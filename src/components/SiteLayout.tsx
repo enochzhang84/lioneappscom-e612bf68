@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,18 +34,20 @@ const productLinks = [
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
 
   function handleLogoClick(e: React.MouseEvent) {
+    if (location.pathname !== "/") return;
     clickCountRef.current += 1;
     if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
     clickTimerRef.current = setTimeout(() => {
       clickCountRef.current = 0;
     }, 1500);
-    if (clickCountRef.current >= 5) {
+    if (clickCountRef.current >= 7) {
       e.preventDefault();
       clickCountRef.current = 0;
       if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
@@ -53,6 +55,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
       setDialogOpen(true);
     }
   }
+
 
   function handleSubmitPassword(e: React.FormEvent) {
     e.preventDefault();
