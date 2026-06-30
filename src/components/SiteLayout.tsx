@@ -1,6 +1,16 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,7 +19,10 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import type { ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { toast } from "sonner";
+
+const ADMIN_SECRET = "Loveliang@2026";
 
 const productLinks = [
   { slug: "church", label: "教会管理平台", desc: "HOC3 — 事工全流程管理" },
@@ -18,18 +31,53 @@ const productLinks = [
   { slug: "custom", label: "定制开发", desc: "按需打造的专属系统" },
 ] as const;
 
+
 export function SiteLayout({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [password, setPassword] = useState("");
+
+  function handleLogoClick(e: React.MouseEvent) {
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 1500);
+    if (clickCountRef.current >= 5) {
+      e.preventDefault();
+      clickCountRef.current = 0;
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+      setPassword("");
+      setDialogOpen(true);
+    }
+  }
+
+  function handleSubmitPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (password === ADMIN_SECRET) {
+      setDialogOpen(false);
+      setPassword("");
+      toast.success("验证通过，进入后台");
+      navigate({ to: "/admin" });
+    } else {
+      toast.error("密码错误");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Toaster richColors position="top-center" />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2 font-bold">
+          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 font-bold select-none">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               L
             </div>
             <span>Lione Apps</span>
           </Link>
+
 
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
@@ -129,7 +177,35 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>进入后台</DialogTitle>
+            <DialogDescription>请输入管理员密码</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitPassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin-secret">密码</Label>
+              <Input
+                id="admin-secret"
+                type="password"
+                autoFocus
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                取消
+              </Button>
+              <Button type="submit">确定</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
 
