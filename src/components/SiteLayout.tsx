@@ -1,6 +1,16 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,7 +19,10 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import type { ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { toast } from "sonner";
+
+const ADMIN_SECRET = "Loveliang@2026";
 
 const productLinks = [
   { slug: "church", label: "教会管理平台", desc: "HOC3 — 事工全流程管理" },
@@ -17,6 +30,7 @@ const productLinks = [
   { slug: "office", label: "企业办公平台", desc: "考勤、排班、任务统计" },
   { slug: "custom", label: "定制开发", desc: "按需打造的专属系统" },
 ] as const;
+
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   return (
