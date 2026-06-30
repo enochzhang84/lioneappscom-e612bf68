@@ -33,17 +33,51 @@ const productLinks = [
 
 
 export function SiteLayout({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [password, setPassword] = useState("");
+
+  function handleLogoClick(e: React.MouseEvent) {
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 1500);
+    if (clickCountRef.current >= 5) {
+      e.preventDefault();
+      clickCountRef.current = 0;
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+      setPassword("");
+      setDialogOpen(true);
+    }
+  }
+
+  function handleSubmitPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (password === ADMIN_SECRET) {
+      setDialogOpen(false);
+      setPassword("");
+      toast.success("验证通过，进入后台");
+      navigate({ to: "/admin" });
+    } else {
+      toast.error("密码错误");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Toaster richColors position="top-center" />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2 font-bold">
+          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 font-bold select-none">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               L
             </div>
             <span>Lione Apps</span>
           </Link>
+
 
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
