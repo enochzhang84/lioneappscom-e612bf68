@@ -177,7 +177,35 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>进入后台</DialogTitle>
+            <DialogDescription>请输入管理员密码</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitPassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin-secret">密码</Label>
+              <Input
+                id="admin-secret"
+                type="password"
+                autoFocus
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                取消
+              </Button>
+              <Button type="submit">确定</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
 
