@@ -38,6 +38,9 @@ function ItemDetail() {
         )}
 
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{item.title}</h1>
+        {item.subtitle && (
+          <p className="mt-3 text-lg text-muted-foreground">{item.subtitle}</p>
+        )}
         <div className="mt-2 text-sm text-muted-foreground">
           {new Date(item.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}
         </div>
@@ -53,6 +56,11 @@ function ItemDetail() {
 
         {item.content && (
           <div className="mt-8 whitespace-pre-wrap text-base leading-relaxed">{item.content}</div>
+        )}
+
+        {item.html_content && (
+          <div className="mt-8 prose prose-neutral max-w-none"
+            dangerouslySetInnerHTML={{ __html: item.html_content }} />
         )}
 
         {item.video_url && (
