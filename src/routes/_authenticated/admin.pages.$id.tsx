@@ -253,7 +253,8 @@ type Category = {
 };
 type Item = {
   id: string; page_id: string; category_id: string | null; slug: string;
-  title: string; description: string | null; content: string | null;
+  title: string; subtitle: string | null;
+  description: string | null; content: string | null; html_content: string | null;
   image_url: string | null; video_url: string | null; link_url: string | null;
   button_text: string | null; sort_order: number; is_visible: boolean;
 };
