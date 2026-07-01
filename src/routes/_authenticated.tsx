@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { LayoutDashboard, Package, Briefcase, Settings, LogOut, ExternalLink } from "lucide-react";
+import { LayoutDashboard, Package, Briefcase, Settings, LogOut, ExternalLink, FileText } from "lucide-react";
 import { claimFirstAdmin } from "@/lib/bootstrap.functions";
 import { toast } from "sonner";
 
