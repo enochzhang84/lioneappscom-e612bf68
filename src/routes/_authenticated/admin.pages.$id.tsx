@@ -191,43 +191,44 @@ function PageEditor() {
 
         <Card>
           <CardHeader>
-            <CardTitle>页面内容</CardTitle>
+            <CardTitle>页面编辑</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {pageType === "tools" ? (
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" size="sm" onClick={() => {
-                  const manager = document.getElementById("tools-content-manager");
-                  manager?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  window.setTimeout(() => document.getElementById("add-tool-category")?.click(), 250);
-                }}>
-                  <Plus size={14} className="mr-1" /> 增加新类别
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" size="sm" onClick={() => {
+                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理类别"); }
+                window.setTimeout(() => {
+                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  document.getElementById("add-tool-category")?.click();
+                }, 300);
+              }}>
+                <Plus size={14} className="mr-1" /> 增加新类别
+              </Button>
+              <Button type="button" size="sm" onClick={() => {
+                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理项目"); }
+                window.setTimeout(() => {
+                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  document.getElementById("add-tool-item")?.click();
+                }, 300);
+              }}>
+                <Plus size={14} className="mr-1" /> 增加新项目
+              </Button>
+              <div className="w-full" />
+              {pageType !== "tools" && (Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
+                <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
+                  <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
                 </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => {
-                  const manager = document.getElementById("tools-content-manager");
-                  manager?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  window.setTimeout(() => document.getElementById("add-tool-item")?.click(), 250);
-                }}>
-                  <Plus size={14} className="mr-1" /> 增加新项目
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {(Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
-                  <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
-                    <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
-                  </Button>
-                ))}
-              </div>
-            )}
+              ))}
+            </div>
 
             {pageType === "tools" && (
-              <p className="text-sm text-muted-foreground">实用工具页面的内容请使用下方“工具类别”和“工具项目”管理。</p>
+              <p className="text-sm text-muted-foreground">实用工具页面的内容请使用下方「工具类别」和「工具项目」管理。</p>
             )}
 
             {pageType !== "tools" && blocks.length === 0 && (
               <p className="text-sm text-muted-foreground">还没有内容块，点击上方按钮添加。</p>
             )}
+
 
             {pageType !== "tools" && <div className="space-y-3">
               {blocks.map((b, i) => (
