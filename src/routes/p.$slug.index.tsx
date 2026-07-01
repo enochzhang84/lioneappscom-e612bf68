@@ -156,17 +156,15 @@ function ToolsPageView({ page, categories, items }: {
 
           {/* Right content */}
           <main className="min-w-0 py-6 md:pl-6">
-            {categories.length > 0 && (
-              <div className="mb-5">
-                <div className="relative max-w-md">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input type="search" value={query} onChange={e => setQuery(e.target.value)}
-                    placeholder="搜索工具..."
-                    className="w-full h-10 pl-11 pr-4 rounded-lg border border-border bg-card text-sm
-                      placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition" />
-                </div>
+            <div className="mb-5">
+              <div className="relative max-w-md">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input type="search" value={query} onChange={e => setQuery(e.target.value)}
+                  placeholder="搜索工具..."
+                  className="w-full h-10 pl-11 pr-4 rounded-lg border border-border bg-card text-sm
+                    placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition" />
               </div>
-            )}
+            </div>
 
             {activeCat && (
               <div className="flex items-center gap-2 mb-4">
