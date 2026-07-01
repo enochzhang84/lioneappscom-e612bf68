@@ -76,8 +76,8 @@ function DynamicPage() {
   );
 }
 
-function isToolsPage(page: Pick<PageFull, "page_type">) {
-  return String(page.page_type).trim().toLowerCase() === "tools";
+function isToolsPage(page: Pick<PageFull, "page_type" | "slug">) {
+  return String(page.page_type).trim().toLowerCase() === "tools" || String(page.slug).trim().toLowerCase() === "tools";
 }
 
 function ToolsPageView({ page, categories, items }: {
@@ -109,7 +109,7 @@ function ToolsPageView({ page, categories, items }: {
   return (
     <SiteLayout>
       {/* Title section (full width) */}
-      <section className="border-b border-border">
+      <section data-tools-layout="true" className="border-b border-border">
         <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-10 md:py-14">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{page.title}</h1>
           <p className="mt-2 text-muted-foreground">
