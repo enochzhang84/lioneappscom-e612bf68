@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
+import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as ProcessRouteImport } from './routes/process'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -42,6 +43,11 @@ import { Route as AuthenticatedAdminCasesIdRouteImport } from './routes/_authent
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
   id: '/update-password',
   path: '/update-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuccessRoute = SuccessRouteImport.update({
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/process': typeof ProcessRoute
   '/success': typeof SuccessRoute
+  '/tools': typeof ToolsRoute
   '/update-password': typeof UpdatePasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/process': typeof ProcessRoute
   '/success': typeof SuccessRoute
+  '/tools': typeof ToolsRoute
   '/update-password': typeof UpdatePasswordRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/process': typeof ProcessRoute
   '/success': typeof SuccessRoute
+  '/tools': typeof ToolsRoute
   '/update-password': typeof UpdatePasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/process'
     | '/success'
+    | '/tools'
     | '/update-password'
     | '/admin'
     | '/cases/$slug'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/process'
     | '/success'
+    | '/tools'
     | '/update-password'
     | '/cases/$slug'
     | '/products/$slug'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/process'
     | '/success'
+    | '/tools'
     | '/update-password'
     | '/_authenticated/admin'
     | '/cases/$slug'
@@ -380,6 +392,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ProcessRoute: typeof ProcessRoute
   SuccessRoute: typeof SuccessRoute
+  ToolsRoute: typeof ToolsRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
   PSlugIndexRoute: typeof PSlugIndexRoute
@@ -394,6 +407,13 @@ declare module '@tanstack/react-router' {
       path: '/update-password'
       fullPath: '/update-password'
       preLoaderRoute: typeof UpdatePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/success': {
@@ -709,6 +729,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   ProcessRoute: ProcessRoute,
   SuccessRoute: SuccessRoute,
+  ToolsRoute: ToolsRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   ProductsSlugRoute: ProductsSlugRoute,
   PSlugIndexRoute: PSlugIndexRoute,
