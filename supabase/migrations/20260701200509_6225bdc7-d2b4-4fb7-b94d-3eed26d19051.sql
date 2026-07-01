@@ -1,0 +1,1 @@
+ALTER TABLE public.tool_items ADD COLUMN IF NOT EXISTS icon text;

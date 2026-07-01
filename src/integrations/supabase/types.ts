@@ -210,6 +210,7 @@ export type Database = {
           created_at: string
           description: string | null
           html_content: string | null
+          icon: string | null
           id: string
           image_url: string | null
           is_visible: boolean
@@ -229,6 +230,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           html_content?: string | null
+          icon?: string | null
           id?: string
           image_url?: string | null
           is_visible?: boolean
@@ -248,6 +250,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           html_content?: string | null
+          icon?: string | null
           id?: string
           image_url?: string | null
           is_visible?: boolean

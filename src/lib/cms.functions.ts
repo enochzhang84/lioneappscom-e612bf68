@@ -162,6 +162,7 @@ export type ToolItem = {
   slug: string;
   title: string;
   subtitle: string | null;
+  icon: string | null;
   description: string | null;
   content: string | null;
   html_content: string | null;
@@ -195,7 +196,7 @@ export const getToolsByPageSlug = createServerFn({ method: "GET" })
         .order("sort_order", { ascending: true }),
       supabasePublic
         .from("tool_items")
-        .select("id, page_id, category_id, slug, title, subtitle, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at")
+        .select("id, page_id, category_id, slug, title, subtitle, icon, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at")
         .eq("page_id", (page as PageFull).id)
         .eq("is_visible", true)
         .order("sort_order", { ascending: true }),
@@ -225,7 +226,7 @@ export const getToolItem = createServerFn({ method: "GET" })
     if (!page) return null;
     const { data: item, error: itemErr } = await supabasePublic
       .from("tool_items")
-      .select("id, page_id, category_id, slug, title, subtitle, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at")
+      .select("id, page_id, category_id, slug, title, subtitle, icon, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at")
       .eq("page_id", (page as PageFull).id)
       .eq("slug", data.itemSlug)
       .eq("is_visible", true)

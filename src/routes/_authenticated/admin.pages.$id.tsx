@@ -253,7 +253,7 @@ type Category = {
 };
 type Item = {
   id: string; page_id: string; category_id: string | null; slug: string;
-  title: string; subtitle: string | null;
+  title: string; subtitle: string | null; icon: string | null;
   description: string | null; content: string | null; html_content: string | null;
   image_url: string | null; video_url: string | null; link_url: string | null;
   button_text: string | null; sort_order: number; is_visible: boolean;
@@ -444,7 +444,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
                         <Button type="button" size="sm" disabled={!dirty || mItem.isPending}
                           onClick={() => mItem.mutate({ data: { id: it.id, page_id: pageId,
                             category_id: draft.category_id, slug: draft.slug, title: draft.title,
-                            subtitle: draft.subtitle ?? "",
+                            subtitle: draft.subtitle ?? "", icon: draft.icon ?? "",
                             description: draft.description ?? "", content: draft.content ?? "",
                             html_content: draft.html_content ?? "",
                             image_url: draft.image_url ?? null, video_url: draft.video_url ?? "",
@@ -477,7 +477,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
                     onClick={() => mItem.mutate(
                       { data: { page_id: pageId, category_id: d.category_id ?? null,
                         slug: d.slug ?? "", title: d.title ?? "",
-                        subtitle: d.subtitle ?? "",
+                        subtitle: d.subtitle ?? "", icon: d.icon ?? "",
                         description: d.description ?? "",
                         content: d.content ?? "", html_content: d.html_content ?? "",
                         image_url: d.image_url ?? null,
@@ -536,6 +536,7 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
             <Input value={value.slug ?? ""} onChange={e => onPatch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
           </Field>
           <Field label="卡片标题"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="小型车 C1 考试" /></Field>
+          <Field label="图标 emoji"><Input value={value.icon ?? ""} onChange={e => onPatch({ icon: e.target.value })} placeholder="🚗" /></Field>
           <Field label="卡片简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="适合普通小型车驾照考试练习" /></Field>
           <Field label="外部/内部链接（留空使用内置详情页）">
             <Input value={value.link_url ?? ""} onChange={e => onPatch({ link_url: e.target.value })} placeholder="留空使用 /p/{slug}/i/{itemSlug}" />
