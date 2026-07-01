@@ -1,0 +1,1 @@
+UPDATE public.pages SET page_type = 'tools' WHERE slug = 'tools';
