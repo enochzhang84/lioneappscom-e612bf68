@@ -21,17 +21,21 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
+import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminCasesRouteImport } from './routes/_authenticated/admin.cases'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin.settings.index'
 import { Route as AuthenticatedAdminProductsIndexRouteImport } from './routes/_authenticated/admin.products.index'
+import { Route as AuthenticatedAdminPagesIndexRouteImport } from './routes/_authenticated/admin.pages.index'
 import { Route as AuthenticatedAdminCasesIndexRouteImport } from './routes/_authenticated/admin.cases.index'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
 import { Route as AuthenticatedAdminProductsIdRouteImport } from './routes/_authenticated/admin.products.$id'
+import { Route as AuthenticatedAdminPagesIdRouteImport } from './routes/_authenticated/admin.pages.$id'
 import { Route as AuthenticatedAdminCasesIdRouteImport } from './routes/_authenticated/admin.cases.$id'
 
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
@@ -93,6 +97,11 @@ const ProductsSlugRoute = ProductsSlugRouteImport.update({
   path: '/products/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CasesSlugRoute = CasesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -120,6 +129,11 @@ const AuthenticatedAdminProductsRoute =
     path: '/products',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPagesRoute = AuthenticatedAdminPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminCasesRoute = AuthenticatedAdminCasesRouteImport.update({
   id: '/cases',
   path: '/cases',
@@ -137,6 +151,12 @@ const AuthenticatedAdminProductsIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminProductsRoute,
   } as any)
+const AuthenticatedAdminPagesIndexRoute =
+  AuthenticatedAdminPagesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminPagesRoute,
+  } as any)
 const AuthenticatedAdminCasesIndexRoute =
   AuthenticatedAdminCasesIndexRouteImport.update({
     id: '/',
@@ -153,6 +173,12 @@ const AuthenticatedAdminProductsIdRoute =
     id: '/$id',
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminProductsRoute,
+  } as any)
+const AuthenticatedAdminPagesIdRoute =
+  AuthenticatedAdminPagesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminPagesRoute,
   } as any)
 const AuthenticatedAdminCasesIdRoute =
   AuthenticatedAdminCasesIdRouteImport.update({
@@ -174,15 +200,19 @@ export interface FileRoutesByFullPath {
   '/update-password': typeof UpdatePasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
+  '/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
+  '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
+  '/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
   '/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -198,12 +228,15 @@ export interface FileRoutesByTo {
   '/success': typeof SuccessRoute
   '/update-password': typeof UpdatePasswordRoute
   '/cases/$slug': typeof CasesSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
+  '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/admin/cases': typeof AuthenticatedAdminCasesIndexRoute
+  '/admin/pages': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsIndexRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -222,15 +255,19 @@ export interface FileRoutesById {
   '/update-password': typeof UpdatePasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/_authenticated/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
+  '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
+  '/_authenticated/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/_authenticated/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/_authenticated/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
+  '/_authenticated/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/_authenticated/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
   '/_authenticated/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -249,15 +286,19 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/admin'
     | '/cases/$slug'
+    | '/p/$slug'
     | '/products/$slug'
     | '/admin/cases'
+    | '/admin/pages'
     | '/admin/products'
     | '/admin/settings'
     | '/admin/'
     | '/admin/cases/$id'
+    | '/admin/pages/$id'
     | '/admin/products/$id'
     | '/api/public/media/$'
     | '/admin/cases/'
+    | '/admin/pages/'
     | '/admin/products/'
     | '/admin/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -273,12 +314,15 @@ export interface FileRouteTypes {
     | '/success'
     | '/update-password'
     | '/cases/$slug'
+    | '/p/$slug'
     | '/products/$slug'
     | '/admin'
     | '/admin/cases/$id'
+    | '/admin/pages/$id'
     | '/admin/products/$id'
     | '/api/public/media/$'
     | '/admin/cases'
+    | '/admin/pages'
     | '/admin/products'
     | '/admin/settings'
   id:
@@ -296,15 +340,19 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/_authenticated/admin'
     | '/cases/$slug'
+    | '/p/$slug'
     | '/products/$slug'
     | '/_authenticated/admin/cases'
+    | '/_authenticated/admin/pages'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/cases/$id'
+    | '/_authenticated/admin/pages/$id'
     | '/_authenticated/admin/products/$id'
     | '/api/public/media/$'
     | '/_authenticated/admin/cases/'
+    | '/_authenticated/admin/pages/'
     | '/_authenticated/admin/products/'
     | '/_authenticated/admin/settings/'
   fileRoutesById: FileRoutesById
@@ -321,6 +369,7 @@ export interface RootRouteChildren {
   ProcessRoute: typeof ProcessRoute
   SuccessRoute: typeof SuccessRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
+  PSlugRoute: typeof PSlugRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
 }
@@ -411,6 +460,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cases/$slug': {
       id: '/cases/$slug'
       path: '/$slug'
@@ -446,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/pages': {
+      id: '/_authenticated/admin/pages'
+      path: '/pages'
+      fullPath: '/admin/pages'
+      preLoaderRoute: typeof AuthenticatedAdminPagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/cases': {
       id: '/_authenticated/admin/cases'
       path: '/cases'
@@ -467,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProductsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminProductsRoute
     }
+    '/_authenticated/admin/pages/': {
+      id: '/_authenticated/admin/pages/'
+      path: '/'
+      fullPath: '/admin/pages/'
+      preLoaderRoute: typeof AuthenticatedAdminPagesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminPagesRoute
+    }
     '/_authenticated/admin/cases/': {
       id: '/_authenticated/admin/cases/'
       path: '/'
@@ -487,6 +557,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/products/$id'
       preLoaderRoute: typeof AuthenticatedAdminProductsIdRouteImport
       parentRoute: typeof AuthenticatedAdminProductsRoute
+    }
+    '/_authenticated/admin/pages/$id': {
+      id: '/_authenticated/admin/pages/$id'
+      path: '/$id'
+      fullPath: '/admin/pages/$id'
+      preLoaderRoute: typeof AuthenticatedAdminPagesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminPagesRoute
     }
     '/_authenticated/admin/cases/$id': {
       id: '/_authenticated/admin/cases/$id'
@@ -512,6 +589,22 @@ const AuthenticatedAdminCasesRouteChildren: AuthenticatedAdminCasesRouteChildren
 const AuthenticatedAdminCasesRouteWithChildren =
   AuthenticatedAdminCasesRoute._addFileChildren(
     AuthenticatedAdminCasesRouteChildren,
+  )
+
+interface AuthenticatedAdminPagesRouteChildren {
+  AuthenticatedAdminPagesIdRoute: typeof AuthenticatedAdminPagesIdRoute
+  AuthenticatedAdminPagesIndexRoute: typeof AuthenticatedAdminPagesIndexRoute
+}
+
+const AuthenticatedAdminPagesRouteChildren: AuthenticatedAdminPagesRouteChildren =
+  {
+    AuthenticatedAdminPagesIdRoute: AuthenticatedAdminPagesIdRoute,
+    AuthenticatedAdminPagesIndexRoute: AuthenticatedAdminPagesIndexRoute,
+  }
+
+const AuthenticatedAdminPagesRouteWithChildren =
+  AuthenticatedAdminPagesRoute._addFileChildren(
+    AuthenticatedAdminPagesRouteChildren,
   )
 
 interface AuthenticatedAdminProductsRouteChildren {
@@ -546,6 +639,7 @@ const AuthenticatedAdminSettingsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCasesRoute: typeof AuthenticatedAdminCasesRouteWithChildren
+  AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRouteWithChildren
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRouteWithChildren
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -553,6 +647,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCasesRoute: AuthenticatedAdminCasesRouteWithChildren,
+  AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRouteWithChildren,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRouteWithChildren,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -595,6 +690,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProcessRoute: ProcessRoute,
   SuccessRoute: SuccessRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
+  PSlugRoute: PSlugRoute,
   ProductsSlugRoute: ProductsSlugRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
 }
