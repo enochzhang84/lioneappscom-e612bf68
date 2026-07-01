@@ -269,16 +269,17 @@ function Exam({
       </Card>
 
       {confirming && (
-        <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4" onClick={() => setConfirming(false)}>
+        <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4" onClick={() => submitting ? null : setConfirming(false)}>
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold">确认交卷？</h3>
             <p className="text-sm text-muted-foreground">
               你已作答 <b>{answered}</b> / {questions.length} 题
               {answered < questions.length && "，未作答的题将计为错误。"}
             </p>
+            {submitError && <p className="text-sm text-destructive">{submitError}</p>}
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setConfirming(false)}>取消</Button>
-              <Button onClick={onSubmit}>确认交卷</Button>
+              <Button variant="outline" onClick={() => setConfirming(false)} disabled={submitting}>取消</Button>
+              <Button onClick={onSubmit} disabled={submitting}>{submitting ? "评分中…" : "确认交卷"}</Button>
             </div>
           </div>
         </div>
