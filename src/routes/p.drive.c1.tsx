@@ -143,7 +143,7 @@ function Intro({ onStart, loading, error }: { onStart: () => void; loading: bool
 }
 
 function Exam({
-  questions, answers, setAnswers, current, setCurrent, onSubmit,
+  questions, answers, setAnswers, current, setCurrent, onSubmit, submitting, submitError,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -151,6 +151,8 @@ function Exam({
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
   onSubmit: () => void;
+  submitting: boolean;
+  submitError?: string;
 }) {
   const q = questions[current];
   const answered = Object.keys(answers).length;
