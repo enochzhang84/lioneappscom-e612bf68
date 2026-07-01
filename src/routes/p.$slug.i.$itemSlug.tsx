@@ -29,7 +29,7 @@ function ItemDetail() {
     page: PageFull; item: ToolItem; category: ToolCategory | null;
   };
 
-  const appKey = item.internal_url?.trim() || "";
+  const appKey = item.link_url?.trim() || "";
   const AppComp = appKey ? EMBEDDED_APPS[appKey] : undefined;
   if (AppComp) {
     return (
