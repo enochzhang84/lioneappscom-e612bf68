@@ -289,20 +289,17 @@ function Exam({
 }
 
 function Result({
-  questions, answers, onRetake, onHome, retaking,
+  grade, onRetake, onHome, retaking,
 }: {
-  questions: QuizQuestion[];
-  answers: Record<string, "A" | "B" | "C" | "D">;
+  grade: GradeResult;
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
 }) {
-  const total = questions.length;
-  const correctCount = questions.reduce((acc, q) => acc + (answers[q.id] === q.correct_answer ? 1 : 0), 0);
-  const wrongCount = total - correctCount;
-  const rate = Math.round((correctCount / total) * 100);
+  const { total, correct: correctCount, wrong: wrongCount, results } = grade;
+  const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   const passed = correctCount >= PASS;
-  const wrongs = questions.filter((q) => answers[q.id] !== q.correct_answer);
+  const wrongs = results.filter((r) => !r.is_correct);
 
   return (
     <div className="space-y-8">
@@ -343,8 +340,8 @@ function Result({
         <section className="space-y-4">
           <h2 className="text-lg font-semibold">错题回顾（{wrongs.length}）</h2>
           <div className="space-y-4">
-            {wrongs.map((q, i) => (
-              <ReviewItem key={q.id} q={q} idx={i + 1} pick={answers[q.id]} />
+            {wrongs.map((r, i) => (
+              <ReviewItem key={r.id} r={r} idx={i + 1} />
             ))}
           </div>
         </section>
@@ -354,8 +351,8 @@ function Result({
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">全部题目解析</h2>
         <div className="space-y-4">
-          {questions.map((q, i) => (
-            <ReviewItem key={q.id} q={q} idx={i + 1} pick={answers[q.id]} />
+          {results.map((r, i) => (
+            <ReviewItem key={r.id} r={r} idx={i + 1} />
           ))}
         </div>
       </section>
