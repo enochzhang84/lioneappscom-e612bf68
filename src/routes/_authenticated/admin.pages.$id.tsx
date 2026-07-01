@@ -408,15 +408,16 @@ function ToolsManager({ pageId }: { pageId: string }) {
         {/* Items */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">内容栏（右侧内容）</h3>
+            <h3 className="font-semibold">工具项目（右侧内容）</h3>
             <Button type="button" size="sm" onClick={newItem} disabled={cats.length === 0}>
-              <Plus size={14} className="mr-1" /> 添加内容栏
+              <Plus size={14} className="mr-1" /> 增加新项目
             </Button>
           </div>
-          {cats.length === 0 && <p className="text-xs text-muted-foreground">请先创建一个项目栏。</p>}
+          {cats.length === 0 && <p className="text-xs text-muted-foreground">请先创建一个类别。</p>}
           {cats.length > 0 && items.length === 0 && Object.keys(itemDrafts).length === 0 && (
-            <p className="text-sm text-muted-foreground">还没有内容。</p>
+            <p className="text-sm text-muted-foreground">还没有项目。</p>
           )}
+
           <div className="space-y-2">
             {items.map((it) => {
               const draft = { ...it, ...(itemDrafts[it.id] ?? {}) } as Item;
