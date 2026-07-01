@@ -476,8 +476,11 @@ function ToolsManager({ pageId }: { pageId: string }) {
                     disabled={!(d.title && d.slug && d.category_id)}
                     onClick={() => mItem.mutate(
                       { data: { page_id: pageId, category_id: d.category_id ?? null,
-                        slug: d.slug ?? "", title: d.title ?? "", description: d.description ?? "",
-                        content: d.content ?? "", image_url: d.image_url ?? null,
+                        slug: d.slug ?? "", title: d.title ?? "",
+                        subtitle: d.subtitle ?? "",
+                        description: d.description ?? "",
+                        content: d.content ?? "", html_content: d.html_content ?? "",
+                        image_url: d.image_url ?? null,
                         video_url: d.video_url ?? "", link_url: d.link_url ?? "",
                         button_text: d.button_text ?? "",
                         sort_order: d.sort_order ?? 0, is_visible: d.is_visible ?? true } },
