@@ -372,11 +372,12 @@ function Stat({ label, value, tone }: { label: string; value: number | string; t
   );
 }
 
-function ReviewItem({ q, idx, pick }: { q: QuizQuestion; idx: number; pick?: "A" | "B" | "C" | "D" }) {
-  const correct = q.correct_answer;
-  const isRight = pick === correct;
+function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
+  const correct = r.correct_answer;
+  const pick = r.picked;
+  const isRight = r.is_correct;
   const opts = (["A", "B", "C", "D"] as const)
-    .map((k) => ({ key: k, text: (q as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`] }))
+    .map((k) => ({ key: k, text: (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`] }))
     .filter((o) => o.text && o.text.trim() !== "");
 
   return (
@@ -385,7 +386,7 @@ function ReviewItem({ q, idx, pick }: { q: QuizQuestion; idx: number; pick?: "A"
         <div className="flex items-start justify-between gap-4">
           <div className="text-sm font-medium">
             <span className="text-muted-foreground mr-2">Q{idx}.</span>
-            {q.question}
+            {r.question}
           </div>
           <span
             className={cn(
@@ -426,10 +427,10 @@ function ReviewItem({ q, idx, pick }: { q: QuizQuestion; idx: number; pick?: "A"
           <div>我的选择：<b className={cn(isRight ? "text-emerald-700" : "text-red-700")}>{pick ?? "未作答"}</b></div>
           <div>正确答案：<b className="text-emerald-700">{correct}</b></div>
         </div>
-        {q.explanation && (
+        {r.explanation && (
           <div className="text-sm rounded-lg bg-muted/50 p-3 leading-relaxed">
             <div className="text-xs font-semibold text-muted-foreground mb-1">解析</div>
-            {q.explanation}
+            {r.explanation}
           </div>
         )}
       </CardContent>
