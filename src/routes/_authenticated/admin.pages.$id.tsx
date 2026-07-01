@@ -343,7 +343,15 @@ function ToolsManager({ pageId }: { pageId: string }) {
   }
   function newItem() {
     const tmpId = `new-${Date.now()}`;
-    setItemDrafts({ ...itemDrafts, [tmpId]: { slug: "", title: "", description: "", category_id: cats[0]?.id ?? null, sort_order: items.length, is_visible: true } });
+    const stamp = Date.now().toString(36);
+    setItemDrafts({ ...itemDrafts, [tmpId]: {
+      slug: `item-${stamp}`,
+      title: "未命名项目",
+      description: "",
+      category_id: cats[0]?.id ?? null,
+      sort_order: items.length,
+      is_visible: true,
+    } });
     setOpenItem({ ...openItem, [tmpId]: true });
   }
 
@@ -436,11 +444,11 @@ function ToolsManager({ pageId }: { pageId: string }) {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">工具项目（右侧内容）</h3>
-            <Button id="add-tool-item" type="button" size="sm" onClick={newItem} disabled={cats.length === 0}>
+            <Button id="add-tool-item" type="button" size="sm" onClick={newItem}>
               <Plus size={14} className="mr-1" /> 增加新项目
             </Button>
           </div>
-          {cats.length === 0 && <p className="text-xs text-muted-foreground">请先创建一个类别。</p>}
+          {cats.length === 0 && <p className="text-xs text-muted-foreground">提示：还没有类别，新项目会先保存为「未分类」，可以稍后再指定类别。</p>}
           {cats.length > 0 && items.length === 0 && Object.keys(itemDrafts).length === 0 && (
             <p className="text-sm text-muted-foreground">还没有项目。</p>
           )}
@@ -506,7 +514,6 @@ function ToolsManager({ pageId }: { pageId: string }) {
                 />
                 <div className="flex gap-2">
                   <Button type="button" size="sm"
-                    disabled={!(d.title && d.slug && d.category_id)}
                     onClick={() => mItem.mutate(
                       { data: { page_id: pageId, category_id: d.category_id ?? null,
                         slug: d.slug ?? "", title: d.title ?? "",
