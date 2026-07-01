@@ -26,16 +26,20 @@ import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
+import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authenticated/admin.quiz'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminCasesRouteImport } from './routes/_authenticated/admin.cases'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin.settings.index'
+import { Route as AuthenticatedAdminQuizIndexRouteImport } from './routes/_authenticated/admin.quiz.index'
 import { Route as AuthenticatedAdminProductsIndexRouteImport } from './routes/_authenticated/admin.products.index'
 import { Route as AuthenticatedAdminPagesIndexRouteImport } from './routes/_authenticated/admin.pages.index'
 import { Route as AuthenticatedAdminCasesIndexRouteImport } from './routes/_authenticated/admin.cases.index'
 import { Route as PSlugIItemSlugRouteImport } from './routes/p.$slug.i.$itemSlug'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
+import { Route as AuthenticatedAdminQuizIdRouteImport } from './routes/_authenticated/admin.quiz.$id'
 import { Route as AuthenticatedAdminProductsIdRouteImport } from './routes/_authenticated/admin.products.$id'
 import { Route as AuthenticatedAdminPagesIdRouteImport } from './routes/_authenticated/admin.pages.$id'
 import { Route as AuthenticatedAdminCasesIdRouteImport } from './routes/_authenticated/admin.cases.$id'
@@ -124,12 +128,22 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const PDriveC1Route = PDriveC1RouteImport.update({
+  id: '/p/drive/c1',
+  path: '/p/drive/c1',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
     path: '/settings',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminQuizRoute = AuthenticatedAdminQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminProductsRoute =
   AuthenticatedAdminProductsRouteImport.update({
     id: '/products',
@@ -151,6 +165,12 @@ const AuthenticatedAdminSettingsIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedAdminSettingsRoute,
+  } as any)
+const AuthenticatedAdminQuizIndexRoute =
+  AuthenticatedAdminQuizIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminQuizRoute,
   } as any)
 const AuthenticatedAdminProductsIndexRoute =
   AuthenticatedAdminProductsIndexRouteImport.update({
@@ -180,6 +200,12 @@ const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
   path: '/api/public/media/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminQuizIdRoute =
+  AuthenticatedAdminQuizIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminQuizRoute,
+  } as any)
 const AuthenticatedAdminProductsIdRoute =
   AuthenticatedAdminProductsIdRouteImport.update({
     id: '/$id',
@@ -217,17 +243,21 @@ export interface FileRoutesByFullPath {
   '/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
   '/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
+  '/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
+  '/p/drive/c1': typeof PDriveC1Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
   '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
+  '/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
   '/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
+  '/admin/quiz/': typeof AuthenticatedAdminQuizIndexRoute
   '/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -244,16 +274,19 @@ export interface FileRoutesByTo {
   '/update-password': typeof UpdatePasswordRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/p/drive/c1': typeof PDriveC1Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
   '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
+  '/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/admin/cases': typeof AuthenticatedAdminCasesIndexRoute
   '/admin/pages': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsIndexRoute
+  '/admin/quiz': typeof AuthenticatedAdminQuizIndexRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -276,17 +309,21 @@ export interface FileRoutesById {
   '/_authenticated/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
+  '/_authenticated/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
+  '/p/drive/c1': typeof PDriveC1Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
   '/_authenticated/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
   '/_authenticated/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/_authenticated/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
+  '/_authenticated/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/_authenticated/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
   '/_authenticated/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/_authenticated/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
+  '/_authenticated/admin/quiz/': typeof AuthenticatedAdminQuizIndexRoute
   '/_authenticated/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -309,17 +346,21 @@ export interface FileRouteTypes {
     | '/admin/cases'
     | '/admin/pages'
     | '/admin/products'
+    | '/admin/quiz'
     | '/admin/settings'
+    | '/p/drive/c1'
     | '/admin/'
     | '/p/$slug/'
     | '/admin/cases/$id'
     | '/admin/pages/$id'
     | '/admin/products/$id'
+    | '/admin/quiz/$id'
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
     | '/admin/cases/'
     | '/admin/pages/'
     | '/admin/products/'
+    | '/admin/quiz/'
     | '/admin/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -336,16 +377,19 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/p/drive/c1'
     | '/admin'
     | '/p/$slug'
     | '/admin/cases/$id'
     | '/admin/pages/$id'
     | '/admin/products/$id'
+    | '/admin/quiz/$id'
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
     | '/admin/cases'
     | '/admin/pages'
     | '/admin/products'
+    | '/admin/quiz'
     | '/admin/settings'
   id:
     | '__root__'
@@ -367,17 +411,21 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cases'
     | '/_authenticated/admin/pages'
     | '/_authenticated/admin/products'
+    | '/_authenticated/admin/quiz'
     | '/_authenticated/admin/settings'
+    | '/p/drive/c1'
     | '/_authenticated/admin/'
     | '/p/$slug/'
     | '/_authenticated/admin/cases/$id'
     | '/_authenticated/admin/pages/$id'
     | '/_authenticated/admin/products/$id'
+    | '/_authenticated/admin/quiz/$id'
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
     | '/_authenticated/admin/cases/'
     | '/_authenticated/admin/pages/'
     | '/_authenticated/admin/products/'
+    | '/_authenticated/admin/quiz/'
     | '/_authenticated/admin/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -395,6 +443,7 @@ export interface RootRouteChildren {
   ToolsRoute: typeof ToolsRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
+  PDriveC1Route: typeof PDriveC1Route
   PSlugIndexRoute: typeof PSlugIndexRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
   PSlugIItemSlugRoute: typeof PSlugIItemSlugRoute
@@ -521,11 +570,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/p/drive/c1': {
+      id: '/p/drive/c1'
+      path: '/p/drive/c1'
+      fullPath: '/p/drive/c1'
+      preLoaderRoute: typeof PDriveC1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/settings': {
       id: '/_authenticated/admin/settings'
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/quiz': {
+      id: '/_authenticated/admin/quiz'
+      path: '/quiz'
+      fullPath: '/admin/quiz'
+      preLoaderRoute: typeof AuthenticatedAdminQuizRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/products': {
@@ -555,6 +618,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/settings/'
       preLoaderRoute: typeof AuthenticatedAdminSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminSettingsRoute
+    }
+    '/_authenticated/admin/quiz/': {
+      id: '/_authenticated/admin/quiz/'
+      path: '/'
+      fullPath: '/admin/quiz/'
+      preLoaderRoute: typeof AuthenticatedAdminQuizIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminQuizRoute
     }
     '/_authenticated/admin/products/': {
       id: '/_authenticated/admin/products/'
@@ -590,6 +660,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/media/$'
       preLoaderRoute: typeof ApiPublicMediaSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/quiz/$id': {
+      id: '/_authenticated/admin/quiz/$id'
+      path: '/$id'
+      fullPath: '/admin/quiz/$id'
+      preLoaderRoute: typeof AuthenticatedAdminQuizIdRouteImport
+      parentRoute: typeof AuthenticatedAdminQuizRoute
     }
     '/_authenticated/admin/products/$id': {
       id: '/_authenticated/admin/products/$id'
@@ -663,6 +740,22 @@ const AuthenticatedAdminProductsRouteWithChildren =
     AuthenticatedAdminProductsRouteChildren,
   )
 
+interface AuthenticatedAdminQuizRouteChildren {
+  AuthenticatedAdminQuizIdRoute: typeof AuthenticatedAdminQuizIdRoute
+  AuthenticatedAdminQuizIndexRoute: typeof AuthenticatedAdminQuizIndexRoute
+}
+
+const AuthenticatedAdminQuizRouteChildren: AuthenticatedAdminQuizRouteChildren =
+  {
+    AuthenticatedAdminQuizIdRoute: AuthenticatedAdminQuizIdRoute,
+    AuthenticatedAdminQuizIndexRoute: AuthenticatedAdminQuizIndexRoute,
+  }
+
+const AuthenticatedAdminQuizRouteWithChildren =
+  AuthenticatedAdminQuizRoute._addFileChildren(
+    AuthenticatedAdminQuizRouteChildren,
+  )
+
 interface AuthenticatedAdminSettingsRouteChildren {
   AuthenticatedAdminSettingsIndexRoute: typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -681,6 +774,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCasesRoute: typeof AuthenticatedAdminCasesRouteWithChildren
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRouteWithChildren
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRouteWithChildren
+  AuthenticatedAdminQuizRoute: typeof AuthenticatedAdminQuizRouteWithChildren
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -689,6 +783,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCasesRoute: AuthenticatedAdminCasesRouteWithChildren,
   AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRouteWithChildren,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRouteWithChildren,
+  AuthenticatedAdminQuizRoute: AuthenticatedAdminQuizRouteWithChildren,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
@@ -732,6 +827,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsRoute: ToolsRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   ProductsSlugRoute: ProductsSlugRoute,
+  PDriveC1Route: PDriveC1Route,
   PSlugIndexRoute: PSlugIndexRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
   PSlugIItemSlugRoute: PSlugIItemSlugRoute,
