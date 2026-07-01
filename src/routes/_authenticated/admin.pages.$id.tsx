@@ -514,7 +514,6 @@ function ToolsManager({ pageId }: { pageId: string }) {
                 />
                 <div className="flex gap-2">
                   <Button type="button" size="sm"
-                    disabled={!(d.title && d.slug && d.category_id)}
                     onClick={() => mItem.mutate(
                       { data: { page_id: pageId, category_id: d.category_id ?? null,
                         slug: d.slug ?? "", title: d.title ?? "",
