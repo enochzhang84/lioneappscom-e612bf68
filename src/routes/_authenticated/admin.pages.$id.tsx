@@ -536,6 +536,7 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
             <Input value={value.slug ?? ""} onChange={e => onPatch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
           </Field>
           <Field label="卡片标题"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="小型车 C1 考试" /></Field>
+          <Field label="图标 emoji"><Input value={value.icon ?? ""} onChange={e => onPatch({ icon: e.target.value })} placeholder="🚗" /></Field>
           <Field label="卡片简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="适合普通小型车驾照考试练习" /></Field>
           <Field label="外部/内部链接（留空使用内置详情页）">
             <Input value={value.link_url ?? ""} onChange={e => onPatch({ link_url: e.target.value })} placeholder="留空使用 /p/{slug}/i/{itemSlug}" />
