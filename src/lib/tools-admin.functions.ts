@@ -85,6 +85,7 @@ const itemInput = z.object({
   category_id: uuid.nullable().optional(),
   slug: z.string().min(1).max(80).regex(/^[a-z0-9-]+$/, "slug 只能小写字母数字和短横线"),
   title: z.string().min(1).max(160),
+  page_title: z.string().max(200).nullable().optional(),
   subtitle: z.string().max(300).nullable().optional(),
   description: z.string().max(500).nullable().optional(),
   icon: z.string().max(20).nullable().optional(),
@@ -93,10 +94,14 @@ const itemInput = z.object({
   image_url: z.string().nullable().optional(),
   video_url: z.string().nullable().optional(),
   link_url: z.string().nullable().optional(),
+  external_url: z.string().nullable().optional(),
+  internal_url: z.string().nullable().optional(),
   button_text: z.string().max(60).nullable().optional(),
+  button_url: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
 });
+
 
 export const adminListItems = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
