@@ -218,9 +218,12 @@ function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
   if (external) {
     return <a href={item.link_url!} target="_blank" rel="noreferrer">{inner}</a>;
   }
-  if (item.link_url) {
+  // Internal links (e.g. "/p/drive/c1") route through the SPA. Embedded-app markers
+  // like "app:drive-c1" must go through the detail page, not be used as href.
+  if (item.link_url && item.link_url.startsWith("/")) {
     return <a href={item.link_url}>{inner}</a>;
   }
+
   return (
     <Link to="/p/$slug/i/$itemSlug" params={{ slug: pageSlug, itemSlug: item.slug }}>
       {inner}
