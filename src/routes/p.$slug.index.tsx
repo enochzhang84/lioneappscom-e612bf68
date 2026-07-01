@@ -226,7 +226,7 @@ function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
     <div className="group h-full rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition">
       <div className="flex items-start gap-3">
         <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 grid place-items-center text-xl">
-          {item.button_text || "🧰"}
+          {(item as ToolItem & { icon?: string | null }).icon || "🧰"}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
