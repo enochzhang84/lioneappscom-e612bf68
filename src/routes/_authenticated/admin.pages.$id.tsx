@@ -444,7 +444,9 @@ function ToolsManager({ pageId }: { pageId: string }) {
                         <Button type="button" size="sm" disabled={!dirty || mItem.isPending}
                           onClick={() => mItem.mutate({ data: { id: it.id, page_id: pageId,
                             category_id: draft.category_id, slug: draft.slug, title: draft.title,
+                            subtitle: draft.subtitle ?? "",
                             description: draft.description ?? "", content: draft.content ?? "",
+                            html_content: draft.html_content ?? "",
                             image_url: draft.image_url ?? null, video_url: draft.video_url ?? "",
                             link_url: draft.link_url ?? "", button_text: draft.button_text ?? "",
                             sort_order: draft.sort_order, is_visible: draft.is_visible } },
