@@ -1,11 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getRandomQuizQuestions, type QuizQuestion } from "@/lib/quiz.functions";
+import {
+  getRandomQuizQuestions,
+  gradeQuiz,
+  type QuizQuestion,
+  type GradedQuestion,
+  type GradeResult,
+} from "@/lib/quiz.functions";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle, ArrowLeft, ArrowRight, RotateCcw, ClipboardCheck } from "lucide-react";
 
@@ -24,15 +30,21 @@ const TOTAL = 36;
 const PASS = 30;
 
 function QuizPage() {
-  const fn = useServerFn(getRandomQuizQuestions);
+  const fetchFn = useServerFn(getRandomQuizQuestions);
+  const gradeFn = useServerFn(gradeQuiz);
   const load = useMutation({
-    mutationFn: () => fn({ data: { category: "c1", count: TOTAL } }),
+    mutationFn: () => fetchFn({ data: { category: "c1", count: TOTAL } }),
+  });
+  const submit = useMutation({
+    mutationFn: (vars: { ids: string[]; answers: Record<string, "A" | "B" | "C" | "D"> }) =>
+      gradeFn({ data: vars }),
   });
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, "A" | "B" | "C" | "D">>({});
   const [current, setCurrent] = useState(0);
+  const [grade, setGrade] = useState<GradeResult | null>(null);
 
   async function startExam() {
     const rows = await load.mutateAsync();
@@ -40,6 +52,7 @@ function QuizPage() {
     setQuestions(rows);
     setAnswers({});
     setCurrent(0);
+    setGrade(null);
     setPhase("exam");
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
@@ -49,6 +62,15 @@ function QuizPage() {
     setQuestions([]);
     setAnswers({});
     setCurrent(0);
+    setGrade(null);
+  }
+
+  async function submitExam() {
+    const ids = questions.map((q) => q.id);
+    const res = await submit.mutateAsync({ ids, answers });
+    setGrade(res);
+    setPhase("result");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
 
   return (
@@ -78,16 +100,19 @@ function QuizPage() {
             setAnswers={setAnswers}
             current={current}
             setCurrent={setCurrent}
-            onSubmit={() => { setPhase("result"); if (typeof window !== "undefined") window.scrollTo({ top: 0 }); }}
+            onSubmit={submitExam}
+            submitting={submit.isPending}
+            submitError={submit.error?.message}
           />
         )}
-        {phase === "result" && (
-          <Result questions={questions} answers={answers} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+        {phase === "result" && grade && (
+          <Result grade={grade} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
         )}
       </div>
     </SiteLayout>
   );
 }
+
 
 function Intro({ onStart, loading, error }: { onStart: () => void; loading: boolean; error?: string }) {
   return (
