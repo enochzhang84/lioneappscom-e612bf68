@@ -194,19 +194,42 @@ function PageEditor() {
             <CardTitle>页面内容</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {(Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
-                <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
-                  <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
+            {pageType === "tools" ? (
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" size="sm" onClick={() => {
+                  const manager = document.getElementById("tools-content-manager");
+                  manager?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  window.setTimeout(() => document.getElementById("add-tool-category")?.click(), 250);
+                }}>
+                  <Plus size={14} className="mr-1" /> 增加新类别
                 </Button>
-              ))}
-            </div>
+                <Button type="button" size="sm" variant="outline" onClick={() => {
+                  const manager = document.getElementById("tools-content-manager");
+                  manager?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  window.setTimeout(() => document.getElementById("add-tool-item")?.click(), 250);
+                }}>
+                  <Plus size={14} className="mr-1" /> 增加新项目
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {(Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
+                  <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
+                    <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
+                  </Button>
+                ))}
+              </div>
+            )}
 
-            {blocks.length === 0 && (
+            {pageType === "tools" && (
+              <p className="text-sm text-muted-foreground">实用工具页面的内容请使用下方“工具类别”和“工具项目”管理。</p>
+            )}
+
+            {pageType !== "tools" && blocks.length === 0 && (
               <p className="text-sm text-muted-foreground">还没有内容块，点击上方按钮添加。</p>
             )}
 
-            <div className="space-y-3">
+            {pageType !== "tools" && <div className="space-y-3">
               {blocks.map((b, i) => (
                 <div key={i} className="rounded-md border border-border p-4 space-y-2 bg-background">
                   <div className="flex items-center justify-between">
@@ -220,7 +243,7 @@ function PageEditor() {
                   <BlockEditor block={b} onChange={(patch) => updateBlock(i, patch)} />
                 </div>
               ))}
-            </div>
+            </div>}
           </CardContent>
         </Card>
 
@@ -231,13 +254,13 @@ function PageEditor() {
       </form>
 
       {!isNew && pageType === "tools" && page && (
-        <ToolsManager pageId={page.id} />
+        <div id="tools-content-manager" className="scroll-mt-8"><ToolsManager pageId={page.id} /></div>
       )}
       {isNew && pageType === "tools" && (
         <Card>
           <CardHeader><CardTitle>工具页面分类与内容</CardTitle></CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            请先保存页面后，即可在此管理项目栏（分类）与内容栏（条目）。
+            请先保存页面后，即可在此管理工具类别和工具项目。
           </CardContent>
         </Card>
       )}
@@ -330,7 +353,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">工具类别（左侧导航栏）</h3>
-            <Button type="button" size="sm" onClick={newCat}><Plus size={14} className="mr-1" /> 增加新类别</Button>
+            <Button id="add-tool-category" type="button" size="sm" onClick={newCat}><Plus size={14} className="mr-1" /> 增加新类别</Button>
           </div>
           {cats.length === 0 && Object.keys(catDrafts).length === 0 && (
             <p className="text-sm text-muted-foreground">还没有类别。</p>
@@ -381,7 +404,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
             })}
             {Object.entries(catDrafts).filter(([k]) => k.startsWith("new-")).map(([tmpId, d]) => (
               <div key={tmpId} className="rounded-md border border-primary/40 bg-background p-3 space-y-3">
-                <div className="text-xs text-primary uppercase font-medium">新项目栏</div>
+                <div className="text-xs text-primary uppercase font-medium">新类别</div>
                 <CategoryFormFields
                   value={d as Category}
                   onPatch={(p) => setCatDrafts({ ...catDrafts, [tmpId]: { ...d, ...p } })}
@@ -409,7 +432,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">工具项目（右侧内容）</h3>
-            <Button type="button" size="sm" onClick={newItem} disabled={cats.length === 0}>
+            <Button id="add-tool-item" type="button" size="sm" onClick={newItem} disabled={cats.length === 0}>
               <Plus size={14} className="mr-1" /> 增加新项目
             </Button>
           </div>
@@ -467,7 +490,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
             })}
             {Object.entries(itemDrafts).filter(([k]) => k.startsWith("new-")).map(([tmpId, d]) => (
               <div key={tmpId} className="rounded-md border border-primary/40 bg-background p-3 space-y-3">
-                <div className="text-xs text-primary uppercase font-medium">新内容栏</div>
+                <div className="text-xs text-primary uppercase font-medium">新项目</div>
                 <ItemFormFields
                   value={d as Item}
                   cats={cats}
@@ -507,9 +530,9 @@ function ToolsManager({ pageId }: { pageId: string }) {
 function CategoryFormFields({ value, onPatch }: { value: Category; onPatch: (p: Partial<Category>) => void }) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
-      <Field label="项目标题"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="驾照考试" /></Field>
+      <Field label="类别名称"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="驾照考试" /></Field>
       <Field label="图标 emoji"><Input value={value.icon ?? ""} onChange={e => onPatch({ icon: e.target.value })} placeholder="🚗" /></Field>
-      <Field label="项目说明"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="各类驾照模拟考试" /></Field>
+      <Field label="类别简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="各类驾照模拟考试" /></Field>
       <Field label="排序"><Input type="number" value={value.sort_order ?? 0} onChange={e => onPatch({ sort_order: parseInt(e.target.value) || 0 })} /></Field>
       <div className="flex items-center gap-3 md:col-span-2">
         <Switch checked={value.is_visible ?? true} onCheckedChange={(v) => onPatch({ is_visible: v })} />
@@ -526,7 +549,7 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
       <div>
         <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">卡片基础信息（显示在列表）</div>
         <div className="grid gap-3 md:grid-cols-2">
-          <Field label="所属项目栏">
+          <Field label="所属类别">
             <Select value={value.category_id ?? ""} onValueChange={(v) => onPatch({ category_id: v || null })}>
               <SelectTrigger><SelectValue placeholder="选择分类" /></SelectTrigger>
               <SelectContent>
@@ -537,10 +560,10 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
           <Field label="slug（详情页地址）">
             <Input value={value.slug ?? ""} onChange={e => onPatch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
           </Field>
-          <Field label="卡片标题"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="小型车 C1 考试" /></Field>
-          <Field label="图标 emoji"><Input value={value.icon ?? ""} onChange={e => onPatch({ icon: e.target.value })} placeholder="🚗" /></Field>
-          <Field label="卡片简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="适合普通小型车驾照考试练习" /></Field>
-          <Field label="外部/内部链接（留空使用内置详情页）">
+          <Field label="项目名称"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="小型车 C1 考试" /></Field>
+          <Field label="项目图标 emoji"><Input value={value.icon ?? ""} onChange={e => onPatch({ icon: e.target.value })} placeholder="🚗" /></Field>
+          <Field label="项目简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="适合普通小型车驾照考试练习" /></Field>
+          <Field label="页面链接（留空使用内置详情页）">
             <Input value={value.link_url ?? ""} onChange={e => onPatch({ link_url: e.target.value })} placeholder="留空使用 /p/{slug}/i/{itemSlug}" />
           </Field>
           <Field label="排序"><Input type="number" value={value.sort_order ?? 0} onChange={e => onPatch({ sort_order: parseInt(e.target.value) || 0 })} /></Field>
