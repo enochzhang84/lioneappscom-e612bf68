@@ -104,7 +104,7 @@ function PageEditor() {
         id: isNew ? undefined : id,
         slug, title,
         nav_label: navLabel || title,
-        page_type: pageType,
+        page_type: (pageType || "content") as PageType,
         show_in_nav: showInNav,
         is_visible: isVisible,
         sort_order: sortOrder,
