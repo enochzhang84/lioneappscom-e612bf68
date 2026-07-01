@@ -477,7 +477,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
                     onClick={() => mItem.mutate(
                       { data: { page_id: pageId, category_id: d.category_id ?? null,
                         slug: d.slug ?? "", title: d.title ?? "",
-                        subtitle: d.subtitle ?? "",
+                        subtitle: d.subtitle ?? "", icon: d.icon ?? "",
                         description: d.description ?? "",
                         content: d.content ?? "", html_content: d.html_content ?? "",
                         image_url: d.image_url ?? null,
