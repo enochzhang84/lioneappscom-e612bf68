@@ -87,6 +87,7 @@ const itemInput = z.object({
   title: z.string().min(1).max(160),
   subtitle: z.string().max(300).nullable().optional(),
   description: z.string().max(500).nullable().optional(),
+  icon: z.string().max(20).nullable().optional(),
   content: z.string().nullable().optional(),
   html_content: z.string().nullable().optional(),
   image_url: z.string().nullable().optional(),
