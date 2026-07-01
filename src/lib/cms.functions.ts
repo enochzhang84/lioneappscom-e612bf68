@@ -98,3 +98,51 @@ export const getSettings = createServerFn({ method: "GET" }).handler(
     return out;
   },
 );
+
+export type PageNavItem = {
+  id: string;
+  slug: string;
+  nav_label: string;
+  sort_order: number;
+};
+
+export type PageFull = {
+  id: string;
+  slug: string;
+  title: string;
+  nav_label: string;
+  page_type: "content" | "tools" | "blank";
+  content: Json;
+  show_in_nav: boolean;
+  is_visible: boolean;
+  sort_order: number;
+};
+
+export const listNavPages = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PageNavItem[]> => {
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data, error } = await supabasePublic
+      .from("pages")
+      .select("id, slug, nav_label, sort_order")
+      .eq("is_visible", true)
+      .eq("show_in_nav", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PageNavItem[];
+  },
+);
+
+export const getPageBySlug = createServerFn({ method: "GET" })
+  .inputValidator((d: { slug: string }) => z.object({ slug: z.string().min(1).max(100) }).parse(d))
+  .handler(async ({ data }): Promise<PageFull | null> => {
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: row, error } = await supabasePublic
+      .from("pages")
+      .select("id, slug, title, nav_label, page_type, content, show_in_nav, is_visible, sort_order")
+      .eq("slug", data.slug)
+      .eq("is_visible", true)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row as PageFull | null;
+  });
+

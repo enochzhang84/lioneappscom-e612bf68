@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/navigation-menu";
 import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { listNavPages } from "@/lib/cms.functions";
 
 const ADMIN_SECRET = "Loveliang@2026";
 
@@ -39,6 +42,13 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
+
+  const listNav = useServerFn(listNavPages);
+  const { data: navPages } = useQuery({
+    queryKey: ["public", "nav-pages"],
+    queryFn: () => listNav(),
+    staleTime: 60_000,
+  });
 
   function handleLogoClick(e: React.MouseEvent) {
     if (location.pathname !== "/") return;
@@ -131,6 +141,19 @@ export function SiteLayout({ children }: { children: ReactNode }) {
                   <Link to="/contact" activeProps={{ className: "text-foreground font-medium" }}>联系我们</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
+              {navPages?.map((p) => (
+                <NavigationMenuItem key={p.id}>
+                  <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                    <Link
+                      to="/p/$slug"
+                      params={{ slug: p.slug }}
+                      activeProps={{ className: "text-foreground font-medium" }}
+                    >
+                      {p.nav_label}
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              ))}
             </NavigationMenuList>
           </NavigationMenu>
 
