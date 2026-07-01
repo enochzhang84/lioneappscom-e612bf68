@@ -519,41 +519,69 @@ function CategoryFormFields({ value, onPatch }: { value: Category; onPatch: (p: 
 
 function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[]; onPatch: (p: Partial<Item>) => void }) {
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      <Field label="所属项目栏">
-        <Select value={value.category_id ?? ""} onValueChange={(v) => onPatch({ category_id: v || null })}>
-          <SelectTrigger><SelectValue placeholder="选择分类" /></SelectTrigger>
-          <SelectContent>
-            {cats.map(c => <SelectItem key={c.id} value={c.id}>{c.icon || "🧰"} {c.title}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </Field>
-      <Field label="slug（详情页地址）">
-        <Input value={value.slug ?? ""} onChange={e => onPatch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
-      </Field>
-      <Field label="内容标题"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="小型车 C1 考试" /></Field>
-      <Field label="按钮文字（可选）"><Input value={value.button_text ?? ""} onChange={e => onPatch({ button_text: e.target.value })} placeholder="开始练习" /></Field>
-      <Field label="内容简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="适合普通小型车驾照考试练习" /></Field>
-      <Field label="外部/内部链接（留空使用详情页）">
-        <Input value={value.link_url ?? ""} onChange={e => onPatch({ link_url: e.target.value })} placeholder="/tools/drive/c1 或 https://..." />
-      </Field>
-      <div className="md:col-span-2">
-        <Field label="正文内容（详情页显示）">
-          <Textarea rows={5} value={value.content ?? ""} onChange={e => onPatch({ content: e.target.value })} placeholder="文章正文..." />
-        </Field>
+    <div className="space-y-6">
+      {/* 卡片基础信息 */}
+      <div>
+        <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">卡片基础信息（显示在列表）</div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Field label="所属项目栏">
+            <Select value={value.category_id ?? ""} onValueChange={(v) => onPatch({ category_id: v || null })}>
+              <SelectTrigger><SelectValue placeholder="选择分类" /></SelectTrigger>
+              <SelectContent>
+                {cats.map(c => <SelectItem key={c.id} value={c.id}>{c.icon || "🧰"} {c.title}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="slug（详情页地址）">
+            <Input value={value.slug ?? ""} onChange={e => onPatch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
+          </Field>
+          <Field label="卡片标题"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="小型车 C1 考试" /></Field>
+          <Field label="卡片简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="适合普通小型车驾照考试练习" /></Field>
+          <Field label="外部/内部链接（留空使用内置详情页）">
+            <Input value={value.link_url ?? ""} onChange={e => onPatch({ link_url: e.target.value })} placeholder="留空使用 /p/{slug}/i/{itemSlug}" />
+          </Field>
+          <Field label="排序"><Input type="number" value={value.sort_order ?? 0} onChange={e => onPatch({ sort_order: parseInt(e.target.value) || 0 })} /></Field>
+          <div className="flex items-center gap-3 md:col-span-2">
+            <Switch checked={value.is_visible ?? true} onCheckedChange={(v) => onPatch({ is_visible: v })} />
+            <Label>显示在前台</Label>
+          </div>
+        </div>
       </div>
-      <div className="md:col-span-2">
-        <Field label="图片">
-          <ImageUpload value={value.image_url ?? null} onChange={(v) => onPatch({ image_url: v })} folder="tools" label="上传图片" />
-        </Field>
-      </div>
-      <Field label="视频链接（YouTube/Bilibili 等）">
-        <Input value={value.video_url ?? ""} onChange={e => onPatch({ video_url: e.target.value })} placeholder="https://..." />
-      </Field>
-      <Field label="排序"><Input type="number" value={value.sort_order ?? 0} onChange={e => onPatch({ sort_order: parseInt(e.target.value) || 0 })} /></Field>
-      <div className="flex items-center gap-3 md:col-span-2">
-        <Switch checked={value.is_visible ?? true} onCheckedChange={(v) => onPatch({ is_visible: v })} />
-        <Label>显示在前台</Label>
+
+      {/* 详情页内容 */}
+      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
+        <div>
+          <div className="text-sm font-semibold">📄 编辑页面内容（点击卡片后打开的详情页）</div>
+          <div className="text-xs text-muted-foreground mt-1">路径：/p/{"{"}页面slug{"}"}/i/{value.slug || "{item-slug}"}</div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <Field label="页面副标题">
+              <Input value={value.subtitle ?? ""} onChange={e => onPatch({ subtitle: e.target.value })} placeholder="加州 DMV 驾照考试练习" />
+            </Field>
+          </div>
+          <div className="md:col-span-2">
+            <Field label="正文（纯文字段落）">
+              <Textarea rows={6} value={value.content ?? ""} onChange={e => onPatch({ content: e.target.value })} placeholder="文章正文，可换行..." />
+            </Field>
+          </div>
+          <div className="md:col-span-2">
+            <Field label="封面图片">
+              <ImageUpload value={value.image_url ?? null} onChange={(v) => onPatch({ image_url: v })} folder="tools" label="上传图片" />
+            </Field>
+          </div>
+          <Field label="视频链接（YouTube/Bilibili 等）">
+            <Input value={value.video_url ?? ""} onChange={e => onPatch({ video_url: e.target.value })} placeholder="https://..." />
+          </Field>
+          <Field label="按钮文字（可选）">
+            <Input value={value.button_text ?? ""} onChange={e => onPatch({ button_text: e.target.value })} placeholder="开始练习" />
+          </Field>
+          <div className="md:col-span-2">
+            <Field label="自定义 HTML（进阶，可留空）">
+              <Textarea rows={5} className="font-mono text-xs" value={value.html_content ?? ""} onChange={e => onPatch({ html_content: e.target.value })} placeholder="<div>自定义 HTML 内容</div>" />
+            </Field>
+          </div>
+        </div>
       </div>
     </div>
   );
