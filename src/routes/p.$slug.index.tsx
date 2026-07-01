@@ -3,8 +3,8 @@ import { getPageBySlug, getToolsByPageSlug, type PageFull, type ToolCategory, ty
 import { SiteLayout } from "@/components/SiteLayout";
 import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowRight, Search } from "lucide-react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/p/$slug/")({
