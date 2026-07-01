@@ -157,7 +157,7 @@ function PageEditor() {
               <Input type="number" value={sortOrder} onChange={e => setSortOrder(parseInt(e.target.value) || 0)} />
             </Field>
             <Field label="页面类型">
-              <Select value={pageType} onValueChange={(v) => setPageType(v as PageType)}>
+              <Select value={pageType} onValueChange={(v) => setPageType((v || "content") as PageType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="content">普通内容页面</SelectItem>
