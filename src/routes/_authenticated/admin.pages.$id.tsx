@@ -83,7 +83,8 @@ function PageEditor() {
       setSlug(page.slug ?? "");
       setTitle(page.title ?? "");
       setNavLabel(page.nav_label ?? "");
-      setPageType((page.page_type as PageType) ?? "content");
+      const pt = page.page_type as PageType;
+      setPageType(pt === "content" || pt === "tools" || pt === "blank" ? pt : "content");
       setShowInNav(page.show_in_nav ?? true);
       setIsVisible(page.is_visible ?? true);
       setSortOrder(page.sort_order ?? 0);
@@ -104,7 +105,7 @@ function PageEditor() {
         id: isNew ? undefined : id,
         slug, title,
         nav_label: navLabel || title,
-        page_type: pageType,
+        page_type: (pageType || "content") as PageType,
         show_in_nav: showInNav,
         is_visible: isVisible,
         sort_order: sortOrder,
@@ -157,7 +158,7 @@ function PageEditor() {
               <Input type="number" value={sortOrder} onChange={e => setSortOrder(parseInt(e.target.value) || 0)} />
             </Field>
             <Field label="页面类型">
-              <Select value={pageType} onValueChange={(v) => setPageType(v as PageType)}>
+              <Select value={pageType} onValueChange={(v) => setPageType((v || "content") as PageType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="content">普通内容页面</SelectItem>
