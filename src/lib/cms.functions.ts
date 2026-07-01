@@ -161,8 +161,10 @@ export type ToolItem = {
   category_id: string | null;
   slug: string;
   title: string;
+  subtitle: string | null;
   description: string | null;
   content: string | null;
+  html_content: string | null;
   image_url: string | null;
   video_url: string | null;
   link_url: string | null;
