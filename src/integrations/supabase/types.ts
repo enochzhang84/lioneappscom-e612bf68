@@ -56,6 +56,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pages: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_visible: boolean
+          nav_label: string
+          page_type: string
+          show_in_nav: boolean
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          nav_label: string
+          page_type?: string
+          show_in_nav?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          nav_label?: string
+          page_type?: string
+          show_in_nav?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           created_at: string
