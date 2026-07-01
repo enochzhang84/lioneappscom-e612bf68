@@ -58,6 +58,11 @@ function ItemDetail() {
           <div className="mt-8 whitespace-pre-wrap text-base leading-relaxed">{item.content}</div>
         )}
 
+        {item.html_content && (
+          <div className="mt-8 prose prose-neutral max-w-none"
+            dangerouslySetInnerHTML={{ __html: item.html_content }} />
+        )}
+
         {item.video_url && (
           <div className="mt-8 aspect-video rounded-lg overflow-hidden border border-border bg-muted">
             <iframe src={toEmbed(item.video_url)} title={item.title}
