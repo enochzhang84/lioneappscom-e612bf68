@@ -1,82 +1,86 @@
-## 目标
-在 `/admin` 新增「页面管理」模块，可创建、编辑、排序、启停自定义前台页面（如「实用工具」）。前台导航栏根据数据库动态渲染，现有固定页面（首页/产品/案例/关于/联系）保持不变。
 
-## 一、数据库（新迁移）
+# 页面管理优化：工具页面左右布局 + 分类/内容管理
 
-新增两张表：
+## 一、数据库（新增两张表）
 
-**pages**
-- `id uuid PK`
-- `slug text unique`（例如 `tools`，前台路径 `/p/{slug}`）
-- `title text`（页面标题）
-- `nav_label text`（导航栏显示文字）
-- `page_type text`（`content` | `tools` | `blank`）
-- `content jsonb`（区块数组：标题/副标题/文字/图片/按钮/HTML/工具卡片）
-- `show_in_nav bool default true`
-- `is_visible bool default true`（停用 = false）
-- `sort_order int default 0`
-- `created_at`, `updated_at`
+新增 `tool_categories`（项目栏）和 `tool_items`（内容栏），通过 `page_id` 关联到 `pages` 表中 `page_type='tools'` 的页面。
 
-RLS：`anon` 只读 `is_visible=true`；admin 全权。GRANT 齐全。
+**tool_categories 字段**
+- id, page_id (FK pages), title, description, icon, sort_order, is_visible, timestamps
+- 唯一约束: (page_id, slug) 可选，先用 id 引用
 
-## 二、前台路由
+**tool_items 字段**
+- id, page_id, category_id (FK tool_categories, on delete cascade), title, description, content(text), image_url, video_url, link_url, button_text, slug (用于详情页 URL), sort_order, is_visible, timestamps
 
-新增单一动态路由 `src/routes/p.$slug.tsx`：
-- 从 pages 表按 slug 读取
-- 根据 `page_type` 渲染：
-  - `content`: 区块顺序渲染（title/subtitle/text/image/button/html）
-  - `tools`: 工具卡片网格（卡片带图标、标题、描述、链接）
-  - `blank`: 只渲染自定义 HTML 块
+**RLS/GRANT**
+- 匿名 SELECT 可见行（is_visible=true）
+- authenticated 全部（admin 通过 has_role 校验）+ service_role
+- 遵循 GRANT 规范
 
-不影响现有 `/`, `/products/$slug`, `/cases`, `/about`, `/contact`。
+## 二、后端 server functions
 
-导航栏（`SiteLayout`）改造：
-- 保留原有固定项（首页/产品/案例/关于/联系）
-- 追加数据库中 `show_in_nav=true && is_visible=true` 的 pages（按 sort_order）
-- 通过一个轻量 public server fn `listNavPages()` 提供数据
+新增 `src/lib/tools-admin.functions.ts`：
+- adminListCategories({ page_id })
+- adminUpsertCategory / adminDeleteCategory / adminMoveCategory / adminToggleCategoryVisibility
+- adminListItems({ page_id }) 一次拉全（含 category_id）
+- adminUpsertItem / adminDeleteItem / adminMoveItem / adminToggleItemVisibility
 
-## 三、后台
+在 `src/lib/cms.functions.ts` 中新增公开读取：
+- getToolsByPageSlug({ slug }) → 返回 { page, categories, items }
+- getToolItem({ pageSlug, itemSlug }) → 详情页数据
 
-**菜单**：在 `admin.tsx` 侧边导航加入「页面管理」，位置为「案例」和「站点设置」之间。
+## 三、后台编辑器（admin.pages.$id.tsx）
 
-**路由**：
-- `src/routes/_authenticated/admin.pages.tsx`（layout：Outlet）
-- `admin.pages.index.tsx` — 列表 + 「+ 新增页面」
-  - 表格列：页面名称 | slug | 导航栏显示 | 状态 | 排序 | 操作
-  - 操作：编辑 / 删除 / 启停 / 上下移
-- `admin.pages.$id.tsx` — 编辑器
-  - 基本信息：title, slug, nav_label, sort_order, show_in_nav, page_type
-  - 区块编辑器（content JSON 数组）：可添加/删除/排序区块，每种类型独立表单
-  - 工具卡片：图标（emoji/icon 名）、标题、描述、链接 URL
+在页面类型为 `tools` 时，在"页面内容"卡片下方增加一个新卡片 **"工具页面分类与内容"**（仅 tools 类型显示），提供两个 Tab / 两个区域：
 
-**Server fns**（`src/lib/pages-admin.functions.ts`）：`adminListPages`, `adminGetPage`, `adminUpsertPage`, `adminDeletePage`, `adminTogglePageVisibility`, `adminMovePage`。全部带 `requireSupabaseAuth` + 管理员校验。
+- **项目栏 (Categories)**：列表 + `+ 添加项目栏`
+  - 每行可展开编辑：标题、说明、emoji、排序、显示开关、删除
+- **内容栏 (Items)**：列表 + `+ 添加内容栏`
+  - 每行可编辑：所属项目栏（下拉）、标题、简介、正文（Textarea）、图片(ImageUpload)、视频链接、外部/内部链接、按钮文字、slug、排序、显示
 
-**Public fn**（`src/lib/cms.functions.ts` 追加）：`listNavPages()`（只返 slug/nav_label/sort_order），`getPageBySlug(slug)`。
+顶部"页面内容"工具栏中额外加两个快捷按钮 `+ 添加项目栏` / `+ 添加内容栏`（tools 类型时可用），点击直接在下方分类/内容区新增一行。
 
-## 四、区块类型 Schema
+普通 `content` 与 `blank` 页面完全不显示这个卡片，保持现有行为不受影响。
 
-```ts
-type Block =
-  | { type: 'title'; text: string }
-  | { type: 'subtitle'; text: string }
-  | { type: 'text'; text: string }
-  | { type: 'image'; url: string; alt?: string }
-  | { type: 'button'; label: string; href: string }
-  | { type: 'html'; html: string }
-  | { type: 'tool_card'; icon?: string; title: string; desc?: string; href: string }
-```
+## 四、前台
 
-## 五、不影响现有
+### `/p/{slug}` （page_type = tools）
+改为左右布局：
+- 桌面：`grid-cols-[240px_1fr]`，左侧 sticky 分类列表，图标 + 标题
+- 移动端：上下布局，分类变成横向可滚动 chip
+- 选中态用 URL search param `?cat=<categoryId>` 或本地 state；默认选第一个
+- 右侧显示所选分类的 items 卡片列表（标题、简介、按钮/链接）
+- 点击 item：若 link_url 非空则跳转该地址；否则进入内置详情页 `/p/{slug}/i/{itemSlug}`
 
-- 现有路由文件全部不动
-- 导航栏采用「固定项 + 追加动态项」策略
-- 前台通过 `/p/{slug}` 命名空间，避免与现有路由冲突
+`content` / `blank` 类型保持现有渲染逻辑不变。
 
-## 六、交付顺序
+### 详情页：新增 `src/routes/p.$slug.i.$itemSlug.tsx`
+博客文章样式：
+- 返回按钮 → `/p/{slug}`
+- 标题、发布时间（created_at）、所属分类 badge
+- 正文（whitespace-pre-wrap）
+- 图片、视频（iframe 或 video 标签）
+- 相关链接按钮（link_url + button_text）
 
-1. 迁移建表 + RLS + GRANT
-2. Admin server fns + 后台列表/编辑页 + 菜单项
-3. 前台动态路由 `/p/$slug` + 导航栏动态追加
-4. 顺手清理构建报错的 `admin.pages` 引用（若有）与孤立的 `reset-admin-pw.ts` 引用
+## 五、导航栏不受影响
 
-完成后你可在 `/admin/pages` 新建「实用工具」页面（slug=`tools`, 类型=tools，勾选显示在导航），前台导航即自动出现「实用工具」，点击进入 `/p/tools`。
+`SiteLayout` 已根据 pages.show_in_nav 动态渲染，无需改动。
+
+## 六、风格
+
+沿用现有 shadcn + tailwind 语义 token，卡片 border/bg-card，hover:border-primary/40，简洁知识库风格。
+
+## 技术要点
+- 迁移工具建表（含 GRANT + RLS + updated_at 触发器复用 `set_updated_at`）
+- 类型：迁移执行后 Supabase types 会重新生成，随后再写依赖类型的代码
+- 详情页路由：`p.$slug.i.$itemSlug.tsx` 走 loader `ensureQueryData` + `useSuspenseQuery` 模式（保持与现有 p.$slug 一致）
+- 后台使用 react-query mutation + invalidate 刷新列表
+
+## 交付顺序
+1. 数据库迁移（等用户确认）
+2. 后端 server functions（admin + public）
+3. 后台编辑器 UI（tools 类型专属卡片）
+4. 前台 `/p/{slug}` 左右布局改造
+5. 详情页新路由
+
+确认后开始执行第 1 步（迁移）。
