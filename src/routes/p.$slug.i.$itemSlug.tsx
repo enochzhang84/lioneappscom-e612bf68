@@ -1,9 +1,16 @@
+import * as React from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { getToolItem, type PageFull, type ToolItem, type ToolCategory } from "@/lib/cms.functions";
 import { SiteLayout } from "@/components/SiteLayout";
 import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { QuizApp } from "./p.drive.c1";
+
+const EMBEDDED_APPS: Record<string, () => React.ReactElement> = {
+  "app:drive-c1": () => <QuizApp embedded />,
+  "/p/drive/c1": () => <QuizApp embedded />,
+};
 
 export const Route = createFileRoute("/p/$slug/i/$itemSlug")({
   loader: async ({ params }) => {
@@ -21,6 +28,23 @@ function ItemDetail() {
   const { page, item, category } = Route.useLoaderData() as {
     page: PageFull; item: ToolItem; category: ToolCategory | null;
   };
+
+  const appKey = item.link_url?.trim() || "";
+  const AppComp = appKey ? EMBEDDED_APPS[appKey] : undefined;
+  if (AppComp) {
+    return (
+      <SiteLayout>
+        <div className="mx-auto max-w-5xl px-4 md:px-6 pt-6">
+          <Button asChild variant="ghost" size="sm" className="-ml-2">
+            <Link to="/p/$slug" params={{ slug: page.slug }} search={{ cat: category?.id }}>
+              <ArrowLeft size={14} className="mr-1" /> 返回 {page.title}
+            </Link>
+          </Button>
+        </div>
+        <AppComp />
+      </SiteLayout>
+    );
+  }
 
   return (
     <SiteLayout>

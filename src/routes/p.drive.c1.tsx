@@ -29,7 +29,7 @@ type Phase = "intro" | "exam" | "result";
 const TOTAL = 36;
 const PASS = 30;
 
-function QuizPage() {
+export function QuizApp({ embedded = false }: { embedded?: boolean }) {
   const fetchFn = useServerFn(getRandomQuizQuestions);
   const gradeFn = useServerFn(gradeQuiz);
   const load = useMutation({
@@ -73,14 +73,16 @@ function QuizPage() {
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
 
-  return (
-    <SiteLayout>
+  const body = (
+    <>
       <section className="border-b border-border bg-white">
         <div className="mx-auto max-w-4xl px-4 md:px-8 py-6 flex items-center justify-between gap-4">
           <div>
-            <div className="text-xs text-muted-foreground mb-1">
-              <Link to="/p/$slug" params={{ slug: "drive" }} className="hover:text-foreground">← 返回驾考工具</Link>
-            </div>
+            {!embedded && (
+              <div className="text-xs text-muted-foreground mb-1">
+                <Link to="/p/$slug" params={{ slug: "drive" }} className="hover:text-foreground">← 返回驾考工具</Link>
+              </div>
+            )}
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">小型车 C1 模拟考试</h1>
           </div>
           {phase !== "intro" && (
@@ -109,8 +111,14 @@ function QuizPage() {
           <Result grade={grade} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
         )}
       </div>
-    </SiteLayout>
+    </>
   );
+
+  return embedded ? body : <SiteLayout>{body}</SiteLayout>;
+}
+
+function QuizPage() {
+  return <QuizApp />;
 }
 
 

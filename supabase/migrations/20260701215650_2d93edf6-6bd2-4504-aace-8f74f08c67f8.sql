@@ -1,0 +1,1 @@
+UPDATE public.tool_items SET link_url = 'app:drive-c1' WHERE id = '6a419a46-6f23-411d-b991-95f687e9c2cb';
