@@ -29,6 +29,23 @@ function ItemDetail() {
     page: PageFull; item: ToolItem; category: ToolCategory | null;
   };
 
+  const appKey = item.internal_url?.trim() || "";
+  const AppComp = appKey ? EMBEDDED_APPS[appKey] : undefined;
+  if (AppComp) {
+    return (
+      <SiteLayout>
+        <div className="mx-auto max-w-5xl px-4 md:px-6 pt-6">
+          <Button asChild variant="ghost" size="sm" className="-ml-2">
+            <Link to="/p/$slug" params={{ slug: page.slug }} search={{ cat: category?.id }}>
+              <ArrowLeft size={14} className="mr-1" /> 返回 {page.title}
+            </Link>
+          </Button>
+        </div>
+        <AppComp />
+      </SiteLayout>
+    );
+  }
+
   return (
     <SiteLayout>
       <article className="mx-auto max-w-3xl px-6 py-10 md:py-16">
