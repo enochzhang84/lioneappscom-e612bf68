@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { QuizApp } from "./p.drive.c1";
 
-const EMBEDDED_APPS: Record<string, () => JSX.Element> = {
+const EMBEDDED_APPS: Record<string, () => React.ReactElement> = {
   "app:drive-c1": () => <QuizApp embedded />,
   "/p/drive/c1": () => <QuizApp embedded />,
 };
