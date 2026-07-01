@@ -209,6 +209,7 @@ export type Database = {
           content: string | null
           created_at: string
           description: string | null
+          html_content: string | null
           id: string
           image_url: string | null
           is_visible: boolean
@@ -216,6 +217,7 @@ export type Database = {
           page_id: string
           slug: string
           sort_order: number
+          subtitle: string | null
           title: string
           updated_at: string
           video_url: string | null
@@ -226,6 +228,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          html_content?: string | null
           id?: string
           image_url?: string | null
           is_visible?: boolean
@@ -233,6 +236,7 @@ export type Database = {
           page_id: string
           slug: string
           sort_order?: number
+          subtitle?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
@@ -243,6 +247,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          html_content?: string | null
           id?: string
           image_url?: string | null
           is_visible?: boolean
@@ -250,6 +255,7 @@ export type Database = {
           page_id?: string
           slug?: string
           sort_order?: number
+          subtitle?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
