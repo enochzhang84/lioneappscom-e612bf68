@@ -140,6 +140,57 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_questions: {
+        Row: {
+          category: string
+          correct_answer: string
+          created_at: string
+          difficulty: string | null
+          explanation: string | null
+          id: string
+          is_active: boolean
+          option_a: string
+          option_b: string
+          option_c: string | null
+          option_d: string | null
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          correct_answer: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          is_active?: boolean
+          option_a: string
+          option_b: string
+          option_c?: string | null
+          option_d?: string | null
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          correct_answer?: string
+          created_at?: string
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          is_active?: boolean
+          option_a?: string
+          option_b?: string
+          option_c?: string | null
+          option_d?: string | null
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           key: string
