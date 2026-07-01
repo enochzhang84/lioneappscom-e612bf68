@@ -12,9 +12,12 @@ export const Route = createFileRoute("/p/$slug/")({
   loader: async ({ params }) => {
     const page = await getPageBySlug({ data: { slug: params.slug } });
     if (!page) throw notFound();
-    if (page.page_type === "tools") {
+    if (isToolsPage(page)) {
       const bundle = await getToolsByPageSlug({ data: { slug: params.slug } });
-      return { page, bundle };
+      return {
+        page: bundle?.page ?? page,
+        bundle: bundle ?? { page, categories: [], items: [] },
+      };
     }
     return { page, bundle: null as null };
   },
@@ -40,8 +43,8 @@ function DynamicPage() {
     bundle: { page: PageFull; categories: ToolCategory[]; items: ToolItem[] } | null;
   };
 
-  if (page.page_type === "tools" && bundle) {
-    return <ToolsPageView page={page} categories={bundle.categories} items={bundle.items} />;
+  if (isToolsPage(page)) {
+    return <ToolsPageView page={page} categories={bundle?.categories ?? []} items={bundle?.items ?? []} />;
   }
 
   const blocks: Block[] = Array.isArray(page.content) ? (page.content as Block[]) : [];
@@ -71,6 +74,10 @@ function DynamicPage() {
       </section>
     </SiteLayout>
   );
+}
+
+function isToolsPage(page: Pick<PageFull, "page_type">) {
+  return String(page.page_type).trim().toLowerCase() === "tools";
 }
 
 function ToolsPageView({ page, categories, items }: {
