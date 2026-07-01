@@ -124,6 +124,7 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       title: data.title,
       subtitle: data.subtitle ?? null,
       description: data.description ?? null,
+      icon: data.icon ?? null,
       content: data.content ?? null,
       html_content: data.html_content ?? null,
       image_url: data.image_url ?? null,
