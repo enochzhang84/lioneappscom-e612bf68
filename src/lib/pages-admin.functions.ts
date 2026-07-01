@@ -38,7 +38,6 @@ export const adminListPages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await ensureAdmin(context.supabase, context.userId);
-    // @ts-expect-error pages table may not be in generated types yet
     const { data, error } = await context.supabase
       .from("pages")
       .select("*")
@@ -52,7 +51,6 @@ export const adminGetPage = createServerFn({ method: "GET" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    // @ts-expect-error pages table may not be in generated types yet
     const { data: row, error } = await context.supabase
       .from("pages")
       .select("*")
@@ -68,7 +66,6 @@ export const adminUpsertPage = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
     if (data.id) {
-      // @ts-expect-error pages table may not be in generated types yet
       const { error } = await context.supabase
         .from("pages")
         .update({
@@ -85,7 +82,6 @@ export const adminUpsertPage = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
-    // @ts-expect-error pages table may not be in generated types yet
     const { data: row, error } = await context.supabase
       .from("pages")
       .insert({
@@ -109,7 +105,6 @@ export const adminDeletePage = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    // @ts-expect-error pages table may not be in generated types yet
     const { error } = await context.supabase.from("pages").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -122,7 +117,6 @@ export const adminTogglePageVisibility = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    // @ts-expect-error pages table may not be in generated types yet
     const { error } = await context.supabase
       .from("pages")
       .update({ is_visible: data.is_visible })
@@ -138,7 +132,6 @@ export const adminMovePage = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    // @ts-expect-error pages table may not be in generated types yet
     const { error } = await context.supabase
       .from("pages")
       .update({ sort_order: data.sort_order })
