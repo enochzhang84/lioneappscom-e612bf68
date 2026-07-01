@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { LayoutDashboard, Package, Briefcase, Settings, LogOut, ExternalLink, FileText } from "lucide-react";
+import { LayoutDashboard, Package, Briefcase, Settings, LogOut, ExternalLink, FileText, ClipboardList } from "lucide-react";
 import { claimFirstAdmin } from "@/lib/bootstrap.functions";
 import { toast } from "sonner";
 
@@ -72,6 +72,7 @@ function AdminLayout() {
           <NavItem to="/admin/products" icon={<Package size={16} />} label="产品" />
           <NavItem to="/admin/cases" icon={<Briefcase size={16} />} label="案例" />
           <NavItem to="/admin/pages" icon={<FileText size={16} />} label="页面管理" />
+          <NavItem to="/admin/quiz" icon={<ClipboardList size={16} />} label="题库管理" />
           <NavItem to="/admin/settings" icon={<Settings size={16} />} label="站点设置" />
         </nav>
         <div className="p-3 border-t border-border space-y-2">
