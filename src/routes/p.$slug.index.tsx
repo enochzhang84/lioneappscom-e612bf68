@@ -86,74 +86,60 @@ function ToolsPageView({ page, categories, items }: {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [query, setQuery] = useState("");
-  const [activeId, setActiveId] = useState<string | null>(search.cat ?? categories[0]?.id ?? null);
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const initialCat = search.cat ?? categories[0]?.id ?? null;
+  const [activeId, setActiveId] = useState<string | null>(initialCat);
 
-  // Group items by category
-  const grouped = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filter = (it: ToolItem) =>
+  const activeCat = categories.find(c => c.id === activeId) ?? categories[0] ?? null;
+
+  const q = query.trim().toLowerCase();
+  const visibleItems = items
+    .filter(it => activeCat ? it.category_id === activeCat.id : false)
+    .filter(it =>
       !q ||
       it.title.toLowerCase().includes(q) ||
       (it.description ?? "").toLowerCase().includes(q) ||
-      (it.subtitle ?? "").toLowerCase().includes(q);
-    return categories.map(c => ({
-      cat: c,
-      items: items.filter(it => it.category_id === c.id && filter(it)),
-    }));
-  }, [categories, items, query]);
+      (it.subtitle ?? "").toLowerCase().includes(q),
+    );
 
-  const totalMatches = grouped.reduce((n, g) => n + g.items.length, 0);
-
-  const scrollTo = (id: string) => {
+  const pick = (id: string) => {
     setActiveId(id);
     navigate({ search: { cat: id }, replace: true });
-    const el = sectionRefs.current[id];
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-
-  // Scroll-spy: highlight active category as user scrolls
-  useEffect(() => {
-    if (query) return;
-    const observer = new IntersectionObserver(
-      entries => {
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-        if (visible) setActiveId(visible.target.getAttribute("data-cat-id"));
-      },
-      { rootMargin: "-96px 0px -70% 0px", threshold: 0 },
-    );
-    Object.values(sectionRefs.current).forEach(el => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, [grouped, query]);
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-[1400px] px-4 md:px-6">
-        <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)] py-6">
-          {/* Mobile chips */}
-          <div className="md:hidden -mx-4 px-4 overflow-x-auto">
-            <div className="flex gap-2 min-w-max pb-1">
-              {categories.map(c => (
-                <button key={c.id} type="button" onClick={() => scrollTo(c.id)}
-                  className={`shrink-0 rounded-full border px-3 py-1.5 text-sm transition
-                    ${activeId === c.id ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card hover:border-primary/40"}`}>
-                  <span className="mr-1">{c.icon || "🧰"}</span>{c.title}
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Title section (full width) */}
+      <section className="border-b border-border">
+        <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-10 md:py-14">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{page.title}</h1>
+          <p className="mt-2 text-muted-foreground">
+            {(page.content && (page.content as { subtitle?: string }).subtitle) || "这里可以放副标题/说明文字"}
+          </p>
+        </div>
+      </section>
 
-          {/* Sidebar (desktop) */}
-          <aside className="hidden md:block">
-            <nav className="sticky top-24 rounded-xl border border-border bg-card p-2 space-y-0.5 max-h-[calc(100vh-7rem)] overflow-y-auto">
-              <div className="px-3 py-3 mb-1 border-b border-border/60">
-                <div className="text-base font-bold tracking-tight">{page.title}</div>
-              </div>
+      <div className="mx-auto max-w-[1400px] px-4 md:px-6">
+        {/* Mobile category chips */}
+        <div className="md:hidden -mx-4 px-4 py-3 border-b border-border overflow-x-auto">
+          <div className="flex gap-2 min-w-max">
+            {categories.map(c => (
+              <button key={c.id} type="button" onClick={() => pick(c.id)}
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-sm transition
+                  ${activeId === c.id ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card hover:border-primary/40"}`}>
+                <span className="mr-1">{c.icon || "🧰"}</span>{c.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop split layout with fixed vertical divider */}
+        <div className="grid md:grid-cols-[260px_1fr]">
+          {/* Left sidebar */}
+          <aside className="hidden md:block border-r border-border py-6 pr-4">
+            <nav className="sticky top-24 space-y-1">
               {categories.map(c => (
-                <button key={c.id} type="button" onClick={() => scrollTo(c.id)}
+                <button key={c.id} type="button" onClick={() => pick(c.id)}
                   className={`w-full text-left flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition
                     ${activeId === c.id
                       ? "bg-primary/10 text-primary font-medium"
@@ -163,69 +149,53 @@ function ToolsPageView({ page, categories, items }: {
                 </button>
               ))}
               {categories.length === 0 && (
-                <p className="text-sm text-muted-foreground px-3 py-2">暂无分类</p>
+                <p className="text-sm text-muted-foreground px-3 py-2">暂无类别</p>
               )}
             </nav>
           </aside>
 
-          {/* Right main */}
-          <main className="min-w-0">
-            {/* Search bar */}
-            <div className="sticky top-16 z-10 -mx-4 md:mx-0 px-4 md:px-0 pb-4 pt-2 bg-background/80 backdrop-blur">
-              <div className="relative">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="search"
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  placeholder="输入关键词，按回车搜索..."
-                  className="w-full h-12 pl-11 pr-4 rounded-xl border border-border bg-card text-sm
-                    placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition"
-                />
+          {/* Right content */}
+          <main className="min-w-0 py-6 md:pl-6">
+            {categories.length > 0 && (
+              <div className="mb-5">
+                <div className="relative max-w-md">
+                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input type="search" value={query} onChange={e => setQuery(e.target.value)}
+                    placeholder="搜索工具..."
+                    className="w-full h-10 pl-11 pr-4 rounded-lg border border-border bg-card text-sm
+                      placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition" />
+                </div>
               </div>
-            </div>
-
-            {categories.length === 0 && (
-              <p className="text-muted-foreground text-sm py-8">此工具页面还没有分类。请在后台添加。</p>
             )}
 
-            {query && totalMatches === 0 && (
-              <p className="text-muted-foreground text-sm py-8">没有找到与 "{query}" 相关的工具。</p>
+            {activeCat && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-block w-1 h-5 rounded bg-primary" />
+                <h2 className="text-lg font-semibold">{activeCat.title}</h2>
+                {activeCat.description && (
+                  <span className="text-xs text-muted-foreground hidden sm:inline">· {activeCat.description}</span>
+                )}
+              </div>
             )}
 
-            <div className="space-y-10 pb-16">
-              {grouped.map(({ cat, items }) =>
-                items.length === 0 && query ? null : (
-                  <section
-                    key={cat.id}
-                    data-cat-id={cat.id}
-                    ref={el => { sectionRefs.current[cat.id] = el; }}
-                    className="scroll-mt-24"
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="inline-block w-1 h-5 rounded bg-primary" />
-                      <h2 className="text-lg font-semibold">{cat.title}</h2>
-                      {cat.description && (
-                        <span className="text-xs text-muted-foreground hidden sm:inline">· {cat.description}</span>
-                      )}
-                    </div>
-                    {items.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">此分类下暂无内容。</p>
-                    ) : (
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {items.map(it => <ItemCard key={it.id} pageSlug={page.slug} item={it} />)}
-                      </div>
-                    )}
-                  </section>
-                )
-              )}
-            </div>
+            {categories.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-8">此工具页面还没有类别。请在后台添加。</p>
+            ) : visibleItems.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-8">
+                {query ? `没有找到与 "${query}" 相关的工具。` : "此类别下暂无项目。"}
+              </p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 pb-16">
+                {visibleItems.map(it => <ItemCard key={it.id} pageSlug={page.slug} item={it} />)}
+              </div>
+            )}
           </main>
         </div>
       </div>
     </SiteLayout>
   );
 }
+
 
 function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
   const external = item.link_url && /^https?:\/\//.test(item.link_url);
