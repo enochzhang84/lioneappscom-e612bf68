@@ -1,11 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getRandomQuizQuestions, type QuizQuestion } from "@/lib/quiz.functions";
+import {
+  getRandomQuizQuestions,
+  gradeQuiz,
+  type QuizQuestion,
+  type GradedQuestion,
+  type GradeResult,
+} from "@/lib/quiz.functions";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle, ArrowLeft, ArrowRight, RotateCcw, ClipboardCheck } from "lucide-react";
 
@@ -24,15 +30,21 @@ const TOTAL = 36;
 const PASS = 30;
 
 function QuizPage() {
-  const fn = useServerFn(getRandomQuizQuestions);
+  const fetchFn = useServerFn(getRandomQuizQuestions);
+  const gradeFn = useServerFn(gradeQuiz);
   const load = useMutation({
-    mutationFn: () => fn({ data: { category: "c1", count: TOTAL } }),
+    mutationFn: () => fetchFn({ data: { category: "c1", count: TOTAL } }),
+  });
+  const submit = useMutation({
+    mutationFn: (vars: { ids: string[]; answers: Record<string, "A" | "B" | "C" | "D"> }) =>
+      gradeFn({ data: vars }),
   });
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, "A" | "B" | "C" | "D">>({});
   const [current, setCurrent] = useState(0);
+  const [grade, setGrade] = useState<GradeResult | null>(null);
 
   async function startExam() {
     const rows = await load.mutateAsync();
@@ -40,6 +52,7 @@ function QuizPage() {
     setQuestions(rows);
     setAnswers({});
     setCurrent(0);
+    setGrade(null);
     setPhase("exam");
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
@@ -49,6 +62,15 @@ function QuizPage() {
     setQuestions([]);
     setAnswers({});
     setCurrent(0);
+    setGrade(null);
+  }
+
+  async function submitExam() {
+    const ids = questions.map((q) => q.id);
+    const res = await submit.mutateAsync({ ids, answers });
+    setGrade(res);
+    setPhase("result");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
 
   return (
@@ -78,16 +100,19 @@ function QuizPage() {
             setAnswers={setAnswers}
             current={current}
             setCurrent={setCurrent}
-            onSubmit={() => { setPhase("result"); if (typeof window !== "undefined") window.scrollTo({ top: 0 }); }}
+            onSubmit={submitExam}
+            submitting={submit.isPending}
+            submitError={submit.error?.message}
           />
         )}
-        {phase === "result" && (
-          <Result questions={questions} answers={answers} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+        {phase === "result" && grade && (
+          <Result grade={grade} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
         )}
       </div>
     </SiteLayout>
   );
 }
+
 
 function Intro({ onStart, loading, error }: { onStart: () => void; loading: boolean; error?: string }) {
   return (
@@ -118,7 +143,7 @@ function Intro({ onStart, loading, error }: { onStart: () => void; loading: bool
 }
 
 function Exam({
-  questions, answers, setAnswers, current, setCurrent, onSubmit,
+  questions, answers, setAnswers, current, setCurrent, onSubmit, submitting, submitError,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -126,6 +151,8 @@ function Exam({
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
   onSubmit: () => void;
+  submitting: boolean;
+  submitError?: string;
 }) {
   const q = questions[current];
   const answered = Object.keys(answers).length;
@@ -242,16 +269,17 @@ function Exam({
       </Card>
 
       {confirming && (
-        <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4" onClick={() => setConfirming(false)}>
+        <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4" onClick={() => submitting ? null : setConfirming(false)}>
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold">确认交卷？</h3>
             <p className="text-sm text-muted-foreground">
               你已作答 <b>{answered}</b> / {questions.length} 题
               {answered < questions.length && "，未作答的题将计为错误。"}
             </p>
+            {submitError && <p className="text-sm text-destructive">{submitError}</p>}
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setConfirming(false)}>取消</Button>
-              <Button onClick={onSubmit}>确认交卷</Button>
+              <Button variant="outline" onClick={() => setConfirming(false)} disabled={submitting}>取消</Button>
+              <Button onClick={onSubmit} disabled={submitting}>{submitting ? "评分中…" : "确认交卷"}</Button>
             </div>
           </div>
         </div>
@@ -261,20 +289,17 @@ function Exam({
 }
 
 function Result({
-  questions, answers, onRetake, onHome, retaking,
+  grade, onRetake, onHome, retaking,
 }: {
-  questions: QuizQuestion[];
-  answers: Record<string, "A" | "B" | "C" | "D">;
+  grade: GradeResult;
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
 }) {
-  const total = questions.length;
-  const correctCount = questions.reduce((acc, q) => acc + (answers[q.id] === q.correct_answer ? 1 : 0), 0);
-  const wrongCount = total - correctCount;
-  const rate = Math.round((correctCount / total) * 100);
+  const { total, correct: correctCount, wrong: wrongCount, results } = grade;
+  const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   const passed = correctCount >= PASS;
-  const wrongs = questions.filter((q) => answers[q.id] !== q.correct_answer);
+  const wrongs = results.filter((r) => !r.is_correct);
 
   return (
     <div className="space-y-8">
@@ -315,8 +340,8 @@ function Result({
         <section className="space-y-4">
           <h2 className="text-lg font-semibold">错题回顾（{wrongs.length}）</h2>
           <div className="space-y-4">
-            {wrongs.map((q, i) => (
-              <ReviewItem key={q.id} q={q} idx={i + 1} pick={answers[q.id]} />
+            {wrongs.map((r, i) => (
+              <ReviewItem key={r.id} r={r} idx={i + 1} />
             ))}
           </div>
         </section>
@@ -326,8 +351,8 @@ function Result({
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">全部题目解析</h2>
         <div className="space-y-4">
-          {questions.map((q, i) => (
-            <ReviewItem key={q.id} q={q} idx={i + 1} pick={answers[q.id]} />
+          {results.map((r, i) => (
+            <ReviewItem key={r.id} r={r} idx={i + 1} />
           ))}
         </div>
       </section>
@@ -347,11 +372,12 @@ function Stat({ label, value, tone }: { label: string; value: number | string; t
   );
 }
 
-function ReviewItem({ q, idx, pick }: { q: QuizQuestion; idx: number; pick?: "A" | "B" | "C" | "D" }) {
-  const correct = q.correct_answer;
-  const isRight = pick === correct;
+function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
+  const correct = r.correct_answer;
+  const pick = r.picked;
+  const isRight = r.is_correct;
   const opts = (["A", "B", "C", "D"] as const)
-    .map((k) => ({ key: k, text: (q as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`] }))
+    .map((k) => ({ key: k, text: (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`] }))
     .filter((o) => o.text && o.text.trim() !== "");
 
   return (
@@ -360,7 +386,7 @@ function ReviewItem({ q, idx, pick }: { q: QuizQuestion; idx: number; pick?: "A"
         <div className="flex items-start justify-between gap-4">
           <div className="text-sm font-medium">
             <span className="text-muted-foreground mr-2">Q{idx}.</span>
-            {q.question}
+            {r.question}
           </div>
           <span
             className={cn(
@@ -401,10 +427,10 @@ function ReviewItem({ q, idx, pick }: { q: QuizQuestion; idx: number; pick?: "A"
           <div>我的选择：<b className={cn(isRight ? "text-emerald-700" : "text-red-700")}>{pick ?? "未作答"}</b></div>
           <div>正确答案：<b className="text-emerald-700">{correct}</b></div>
         </div>
-        {q.explanation && (
+        {r.explanation && (
           <div className="text-sm rounded-lg bg-muted/50 p-3 leading-relaxed">
             <div className="text-xs font-semibold text-muted-foreground mb-1">解析</div>
-            {q.explanation}
+            {r.explanation}
           </div>
         )}
       </CardContent>
