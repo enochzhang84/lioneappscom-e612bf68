@@ -4,6 +4,12 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { QuizApp } from "./p.drive.c1";
+
+const EMBEDDED_APPS: Record<string, () => JSX.Element> = {
+  "app:drive-c1": () => <QuizApp embedded />,
+  "/p/drive/c1": () => <QuizApp embedded />,
+};
 
 export const Route = createFileRoute("/p/$slug/i/$itemSlug")({
   loader: async ({ params }) => {
