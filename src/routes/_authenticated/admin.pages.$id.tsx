@@ -510,15 +510,18 @@ function ToolsManager({ pageId }: { pageId: string }) {
                     onClick={() => mItem.mutate(
                       { data: { page_id: pageId, category_id: d.category_id ?? null,
                         slug: d.slug ?? "", title: d.title ?? "",
+                        page_title: d.page_title ?? "",
                         subtitle: d.subtitle ?? "", icon: d.icon ?? "",
                         description: d.description ?? "",
                         content: d.content ?? "", html_content: d.html_content ?? "",
                         image_url: d.image_url ?? null,
                         video_url: d.video_url ?? "", link_url: d.link_url ?? "",
-                        button_text: d.button_text ?? "",
+                        external_url: d.external_url ?? "", internal_url: d.internal_url ?? "",
+                        button_text: d.button_text ?? "", button_url: d.button_url ?? "",
                         sort_order: d.sort_order ?? 0, is_visible: d.is_visible ?? true } },
                       { onSuccess: () => { const n = { ...itemDrafts }; delete n[tmpId]; setItemDrafts(n); } },
                     )}>
+
                     创建
                   </Button>
                   <Button type="button" size="sm" variant="ghost"
