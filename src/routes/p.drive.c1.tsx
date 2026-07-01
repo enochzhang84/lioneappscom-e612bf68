@@ -29,7 +29,7 @@ type Phase = "intro" | "exam" | "result";
 const TOTAL = 36;
 const PASS = 30;
 
-function QuizPage() {
+export function QuizApp({ embedded = false }: { embedded?: boolean }) {
   const fetchFn = useServerFn(getRandomQuizQuestions);
   const gradeFn = useServerFn(gradeQuiz);
   const load = useMutation({
