@@ -43,6 +43,13 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
 
+  const listNav = useServerFn(listNavPages);
+  const { data: navPages } = useQuery({
+    queryKey: ["public", "nav-pages"],
+    queryFn: () => listNav(),
+    staleTime: 60_000,
+  });
+
   function handleLogoClick(e: React.MouseEvent) {
     if (location.pathname !== "/") return;
     clickCountRef.current += 1;
