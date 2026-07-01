@@ -4,7 +4,7 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search } from "lucide-react";
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { z } from "zod";
 
 export const Route = createFileRoute("/p/$slug/")({
