@@ -4,13 +4,54 @@ import { getToolItem, type PageFull, type ToolItem, type ToolCategory } from "@/
 import { SiteLayout } from "@/components/SiteLayout";
 import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Maximize2, Loader2, AlertTriangle } from "lucide-react";
 import { QuizApp } from "./p.drive.c1";
 
-const EMBEDDED_APPS: Record<string, () => React.ReactElement> = {
-  "app:drive-c1": () => <QuizApp embedded />,
-  "/p/drive/c1": () => <QuizApp embedded />,
+const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath?: string }> = {
+  "app:drive-c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
+  "/p/drive/c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
 };
+
+class EmbedErrorBoundary extends React.Component<
+  { fullPath?: string; children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="mx-auto max-w-2xl px-4 md:px-6 py-10">
+          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+            <AlertTriangle className="mx-auto mb-3 text-destructive" size={28} />
+            <h3 className="text-lg font-semibold">加载失败</h3>
+            <p className="mt-2 text-sm text-muted-foreground break-words">
+              {this.state.error.message || "嵌入的应用无法加载，请稍后再试。"}
+            </p>
+            <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
+              <Button size="sm" onClick={() => this.setState({ error: null })}>重新加载</Button>
+              {this.props.fullPath && (
+                <Button asChild size="sm" variant="outline">
+                  <a href={this.props.fullPath}>打开完整考试页</a>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function EmbedFallback() {
+  return (
+    <div className="mx-auto max-w-2xl px-4 md:px-6 py-16 flex flex-col items-center text-center">
+      <Loader2 className="animate-spin text-primary" size={28} />
+      <p className="mt-3 text-sm text-muted-foreground">正在加载考试程序…</p>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/p/$slug/i/$itemSlug")({
   loader: async ({ params }) => {
@@ -30,21 +71,33 @@ function ItemDetail() {
   };
 
   const appKey = item.link_url?.trim() || "";
-  const AppComp = appKey ? EMBEDDED_APPS[appKey] : undefined;
-  if (AppComp) {
+  const embed = appKey ? EMBEDDED_APPS[appKey] : undefined;
+  if (embed) {
     return (
       <SiteLayout>
-        <div className="mx-auto max-w-5xl px-4 md:px-6 pt-6">
+        <div className="mx-auto max-w-5xl px-4 md:px-6 pt-4 md:pt-6 flex flex-wrap items-center justify-between gap-2">
           <Button asChild variant="ghost" size="sm" className="-ml-2">
             <Link to="/p/$slug" params={{ slug: page.slug }} search={{ cat: category?.id }}>
               <ArrowLeft size={14} className="mr-1" /> 返回 {page.title}
             </Link>
           </Button>
+          {embed.fullPath && (
+            <Button asChild variant="outline" size="sm">
+              <a href={embed.fullPath}>
+                <Maximize2 size={14} className="mr-1" /> 打开完整考试页
+              </a>
+            </Button>
+          )}
         </div>
-        <AppComp />
+        <EmbedErrorBoundary fullPath={embed.fullPath}>
+          <React.Suspense fallback={<EmbedFallback />}>
+            {embed.render()}
+          </React.Suspense>
+        </EmbedErrorBoundary>
       </SiteLayout>
     );
   }
+
 
   return (
     <SiteLayout>
