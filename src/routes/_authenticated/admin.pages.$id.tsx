@@ -473,13 +473,17 @@ function ToolsManager({ pageId }: { pageId: string }) {
                         <Button type="button" size="sm" disabled={!dirty || mItem.isPending}
                           onClick={() => mItem.mutate({ data: { id: it.id, page_id: pageId,
                             category_id: draft.category_id, slug: draft.slug, title: draft.title,
+                            page_title: draft.page_title ?? "",
                             subtitle: draft.subtitle ?? "", icon: draft.icon ?? "",
                             description: draft.description ?? "", content: draft.content ?? "",
                             html_content: draft.html_content ?? "",
                             image_url: draft.image_url ?? null, video_url: draft.video_url ?? "",
-                            link_url: draft.link_url ?? "", button_text: draft.button_text ?? "",
+                            link_url: draft.link_url ?? "",
+                            external_url: draft.external_url ?? "", internal_url: draft.internal_url ?? "",
+                            button_text: draft.button_text ?? "", button_url: draft.button_url ?? "",
                             sort_order: draft.sort_order, is_visible: draft.is_visible } },
                             { onSuccess: () => { const n = { ...itemDrafts }; delete n[it.id]; setItemDrafts(n); } })}>
+
                           保存
                         </Button>
                         <Button type="button" size="sm" variant="ghost"
