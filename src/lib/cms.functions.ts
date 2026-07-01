@@ -146,3 +146,101 @@ export const getPageBySlug = createServerFn({ method: "GET" })
     return row as PageFull | null;
   });
 
+export type ToolCategory = {
+  id: string;
+  page_id: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  sort_order: number;
+};
+
+export type ToolItem = {
+  id: string;
+  page_id: string;
+  category_id: string | null;
+  slug: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  image_url: string | null;
+  video_url: string | null;
+  link_url: string | null;
+  button_text: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
+export const getToolsByPageSlug = createServerFn({ method: "GET" })
+  .inputValidator((d: { slug: string }) => z.object({ slug: z.string().min(1).max(100) }).parse(d))
+  .handler(async ({ data }): Promise<{ page: PageFull; categories: ToolCategory[]; items: ToolItem[] } | null> => {
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: page, error: pageErr } = await supabasePublic
+      .from("pages")
+      .select("id, slug, title, nav_label, page_type, content, show_in_nav, is_visible, sort_order")
+      .eq("slug", data.slug)
+      .eq("is_visible", true)
+      .maybeSingle();
+    if (pageErr) throw new Error(pageErr.message);
+    if (!page) return null;
+
+    const [{ data: cats, error: catErr }, { data: items, error: itemErr }] = await Promise.all([
+      supabasePublic
+        .from("tool_categories")
+        .select("id, page_id, title, description, icon, sort_order")
+        .eq("page_id", (page as PageFull).id)
+        .eq("is_visible", true)
+        .order("sort_order", { ascending: true }),
+      supabasePublic
+        .from("tool_items")
+        .select("id, page_id, category_id, slug, title, description, content, image_url, video_url, link_url, button_text, sort_order, created_at")
+        .eq("page_id", (page as PageFull).id)
+        .eq("is_visible", true)
+        .order("sort_order", { ascending: true }),
+    ]);
+    if (catErr) throw new Error(catErr.message);
+    if (itemErr) throw new Error(itemErr.message);
+    return {
+      page: page as PageFull,
+      categories: (cats ?? []) as ToolCategory[],
+      items: (items ?? []) as ToolItem[],
+    };
+  });
+
+export const getToolItem = createServerFn({ method: "GET" })
+  .inputValidator((d: { pageSlug: string; itemSlug: string }) =>
+    z.object({ pageSlug: z.string().min(1).max(100), itemSlug: z.string().min(1).max(100) }).parse(d),
+  )
+  .handler(async ({ data }): Promise<{ page: PageFull; item: ToolItem; category: ToolCategory | null } | null> => {
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: page, error: pageErr } = await supabasePublic
+      .from("pages")
+      .select("id, slug, title, nav_label, page_type, content, show_in_nav, is_visible, sort_order")
+      .eq("slug", data.pageSlug)
+      .eq("is_visible", true)
+      .maybeSingle();
+    if (pageErr) throw new Error(pageErr.message);
+    if (!page) return null;
+    const { data: item, error: itemErr } = await supabasePublic
+      .from("tool_items")
+      .select("id, page_id, category_id, slug, title, description, content, image_url, video_url, link_url, button_text, sort_order, created_at")
+      .eq("page_id", (page as PageFull).id)
+      .eq("slug", data.itemSlug)
+      .eq("is_visible", true)
+      .maybeSingle();
+    if (itemErr) throw new Error(itemErr.message);
+    if (!item) return null;
+    let category: ToolCategory | null = null;
+    const catId = (item as ToolItem).category_id;
+    if (catId) {
+      const { data: cat } = await supabasePublic
+        .from("tool_categories")
+        .select("id, page_id, title, description, icon, sort_order")
+        .eq("id", catId)
+        .maybeSingle();
+      category = (cat as ToolCategory | null) ?? null;
+    }
+    return { page: page as PageFull, item: item as ToolItem, category };
+  });
+
+
