@@ -343,7 +343,15 @@ function ToolsManager({ pageId }: { pageId: string }) {
   }
   function newItem() {
     const tmpId = `new-${Date.now()}`;
-    setItemDrafts({ ...itemDrafts, [tmpId]: { slug: "", title: "", description: "", category_id: cats[0]?.id ?? null, sort_order: items.length, is_visible: true } });
+    const stamp = Date.now().toString(36);
+    setItemDrafts({ ...itemDrafts, [tmpId]: {
+      slug: `item-${stamp}`,
+      title: "未命名项目",
+      description: "",
+      category_id: cats[0]?.id ?? null,
+      sort_order: items.length,
+      is_visible: true,
+    } });
     setOpenItem({ ...openItem, [tmpId]: true });
   }
 
