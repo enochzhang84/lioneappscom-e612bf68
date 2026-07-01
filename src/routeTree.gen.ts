@@ -33,6 +33,7 @@ import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminProductsIndexRouteImport } from './routes/_authenticated/admin.products.index'
 import { Route as AuthenticatedAdminPagesIndexRouteImport } from './routes/_authenticated/admin.pages.index'
 import { Route as AuthenticatedAdminCasesIndexRouteImport } from './routes/_authenticated/admin.cases.index'
+import { Route as PSlugIItemSlugRouteImport } from './routes/p.$slug.i.$itemSlug'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
 import { Route as AuthenticatedAdminProductsIdRouteImport } from './routes/_authenticated/admin.products.$id'
 import { Route as AuthenticatedAdminPagesIdRouteImport } from './routes/_authenticated/admin.pages.$id'
@@ -163,6 +164,11 @@ const AuthenticatedAdminCasesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminCasesRoute,
   } as any)
+const PSlugIItemSlugRoute = PSlugIItemSlugRouteImport.update({
+  id: '/i/$itemSlug',
+  path: '/i/$itemSlug',
+  getParentRoute: () => PSlugRoute,
+} as any)
 const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
   id: '/api/public/media/$',
   path: '/api/public/media/$',
@@ -200,7 +206,7 @@ export interface FileRoutesByFullPath {
   '/update-password': typeof UpdatePasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
-  '/p/$slug': typeof PSlugRoute
+  '/p/$slug': typeof PSlugRouteWithChildren
   '/products/$slug': typeof ProductsSlugRoute
   '/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
   '/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
   '/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
@@ -228,13 +235,14 @@ export interface FileRoutesByTo {
   '/success': typeof SuccessRoute
   '/update-password': typeof UpdatePasswordRoute
   '/cases/$slug': typeof CasesSlugRoute
-  '/p/$slug': typeof PSlugRoute
+  '/p/$slug': typeof PSlugRouteWithChildren
   '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
   '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/admin/cases': typeof AuthenticatedAdminCasesIndexRoute
   '/admin/pages': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsIndexRoute
@@ -255,7 +263,7 @@ export interface FileRoutesById {
   '/update-password': typeof UpdatePasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
-  '/p/$slug': typeof PSlugRoute
+  '/p/$slug': typeof PSlugRouteWithChildren
   '/products/$slug': typeof ProductsSlugRoute
   '/_authenticated/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
   '/_authenticated/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/_authenticated/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
   '/_authenticated/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/_authenticated/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/admin/pages/$id'
     | '/admin/products/$id'
     | '/api/public/media/$'
+    | '/p/$slug/i/$itemSlug'
     | '/admin/cases/'
     | '/admin/pages/'
     | '/admin/products/'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/admin/pages/$id'
     | '/admin/products/$id'
     | '/api/public/media/$'
+    | '/p/$slug/i/$itemSlug'
     | '/admin/cases'
     | '/admin/pages'
     | '/admin/products'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pages/$id'
     | '/_authenticated/admin/products/$id'
     | '/api/public/media/$'
+    | '/p/$slug/i/$itemSlug'
     | '/_authenticated/admin/cases/'
     | '/_authenticated/admin/pages/'
     | '/_authenticated/admin/products/'
@@ -369,7 +381,7 @@ export interface RootRouteChildren {
   ProcessRoute: typeof ProcessRoute
   SuccessRoute: typeof SuccessRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
-  PSlugRoute: typeof PSlugRoute
+  PSlugRoute: typeof PSlugRouteWithChildren
   ProductsSlugRoute: typeof ProductsSlugRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
 }
@@ -544,6 +556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCasesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminCasesRoute
     }
+    '/p/$slug/i/$itemSlug': {
+      id: '/p/$slug/i/$itemSlug'
+      path: '/i/$itemSlug'
+      fullPath: '/p/$slug/i/$itemSlug'
+      preLoaderRoute: typeof PSlugIItemSlugRouteImport
+      parentRoute: typeof PSlugRoute
+    }
     '/api/public/media/$': {
       id: '/api/public/media/$'
       path: '/api/public/media/$'
@@ -678,6 +697,16 @@ const CasesRouteChildren: CasesRouteChildren = {
 
 const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
 
+interface PSlugRouteChildren {
+  PSlugIItemSlugRoute: typeof PSlugIItemSlugRoute
+}
+
+const PSlugRouteChildren: PSlugRouteChildren = {
+  PSlugIItemSlugRoute: PSlugIItemSlugRoute,
+}
+
+const PSlugRouteWithChildren = PSlugRoute._addFileChildren(PSlugRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -690,7 +719,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProcessRoute: ProcessRoute,
   SuccessRoute: SuccessRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
-  PSlugRoute: PSlugRoute,
+  PSlugRoute: PSlugRouteWithChildren,
   ProductsSlugRoute: ProductsSlugRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
 }
