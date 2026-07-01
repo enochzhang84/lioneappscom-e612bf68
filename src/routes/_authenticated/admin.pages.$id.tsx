@@ -191,43 +191,44 @@ function PageEditor() {
 
         <Card>
           <CardHeader>
-            <CardTitle>页面内容</CardTitle>
+            <CardTitle>页面编辑</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {pageType === "tools" ? (
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" size="sm" onClick={() => {
-                  const manager = document.getElementById("tools-content-manager");
-                  manager?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  window.setTimeout(() => document.getElementById("add-tool-category")?.click(), 250);
-                }}>
-                  <Plus size={14} className="mr-1" /> 增加新类别
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" size="sm" onClick={() => {
+                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理类别"); }
+                window.setTimeout(() => {
+                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  document.getElementById("add-tool-category")?.click();
+                }, 300);
+              }}>
+                <Plus size={14} className="mr-1" /> 增加新类别
+              </Button>
+              <Button type="button" size="sm" onClick={() => {
+                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理项目"); }
+                window.setTimeout(() => {
+                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  document.getElementById("add-tool-item")?.click();
+                }, 300);
+              }}>
+                <Plus size={14} className="mr-1" /> 增加新项目
+              </Button>
+              <div className="w-full" />
+              {pageType !== "tools" && (Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
+                <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
+                  <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
                 </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => {
-                  const manager = document.getElementById("tools-content-manager");
-                  manager?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  window.setTimeout(() => document.getElementById("add-tool-item")?.click(), 250);
-                }}>
-                  <Plus size={14} className="mr-1" /> 增加新项目
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {(Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
-                  <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
-                    <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
-                  </Button>
-                ))}
-              </div>
-            )}
+              ))}
+            </div>
 
             {pageType === "tools" && (
-              <p className="text-sm text-muted-foreground">实用工具页面的内容请使用下方“工具类别”和“工具项目”管理。</p>
+              <p className="text-sm text-muted-foreground">实用工具页面的内容请使用下方「工具类别」和「工具项目」管理。</p>
             )}
 
             {pageType !== "tools" && blocks.length === 0 && (
               <p className="text-sm text-muted-foreground">还没有内容块，点击上方按钮添加。</p>
             )}
+
 
             {pageType !== "tools" && <div className="space-y-3">
               {blocks.map((b, i) => (
@@ -276,11 +277,14 @@ type Category = {
 };
 type Item = {
   id: string; page_id: string; category_id: string | null; slug: string;
-  title: string; subtitle: string | null; icon: string | null;
+  title: string; page_title: string | null; subtitle: string | null; icon: string | null;
   description: string | null; content: string | null; html_content: string | null;
   image_url: string | null; video_url: string | null; link_url: string | null;
-  button_text: string | null; sort_order: number; is_visible: boolean;
+  external_url: string | null; internal_url: string | null;
+  button_text: string | null; button_url: string | null;
+  sort_order: number; is_visible: boolean;
 };
+
 
 function ToolsManager({ pageId }: { pageId: string }) {
   const qc = useQueryClient();
@@ -469,13 +473,17 @@ function ToolsManager({ pageId }: { pageId: string }) {
                         <Button type="button" size="sm" disabled={!dirty || mItem.isPending}
                           onClick={() => mItem.mutate({ data: { id: it.id, page_id: pageId,
                             category_id: draft.category_id, slug: draft.slug, title: draft.title,
+                            page_title: draft.page_title ?? "",
                             subtitle: draft.subtitle ?? "", icon: draft.icon ?? "",
                             description: draft.description ?? "", content: draft.content ?? "",
                             html_content: draft.html_content ?? "",
                             image_url: draft.image_url ?? null, video_url: draft.video_url ?? "",
-                            link_url: draft.link_url ?? "", button_text: draft.button_text ?? "",
+                            link_url: draft.link_url ?? "",
+                            external_url: draft.external_url ?? "", internal_url: draft.internal_url ?? "",
+                            button_text: draft.button_text ?? "", button_url: draft.button_url ?? "",
                             sort_order: draft.sort_order, is_visible: draft.is_visible } },
                             { onSuccess: () => { const n = { ...itemDrafts }; delete n[it.id]; setItemDrafts(n); } })}>
+
                           保存
                         </Button>
                         <Button type="button" size="sm" variant="ghost"
@@ -502,15 +510,18 @@ function ToolsManager({ pageId }: { pageId: string }) {
                     onClick={() => mItem.mutate(
                       { data: { page_id: pageId, category_id: d.category_id ?? null,
                         slug: d.slug ?? "", title: d.title ?? "",
+                        page_title: d.page_title ?? "",
                         subtitle: d.subtitle ?? "", icon: d.icon ?? "",
                         description: d.description ?? "",
                         content: d.content ?? "", html_content: d.html_content ?? "",
                         image_url: d.image_url ?? null,
                         video_url: d.video_url ?? "", link_url: d.link_url ?? "",
-                        button_text: d.button_text ?? "",
+                        external_url: d.external_url ?? "", internal_url: d.internal_url ?? "",
+                        button_text: d.button_text ?? "", button_url: d.button_url ?? "",
                         sort_order: d.sort_order ?? 0, is_visible: d.is_visible ?? true } },
                       { onSuccess: () => { const n = { ...itemDrafts }; delete n[tmpId]; setItemDrafts(n); } },
                     )}>
+
                     创建
                   </Button>
                   <Button type="button" size="sm" variant="ghost"
@@ -582,6 +593,11 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
+            <Field label="页面标题（详情页 H1，留空则用项目名称）">
+              <Input value={value.page_title ?? ""} onChange={e => onPatch({ page_title: e.target.value })} placeholder="小型车 C1 驾照模拟考试" />
+            </Field>
+          </div>
+          <div className="md:col-span-2">
             <Field label="页面副标题">
               <Input value={value.subtitle ?? ""} onChange={e => onPatch({ subtitle: e.target.value })} placeholder="加州 DMV 驾照考试练习" />
             </Field>
@@ -599,9 +615,19 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
           <Field label="视频链接（YouTube/Bilibili 等）">
             <Input value={value.video_url ?? ""} onChange={e => onPatch({ video_url: e.target.value })} placeholder="https://..." />
           </Field>
+          <Field label="外部链接（打开新标签）">
+            <Input value={value.external_url ?? ""} onChange={e => onPatch({ external_url: e.target.value })} placeholder="https://..." />
+          </Field>
+          <Field label="内部链接（站内路径）">
+            <Input value={value.internal_url ?? ""} onChange={e => onPatch({ internal_url: e.target.value })} placeholder="/p/other-page" />
+          </Field>
           <Field label="按钮文字（可选）">
             <Input value={value.button_text ?? ""} onChange={e => onPatch({ button_text: e.target.value })} placeholder="开始练习" />
           </Field>
+          <Field label="按钮链接">
+            <Input value={value.button_url ?? ""} onChange={e => onPatch({ button_url: e.target.value })} placeholder="https://... 或 /p/..." />
+          </Field>
+
           <div className="md:col-span-2">
             <Field label="自定义 HTML（进阶，可留空）">
               <Textarea rows={5} className="font-mono text-xs" value={value.html_content ?? ""} onChange={e => onPatch({ html_content: e.target.value })} placeholder="<div>自定义 HTML 内容</div>" />

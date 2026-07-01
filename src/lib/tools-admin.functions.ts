@@ -85,6 +85,7 @@ const itemInput = z.object({
   category_id: uuid.nullable().optional(),
   slug: z.string().min(1).max(80).regex(/^[a-z0-9-]+$/, "slug 只能小写字母数字和短横线"),
   title: z.string().min(1).max(160),
+  page_title: z.string().max(200).nullable().optional(),
   subtitle: z.string().max(300).nullable().optional(),
   description: z.string().max(500).nullable().optional(),
   icon: z.string().max(20).nullable().optional(),
@@ -93,10 +94,14 @@ const itemInput = z.object({
   image_url: z.string().nullable().optional(),
   video_url: z.string().nullable().optional(),
   link_url: z.string().nullable().optional(),
+  external_url: z.string().nullable().optional(),
+  internal_url: z.string().nullable().optional(),
   button_text: z.string().max(60).nullable().optional(),
+  button_url: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
 });
+
 
 export const adminListItems = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -122,6 +127,7 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       category_id: data.category_id ?? null,
       slug: data.slug,
       title: data.title,
+      page_title: data.page_title ?? null,
       subtitle: data.subtitle ?? null,
       description: data.description ?? null,
       icon: data.icon ?? null,
@@ -130,7 +136,10 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       image_url: data.image_url ?? null,
       video_url: data.video_url ?? null,
       link_url: data.link_url ?? null,
+      external_url: data.external_url ?? null,
+      internal_url: data.internal_url ?? null,
       button_text: data.button_text ?? null,
+      button_url: data.button_url ?? null,
       sort_order: data.sort_order,
       is_visible: data.is_visible,
     };
@@ -138,6 +147,7 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       const { error } = await context.supabase
         .from("tool_items").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
+
       return { id: data.id };
     }
     const { data: row, error } = await context.supabase
