@@ -277,11 +277,14 @@ type Category = {
 };
 type Item = {
   id: string; page_id: string; category_id: string | null; slug: string;
-  title: string; subtitle: string | null; icon: string | null;
+  title: string; page_title: string | null; subtitle: string | null; icon: string | null;
   description: string | null; content: string | null; html_content: string | null;
   image_url: string | null; video_url: string | null; link_url: string | null;
-  button_text: string | null; sort_order: number; is_visible: boolean;
+  external_url: string | null; internal_url: string | null;
+  button_text: string | null; button_url: string | null;
+  sort_order: number; is_visible: boolean;
 };
+
 
 function ToolsManager({ pageId }: { pageId: string }) {
   const qc = useQueryClient();
