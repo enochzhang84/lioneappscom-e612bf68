@@ -593,6 +593,11 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
+            <Field label="页面标题（详情页 H1，留空则用项目名称）">
+              <Input value={value.page_title ?? ""} onChange={e => onPatch({ page_title: e.target.value })} placeholder="小型车 C1 驾照模拟考试" />
+            </Field>
+          </div>
+          <div className="md:col-span-2">
             <Field label="页面副标题">
               <Input value={value.subtitle ?? ""} onChange={e => onPatch({ subtitle: e.target.value })} placeholder="加州 DMV 驾照考试练习" />
             </Field>
@@ -610,9 +615,19 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
           <Field label="视频链接（YouTube/Bilibili 等）">
             <Input value={value.video_url ?? ""} onChange={e => onPatch({ video_url: e.target.value })} placeholder="https://..." />
           </Field>
+          <Field label="外部链接（打开新标签）">
+            <Input value={value.external_url ?? ""} onChange={e => onPatch({ external_url: e.target.value })} placeholder="https://..." />
+          </Field>
+          <Field label="内部链接（站内路径）">
+            <Input value={value.internal_url ?? ""} onChange={e => onPatch({ internal_url: e.target.value })} placeholder="/p/other-page" />
+          </Field>
           <Field label="按钮文字（可选）">
             <Input value={value.button_text ?? ""} onChange={e => onPatch({ button_text: e.target.value })} placeholder="开始练习" />
           </Field>
+          <Field label="按钮链接">
+            <Input value={value.button_url ?? ""} onChange={e => onPatch({ button_url: e.target.value })} placeholder="https://... 或 /p/..." />
+          </Field>
+
           <div className="md:col-span-2">
             <Field label="自定义 HTML（进阶，可留空）">
               <Textarea rows={5} className="font-mono text-xs" value={value.html_content ?? ""} onChange={e => onPatch({ html_content: e.target.value })} placeholder="<div>自定义 HTML 内容</div>" />
