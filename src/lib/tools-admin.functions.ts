@@ -127,6 +127,7 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       category_id: data.category_id ?? null,
       slug: data.slug,
       title: data.title,
+      page_title: data.page_title ?? null,
       subtitle: data.subtitle ?? null,
       description: data.description ?? null,
       icon: data.icon ?? null,
@@ -135,7 +136,10 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       image_url: data.image_url ?? null,
       video_url: data.video_url ?? null,
       link_url: data.link_url ?? null,
+      external_url: data.external_url ?? null,
+      internal_url: data.internal_url ?? null,
       button_text: data.button_text ?? null,
+      button_url: data.button_url ?? null,
       sort_order: data.sort_order,
       is_visible: data.is_visible,
     };
@@ -143,6 +147,7 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       const { error } = await context.supabase
         .from("tool_items").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
+
       return { id: data.id };
     }
     const { data: row, error } = await context.supabase
