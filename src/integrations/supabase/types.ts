@@ -205,17 +205,21 @@ export type Database = {
       tool_items: {
         Row: {
           button_text: string | null
+          button_url: string | null
           category_id: string | null
           content: string | null
           created_at: string
           description: string | null
+          external_url: string | null
           html_content: string | null
           icon: string | null
           id: string
           image_url: string | null
+          internal_url: string | null
           is_visible: boolean
           link_url: string | null
           page_id: string
+          page_title: string | null
           slug: string
           sort_order: number
           subtitle: string | null
@@ -225,17 +229,21 @@ export type Database = {
         }
         Insert: {
           button_text?: string | null
+          button_url?: string | null
           category_id?: string | null
           content?: string | null
           created_at?: string
           description?: string | null
+          external_url?: string | null
           html_content?: string | null
           icon?: string | null
           id?: string
           image_url?: string | null
+          internal_url?: string | null
           is_visible?: boolean
           link_url?: string | null
           page_id: string
+          page_title?: string | null
           slug: string
           sort_order?: number
           subtitle?: string | null
@@ -245,17 +253,21 @@ export type Database = {
         }
         Update: {
           button_text?: string | null
+          button_url?: string | null
           category_id?: string | null
           content?: string | null
           created_at?: string
           description?: string | null
+          external_url?: string | null
           html_content?: string | null
           icon?: string | null
           id?: string
           image_url?: string | null
+          internal_url?: string | null
           is_visible?: boolean
           link_url?: string | null
           page_id?: string
+          page_title?: string | null
           slug?: string
           sort_order?: number
           subtitle?: string | null
