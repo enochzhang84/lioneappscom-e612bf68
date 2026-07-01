@@ -83,7 +83,8 @@ function PageEditor() {
       setSlug(page.slug ?? "");
       setTitle(page.title ?? "");
       setNavLabel(page.nav_label ?? "");
-      setPageType((page.page_type as PageType) ?? "content");
+      const pt = page.page_type as PageType;
+      setPageType(pt === "content" || pt === "tools" || pt === "blank" ? pt : "content");
       setShowInNav(page.show_in_nav ?? true);
       setIsVisible(page.is_visible ?? true);
       setSortOrder(page.sort_order ?? 0);
