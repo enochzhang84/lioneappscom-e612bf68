@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { getToolItem, type PageFull, type ToolItem, type ToolCategory } from "@/lib/cms.functions";
 import { SiteLayout } from "@/components/SiteLayout";
