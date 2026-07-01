@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-export const Route = createFileRoute("/p/$slug")({
+export const Route = createFileRoute("/p/$slug/")({
   validateSearch: z.object({ cat: z.string().optional() }).parse,
   loader: async ({ params }) => {
     const page = await getPageBySlug({ data: { slug: params.slug } });
