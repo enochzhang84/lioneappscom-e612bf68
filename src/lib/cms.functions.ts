@@ -162,6 +162,7 @@ export type ToolItem = {
   slug: string;
   title: string;
   subtitle: string | null;
+  icon: string | null;
   description: string | null;
   content: string | null;
   html_content: string | null;
