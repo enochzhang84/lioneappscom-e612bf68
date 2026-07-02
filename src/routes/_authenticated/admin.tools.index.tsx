@@ -211,19 +211,20 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
     );
   }
 
-  function addItemUnder(catId: string) {
+  function addItemUnder(catId: string, parentId: string | null = null) {
     const stamp = Date.now().toString(36);
-    const catItems = items.filter((i) => i.category_id === catId);
+    const siblings = items.filter((i) => i.category_id === catId && (i.parent_id ?? null) === parentId);
     mItem.mutate(
       {
         data: {
           page_id: pageId,
           category_id: catId,
+          parent_id: parentId,
           slug: `item-${stamp}`,
-          title: "未命名工具",
+          title: parentId ? "未命名子页面" : "未命名工具",
           page_title: "",
           subtitle: "",
-          icon: "🧰",
+          icon: parentId ? "📄" : "🧰",
           description: "",
           content: "",
           html_content: "",
@@ -234,14 +235,15 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
           internal_url: "",
           button_text: "",
           button_url: "",
-          sort_order: catItems.length,
+          sort_order: siblings.length,
           is_visible: true,
         },
       },
       {
         onSuccess: (r) => {
-          toast.success("已创建工具");
+          toast.success(parentId ? "已创建子页面" : "已创建工具");
           setOpenCat((s) => ({ ...s, [catId]: true }));
+          if (parentId) setOpenItem((s) => ({ ...s, [parentId]: true }));
           setSelection({ kind: "item", id: r.id });
         },
       },
