@@ -267,6 +267,16 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
     mItem.mutate({ data: itemPayload(a, pageId, { sort_order: b.sort_order }) });
     mItem.mutate({ data: itemPayload(b, pageId, { sort_order: a.sort_order }) });
   }
+  function moveItemById(id: string, dir: -1 | 1) {
+    const cur = items.find((i) => i.id === id);
+    if (!cur) return;
+    const siblings = items
+      .filter((i) => i.category_id === cur.category_id && (i.parent_id ?? null) === (cur.parent_id ?? null))
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const idx = siblings.findIndex((i) => i.id === id);
+    moveItem(siblings, idx, dir);
+  }
+
   function duplicateItem(it: Item) {
     const stamp = Date.now().toString(36);
     const catItems = items.filter((i) => i.category_id === it.category_id);
