@@ -159,6 +159,7 @@ export type ToolItem = {
   id: string;
   page_id: string;
   category_id: string | null;
+  parent_id: string | null;
   slug: string;
   title: string;
   subtitle: string | null;
