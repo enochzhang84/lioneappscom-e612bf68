@@ -128,6 +128,16 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/p/$slug" params={{ slug: "tools" }} activeProps={{ className: "text-foreground font-medium" }}>实用工具</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/p/$slug" params={{ slug: "ai" }} activeProps={{ className: "text-foreground font-medium" }}>AI 助手</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
                   <Link to="/blog" activeProps={{ className: "text-foreground font-medium" }}>博客</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -142,7 +152,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
                   <Link to="/contact" activeProps={{ className: "text-foreground font-medium" }}>联系我们</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-              {navPages?.map((p) => (
+              {navPages?.filter((p) => p.slug !== "tools" && p.slug !== "ai").map((p) => (
                 <NavigationMenuItem key={p.id}>
                   <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
                     <Link
