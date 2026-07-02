@@ -83,6 +83,7 @@ const itemInput = z.object({
   id: uuid.optional(),
   page_id: uuid,
   category_id: uuid.nullable().optional(),
+  parent_id: uuid.nullable().optional(),
   slug: z.string().min(1).max(80).regex(/^[a-z0-9-]+$/, "slug 只能小写字母数字和短横线"),
   title: z.string().min(1).max(160),
   page_title: z.string().max(200).nullable().optional(),
