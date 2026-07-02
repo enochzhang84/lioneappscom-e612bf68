@@ -100,6 +100,7 @@ export const adminUpsertQuiz = createServerFn({ method: "POST" })
       manual_url: data.manual_url ?? null,
       google_keywords: data.google_keywords ?? null,
       category: data.category,
+      question_bank_id: data.question_bank_id ?? null,
       difficulty: data.difficulty,
       is_active: data.is_active,
       sort_order: data.sort_order,
