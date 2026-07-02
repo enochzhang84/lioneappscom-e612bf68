@@ -375,7 +375,14 @@ function ToolsManager({ pageId }: { pageId: string }) {
     } }, { onSuccess: () => toast.success("已复制类别") });
   }
 
-  function itemPayload(it: Item, override?: Partial<Item>): Parameters<typeof upsertItem>[0]["data"] {
+  type ItemPayload = {
+    id?: string; page_id: string; category_id: string | null; slug: string; title: string;
+    page_title: string; subtitle: string; icon: string; description: string; content: string;
+    html_content: string; image_url: string | null; video_url: string; link_url: string;
+    external_url: string; internal_url: string; button_text: string; button_url: string;
+    sort_order: number; is_visible: boolean;
+  };
+  function itemPayload(it: Item, override?: Partial<Item>): ItemPayload {
     const m = { ...it, ...override };
     return {
       id: m.id, page_id: pageId,
