@@ -780,6 +780,7 @@ export type Database = {
           is_visible: boolean
           page_id: string
           sort_order: number
+          status: string
           title: string
           updated_at: string
         }
@@ -791,6 +792,7 @@ export type Database = {
           is_visible?: boolean
           page_id: string
           sort_order?: number
+          status?: string
           title: string
           updated_at?: string
         }
@@ -802,6 +804,7 @@ export type Database = {
           is_visible?: boolean
           page_id?: string
           sort_order?: number
+          status?: string
           title?: string
           updated_at?: string
         }
@@ -836,6 +839,7 @@ export type Database = {
           parent_id: string | null
           slug: string
           sort_order: number
+          status: string
           subtitle: string | null
           title: string
           updated_at: string
@@ -861,6 +865,7 @@ export type Database = {
           parent_id?: string | null
           slug: string
           sort_order?: number
+          status?: string
           subtitle?: string | null
           title: string
           updated_at?: string
@@ -886,6 +891,7 @@ export type Database = {
           parent_id?: string | null
           slug?: string
           sort_order?: number
+          status?: string
           subtitle?: string | null
           title?: string
           updated_at?: string
