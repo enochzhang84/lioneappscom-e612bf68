@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { EmojiPicker } from "@/components/admin/EmojiPicker";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -636,7 +637,7 @@ function CategoryFormFields({ value, onPatch }: { value: Category; onPatch: (p: 
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <Field label="类别名称"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="驾照考试" /></Field>
-      <Field label="图标 emoji"><Input value={value.icon ?? ""} onChange={e => onPatch({ icon: e.target.value })} placeholder="🚗" /></Field>
+      <Field label="图标 emoji"><EmojiPicker value={value.icon} onChange={(v) => onPatch({ icon: v })} /></Field>
       <Field label="类别简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="各类驾照模拟考试" /></Field>
       <Field label="排序"><Input type="number" value={value.sort_order ?? 0} onChange={e => onPatch({ sort_order: parseInt(e.target.value) || 0 })} /></Field>
       <div className="flex items-center gap-3 md:col-span-2">
@@ -666,7 +667,7 @@ function ItemFormFields({ value, cats, onPatch }: { value: Item; cats: Category[
             <Input value={value.slug ?? ""} onChange={e => onPatch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
           </Field>
           <Field label="项目名称"><Input value={value.title ?? ""} onChange={e => onPatch({ title: e.target.value })} placeholder="小型车 C1 考试" /></Field>
-          <Field label="项目图标 emoji"><Input value={value.icon ?? ""} onChange={e => onPatch({ icon: e.target.value })} placeholder="🚗" /></Field>
+          <Field label="项目图标 emoji"><EmojiPicker value={value.icon} onChange={(v) => onPatch({ icon: v })} /></Field>
           <Field label="项目简介"><Input value={value.description ?? ""} onChange={e => onPatch({ description: e.target.value })} placeholder="适合普通小型车驾照考试练习" /></Field>
           <Field label="页面链接（留空使用内置详情页）">
             <Input value={value.link_url ?? ""} onChange={e => onPatch({ link_url: e.target.value })} placeholder="留空使用 /p/{slug}/i/{itemSlug}" />
@@ -789,7 +790,7 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (p: Partial<
           <Input placeholder="工具名（如：汇率换算）" value={block.title} onChange={e => onChange({ title: e.target.value })} />
           <Input placeholder="链接（如 /p/currency 或外链）" value={block.href} onChange={e => onChange({ href: e.target.value })} />
           <Textarea className="md:col-span-2" rows={2} placeholder="工具简介" value={block.desc} onChange={e => onChange({ desc: e.target.value })} />
-          <Input className="md:col-span-2" placeholder="图标 emoji（可选，如 💱）" value={block.icon ?? ""} onChange={e => onChange({ icon: e.target.value })} />
+          <div className="md:col-span-2"><EmojiPicker value={block.icon} onChange={(v) => onChange({ icon: v })} placeholder="图标 emoji（可选，如 💱）" /></div>
         </div>
       );
   }
