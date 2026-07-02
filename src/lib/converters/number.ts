@@ -12,8 +12,8 @@ const FORMULAS = [
 
 const FAQS = [
   { q: "1 亿等于多少 million？", a: "1 亿 = 10⁸ = 100 million（一亿等于一百个百万）。" },
-  { q: "1 billion 是十亿还是万亿？", a: "现代英文（美式与英式均已统一）1 billion = 10⁹ = 十亿。旧英式的"long scale"已不常用。" },
-  { q: "为什么中文习惯用"万"和"亿"，英文用 K/M/B？", a: "中文以万（10⁴）为分组，英文以千（10³）为分组，因此换算时数量级会错位，本工具帮你自动转换。" },
+  { q: "1 billion 是十亿还是万亿？", a: "现代英文（美式与英式均已统一）1 billion = 10⁹ = 十亿。旧英式的「long scale」已不常用。" },
+  { q: "为什么中文习惯用「万」和「亿」，英文用 K/M/B？", a: "中文以万（10⁴）为分组，英文以千（10³）为分组，因此换算时数量级会错位，本工具帮你自动转换。" },
 ];
 
 function make(key: string, name: string, defaultValue: number): ConverterConfig {
