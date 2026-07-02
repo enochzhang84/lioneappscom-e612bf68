@@ -31,11 +31,24 @@ const COMBINATION_VEHICLE_PROPS = {
   backLabel: "← 返回驾考工具",
 };
 
+const COMMERCIAL_DRIVER_PROPS = {
+  embedded: true as const,
+  category: "commercial_driver",
+  total: 50,
+  pass: 40,
+  examSeconds: 60 * 60,
+  title: "商业驾驶者笔试模拟考试",
+  subtitle: "DMV 风格 · 随机 50 题 · 60 分钟 · 40 题通过",
+  backHref: "/p/drive",
+  backLabel: "← 返回驾考工具",
+};
+
 const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath?: string }> = {
   "app:drive-c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "/p/drive/c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "app:drive-ab-air-brake": { render: () => <QuizApp {...AIR_BRAKE_PROPS} /> },
   "app:drive-ab-combination-vehicle": { render: () => <QuizApp {...COMBINATION_VEHICLE_PROPS} /> },
+  "app:drive-ab-commercial-driver": { render: () => <QuizApp {...COMMERCIAL_DRIVER_PROPS} /> },
 };
 
 class EmbedErrorBoundary extends React.Component<
