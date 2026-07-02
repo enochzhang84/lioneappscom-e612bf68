@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 import { ensureAdmin } from "./platform";
 
 type PluginInput = {
@@ -61,7 +61,7 @@ export const adminUpsertPlugin = createServerFn({ method: "POST" })
       icon: data.icon ?? null,
       version: data.version ?? "1.0.0",
       component_key: data.component_key.trim(),
-      default_config: data.default_config ?? {},
+      default_config: (data.default_config ?? {}) as Json,
       enabled: data.enabled ?? true,
       sort_order: data.sort_order ?? 0,
     };
