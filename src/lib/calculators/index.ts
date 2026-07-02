@@ -4,12 +4,18 @@ import { DECORATION_CALCS } from "./decoration";
 import { LOGISTICS_CALCS } from "./logistics";
 import { FINANCE_CALCS } from "./finance";
 import { AUTOMOTIVE_CALCS } from "./automotive";
+import { USA_CALCS } from "./usa";
+import { HEALTH_CALCS } from "./health";
+import { NAS_CALCS } from "./nas";
 
 const ALL: CalculatorConfig[] = [
   ...DECORATION_CALCS,
   ...LOGISTICS_CALCS,
   ...FINANCE_CALCS,
   ...AUTOMOTIVE_CALCS,
+  ...USA_CALCS,
+  ...HEALTH_CALCS,
+  ...NAS_CALCS,
 ];
 
 
