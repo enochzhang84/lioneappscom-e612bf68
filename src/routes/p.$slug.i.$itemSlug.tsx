@@ -15,7 +15,7 @@ const AIR_BRAKE_PROPS = {
   pass: 20,
   examSeconds: 45 * 60,
   title: "A/B 照 · 空气制动模拟考试",
-  subtitle: "DMV 风格 · 中英双语 · 随机 25 题 · 45 分钟 · 20 题通过",
+  subtitle: "中英双语 · 随机 25 题 · 45 分钟 · 20 题通过",
   backHref: "/p/drive",
   backLabel: "← 返回驾考工具",
 };
@@ -27,7 +27,7 @@ const COMBINATION_VEHICLE_PROPS = {
   pass: 16,
   examSeconds: 30 * 60,
   title: "A/B 照 · 组合车辆模拟考试",
-  subtitle: "DMV 风格 · 随机 20 题 · 30 分钟 · 16 题通过",
+  subtitle: "随机 20 题 · 30 分钟 · 16 题通过",
   backHref: "/p/drive",
   backLabel: "← 返回驾考工具",
 };
@@ -39,7 +39,7 @@ const COMMERCIAL_DRIVER_PROPS = {
   pass: 40,
   examSeconds: 60 * 60,
   title: "商业驾驶者笔试模拟考试",
-  subtitle: "DMV 风格 · 随机 50 题 · 60 分钟 · 40 题通过",
+  subtitle: "随机 50 题 · 60 分钟 · 40 题通过",
   backHref: "/p/drive",
   backLabel: "← 返回驾考工具",
 };
@@ -52,9 +52,10 @@ const C1_MOCK_PROPS = {
   ],
   total: 48,
   pass: 42, // 允许错 6 题
+  maxWrong: 6,
   examSeconds: 60 * 60,
   title: "DMV 小型车 C1 模拟考",
-  subtitle: "DMV 风格 · 36 道笔试 + 12 道图标 · 共 48 题 · 60 分钟 · 最多可错 6 题",
+  subtitle: "36 道笔试 + 12 道图标 · 共 48 题 · 60 分钟 · 最多可错 6 题",
   backHref: "/p/drive",
   backLabel: "← 返回驾考工具",
 };
