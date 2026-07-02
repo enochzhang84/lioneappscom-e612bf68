@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,8 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { adminGetQuiz, adminUpsertQuiz } from "@/lib/quiz-admin.functions";
+import { adminListBankNodes } from "@/lib/question-bank-admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/quiz/$id")({
+  validateSearch: (s) => z.object({ bank: z.string().uuid().optional() }).parse(s),
   component: QuizEditPage,
 });
 
