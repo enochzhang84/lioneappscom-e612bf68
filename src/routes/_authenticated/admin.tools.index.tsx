@@ -836,3 +836,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+function StatusSelect({ value, onChange }: { value: ToolStatus; onChange: (v: ToolStatus) => void }) {
+  return (
+    <Select value={value} onValueChange={(v) => onChange(v as ToolStatus)}>
+      <SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectContent>
+        {STATUS_OPTIONS.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            <span className="font-medium">{o.label}</span>
+            <span className="text-xs text-muted-foreground ml-2">{o.hint}</span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
