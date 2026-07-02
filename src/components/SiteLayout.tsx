@@ -21,9 +21,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { listNavPages } from "@/lib/cms.functions";
+import { usePlatform } from "@/lib/platform-bootstrap";
 
 const ADMIN_SECRET = "Loveliang@2026";
 
@@ -43,12 +41,9 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
 
-  const listNav = useServerFn(listNavPages);
-  const { data: navPages } = useQuery({
-    queryKey: ["public", "nav-pages"],
-    queryFn: () => listNav(),
-    staleTime: 60_000,
-  });
+  // 全站公共数据统一走 PlatformProvider，Header/Footer 不再自己请求。
+  const { navPages } = usePlatform();
+
 
   function handleLogoClick(e: React.MouseEvent) {
     if (location.pathname !== "/") return;

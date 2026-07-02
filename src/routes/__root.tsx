@@ -12,7 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import faviconAsset from "../assets/favicon.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { listNavPages } from "../lib/cms.functions";
+import { PlatformProvider, ensurePlatformData } from "../lib/platform-bootstrap";
+
 
 
 function NotFoundComponent() {
@@ -103,12 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData({
-      queryKey: ["public", "nav-pages"],
-      queryFn: () => listNavPages(),
-      staleTime: 60_000,
-    }),
+  loader: ({ context }) => ensurePlatformData(context.queryClient),
 });
 
 
@@ -151,9 +147,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <PlatformProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+
       <Outlet />
+      </PlatformProvider>
     </QueryClientProvider>
+
   );
 }
 
