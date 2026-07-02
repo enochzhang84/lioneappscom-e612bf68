@@ -5,3 +5,4 @@ export { DataTable } from "./DataTable";
 export { FormPanel, FormField } from "./FormPanel";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { EmptyState } from "./EmptyState";
+export { EmojiPicker } from "./EmojiPicker";
