@@ -54,6 +54,7 @@ import { Route as PSlugIItemSlugRouteImport } from './routes/p.$slug.i.$itemSlug
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
 import { Route as AuthenticatedAdminQuizIdRouteImport } from './routes/_authenticated/admin.quiz.$id'
 import { Route as AuthenticatedAdminProductsIdRouteImport } from './routes/_authenticated/admin.products.$id'
+import { Route as AuthenticatedAdminPlatformSettingsRouteImport } from './routes/_authenticated/admin.platform.settings'
 import { Route as AuthenticatedAdminPagesIdRouteImport } from './routes/_authenticated/admin.pages.$id'
 import { Route as AuthenticatedAdminExamsIdRouteImport } from './routes/_authenticated/admin.exams.$id'
 import { Route as AuthenticatedAdminCasesIdRouteImport } from './routes/_authenticated/admin.cases.$id'
@@ -297,6 +298,12 @@ const AuthenticatedAdminProductsIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminProductsRoute,
   } as any)
+const AuthenticatedAdminPlatformSettingsRoute =
+  AuthenticatedAdminPlatformSettingsRouteImport.update({
+    id: '/platform/settings',
+    path: '/platform/settings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPagesIdRoute =
   AuthenticatedAdminPagesIdRouteImport.update({
     id: '/$id',
@@ -359,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
   '/admin/exams/$id': typeof AuthenticatedAdminExamsIdRoute
   '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
+  '/admin/platform/settings': typeof AuthenticatedAdminPlatformSettingsRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
@@ -401,6 +409,7 @@ export interface FileRoutesByTo {
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
   '/admin/exams/$id': typeof AuthenticatedAdminExamsIdRoute
   '/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
+  '/admin/platform/settings': typeof AuthenticatedAdminPlatformSettingsRoute
   '/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
@@ -453,6 +462,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
   '/_authenticated/admin/exams/$id': typeof AuthenticatedAdminExamsIdRoute
   '/_authenticated/admin/pages/$id': typeof AuthenticatedAdminPagesIdRoute
+  '/_authenticated/admin/platform/settings': typeof AuthenticatedAdminPlatformSettingsRoute
   '/_authenticated/admin/products/$id': typeof AuthenticatedAdminProductsIdRoute
   '/_authenticated/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
@@ -505,6 +515,7 @@ export interface FileRouteTypes {
     | '/admin/cases/$id'
     | '/admin/exams/$id'
     | '/admin/pages/$id'
+    | '/admin/platform/settings'
     | '/admin/products/$id'
     | '/admin/quiz/$id'
     | '/api/public/media/$'
@@ -547,6 +558,7 @@ export interface FileRouteTypes {
     | '/admin/cases/$id'
     | '/admin/exams/$id'
     | '/admin/pages/$id'
+    | '/admin/platform/settings'
     | '/admin/products/$id'
     | '/admin/quiz/$id'
     | '/api/public/media/$'
@@ -598,6 +610,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cases/$id'
     | '/_authenticated/admin/exams/$id'
     | '/_authenticated/admin/pages/$id'
+    | '/_authenticated/admin/platform/settings'
     | '/_authenticated/admin/products/$id'
     | '/_authenticated/admin/quiz/$id'
     | '/api/public/media/$'
@@ -951,6 +964,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProductsIdRouteImport
       parentRoute: typeof AuthenticatedAdminProductsRoute
     }
+    '/_authenticated/admin/platform/settings': {
+      id: '/_authenticated/admin/platform/settings'
+      path: '/platform/settings'
+      fullPath: '/admin/platform/settings'
+      preLoaderRoute: typeof AuthenticatedAdminPlatformSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/pages/$id': {
       id: '/_authenticated/admin/pages/$id'
       path: '/$id'
@@ -1106,6 +1126,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminBlogIdRoute: typeof AuthenticatedAdminBlogIdRoute
+  AuthenticatedAdminPlatformSettingsRoute: typeof AuthenticatedAdminPlatformSettingsRoute
   AuthenticatedAdminBlogIndexRoute: typeof AuthenticatedAdminBlogIndexRoute
 }
 
@@ -1125,6 +1146,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminBlogIdRoute: AuthenticatedAdminBlogIdRoute,
+  AuthenticatedAdminPlatformSettingsRoute:
+    AuthenticatedAdminPlatformSettingsRoute,
   AuthenticatedAdminBlogIndexRoute: AuthenticatedAdminBlogIndexRoute,
 }
 

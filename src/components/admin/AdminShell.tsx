@@ -75,7 +75,8 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/files", label: "Files", icon: FolderOpen, group: "System" },
   { to: "/admin/notifications", label: "Notifications", icon: Bell, group: "System" },
   { to: "/admin/logs", label: "Logs", icon: ScrollText, group: "System" },
-  { to: "/admin/settings", label: "Platform Settings", icon: Settings, group: "System" },
+  { to: "/admin/platform/settings", label: "Platform Settings", icon: Settings, group: "System" },
+  { to: "/admin/settings", label: "站点内容 (Legacy)", icon: FileText, group: "System" },
 ];
 
 
