@@ -7,8 +7,8 @@ import {
   adminListSettings,
 } from "@/lib/cms-admin.functions";
 import { adminListPages } from "@/lib/pages-admin.functions";
-import { adminListToolItems } from "@/lib/tools-admin.functions";
-import { adminListQuizQuestions } from "@/lib/quiz-admin.functions";
+import { adminListCategories } from "@/lib/tools-admin.functions";
+import { adminListQuiz } from "@/lib/quiz-admin.functions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/PageHeader";
