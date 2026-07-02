@@ -579,13 +579,17 @@ function CategoryPane({
 /* ---------------- Item detail ---------------- */
 
 function ItemPane({
-  item, cats, pageSlug, onSave, onDelete,
+  item, cats, allItems, pageSlug, onSave, onDelete, onAddChild, onSelectItem, onDeleteChild,
 }: {
   item: Item;
   cats: Category[];
+  allItems: Item[];
   pageSlug: string;
   onSave: (patch: Partial<Item>) => void;
   onDelete: () => void;
+  onAddChild: () => void;
+  onSelectItem: (id: string) => void;
+  onDeleteChild: (id: string, title: string) => void;
 }) {
   const [draft, setDraft] = useState(item);
   useEffect(() => setDraft(item), [item]);
@@ -594,16 +598,31 @@ function ItemPane({
 
   function patch(p: Partial<Item>) { setDraft({ ...draft, ...p }); }
 
+  const isChild = !!item.parent_id;
+  const parentCandidates = allItems.filter(
+    (i) => i.category_id === item.category_id && !i.parent_id && i.id !== item.id,
+  );
+  const children = allItems
+    .filter((i) => i.parent_id === item.id)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   return (
     <div className="p-6 space-y-6 max-w-4xl">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-xs text-muted-foreground uppercase mb-1">工具</div>
+          <div className="text-xs text-muted-foreground uppercase mb-1">
+            {isChild ? "子页面" : children.length > 0 ? "工具（分组）" : "工具"}
+          </div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <span>{draft.icon || "🧰"}</span>{draft.title || "(未命名)"}
+            <span>{draft.icon || (isChild ? "📄" : "🧰")}</span>{draft.title || "(未命名)"}
           </h2>
         </div>
         <div className="flex items-center gap-2">
+          {!isChild && (
+            <Button size="sm" variant="secondary" onClick={onAddChild}>
+              <Plus size={14} className="mr-1" />新增子页面
+            </Button>
+          )}
           <Button size="sm" disabled={!dirty} onClick={() => onSave(draft)}>保存</Button>
           {dirty && <Button size="sm" variant="ghost" onClick={() => setDraft(item)}>取消</Button>}
           <Button variant="outline" size="sm" onClick={onDelete}>
@@ -611,6 +630,31 @@ function ItemPane({
           </Button>
         </div>
       </div>
+
+      {!isChild && children.length > 0 && (
+        <div className="rounded-lg border border-border bg-background">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+            <div className="text-sm font-semibold">子页面（{children.length}）</div>
+            <Button size="sm" variant="ghost" onClick={onAddChild}><Plus size={14} className="mr-1" />新增子页面</Button>
+          </div>
+          <ul className="divide-y divide-border">
+            {children.map((ch) => (
+              <li key={ch.id} className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/40">
+                <span className="text-lg">{ch.icon || "📄"}</span>
+                <button type="button" className="flex-1 text-left" onClick={() => onSelectItem(ch.id)}>
+                  <div className="font-medium text-sm">{ch.title || "(未命名)"}</div>
+                  <div className="text-xs text-muted-foreground">/p/{pageSlug || "…"}/i/{ch.slug}</div>
+                </button>
+                {!ch.is_visible && <span className="text-xs text-muted-foreground">隐藏</span>}
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="删除" onClick={() => onDeleteChild(ch.id, ch.title)}>
+                  <Trash2 size={14} />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
 
       <Section title="卡片信息（列表页显示）">
         <div className="grid gap-3 md:grid-cols-2">
