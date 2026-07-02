@@ -129,7 +129,17 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [translations, setTranslations] = useState<Record<string, QuestionTranslation>>({});
   const [translating, setTranslating] = useState(false);
+  const [confirmUnanswered, setConfirmUnanswered] = useState(false);
   const translateFn = useServerFn(translateTexts);
+
+  function requestSubmitFromLast() {
+    const unanswered = questions.filter((q) => !answers[q.id]).length;
+    if (unanswered > 0) {
+      setConfirmUnanswered(true);
+      return;
+    }
+    void submitExam();
+  }
 
   async function startExam() {
     const rows = await load.mutateAsync();
