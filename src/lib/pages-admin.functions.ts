@@ -32,6 +32,7 @@ const pageInput = z.object({
   show_in_nav: z.boolean().default(true),
   is_visible: z.boolean().default(true),
   sort_order: z.number().int().default(0),
+  show_in_admin_shortcut: z.boolean().default(false),
 });
 
 export const adminListPages = createServerFn({ method: "GET" })
@@ -77,6 +78,7 @@ export const adminUpsertPage = createServerFn({ method: "POST" })
           show_in_nav: data.show_in_nav,
           is_visible: data.is_visible,
           sort_order: data.sort_order,
+          show_in_admin_shortcut: data.show_in_admin_shortcut,
         })
         .eq("id", data.id);
       if (error) throw new Error(error.message);
@@ -93,6 +95,7 @@ export const adminUpsertPage = createServerFn({ method: "POST" })
         show_in_nav: data.show_in_nav,
         is_visible: data.is_visible,
         sort_order: data.sort_order,
+        show_in_admin_shortcut: data.show_in_admin_shortcut,
       })
       .select("id")
       .single();
@@ -138,4 +141,17 @@ export const adminMovePage = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export const adminListShortcutPages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data, error } = await context.supabase
+      .from("pages")
+      .select("id, slug, nav_label, title")
+      .eq("show_in_admin_shortcut", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
   });

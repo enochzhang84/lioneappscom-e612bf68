@@ -1,5 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   LayoutDashboard,
   FileText,
@@ -20,10 +22,15 @@ import {
   LogOut,
   Package,
   Briefcase,
+  Home,
+  Info,
+  Mail,
+  PencilLine,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { adminListShortcutPages } from "@/lib/pages-admin.functions";
 
 type NavItem = {
   to: string;
@@ -31,7 +38,20 @@ type NavItem = {
   icon: React.ComponentType<{ size?: number; className?: string }>;
   group: string;
   soon?: boolean;
+  params?: Record<string, string>;
+  search?: Record<string, string>;
 };
+
+const QUICK_EDIT_GROUP = "页面编辑";
+
+const STATIC_QUICK_EDIT: NavItem[] = [
+  { to: "/admin/settings", label: "首页", icon: Home, group: QUICK_EDIT_GROUP, search: { section: "hero" } },
+  { to: "/admin/products", label: "产品", icon: Package, group: QUICK_EDIT_GROUP },
+  { to: "/admin/cases", label: "案例", icon: Briefcase, group: QUICK_EDIT_GROUP },
+  { to: "/admin/settings", label: "关于我们", icon: Info, group: QUICK_EDIT_GROUP, search: { section: "about" } },
+  { to: "/admin/settings", label: "联系我们", icon: Mail, group: QUICK_EDIT_GROUP, search: { section: "contact" } },
+  { to: "/admin/tools", label: "实用工具", icon: Wrench, group: QUICK_EDIT_GROUP },
+];
 
 export const ADMIN_NAV: NavItem[] = [
   { to: "/admin", label: "仪表盘", icon: LayoutDashboard, group: "概览" },
@@ -51,17 +71,39 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/files", label: "文件管理", icon: FolderOpen, group: "系统" },
   { to: "/admin/notifications", label: "通知中心", icon: Bell, group: "系统", soon: true },
   { to: "/admin/logs", label: "操作日志", icon: ScrollText, group: "系统", soon: true },
-  { to: "/admin/settings", label: "系统设置", icon: Settings, group: "系统" },
+  { to: "/admin/settings", label: "站点设置", icon: Settings, group: "系统" },
 ];
+
 
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const groups = Array.from(new Set(ADMIN_NAV.map((n) => n.group)));
+  const listShortcuts = useServerFn(adminListShortcutPages);
+  const { data: shortcutPages } = useQuery({
+    queryKey: ["admin", "shortcut-pages"],
+    queryFn: () => listShortcuts(),
+    staleTime: 60_000,
+  });
 
-  const active = [...ADMIN_NAV]
+  const dynamicQuickEdit: NavItem[] = (shortcutPages ?? []).map((p) => ({
+    to: `/admin/pages/${p.id}`,
+    label: p.nav_label || p.title || p.slug,
+    icon: PencilLine,
+    group: QUICK_EDIT_GROUP,
+  }));
+
+  const nav: NavItem[] = [
+    ADMIN_NAV[0], // 仪表盘
+    ...STATIC_QUICK_EDIT,
+    ...dynamicQuickEdit,
+    ...ADMIN_NAV.slice(1),
+  ];
+
+  const groups = Array.from(new Set(nav.map((n) => n.group)));
+
+  const active = [...nav]
     .filter((n) => pathname === n.to || pathname.startsWith(n.to + "/"))
     .sort((a, b) => b.to.length - a.to.length)[0];
 
@@ -104,21 +146,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               <ul className="space-y-0.5">
-                {ADMIN_NAV.filter((n) => n.group === g).map((n) => {
+                {nav.filter((n) => n.group === g).map((n) => {
                   const isActive =
                     pathname === n.to || (n.to !== "/admin" && pathname.startsWith(n.to + "/")) ||
                     (n.to === "/admin" && pathname === "/admin");
                   const Icon = n.icon;
+                  const isQuickEdit = n.group === QUICK_EDIT_GROUP;
                   return (
-                    <li key={n.to}>
+                    <li key={`${n.group}:${n.to}:${n.label}`}>
                       <Link
                         to={n.to}
+                        search={n.search as never}
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                          isActive
+                          isActive && !isQuickEdit
                             ? "bg-blue-50 text-blue-700 font-medium"
                             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                           collapsed && "justify-center px-0",
+                          isQuickEdit && !collapsed && "pl-6",
                         )}
                         title={collapsed ? n.label : undefined}
                       >
@@ -141,6 +186,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
+
 
         <div className="border-t border-slate-100 p-2 space-y-1">
           <a

@@ -251,6 +251,7 @@ export type Database = {
           is_visible: boolean
           nav_label: string
           page_type: string
+          show_in_admin_shortcut: boolean
           show_in_nav: boolean
           slug: string
           sort_order: number
@@ -265,6 +266,7 @@ export type Database = {
           is_visible?: boolean
           nav_label: string
           page_type?: string
+          show_in_admin_shortcut?: boolean
           show_in_nav?: boolean
           slug: string
           sort_order?: number
@@ -279,6 +281,7 @@ export type Database = {
           is_visible?: boolean
           nav_label?: string
           page_type?: string
+          show_in_admin_shortcut?: boolean
           show_in_nav?: boolean
           slug?: string
           sort_order?: number

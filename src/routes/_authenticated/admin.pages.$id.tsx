@@ -79,6 +79,7 @@ function PageEditor() {
   const [pageType, setPageType] = useState<PageType>("content");
   const [showInNav, setShowInNav] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const [showInAdminShortcut, setShowInAdminShortcut] = useState(false);
   const [sortOrder, setSortOrder] = useState(0);
   const [blocks, setBlocks] = useState<Block[]>([]);
 
@@ -92,6 +93,7 @@ function PageEditor() {
       setShowInNav(page.show_in_nav ?? true);
       setIsVisible(page.is_visible ?? true);
       setSortOrder(page.sort_order ?? 0);
+      setShowInAdminShortcut((page as { show_in_admin_shortcut?: boolean }).show_in_admin_shortcut ?? false);
       setBlocks(Array.isArray(page.content) ? (page.content as Block[]) : []);
     }
   }, [page]);
@@ -113,6 +115,7 @@ function PageEditor() {
         show_in_nav: showInNav,
         is_visible: isVisible,
         sort_order: sortOrder,
+        show_in_admin_shortcut: showInAdminShortcut,
         content: blocks as unknown as Record<string, unknown>[],
       },
     });
@@ -184,6 +187,10 @@ function PageEditor() {
               <div className="flex items-center gap-3">
                 <Switch checked={isVisible} onCheckedChange={setIsVisible} id="vis" />
                 <Label htmlFor="vis">页面已启用（可访问）</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch checked={showInAdminShortcut} onCheckedChange={setShowInAdminShortcut} id="shortcut" />
+                <Label htmlFor="shortcut">显示在后台快捷编辑</Label>
               </div>
             </div>
           </CardContent>
