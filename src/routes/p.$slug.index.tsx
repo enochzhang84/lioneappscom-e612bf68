@@ -190,10 +190,16 @@ function ToolsPageView({ page, categories, items }: {
 
             {categories.length === 0 ? (
               <p className="text-muted-foreground text-sm py-8">此工具页面还没有类别。请在后台添加。</p>
+            ) : activeCat && activeCat.status === "developing" ? (
+              <ComingSoonPanel title={activeCat.title} description={activeCat.description} />
             ) : visibleGroups.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-8">
-                {query ? `没有找到与 "${query}" 相关的工具。` : "此类别下暂无项目。"}
-              </p>
+              query ? (
+                <p className="text-muted-foreground text-sm py-8">
+                  没有找到与 "{query}" 相关的工具。
+                </p>
+              ) : (
+                <ComingSoonPanel title={activeCat?.title ?? ""} description={activeCat?.description ?? null} />
+              )
             ) : (
               <div className="space-y-8 pb-16">
                 {visibleGroups.map(({ top, children }) =>
@@ -220,6 +226,7 @@ function ToolsPageView({ page, categories, items }: {
                 )}
               </div>
             )}
+
           </main>
         </div>
       </div>
