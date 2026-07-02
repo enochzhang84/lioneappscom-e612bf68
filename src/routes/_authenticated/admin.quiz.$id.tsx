@@ -18,8 +18,19 @@ export const Route = createFileRoute("/_authenticated/admin/quiz/$id")({
   component: QuizEditPage,
 });
 
+type QType =
+  | "single_choice"
+  | "image_choice"
+  | "sign_recognition"
+  | "multiple_choice"
+  | "true_false"
+  | "fill_blank"
+  | "hotspot";
+
 type Form = {
   id?: string;
+  question_type: QType;
+  image_url: string;
   question: string;
   option_a: string;
   option_b: string;
@@ -46,7 +57,15 @@ type Form = {
   sort_order: number;
 };
 
+const TYPE_OPTIONS: { value: QType; label: string; hint: string }[] = [
+  { value: "single_choice", label: "普通单选", hint: "纯文字题目 + 四个文字选项" },
+  { value: "image_choice", label: "图片选择题", hint: "一张包含 A/B/C/D 四个图标的大图 + 选项按钮" },
+  { value: "sign_recognition", label: "路标识别题", hint: "一张路标图片 + 四个文字答案" },
+];
+
 const empty: Form = {
+  question_type: "single_choice",
+  image_url: "",
   question: "",
   option_a: "",
   option_b: "",
