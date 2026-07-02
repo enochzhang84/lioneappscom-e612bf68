@@ -147,13 +147,19 @@ export type Database = {
           created_at: string
           difficulty: string | null
           explanation: string | null
+          explanation_en: string | null
           id: string
           is_active: boolean
           option_a: string
+          option_a_en: string | null
           option_b: string
+          option_b_en: string | null
           option_c: string | null
+          option_c_en: string | null
           option_d: string | null
+          option_d_en: string | null
           question: string
+          question_en: string | null
           sort_order: number
           updated_at: string
         }
@@ -163,13 +169,19 @@ export type Database = {
           created_at?: string
           difficulty?: string | null
           explanation?: string | null
+          explanation_en?: string | null
           id?: string
           is_active?: boolean
           option_a: string
+          option_a_en?: string | null
           option_b: string
+          option_b_en?: string | null
           option_c?: string | null
+          option_c_en?: string | null
           option_d?: string | null
+          option_d_en?: string | null
           question: string
+          question_en?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -179,13 +191,19 @@ export type Database = {
           created_at?: string
           difficulty?: string | null
           explanation?: string | null
+          explanation_en?: string | null
           id?: string
           is_active?: boolean
           option_a?: string
+          option_a_en?: string | null
           option_b?: string
+          option_b_en?: string | null
           option_c?: string | null
+          option_c_en?: string | null
           option_d?: string | null
+          option_d_en?: string | null
           question?: string
+          question_en?: string | null
           sort_order?: number
           updated_at?: string
         }
