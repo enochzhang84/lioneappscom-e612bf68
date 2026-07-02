@@ -126,6 +126,7 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
     const payload = {
       page_id: data.page_id,
       category_id: data.category_id ?? null,
+      parent_id: data.parent_id ?? null,
       slug: data.slug,
       title: data.title,
       page_title: data.page_title ?? null,
