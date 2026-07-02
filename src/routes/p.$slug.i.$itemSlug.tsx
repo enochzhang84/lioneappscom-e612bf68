@@ -212,6 +212,8 @@ function ItemDetail() {
     ? { render: () => <ImageTool kind={imageKey} />, fullPath: undefined as string | undefined }
     : netKey
     ? { render: () => <NetworkTool kind={netKey} />, fullPath: undefined as string | undefined }
+    : simpleKey
+    ? { render: () => <SimpleToolByKey toolKey={simpleKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
     : undefined)));
