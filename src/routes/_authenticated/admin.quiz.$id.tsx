@@ -206,6 +206,22 @@ function QuizEditPage() {
             <div><Label>选项 D (中文)</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
             <div><Label>Option D (EN)</Label><Textarea rows={2} value={form.option_d_en} onChange={(e) => set("option_d_en", e.target.value)} /></div>
           </div>
+          <div>
+            <Label>所属题库 *</Label>
+            <select
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={form.question_bank_id ?? ""}
+              onChange={(e) => set("question_bank_id", e.target.value || null)}
+            >
+              <option value="">— 未挂靠 —</option>
+              {banks.map((b) => (
+                <option key={b.id} value={b.id}>{bankLabel(b.id)}</option>
+              ))}
+            </select>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              题库来自左侧目录（三级：分类 › 模块 › 题库）。新增分类请到题库管理主页。
+            </p>
+          </div>
           <div className="grid gap-4 md:grid-cols-4">
             <div>
               <Label>正确答案 *</Label>
