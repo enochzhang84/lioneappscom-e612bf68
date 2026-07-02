@@ -533,13 +533,22 @@ function Exam({
           >
             <ArrowLeft size={16} className="mr-1" /> 上一题
           </Button>
-          <Button
-            onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
-            disabled={current >= questions.length - 1}
-            className="mt-4 bg-blue-600 hover:bg-blue-700"
-          >
-            下一题 <ArrowRight size={16} className="ml-1" />
-          </Button>
+          {current >= questions.length - 1 ? (
+            <Button
+              onClick={() => onSubmit?.()}
+              disabled={submitting || !onSubmit}
+              className="mt-4 bg-blue-600 hover:bg-blue-700"
+            >
+              {submitting ? "评分中…" : "提交答案"}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
+              className="mt-4 bg-blue-600 hover:bg-blue-700"
+            >
+              下一题 <ArrowRight size={16} className="ml-1" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
