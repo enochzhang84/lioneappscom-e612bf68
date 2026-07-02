@@ -56,6 +56,7 @@ const STATIC_QUICK_EDIT: NavItem[] = [
 // Platform Admin — 11 个模块（宪法级顺序，勿随意增删）
 export const ADMIN_NAV: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, group: "Platform" },
+  { to: "/admin/platform/modules", label: "Product Modules", icon: Package, group: "Platform" },
 
   { to: "/admin/pages", label: "Content — 页面", icon: FileText, group: "Content" },
   { to: "/admin/blog", label: "Content — 文章", icon: Newspaper, group: "Content" },
