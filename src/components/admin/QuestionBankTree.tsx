@@ -358,8 +358,11 @@ function NodeEditor({
 }) {
   const upsertFn = useServerFn(adminUpsertBankNode);
   const isEdit = state.mode === "edit";
-  const type: NodeType = isEdit ? state.node.node_type : state.type;
+  const initialType: NodeType = isEdit ? state.node.node_type : state.type;
   const parentId: string | null = isEdit ? state.node.parent_id : state.parent?.id ?? null;
+  const parentType: NodeType | null = state.mode === "create" ? (state.parent?.node_type ?? null) : null;
+  const [type, setType] = useState<NodeType>(initialType);
+
 
   const [name, setName] = useState(isEdit ? state.node.name : "");
   const [nameEn, setNameEn] = useState(isEdit ? state.node.name_en ?? "" : "");
