@@ -67,6 +67,7 @@ const empty: Form = {
   manual_url: "",
   google_keywords: "",
   category: "c1",
+  question_bank_id: null,
   difficulty: "medium",
   is_active: true,
   sort_order: 0,
