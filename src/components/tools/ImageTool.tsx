@@ -1,6 +1,7 @@
 import * as React from "react";
 import imageCompression from "browser-image-compression";
 import QRCode from "qrcode";
+import JsBarcode from "jsbarcode";
 import { saveAs } from "file-saver";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { encodeIco } from "@/lib/tools/ico";
 
 export type ImageKind =
   | "compress" | "resize" | "png-to-jpg" | "jpg-to-png" | "jpg-to-webp" | "webp-to-jpg"
-  | "crop" | "watermark" | "ico" | "qrcode";
+  | "crop" | "watermark" | "ico" | "qrcode" | "id-photo" | "barcode";
 
 type Config = {
   title: string; intro: string; icon?: string;
@@ -40,6 +41,11 @@ const CONFIGS: Record<ImageKind, Config> = {
   ico: { title: "ICO 图标生成", icon: "🎯", intro: "从 PNG / JPG 生成多尺寸 favicon.ico（16 / 32 / 48）。",
     accept: "image/png,image/jpeg", multiple: false, needsFile: true },
   qrcode: { title: "二维码生成", icon: "🔳", intro: "把文字或网址生成二维码 PNG，可直接下载。",
+    accept: "", multiple: false, needsFile: false },
+  "id-photo": { title: "证件照尺寸调整", icon: "🪪", intro: "按常见证件照尺寸（1 寸/2 寸/护照/签证）居中裁剪并填色底。",
+    accept: "image/jpeg,image/png,image/webp", multiple: false, needsFile: true,
+    faqs: [{ q: "白底/蓝底/红底怎么选？", a: "选择需要的底色后，工具会用该颜色填充空白区域。" }] },
+  barcode: { title: "条形码生成", icon: "📊", intro: "根据 CODE128/EAN-13/UPC 等格式生成条形码 PNG，浏览器本地生成。",
     accept: "", multiple: false, needsFile: false },
 };
 
@@ -79,6 +85,20 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
   // qrcode
   const [qrText, setQrText] = React.useState("https://lioneapps.com");
   const [qrPreview, setQrPreview] = React.useState<string>("");
+  // id-photo
+  const idPresets = React.useMemo(() => ({
+    "1inch": { name: "1 寸", w: 295, h: 413 },
+    "2inch": { name: "2 寸", w: 413, h: 626 },
+    "small2": { name: "小 2 寸", w: 413, h: 531 },
+    "passport": { name: "护照 (33×48mm)", w: 390, h: 567 },
+    "visa": { name: "美国签证 (2×2 in)", w: 600, h: 600 },
+  }), []);
+  const [idPreset, setIdPreset] = React.useState<keyof typeof idPresets>("1inch");
+  const [idBg, setIdBg] = React.useState("#ffffff");
+  // barcode
+  const [bcText, setBcText] = React.useState("LIONEAPPS-2026");
+  const [bcFormat, setBcFormat] = React.useState<"CODE128" | "CODE39" | "EAN13" | "EAN8" | "UPC" | "ITF14">("CODE128");
+  const bcPreviewRef = React.useRef<HTMLCanvasElement | null>(null);
 
   // Load natural size when a file is present (for resize/crop defaults)
   React.useEffect(() => {
@@ -101,6 +121,13 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
     QRCode.toDataURL(qrText, { width: 320, margin: 2 }).then(setQrPreview).catch(() => setQrPreview(""));
   }, [kind, qrText]);
 
+  // Live barcode preview
+  React.useEffect(() => {
+    if (kind !== "barcode" || !bcPreviewRef.current) return;
+    try { JsBarcode(bcPreviewRef.current, bcText || " ", { format: bcFormat, width: 2, height: 90, displayValue: true }); }
+    catch { /* invalid code for chosen format */ }
+  }, [kind, bcText, bcFormat]);
+
   async function run() {
     if (cfg.needsFile && files.length === 0) { toast.error("请先上传图片"); return; }
     setBusy(true);
@@ -116,6 +143,8 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
         case "watermark": await opWatermark(files[0], wm); break;
         case "ico": await opIco(files[0]); break;
         case "qrcode": await opQr(qrText); break;
+        case "id-photo": await opIdPhoto(files[0], idPresets[idPreset], idBg); break;
+        case "barcode": await opBarcode(bcText, bcFormat); break;
       }
       toast.success("处理完成，已开始下载");
     } catch (e) {
@@ -196,6 +225,53 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
             )}
           </div>
         )}
+
+        {kind === "id-photo" && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">尺寸</label>
+              <select value={idPreset} onChange={(e) => setIdPreset(e.target.value as keyof typeof idPresets)}
+                className="w-full h-10 px-3 rounded-lg border border-border bg-card text-sm">
+                {Object.entries(idPresets).map(([k, v]) => <option key={k} value={k}>{v.name} · {v.w}×{v.h}px</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">底色</label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={idBg} onChange={(e) => setIdBg(e.target.value)} className="h-10 w-16 rounded border border-border" />
+                {["#ffffff", "#438edb", "#dc2626"].map((c) => (
+                  <button key={c} type="button" onClick={() => setIdBg(c)} className="h-8 w-8 rounded border border-border" style={{ background: c }} title={c} />
+                ))}
+              </div>
+            </div>
+            <p className="col-span-full text-xs text-muted-foreground">工具会按所选尺寸居中裁剪原图，并用底色填充空白区域。</p>
+          </div>
+        )}
+
+        {kind === "barcode" && (
+          <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <TextField label="内容" value={bcText} onChange={setBcText} />
+              <div>
+                <label className="block text-sm font-medium mb-1.5">格式</label>
+                <select value={bcFormat} onChange={(e) => setBcFormat(e.target.value as typeof bcFormat)}
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-card text-sm">
+                  <option value="CODE128">CODE128（推荐）</option>
+                  <option value="CODE39">CODE39</option>
+                  <option value="EAN13">EAN-13（13 位数字）</option>
+                  <option value="EAN8">EAN-8（8 位数字）</option>
+                  <option value="UPC">UPC-A（12 位数字）</option>
+                  <option value="ITF14">ITF-14（14 位数字）</option>
+                </select>
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-white p-4 flex justify-center">
+              <canvas ref={bcPreviewRef} />
+            </div>
+          </div>
+        )}
+
+
 
         <div className="flex flex-wrap items-center gap-3">
           <Button onClick={run} disabled={busy || (cfg.needsFile && files.length === 0)}>
@@ -331,4 +407,31 @@ async function opQr(text: string) {
   const dataUrl = await QRCode.toDataURL(text, { width: 1024, margin: 2 });
   const res = await fetch(dataUrl);
   saveAs(await res.blob(), "qrcode.png");
+}
+
+async function opIdPhoto(file: File, target: { w: number; h: number; name: string }, bg: string) {
+  const img = await loadImage(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = target.w; canvas.height = target.h;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, target.w, target.h);
+  // cover-fit: scale so image fully covers, center-crop
+  const scale = Math.max(target.w / img.naturalWidth, target.h / img.naturalHeight);
+  const dw = img.naturalWidth * scale;
+  const dh = img.naturalHeight * scale;
+  const dx = (target.w - dw) / 2;
+  const dy = (target.h - dh) / 2;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, dx, dy, dw, dh);
+  const blob = await canvasToBlob(canvas, "image/jpeg", 0.92);
+  saveAs(blob, `id-photo-${target.w}x${target.h}.jpg`);
+}
+
+async function opBarcode(text: string, format: string) {
+  if (!text.trim()) throw new Error("请输入条形码内容");
+  const canvas = document.createElement("canvas");
+  JsBarcode(canvas, text, { format, width: 3, height: 140, displayValue: true, margin: 20 });
+  const blob = await canvasToBlob(canvas, "image/png");
+  saveAs(blob, `barcode-${format.toLowerCase()}.png`);
 }

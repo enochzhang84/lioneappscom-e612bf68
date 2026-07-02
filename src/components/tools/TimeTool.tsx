@@ -232,12 +232,107 @@ function AgeCalc() {
   );
 }
 
+function Countdown() {
+  const [target, setTarget] = React.useState(() => {
+    const d = new Date(); d.setDate(d.getDate() + 30);
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  });
+  const [label, setLabel] = React.useState("我的目标日");
+  const [now, setNow] = React.useState(Date.now());
+  React.useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id); }, []);
+  const t = Date.parse(target);
+  const diff = isFinite(t) ? t - now : NaN;
+  const abs = Math.abs(diff);
+  const d = Math.floor(abs / 86400000);
+  const h = Math.floor((abs % 86400000) / 3600000);
+  const m = Math.floor((abs % 3600000) / 60000);
+  const s = Math.floor((abs % 60000) / 1000);
+  const past = diff < 0;
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5 md:p-6 shadow-sm space-y-4">
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div><label className="text-sm font-medium mb-1 block">事件名称</label><Input value={label} onChange={(e) => setLabel(e.target.value)} /></div>
+        <div><label className="text-sm font-medium mb-1 block">目标时间</label><Input type="datetime-local" value={target} onChange={(e) => setTarget(e.target.value)} /></div>
+      </div>
+      <div className="rounded-xl border border-border bg-primary/5 p-6 text-center">
+        <div className="text-sm text-muted-foreground">距离「{label}」{past ? "已过去" : "还剩"}</div>
+        <div className="mt-3 grid grid-cols-4 gap-3">
+          {[["天", d], ["时", h], ["分", m], ["秒", s]].map(([k, v]) => (
+            <div key={k as string} className="rounded-lg bg-white border border-border py-3">
+              <div className="text-3xl md:text-4xl font-bold tabular-nums">{String(v).padStart(2, "0")}</div>
+              <div className="text-xs text-muted-foreground mt-1">{k}</div>
+            </div>
+          ))}
+        </div>
+        {!isFinite(t) && <div className="mt-3 text-sm text-destructive">请选择合法的目标时间</div>}
+      </div>
+    </section>
+  );
+}
+
+function WorkDays() {
+  const today = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  const iso = `${today.getFullYear()}-${p(today.getMonth() + 1)}-${p(today.getDate())}`;
+  const [start, setStart] = React.useState(iso);
+  const [end, setEnd] = React.useState(iso);
+  const [skipSat, setSkipSat] = React.useState(true);
+  const [skipSun, setSkipSun] = React.useState(true);
+  const [holidays, setHolidays] = React.useState("");
+  const stats = React.useMemo(() => {
+    const s = new Date(start), e = new Date(end);
+    if (isNaN(s.getTime()) || isNaN(e.getTime()) || s > e) return null;
+    const hset = new Set(holidays.split(/\r?\n|,|;|\s+/).map((x) => x.trim()).filter(Boolean));
+    let total = 0, work = 0, weekend = 0, holi = 0;
+    const cur = new Date(s);
+    while (cur <= e) {
+      total++;
+      const dw = cur.getDay();
+      const key = `${cur.getFullYear()}-${p(cur.getMonth() + 1)}-${p(cur.getDate())}`;
+      const isWknd = (skipSat && dw === 6) || (skipSun && dw === 0);
+      const isHoli = hset.has(key);
+      if (isWknd) weekend++;
+      if (isHoli) holi++;
+      if (!isWknd && !isHoli) work++;
+      cur.setDate(cur.getDate() + 1);
+    }
+    return { total, work, weekend, holi };
+  }, [start, end, skipSat, skipSun, holidays]);
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5 md:p-6 shadow-sm space-y-4">
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div><label className="text-sm font-medium mb-1 block">起始日期</label><Input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></div>
+        <div><label className="text-sm font-medium mb-1 block">结束日期</label><Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></div>
+      </div>
+      <div className="flex flex-wrap gap-4 text-sm">
+        <label className="flex items-center gap-1"><input type="checkbox" checked={skipSat} onChange={(e) => setSkipSat(e.target.checked)} /> 跳过周六</label>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={skipSun} onChange={(e) => setSkipSun(e.target.checked)} /> 跳过周日</label>
+      </div>
+      <div>
+        <label className="text-sm font-medium mb-1 block">额外假日（YYYY-MM-DD，逗号或换行分隔）</label>
+        <Input value={holidays} onChange={(e) => setHolidays(e.target.value)} placeholder="2026-01-01, 2026-05-01" />
+      </div>
+      {stats && (
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <Stat label="总天数" v={String(stats.total)} />
+          <Stat label="工作日" v={String(stats.work)} />
+          <Stat label="周末天数" v={String(stats.weekend)} />
+          <Stat label="节假日" v={String(stats.holi)} />
+        </div>
+      )}
+    </section>
+  );
+}
+
 const TOOLS: Record<string, ToolDef> = {
   "time-world-clock": { title: "世界时间", intro: "全球主要城市实时时间，可自定义添加/移除时区。", icon: "🌍", render: () => <WorldClock /> },
   "time-timezone": { title: "时区转换器", intro: "任意时区的日期时间互相换算，自动处理夏令时。", icon: "🕓", render: () => <TimezoneConv /> },
   "time-unix": { title: "Unix 时间戳转换", intro: "实时显示当前时间戳，支持秒/毫秒双向转换。", icon: "⏱️", render: () => <UnixTs /> },
   "time-date-diff": { title: "日期差计算", intro: "两个日期之间相差多少天/周/月/年，含自然月分解。", icon: "📅", render: () => <DateDiff /> },
   "time-age": { title: "年龄计算器", intro: "根据出生日期计算周岁、已活天数、距下次生日。", icon: "🎂", render: () => <AgeCalc /> },
+  "time-countdown": { title: "倒计时计算", intro: "为任意目标日设置倒计时，实时显示剩余天/时/分/秒。", icon: "⏳", render: () => <Countdown /> },
+  "time-workdays": { title: "工作日计算", intro: "计算两个日期之间的工作日数量，支持自定义假日。", icon: "🗓️", render: () => <WorkDays /> },
 };
 
 export function TimeToolByKey({ toolKey }: { toolKey: string }) {
