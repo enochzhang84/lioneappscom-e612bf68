@@ -44,6 +44,9 @@ function DynamicPage() {
   };
 
   if (isToolsPage(page)) {
+    if (page.slug === "ai") {
+      return <AiHubView page={page} categories={bundle?.categories ?? []} items={bundle?.items ?? []} />;
+    }
     return <ToolsPageView page={page} categories={bundle?.categories ?? []} items={bundle?.items ?? []} />;
   }
 
@@ -234,6 +237,164 @@ function ToolsPageView({ page, categories, items }: {
   );
 }
 
+
+function AiHubView({ page, categories, items }: {
+  page: PageFull; categories: ToolCategory[]; items: ToolItem[];
+}) {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const [query, setQuery] = useState("");
+
+  const activeCat = search.cat ? categories.find(c => c.id === search.cat) ?? null : null;
+
+  const q = query.trim().toLowerCase();
+  const matches = (it: ToolItem) =>
+    !q ||
+    it.title.toLowerCase().includes(q) ||
+    (it.description ?? "").toLowerCase().includes(q) ||
+    (it.subtitle ?? "").toLowerCase().includes(q);
+
+  const countFor = (catId: string) =>
+    items.filter((it) => it.category_id === catId && !it.parent_id).length;
+
+  const subtitle =
+    (page.content && (page.content as { subtitle?: string }).subtitle) ||
+    "智能写作、翻译、总结、SEO、编程与办公工具。";
+
+  // Category detail view
+  if (activeCat) {
+    const catItems = items.filter((it) => it.category_id === activeCat.id);
+    const topItems = catItems.filter((it) => !it.parent_id).sort((a, b) => a.sort_order - b.sort_order);
+    const visible = q ? topItems.filter(matches) : topItems;
+
+    return (
+      <SiteLayout>
+        <section className="border-b border-border">
+          <div className="mx-auto max-w-6xl px-4 md:px-6 py-8 md:py-10">
+            <button
+              type="button"
+              onClick={() => navigate({ search: {}, replace: true })}
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition"
+            >
+              ← 返回 AI 助手中心
+            </button>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 grid place-items-center text-2xl">
+                {activeCat.icon || "🤖"}
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight truncate">{activeCat.title}</h1>
+                {activeCat.description && (
+                  <p className="text-sm text-muted-foreground mt-0.5">{activeCat.description}</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-6 relative max-w-md">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input type="search" value={query} onChange={e => setQuery(e.target.value)}
+                placeholder="搜索该分类下的工具..."
+                className="w-full h-10 pl-11 pr-4 rounded-lg border border-border bg-card text-sm
+                  placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition" />
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 md:px-6 py-10">
+          {activeCat.status === "developing" ? (
+            <ComingSoonPanel title={activeCat.title} description={activeCat.description} />
+          ) : visible.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-8">
+              {q ? `没有找到与 "${query}" 相关的工具。` : "该分类暂无工具。"}
+            </p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {visible.map((it) => <ItemCard key={it.id} pageSlug={page.slug} item={it} />)}
+            </div>
+          )}
+        </section>
+      </SiteLayout>
+    );
+  }
+
+  // Hub (category cards) view
+  const qCats = q
+    ? categories.filter((c) =>
+        c.title.toLowerCase().includes(q) ||
+        (c.description ?? "").toLowerCase().includes(q) ||
+        items.some((it) => it.category_id === c.id && matches(it)))
+    : categories;
+
+  return (
+    <SiteLayout>
+      <section className="border-b border-border bg-gradient-to-b from-primary/[0.03] to-transparent">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-14 md:py-20 text-center">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+            <span>✨</span> AI Assistant Hub
+          </div>
+          <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">{page.title}</h1>
+          <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            {subtitle}
+          </p>
+          <div className="mt-7 relative max-w-lg mx-auto">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input type="search" value={query} onChange={e => setQuery(e.target.value)}
+              placeholder="搜索 AI 工具或分类..."
+              className="w-full h-11 pl-11 pr-4 rounded-full border border-border bg-card text-sm shadow-sm
+                placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition" />
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 md:px-6 py-10 md:py-14">
+        {qCats.length === 0 ? (
+          <p className="text-center text-muted-foreground text-sm py-16">
+            没有找到与 "{query}" 相关的分类。
+          </p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {qCats.map((c) => {
+              const count = countFor(c.id);
+              const developing = c.status === "developing";
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => navigate({ search: { cat: c.id }, replace: false })}
+                  className={`group text-left h-full rounded-2xl border border-border bg-card p-5 transition
+                    ${developing ? "opacity-70" : "hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 grid place-items-center text-2xl">
+                      {c.icon || "🤖"}
+                    </div>
+                    {developing ? (
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200">
+                        Coming Soon
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        {count} 个工具
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold">{c.title}</h3>
+                  {c.description && (
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      {c.description}
+                    </p>
+                  )}
+                  <div className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-80 group-hover:opacity-100 transition">
+                    进入分类 <ArrowRight size={12} />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </SiteLayout>
+  );
+}
 
 function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
   const isDeveloping = item.status === "developing";
