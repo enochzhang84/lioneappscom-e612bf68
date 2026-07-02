@@ -242,6 +242,7 @@ export function QuizApp(props: QuizAppProps = {}) {
             <Intro
               total={TOTAL}
               pass={PASS}
+              maxWrong={MAX_WRONG}
               examSeconds={EXAM_SECONDS}
               onStart={startExam}
               loading={load.isPending}
