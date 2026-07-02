@@ -1,6 +1,7 @@
 import * as React from "react";
 import imageCompression from "browser-image-compression";
 import QRCode from "qrcode";
+import JsBarcode from "jsbarcode";
 import { saveAs } from "file-saver";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { encodeIco } from "@/lib/tools/ico";
 
 export type ImageKind =
   | "compress" | "resize" | "png-to-jpg" | "jpg-to-png" | "jpg-to-webp" | "webp-to-jpg"
-  | "crop" | "watermark" | "ico" | "qrcode";
+  | "crop" | "watermark" | "ico" | "qrcode" | "id-photo" | "barcode";
 
 type Config = {
   title: string; intro: string; icon?: string;
