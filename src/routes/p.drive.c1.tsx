@@ -472,7 +472,7 @@ function Intro({
         </CardContent>
       </Card>
       <div className="space-y-6">
-        <RulesCard total={total} pass={pass} examSeconds={examSeconds} />
+        <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
         <TipsCard />
       </div>
     </div>
