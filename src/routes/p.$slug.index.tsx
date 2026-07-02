@@ -92,14 +92,26 @@ function ToolsPageView({ page, categories, items }: {
   const activeCat = categories.find(c => c.id === activeId) ?? categories[0] ?? null;
 
   const q = query.trim().toLowerCase();
-  const visibleItems = items
-    .filter(it => activeCat ? it.category_id === activeCat.id : false)
-    .filter(it =>
-      !q ||
-      it.title.toLowerCase().includes(q) ||
-      (it.description ?? "").toLowerCase().includes(q) ||
-      (it.subtitle ?? "").toLowerCase().includes(q),
-    );
+  const matches = (it: ToolItem) =>
+    !q ||
+    it.title.toLowerCase().includes(q) ||
+    (it.description ?? "").toLowerCase().includes(q) ||
+    (it.subtitle ?? "").toLowerCase().includes(q);
+
+  const catItems = items.filter((it) => activeCat ? it.category_id === activeCat.id : false);
+  const topItems = catItems
+    .filter((it) => !it.parent_id)
+    .sort((a, b) => a.sort_order - b.sort_order);
+  const childrenOf = (parentId: string) =>
+    catItems
+      .filter((it) => it.parent_id === parentId)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+  // groups: each top item either renders alone (no children) or as a group with children.
+  // When searching, a group is shown if the group itself or any child matches.
+  const visibleGroups = topItems
+    .map((top) => ({ top, children: childrenOf(top.id) }))
+    .filter(({ top, children }) => matches(top) || children.some(matches));
 
   const pick = (id: string) => {
     setActiveId(id);
