@@ -439,6 +439,7 @@ function Intro({
 function Exam({
   questions, answers, setAnswers, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
+  onSubmit, submitting = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -448,6 +449,8 @@ function Exam({
   showTranslation?: boolean;
   translations?: Record<string, QuestionTranslation>;
   translating?: boolean;
+  onSubmit?: () => void;
+  submitting?: boolean;
 }) {
   const q = questions[current];
   const tr = translations[q?.id ?? ""];
