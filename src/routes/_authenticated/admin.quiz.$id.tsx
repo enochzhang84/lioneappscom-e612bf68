@@ -40,6 +40,7 @@ type Form = {
   manual_url: string;
   google_keywords: string;
   category: string;
+  question_bank_id: string | null;
   difficulty: string;
   is_active: boolean;
   sort_order: number;
