@@ -148,15 +148,8 @@ export function QuestionBankTree({
         />
       )}
 
-      {/* Delete + toggle live inline via context */}
-      <TreeMutations onDone={invalidate} />
     </div>
   );
-}
-
-function TreeMutations({ onDone: _onDone }: { onDone: () => void }) {
-  // Placeholder so we can wire mutations at top-level if we need shared state; kept minimal.
-  return null;
 }
 
 function TreeItem({
