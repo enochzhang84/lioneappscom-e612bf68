@@ -271,6 +271,7 @@ export type Database = {
           link_url: string | null
           page_id: string
           page_title: string | null
+          parent_id: string | null
           slug: string
           sort_order: number
           subtitle: string | null
@@ -295,6 +296,7 @@ export type Database = {
           link_url?: string | null
           page_id: string
           page_title?: string | null
+          parent_id?: string | null
           slug: string
           sort_order?: number
           subtitle?: string | null
@@ -319,6 +321,7 @@ export type Database = {
           link_url?: string | null
           page_id?: string
           page_title?: string | null
+          parent_id?: string | null
           slug?: string
           sort_order?: number
           subtitle?: string | null
@@ -339,6 +342,13 @@ export type Database = {
             columns: ["page_id"]
             isOneToOne: false
             referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "tool_items"
             referencedColumns: ["id"]
           },
         ]

@@ -56,6 +56,7 @@ type Item = {
   id: string;
   page_id: string;
   category_id: string | null;
+  parent_id: string | null;
   slug: string;
   title: string;
   page_title: string | null;
@@ -178,6 +179,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
   const items = itemsQ.data ?? [];
 
   const [openCat, setOpenCat] = useState<Record<string, boolean>>({});
+  const [openItem, setOpenItem] = useState<Record<string, boolean>>({});
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
 
   useEffect(() => {
@@ -210,19 +212,20 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
     );
   }
 
-  function addItemUnder(catId: string) {
+  function addItemUnder(catId: string, parentId: string | null = null) {
     const stamp = Date.now().toString(36);
-    const catItems = items.filter((i) => i.category_id === catId);
+    const siblings = items.filter((i) => i.category_id === catId && (i.parent_id ?? null) === parentId);
     mItem.mutate(
       {
         data: {
           page_id: pageId,
           category_id: catId,
+          parent_id: parentId,
           slug: `item-${stamp}`,
-          title: "未命名工具",
+          title: parentId ? "未命名子页面" : "未命名工具",
           page_title: "",
           subtitle: "",
-          icon: "🧰",
+          icon: parentId ? "📄" : "🧰",
           description: "",
           content: "",
           html_content: "",
@@ -233,14 +236,15 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
           internal_url: "",
           button_text: "",
           button_url: "",
-          sort_order: catItems.length,
+          sort_order: siblings.length,
           is_visible: true,
         },
       },
       {
         onSuccess: (r) => {
-          toast.success("已创建工具");
+          toast.success(parentId ? "已创建子页面" : "已创建工具");
           setOpenCat((s) => ({ ...s, [catId]: true }));
+          if (parentId) setOpenItem((s) => ({ ...s, [parentId]: true }));
           setSelection({ kind: "item", id: r.id });
         },
       },
@@ -296,9 +300,10 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             {cats.map((c, ci) => {
               const isOpen = openCat[c.id] ?? false;
               const isSel = selection.kind === "category" && selection.id === c.id;
-              const catItems = items
-                .filter((i) => i.category_id === c.id)
+              const topItems = items
+                .filter((i) => i.category_id === c.id && !i.parent_id)
                 .sort((a, b) => a.sort_order - b.sort_order);
+              const totalItems = items.filter((i) => i.category_id === c.id).length;
               return (
                 <li key={c.id}>
                   <div
@@ -314,7 +319,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                     </button>
                     <span className="text-base">{c.icon || "📁"}</span>
                     <span className={`flex-1 truncate ${!c.is_visible ? "text-muted-foreground line-through" : ""}`}>{c.title || "(未命名)"}</span>
-                    <span className="text-xs text-muted-foreground">{catItems.length}</span>
+                    <span className="text-xs text-muted-foreground">{totalItems}</span>
                     <div className="hidden group-hover:flex items-center">
                       <button type="button" title="上移" className="p-0.5 hover:bg-muted rounded" onClick={(e) => { e.stopPropagation(); moveCategory(ci, -1); }} disabled={ci === 0}>
                         <ArrowUp size={12} />
@@ -326,16 +331,52 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                   </div>
                   {isOpen && (
                     <ul className="ml-5 border-l border-border pl-2 mt-0.5 space-y-0.5">
-                      {catItems.map((it) => {
+                      {topItems.map((it) => {
                         const iSel = selection.kind === "item" && selection.id === it.id;
+                        const children = items
+                          .filter((x) => x.parent_id === it.id)
+                          .sort((a, b) => a.sort_order - b.sort_order);
+                        const iOpen = openItem[it.id] ?? true;
                         return (
-                          <li
-                            key={it.id}
-                            className={`flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${iSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
-                            onClick={() => setSelection({ kind: "item", id: it.id })}
-                          >
-                            <span>{it.icon || "🧰"}</span>
-                            <span className={`flex-1 truncate ${!it.is_visible ? "text-muted-foreground line-through" : ""}`}>{it.title || "(未命名)"}</span>
+                          <li key={it.id}>
+                            <div
+                              className={`group flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${iSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
+                              onClick={() => setSelection({ kind: "item", id: it.id })}
+                            >
+                              {children.length > 0 ? (
+                                <button type="button" className="p-0.5 hover:bg-muted rounded"
+                                  onClick={(e) => { e.stopPropagation(); setOpenItem({ ...openItem, [it.id]: !iOpen }); }}>
+                                  {iOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                                </button>
+                              ) : (
+                                <span className="w-4" />
+                              )}
+                              <span>{it.icon || "🧰"}</span>
+                              <span className={`flex-1 truncate ${!it.is_visible ? "text-muted-foreground line-through" : ""}`}>{it.title || "(未命名)"}</span>
+                              {children.length > 0 && <span className="text-[10px] text-muted-foreground">{children.length}</span>}
+                            </div>
+                            {iOpen && children.length > 0 && (
+                              <ul className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
+                                {children.map((ch) => {
+                                  const cSel = selection.kind === "item" && selection.id === ch.id;
+                                  return (
+                                    <li key={ch.id}
+                                      className={`flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${cSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
+                                      onClick={() => setSelection({ kind: "item", id: ch.id })}>
+                                      <span>{ch.icon || "📄"}</span>
+                                      <span className={`flex-1 truncate ${!ch.is_visible ? "text-muted-foreground line-through" : ""}`}>{ch.title || "(未命名)"}</span>
+                                    </li>
+                                  );
+                                })}
+                                <li>
+                                  <button type="button"
+                                    className="w-full text-left text-[11px] text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted/60"
+                                    onClick={() => addItemUnder(c.id, it.id)}>
+                                    + 新子页面
+                                  </button>
+                                </li>
+                              </ul>
+                            )}
                           </li>
                         );
                       })}
@@ -367,12 +408,12 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             key={selectedCat.id}
             category={selectedCat}
             pageId={pageId}
-            items={items.filter((i) => i.category_id === selectedCat.id).sort((a, b) => a.sort_order - b.sort_order)}
+            items={items.filter((i) => i.category_id === selectedCat.id && !i.parent_id).sort((a, b) => a.sort_order - b.sort_order)}
             onSave={(patch) => mCat.mutate({ data: catPayload(selectedCat, pageId, patch) }, { onSuccess: () => toast.success("已保存") })}
             onDelete={() => { if (confirm(`删除分类「${selectedCat.title}」及其下所有工具？`)) { mCatDel.mutate({ data: { id: selectedCat.id } }); setSelection({ kind: "none" }); } }}
             onAddItem={() => addItemUnder(selectedCat.id)}
             onSelectItem={(id) => setSelection({ kind: "item", id })}
-            onMoveItem={(idx, dir) => moveItem(items.filter((i) => i.category_id === selectedCat.id).sort((a, b) => a.sort_order - b.sort_order), idx, dir)}
+            onMoveItem={(idx, dir) => moveItem(items.filter((i) => i.category_id === selectedCat.id && !i.parent_id).sort((a, b) => a.sort_order - b.sort_order), idx, dir)}
             onDeleteItem={(id, title) => { if (confirm(`删除工具「${title}」？`)) mItemDel.mutate({ data: { id } }); }}
             onDuplicateItem={duplicateItem}
           />
@@ -382,9 +423,13 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             key={selectedItem.id}
             item={selectedItem}
             cats={cats}
+            allItems={items}
             pageSlug={""}
             onSave={(patch) => mItem.mutate({ data: itemPayload(selectedItem, pageId, patch) }, { onSuccess: () => toast.success("已保存") })}
-            onDelete={() => { if (confirm(`删除工具「${selectedItem.title}」？`)) { mItemDel.mutate({ data: { id: selectedItem.id } }); setSelection({ kind: "category", id: selectedItem.category_id ?? "" }); } }}
+            onDelete={() => { if (confirm(`删除工具「${selectedItem.title}」？该操作会同时删除其下所有子页面。`)) { mItemDel.mutate({ data: { id: selectedItem.id } }); setSelection({ kind: "category", id: selectedItem.category_id ?? "" }); } }}
+            onAddChild={() => addItemUnder(selectedItem.category_id ?? "", selectedItem.id)}
+            onSelectItem={(id) => setSelection({ kind: "item", id })}
+            onDeleteChild={(id, title) => { if (confirm(`删除子页面「${title}」？`)) mItemDel.mutate({ data: { id } }); }}
           />
         )}
       </section>
@@ -409,6 +454,7 @@ type ItemPayloadT = {
   id?: string;
   page_id: string;
   category_id: string | null;
+  parent_id: string | null;
   slug: string; title: string; page_title: string; subtitle: string;
   icon: string; description: string; content: string; html_content: string;
   image_url: string | null; video_url: string; link_url: string;
@@ -420,6 +466,7 @@ function itemPayload(it: Item, pageId: string, override?: Partial<Item>): ItemPa
   return {
     id: m.id, page_id: pageId,
     category_id: m.category_id ?? null,
+    parent_id: m.parent_id ?? null,
     slug: m.slug, title: m.title,
     page_title: m.page_title ?? "",
     subtitle: m.subtitle ?? "",
@@ -532,13 +579,17 @@ function CategoryPane({
 /* ---------------- Item detail ---------------- */
 
 function ItemPane({
-  item, cats, pageSlug, onSave, onDelete,
+  item, cats, allItems, pageSlug, onSave, onDelete, onAddChild, onSelectItem, onDeleteChild,
 }: {
   item: Item;
   cats: Category[];
+  allItems: Item[];
   pageSlug: string;
   onSave: (patch: Partial<Item>) => void;
   onDelete: () => void;
+  onAddChild: () => void;
+  onSelectItem: (id: string) => void;
+  onDeleteChild: (id: string, title: string) => void;
 }) {
   const [draft, setDraft] = useState(item);
   useEffect(() => setDraft(item), [item]);
@@ -547,16 +598,31 @@ function ItemPane({
 
   function patch(p: Partial<Item>) { setDraft({ ...draft, ...p }); }
 
+  const isChild = !!item.parent_id;
+  const parentCandidates = allItems.filter(
+    (i) => i.category_id === item.category_id && !i.parent_id && i.id !== item.id,
+  );
+  const children = allItems
+    .filter((i) => i.parent_id === item.id)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   return (
     <div className="p-6 space-y-6 max-w-4xl">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-xs text-muted-foreground uppercase mb-1">工具</div>
+          <div className="text-xs text-muted-foreground uppercase mb-1">
+            {isChild ? "子页面" : children.length > 0 ? "工具（分组）" : "工具"}
+          </div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <span>{draft.icon || "🧰"}</span>{draft.title || "(未命名)"}
+            <span>{draft.icon || (isChild ? "📄" : "🧰")}</span>{draft.title || "(未命名)"}
           </h2>
         </div>
         <div className="flex items-center gap-2">
+          {!isChild && (
+            <Button size="sm" variant="secondary" onClick={onAddChild}>
+              <Plus size={14} className="mr-1" />新增子页面
+            </Button>
+          )}
           <Button size="sm" disabled={!dirty} onClick={() => onSave(draft)}>保存</Button>
           {dirty && <Button size="sm" variant="ghost" onClick={() => setDraft(item)}>取消</Button>}
           <Button variant="outline" size="sm" onClick={onDelete}>
@@ -564,6 +630,31 @@ function ItemPane({
           </Button>
         </div>
       </div>
+
+      {!isChild && children.length > 0 && (
+        <div className="rounded-lg border border-border bg-background">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+            <div className="text-sm font-semibold">子页面（{children.length}）</div>
+            <Button size="sm" variant="ghost" onClick={onAddChild}><Plus size={14} className="mr-1" />新增子页面</Button>
+          </div>
+          <ul className="divide-y divide-border">
+            {children.map((ch) => (
+              <li key={ch.id} className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/40">
+                <span className="text-lg">{ch.icon || "📄"}</span>
+                <button type="button" className="flex-1 text-left" onClick={() => onSelectItem(ch.id)}>
+                  <div className="font-medium text-sm">{ch.title || "(未命名)"}</div>
+                  <div className="text-xs text-muted-foreground">/p/{pageSlug || "…"}/i/{ch.slug}</div>
+                </button>
+                {!ch.is_visible && <span className="text-xs text-muted-foreground">隐藏</span>}
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="删除" onClick={() => onDeleteChild(ch.id, ch.title)}>
+                  <Trash2 size={14} />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
 
       <Section title="卡片信息（列表页显示）">
         <div className="grid gap-3 md:grid-cols-2">
@@ -573,6 +664,17 @@ function ItemPane({
               <SelectContent>
                 {cats.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.icon || "📁"} {c.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="父项目（选择后成为该工具的子页面）">
+            <Select value={draft.parent_id ?? "__none"} onValueChange={(v) => patch({ parent_id: v === "__none" ? null : v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none">— 无（作为一级工具）—</SelectItem>
+                {parentCandidates.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.icon || "🧰"} {p.title}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

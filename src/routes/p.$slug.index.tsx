@@ -92,14 +92,26 @@ function ToolsPageView({ page, categories, items }: {
   const activeCat = categories.find(c => c.id === activeId) ?? categories[0] ?? null;
 
   const q = query.trim().toLowerCase();
-  const visibleItems = items
-    .filter(it => activeCat ? it.category_id === activeCat.id : false)
-    .filter(it =>
-      !q ||
-      it.title.toLowerCase().includes(q) ||
-      (it.description ?? "").toLowerCase().includes(q) ||
-      (it.subtitle ?? "").toLowerCase().includes(q),
-    );
+  const matches = (it: ToolItem) =>
+    !q ||
+    it.title.toLowerCase().includes(q) ||
+    (it.description ?? "").toLowerCase().includes(q) ||
+    (it.subtitle ?? "").toLowerCase().includes(q);
+
+  const catItems = items.filter((it) => activeCat ? it.category_id === activeCat.id : false);
+  const topItems = catItems
+    .filter((it) => !it.parent_id)
+    .sort((a, b) => a.sort_order - b.sort_order);
+  const childrenOf = (parentId: string) =>
+    catItems
+      .filter((it) => it.parent_id === parentId)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+  // groups: each top item either renders alone (no children) or as a group with children.
+  // When searching, a group is shown if the group itself or any child matches.
+  const visibleGroups = topItems
+    .map((top) => ({ top, children: childrenOf(top.id) }))
+    .filter(({ top, children }) => matches(top) || children.some(matches));
 
   const pick = (id: string) => {
     setActiveId(id);
@@ -178,13 +190,34 @@ function ToolsPageView({ page, categories, items }: {
 
             {categories.length === 0 ? (
               <p className="text-muted-foreground text-sm py-8">此工具页面还没有类别。请在后台添加。</p>
-            ) : visibleItems.length === 0 ? (
+            ) : visibleGroups.length === 0 ? (
               <p className="text-muted-foreground text-sm py-8">
                 {query ? `没有找到与 "${query}" 相关的工具。` : "此类别下暂无项目。"}
               </p>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 pb-16">
-                {visibleItems.map(it => <ItemCard key={it.id} pageSlug={page.slug} item={it} />)}
+              <div className="space-y-8 pb-16">
+                {visibleGroups.map(({ top, children }) =>
+                  children.length === 0 ? (
+                    <div key={top.id} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <ItemCard pageSlug={page.slug} item={top} />
+                    </div>
+                  ) : (
+                    <section key={top.id}>
+                      <div className="flex items-baseline gap-2 mb-3">
+                        <span className="text-lg">{top.icon || "🧰"}</span>
+                        <h3 className="text-base font-semibold">{top.title}</h3>
+                        {top.description && (
+                          <span className="text-xs text-muted-foreground">· {top.description}</span>
+                        )}
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {(q ? children.filter(matches) : children).map((ch) => (
+                          <ItemCard key={ch.id} pageSlug={page.slug} item={ch} />
+                        ))}
+                      </div>
+                    </section>
+                  ),
+                )}
               </div>
             )}
           </main>
