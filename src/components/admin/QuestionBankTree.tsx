@@ -365,6 +365,9 @@ function NodeEditor({
   const [description, setDescription] = useState(isEdit ? state.node.description ?? "" : "");
   const [sortOrder, setSortOrder] = useState(isEdit ? state.node.sort_order : 0);
   const [isActive, setIsActive] = useState(isEdit ? state.node.is_active : true);
+  const [source, setSource] = useState(isEdit ? state.node.source ?? "" : "");
+  const [includeInExam, setIncludeInExam] = useState(isEdit ? state.node.include_in_exam : true);
+  const [notes, setNotes] = useState(isEdit ? state.node.notes ?? "" : "");
   const [slugTouched, setSlugTouched] = useState(isEdit);
 
   const save = useMutation({
@@ -381,6 +384,9 @@ function NodeEditor({
           description: description.trim() || null,
           sort_order: sortOrder,
           is_active: isActive,
+          source: source.trim() || null,
+          include_in_exam: includeInExam,
+          notes: notes.trim() || null,
         },
       }),
     onSuccess: () => {
@@ -394,9 +400,11 @@ function NodeEditor({
     ? `编辑${TYPE_LABEL[type]}`
     : `新建${TYPE_LABEL[type]}${state.mode === "create" && state.parent ? ` — ${state.parent.name}` : ""}`;
 
+  const isBank = type === "bank";
+
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -409,7 +417,7 @@ function NodeEditor({
                 setName(e.target.value);
                 if (!slugTouched) setSlug(slugify(e.target.value));
               }}
-              placeholder={type === "category" ? "DMV 驾照考试" : type === "module" ? "C1 小型车" : "笔试题库"}
+              placeholder={type === "category" ? "DMV 驾照考试" : type === "module" ? "C1 小型车 / 图标考试" : "官方手册题库"}
             />
           </div>
           <div>
@@ -422,7 +430,7 @@ function NodeEditor({
               <Input
                 value={slug}
                 onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
-                placeholder="dmv / c1 / written"
+                placeholder="dmv / c1 / official"
               />
               <p className="text-[11px] text-muted-foreground mt-1">同一父级下唯一，小写字母/数字/-</p>
             </div>
@@ -439,11 +447,40 @@ function NodeEditor({
             <Label>说明</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="选填" />
           </div>
+          {isBank && (
+            <>
+              <div>
+                <Label>题库来源</Label>
+                <Input
+                  value={source}
+                  onChange={(e) => setSource(e.target.value)}
+                  placeholder="California DMV Official Handbook / Internet Reference / AI Generated"
+                />
+              </div>
+              <div>
+                <Label>备注</Label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="选填：整理来源、更新日期、维护人等信息"
+                  rows={3}
+                />
+              </div>
+              <div className="flex items-center gap-2 rounded-md border p-3 bg-muted/30">
+                <Switch checked={includeInExam} onCheckedChange={setIncludeInExam} />
+                <div className="text-sm">
+                  <div className="font-medium">参与模拟考试</div>
+                  <p className="text-xs text-muted-foreground mt-0.5">开启后，本题库题目会加入所在考试的抽题池。</p>
+                </div>
+              </div>
+            </>
+          )}
           <div className="flex items-center gap-2">
             <Switch checked={isActive} onCheckedChange={setIsActive} />
             <span className="text-sm">启用</span>
           </div>
         </div>
+
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>取消</Button>
           <Button onClick={() => save.mutate()} disabled={!name.trim() || save.isPending}>
