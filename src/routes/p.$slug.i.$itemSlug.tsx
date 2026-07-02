@@ -22,6 +22,7 @@ import { PdfTool, type PdfKind } from "@/components/tools/PdfTool";
 import { ImageTool, type ImageKind } from "@/components/tools/ImageTool";
 import { NetworkTool, type NetworkKind } from "@/components/tools/NetworkTool";
 import { SimpleToolByKey } from "@/components/tools/SimpleTool";
+import { CurrencyToolByKey } from "@/components/currency/CurrencyConverter";
 
 
 const AIR_BRAKE_PROPS = {
@@ -193,6 +194,7 @@ function ItemDetail() {
   const imageKey = appKey.startsWith("app:image:") ? appKey.slice("app:image:".length) as ImageKind : null;
   const netKey = appKey.startsWith("app:net:") ? appKey.slice("app:net:".length) as NetworkKind : null;
   const simpleKey = appKey.startsWith("app:simple:") ? appKey.slice("app:simple:".length) : null;
+  const currencyKey = appKey.startsWith("app:currency:") ? appKey.slice("app:currency:".length) : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
   const embed = isDeveloping ? undefined : (converterKey
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
@@ -214,6 +216,8 @@ function ItemDetail() {
     ? { render: () => <NetworkTool kind={netKey} />, fullPath: undefined as string | undefined }
     : simpleKey
     ? { render: () => <SimpleToolByKey toolKey={simpleKey} />, fullPath: undefined as string | undefined }
+    : currencyKey
+    ? { render: () => <CurrencyToolByKey toolKey={currencyKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
     : undefined)));
