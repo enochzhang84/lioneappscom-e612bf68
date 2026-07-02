@@ -18,8 +18,19 @@ export const Route = createFileRoute("/_authenticated/admin/quiz/$id")({
   component: QuizEditPage,
 });
 
+type QType =
+  | "single_choice"
+  | "image_choice"
+  | "sign_recognition"
+  | "multiple_choice"
+  | "true_false"
+  | "fill_blank"
+  | "hotspot";
+
 type Form = {
   id?: string;
+  question_type: QType;
+  image_url: string;
   question: string;
   option_a: string;
   option_b: string;
@@ -46,7 +57,15 @@ type Form = {
   sort_order: number;
 };
 
+const TYPE_OPTIONS: { value: QType; label: string; hint: string }[] = [
+  { value: "single_choice", label: "普通单选", hint: "纯文字题目 + 四个文字选项" },
+  { value: "image_choice", label: "图片选择题", hint: "一张包含 A/B/C/D 四个图标的大图 + 选项按钮" },
+  { value: "sign_recognition", label: "路标识别题", hint: "一张路标图片 + 四个文字答案" },
+];
+
 const empty: Form = {
+  question_type: "single_choice",
+  image_url: "",
   question: "",
   option_a: "",
   option_b: "",
@@ -107,6 +126,8 @@ function QuizEditPage() {
     if (!isNew && q.data) {
       setForm({
         id: q.data.id,
+        question_type: ((q.data as { question_type?: QType }).question_type ?? "single_choice") as QType,
+        image_url: (q.data as { image_url?: string | null }).image_url ?? "",
         question: q.data.question,
         option_a: q.data.option_a,
         option_b: q.data.option_b,
@@ -139,11 +160,13 @@ function QuizEditPage() {
     mutationFn: () => upsertFn({
       data: {
         id: form.id,
+        question_type: form.question_type,
+        image_url: form.image_url || null,
         question: form.question,
-        option_a: form.option_a,
-        option_b: form.option_b,
-        option_c: form.option_c || null,
-        option_d: form.option_d || null,
+        option_a: form.question_type === "image_choice" ? (form.option_a || "选项 A") : form.option_a,
+        option_b: form.question_type === "image_choice" ? (form.option_b || "选项 B") : form.option_b,
+        option_c: form.question_type === "image_choice" ? (form.option_c || "选项 C") : (form.option_c || null),
+        option_d: form.question_type === "image_choice" ? (form.option_d || "选项 D") : (form.option_d || null),
         question_en: form.question_en || null,
         option_a_en: form.option_a_en || null,
         option_b_en: form.option_b_en || null,
@@ -188,24 +211,102 @@ function QuizEditPage() {
 
       <Card>
         <CardContent className="p-6 space-y-5">
+          {/* 题型选择 */}
+          <div className="rounded-lg border bg-slate-50/60 p-4 space-y-3">
+            <Label className="text-sm font-semibold">题型（Question Type）*</Label>
+            <div className="grid gap-2 md:grid-cols-3">
+              {TYPE_OPTIONS.map((opt) => {
+                const active = form.question_type === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => set("question_type", opt.value)}
+                    className={
+                      "text-left rounded-md border p-3 transition-colors " +
+                      (active
+                        ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+                        : "border-slate-200 bg-white hover:border-blue-300")
+                    }
+                  >
+                    <div className="text-sm font-medium">{opt.label}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{opt.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              考试引擎会按题型自动切换答题界面（图片选择题 / 路标识别题 / 普通单选…）。
+            </p>
+          </div>
+
+          {/* 图片 URL（图片选择 & 路标识别必填；普通单选可选） */}
+          {(form.question_type === "image_choice" ||
+            form.question_type === "sign_recognition" ||
+            form.image_url) && (
+            <div>
+              <Label>
+                图片 URL{" "}
+                {form.question_type === "image_choice"
+                  ? "*（包含 A/B/C/D 四个图标的一张大图）"
+                  : form.question_type === "sign_recognition"
+                    ? "*（单张路标图片）"
+                    : "（可选配图）"}
+              </Label>
+              <Input
+                value={form.image_url}
+                onChange={(e) => set("image_url", e.target.value)}
+                placeholder="https://…/quiz-images/xxx.png"
+              />
+              {form.image_url && (
+                <div className="mt-2 flex justify-center rounded-md border bg-white p-3">
+                  <img src={form.image_url} alt="预览" className="max-h-56 w-auto object-contain" />
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <Label>题目 (中文) *</Label>
-            <Textarea rows={3} value={form.question} onChange={(e) => set("question", e.target.value)} />
+            <Textarea
+              rows={3}
+              value={form.question}
+              onChange={(e) => set("question", e.target.value)}
+              placeholder={
+                form.question_type === "image_choice"
+                  ? "例如：下面哪个标志表示学校？"
+                  : form.question_type === "sign_recognition"
+                    ? "例如：下面路标的含义是？"
+                    : ""
+              }
+            />
           </div>
           <div>
             <Label>Question (English)</Label>
             <Textarea rows={3} value={form.question_en} onChange={(e) => set("question_en", e.target.value)} placeholder="Optional English translation" />
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div><Label>选项 A (中文) *</Label><Textarea rows={2} value={form.option_a} onChange={(e) => set("option_a", e.target.value)} /></div>
-            <div><Label>Option A (EN)</Label><Textarea rows={2} value={form.option_a_en} onChange={(e) => set("option_a_en", e.target.value)} /></div>
-            <div><Label>选项 B (中文) *</Label><Textarea rows={2} value={form.option_b} onChange={(e) => set("option_b", e.target.value)} /></div>
-            <div><Label>Option B (EN)</Label><Textarea rows={2} value={form.option_b_en} onChange={(e) => set("option_b_en", e.target.value)} /></div>
-            <div><Label>选项 C (中文)</Label><Textarea rows={2} value={form.option_c} onChange={(e) => set("option_c", e.target.value)} /></div>
-            <div><Label>Option C (EN)</Label><Textarea rows={2} value={form.option_c_en} onChange={(e) => set("option_c_en", e.target.value)} /></div>
-            <div><Label>选项 D (中文)</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
-            <div><Label>Option D (EN)</Label><Textarea rows={2} value={form.option_d_en} onChange={(e) => set("option_d_en", e.target.value)} /></div>
-          </div>
+
+          {/* 选项 —— image_choice 只需要 A/B/C/D 标签（图里已含图标），其他类型需要文字 */}
+          {form.question_type === "image_choice" ? (
+            <div className="rounded-md border bg-blue-50/40 border-blue-200 p-4 text-sm text-slate-700 space-y-2">
+              <div className="font-medium">图片选择题</div>
+              <div className="text-[12px] text-muted-foreground">
+                四个图标已包含在上方大图中，用户直接选择 A / B / C / D。此处无需填写文字选项，
+                系统会自动使用「选项 A / B / C / D」作为占位。
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              <div><Label>选项 A (中文) *</Label><Textarea rows={2} value={form.option_a} onChange={(e) => set("option_a", e.target.value)} /></div>
+              <div><Label>Option A (EN)</Label><Textarea rows={2} value={form.option_a_en} onChange={(e) => set("option_a_en", e.target.value)} /></div>
+              <div><Label>选项 B (中文) *</Label><Textarea rows={2} value={form.option_b} onChange={(e) => set("option_b", e.target.value)} /></div>
+              <div><Label>Option B (EN)</Label><Textarea rows={2} value={form.option_b_en} onChange={(e) => set("option_b_en", e.target.value)} /></div>
+              <div><Label>选项 C (中文)</Label><Textarea rows={2} value={form.option_c} onChange={(e) => set("option_c", e.target.value)} /></div>
+              <div><Label>Option C (EN)</Label><Textarea rows={2} value={form.option_c_en} onChange={(e) => set("option_c_en", e.target.value)} /></div>
+              <div><Label>选项 D (中文)</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
+              <div><Label>Option D (EN)</Label><Textarea rows={2} value={form.option_d_en} onChange={(e) => set("option_d_en", e.target.value)} /></div>
+            </div>
+          )}
           <div>
             <Label>所属题库 *</Label>
             <select

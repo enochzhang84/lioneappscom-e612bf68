@@ -461,6 +461,9 @@ function Exam({
   const questionEn = q.question_en || (showTranslation ? tr?.question : null);
   const showAiBadge = showTranslation && !q.question_en && !!tr?.question;
 
+  const isImageChoice = q.question_type === "image_choice";
+  const isSignRecognition = q.question_type === "sign_recognition";
+
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 md:p-8 space-y-6">
@@ -486,22 +489,50 @@ function Exam({
           </div>
         </div>
 
+        {/* Media: image_choice = big composite; sign_recognition = single sign; single_choice = optional */}
         {q.image_url && (
           <div className="flex justify-center">
             <img
               src={q.image_url}
-              alt="题目配图"
+              alt={isSignRecognition ? "路标" : "题目配图"}
               loading="lazy"
-              className="max-h-64 md:max-h-80 w-auto object-contain rounded-xl border border-slate-200 bg-white p-3"
+              className={cn(
+                "w-auto object-contain rounded-xl border border-slate-200 bg-white p-3",
+                isImageChoice ? "max-h-[420px]" : isSignRecognition ? "max-h-64" : "max-h-64 md:max-h-80",
+              )}
             />
           </div>
         )}
 
 
-        <div className="space-y-3">
+        <div className={cn("gap-3", isImageChoice ? "grid grid-cols-2 md:grid-cols-4" : "space-y-3")}>
           {options.map(({ key, text, textEn }) => {
             const selected = answers[q.id] === key;
             const optEn = textEn || (showTranslation ? tr?.options?.[key] : null);
+            if (isImageChoice) {
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => pick(key)}
+                  className={cn(
+                    "rounded-xl border p-4 flex flex-col items-center justify-center gap-2 transition-all",
+                    selected
+                      ? "border-blue-500 bg-blue-50 shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
+                      : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "h-10 w-10 rounded-full grid place-items-center text-lg font-bold transition-colors",
+                      selected ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700",
+                    )}
+                  >
+                    {key}
+                  </span>
+                </button>
+              );
+            }
             return (
               <button
                 key={key}

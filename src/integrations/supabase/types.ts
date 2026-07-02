@@ -629,6 +629,7 @@ export type Database = {
           question: string
           question_bank_id: string | null
           question_en: string | null
+          question_type: string
           sort_order: number
           updated_at: string
         }
@@ -659,6 +660,7 @@ export type Database = {
           question: string
           question_bank_id?: string | null
           question_en?: string | null
+          question_type?: string
           sort_order?: number
           updated_at?: string
         }
@@ -689,6 +691,7 @@ export type Database = {
           question?: string
           question_bank_id?: string | null
           question_en?: string | null
+          question_type?: string
           sort_order?: number
           updated_at?: string
         }

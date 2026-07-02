@@ -16,8 +16,20 @@ async function ensureAdmin(supabase: SupabaseClient<Database>, userId: string) {
   if (!data) throw new Error("Forbidden: admin role required");
 }
 
+const questionTypeEnum = z.enum([
+  "single_choice",
+  "image_choice",
+  "sign_recognition",
+  "multiple_choice",
+  "true_false",
+  "fill_blank",
+  "hotspot",
+]);
+
 const questionInput = z.object({
   id: z.string().uuid().optional(),
+  question_type: questionTypeEnum.default("single_choice"),
+  image_url: z.string().nullable().optional(),
   question: z.string().min(1),
   option_a: z.string().min(1),
   option_b: z.string().min(1),
@@ -80,6 +92,8 @@ export const adminUpsertQuiz = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
     const payload = {
+      question_type: data.question_type,
+      image_url: data.image_url ?? null,
       question: data.question,
       option_a: data.option_a,
       option_b: data.option_b,
