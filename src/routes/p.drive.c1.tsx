@@ -59,7 +59,7 @@ export const Route = createFileRoute("/p/drive/c1")({
   head: () => ({
     meta: [
       { title: "小型车 C1 模拟考试 · Lione Apps" },
-      { name: "description", content: "DMV 风格的小型车 C1 驾照笔试模拟考试，题库随机抽题、自动判分、错题回顾。" },
+      { name: "description", content: "小型车 C1 驾照笔试模拟考试，题库随机抽题、自动判分、错题回顾。" },
     ],
   }),
   component: QuizPage,
