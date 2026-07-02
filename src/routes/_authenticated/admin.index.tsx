@@ -26,8 +26,8 @@ function Dashboard() {
   const lc = useServerFn(adminListCases);
   const ls = useServerFn(adminListSettings);
   const lPages = useServerFn(adminListPages);
-  const lTools = useServerFn(adminListToolItems);
-  const lQuiz = useServerFn(adminListQuizQuestions);
+  const lTools = useServerFn(adminListCategories);
+  const lQuiz = useServerFn(adminListQuiz);
 
   const products = useQuery({ queryKey: ["admin", "products"], queryFn: () => lp() });
   const cases = useQuery({ queryKey: ["admin", "cases"], queryFn: () => lc() });
