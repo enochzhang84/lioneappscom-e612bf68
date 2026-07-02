@@ -191,60 +191,44 @@ function PageEditor() {
 
         <Card>
           <CardHeader>
-            <CardTitle>页面编辑</CardTitle>
+            <CardTitle>页面内容</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm" onClick={() => {
-                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理类别"); }
-                window.setTimeout(() => {
-                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  document.getElementById("add-tool-category")?.click();
-                }, 300);
-              }}>
-                <Plus size={14} className="mr-1" /> 增加新类别
-              </Button>
-              <Button type="button" size="sm" onClick={() => {
-                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理项目"); }
-                window.setTimeout(() => {
-                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  document.getElementById("add-tool-item")?.click();
-                }, 300);
-              }}>
-                <Plus size={14} className="mr-1" /> 增加新项目
-              </Button>
-              <div className="w-full" />
-              {pageType !== "tools" && (Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
-                <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
-                  <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
-                </Button>
-              ))}
-            </div>
-
-            {pageType === "tools" && (
-              <p className="text-sm text-muted-foreground">实用工具页面的内容请使用下方「工具类别」和「工具项目」管理。</p>
-            )}
-
-            {pageType !== "tools" && blocks.length === 0 && (
-              <p className="text-sm text-muted-foreground">还没有内容块，点击上方按钮添加。</p>
-            )}
-
-
-            {pageType !== "tools" && <div className="space-y-3">
-              {blocks.map((b, i) => (
-                <div key={i} className="rounded-md border border-border p-4 space-y-2 bg-background">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground uppercase">{BLOCK_LABEL[b.type]}</span>
-                    <div className="flex items-center gap-1">
-                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, -1)} disabled={i === 0}><ArrowUp size={14} /></Button>
-                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}><ArrowDown size={14} /></Button>
-                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeBlock(i)}><Trash2 size={14} /></Button>
-                    </div>
-                  </div>
-                  <BlockEditor block={b} onChange={(patch) => updateBlock(i, patch)} />
+            {pageType === "tools" ? (
+              <p className="text-sm text-muted-foreground">
+                当前是「实用工具页面」。所有一级工具（分类）和它们下面的项目请到下方
+                <span className="font-medium text-foreground"> 已添加工具 </span>
+                区域统一管理。
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
+                    <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
+                      <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
+                    </Button>
+                  ))}
                 </div>
-              ))}
-            </div>}
+                {blocks.length === 0 && (
+                  <p className="text-sm text-muted-foreground">还没有内容块，点击上方按钮添加。</p>
+                )}
+                <div className="space-y-3">
+                  {blocks.map((b, i) => (
+                    <div key={i} className="rounded-md border border-border p-4 space-y-2 bg-background">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground uppercase">{BLOCK_LABEL[b.type]}</span>
+                        <div className="flex items-center gap-1">
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, -1)} disabled={i === 0}><ArrowUp size={14} /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}><ArrowDown size={14} /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeBlock(i)}><Trash2 size={14} /></Button>
+                        </div>
+                      </div>
+                      <BlockEditor block={b} onChange={(patch) => updateBlock(i, patch)} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
