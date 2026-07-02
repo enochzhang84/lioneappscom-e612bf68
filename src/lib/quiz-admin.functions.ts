@@ -38,6 +38,7 @@ const questionInput = z.object({
   manual_url: z.string().nullable().optional(),
   google_keywords: z.string().nullable().optional(),
   category: z.string().min(1).max(40).default("c1"),
+  question_bank_id: z.string().uuid().nullable().optional(),
   difficulty: z.string().max(20).default("medium"),
   is_active: z.boolean().default(true),
   sort_order: z.number().int().default(0),
@@ -45,13 +46,19 @@ const questionInput = z.object({
 
 export const adminListQuiz = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { category?: string } | undefined) =>
-    z.object({ category: z.string().max(40).optional() }).parse(d ?? {}),
+  .inputValidator((d: { category?: string; bankId?: string | null } | undefined) =>
+    z.object({
+      category: z.string().max(40).optional(),
+      bankId: z.string().uuid().nullable().optional(),
+    }).parse(d ?? {}),
   )
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    let q = context.supabase.from("quiz_questions").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
-    if (data.category) q = q.eq("category", data.category);
+    let q = context.supabase.from("quiz_questions").select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (data.bankId) q = q.eq("question_bank_id", data.bankId);
+    else if (data.category) q = q.eq("category", data.category);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return rows ?? [];
@@ -93,6 +100,7 @@ export const adminUpsertQuiz = createServerFn({ method: "POST" })
       manual_url: data.manual_url ?? null,
       google_keywords: data.google_keywords ?? null,
       category: data.category,
+      question_bank_id: data.question_bank_id ?? null,
       difficulty: data.difficulty,
       is_active: data.is_active,
       sort_order: data.sort_order,

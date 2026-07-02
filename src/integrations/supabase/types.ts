@@ -491,6 +491,65 @@ export type Database = {
         }
         Relationships: []
       }
+      question_bank_nodes: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          legacy_category: string | null
+          metadata: Json
+          name: string
+          name_en: string | null
+          node_type: string
+          parent_id: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          legacy_category?: string | null
+          metadata?: Json
+          name: string
+          name_en?: string | null
+          node_type: string
+          parent_id?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          legacy_category?: string | null
+          metadata?: Json
+          name?: string
+          name_en?: string | null
+          node_type?: string
+          parent_id?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_bank_nodes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "question_bank_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_exams: {
         Row: {
           back_href: string | null
@@ -568,6 +627,7 @@ export type Database = {
           option_d: string | null
           option_d_en: string | null
           question: string
+          question_bank_id: string | null
           question_en: string | null
           sort_order: number
           updated_at: string
@@ -597,6 +657,7 @@ export type Database = {
           option_d?: string | null
           option_d_en?: string | null
           question: string
+          question_bank_id?: string | null
           question_en?: string | null
           sort_order?: number
           updated_at?: string
@@ -626,11 +687,20 @@ export type Database = {
           option_d?: string | null
           option_d_en?: string | null
           question?: string
+          question_bank_id?: string | null
           question_en?: string | null
           sort_order?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_question_bank_id_fkey"
+            columns: ["question_bank_id"]
+            isOneToOne: false
+            referencedRelation: "question_bank_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seo_meta: {
         Row: {

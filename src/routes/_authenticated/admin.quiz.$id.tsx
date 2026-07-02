@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,8 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { adminGetQuiz, adminUpsertQuiz } from "@/lib/quiz-admin.functions";
+import { adminListBankNodes } from "@/lib/question-bank-admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/quiz/$id")({
+  validateSearch: (s) => z.object({ bank: z.string().uuid().optional() }).parse(s),
   component: QuizEditPage,
 });
 
@@ -37,6 +40,7 @@ type Form = {
   manual_url: string;
   google_keywords: string;
   category: string;
+  question_bank_id: string | null;
   difficulty: string;
   is_active: boolean;
   sort_order: number;
@@ -63,6 +67,7 @@ const empty: Form = {
   manual_url: "",
   google_keywords: "",
   category: "c1",
+  question_bank_id: null,
   difficulty: "medium",
   is_active: true,
   sort_order: 0,
@@ -70,12 +75,27 @@ const empty: Form = {
 
 function QuizEditPage() {
   const { id } = useParams({ from: "/_authenticated/admin/quiz/$id" });
+  const { bank: bankFromUrl } = useSearch({ from: "/_authenticated/admin/quiz/$id" });
   const isNew = id === "new";
   const navigate = useNavigate();
   const getFn = useServerFn(adminGetQuiz);
   const upsertFn = useServerFn(adminUpsertQuiz);
+  const nodesFn = useServerFn(adminListBankNodes);
 
-  const [form, setForm] = useState<Form>(empty);
+  const nodesQuery = useQuery({ queryKey: ["admin", "bank-nodes"], queryFn: () => nodesFn({}) });
+  const banks = (nodesQuery.data ?? []).filter((n) => n.node_type === "bank");
+  const bankLabel = (id: string) => {
+    const list = nodesQuery.data ?? [];
+    const byId = new Map(list.map((n) => [n.id, n]));
+    const parts: string[] = [];
+    let cur = byId.get(id);
+    while (cur) { parts.unshift(cur.name); cur = cur.parent_id ? byId.get(cur.parent_id) : undefined; }
+    return parts.join(" › ");
+  };
+
+  const [form, setForm] = useState<Form>(() =>
+    isNew && bankFromUrl ? { ...empty, question_bank_id: bankFromUrl } : empty,
+  );
 
   const q = useQuery({
     queryKey: ["admin", "quiz", id],
@@ -107,6 +127,7 @@ function QuizEditPage() {
         manual_url: (q.data as { manual_url?: string | null }).manual_url ?? "",
         google_keywords: (q.data as { google_keywords?: string | null }).google_keywords ?? "",
         category: q.data.category,
+        question_bank_id: (q.data as { question_bank_id?: string | null }).question_bank_id ?? null,
         difficulty: q.data.difficulty ?? "medium",
         is_active: q.data.is_active,
         sort_order: q.data.sort_order ?? 0,
@@ -138,12 +159,19 @@ function QuizEditPage() {
         manual_url: form.manual_url || null,
         google_keywords: form.google_keywords || null,
         category: form.category,
+        question_bank_id: form.question_bank_id,
         difficulty: form.difficulty,
         is_active: form.is_active,
         sort_order: form.sort_order,
       },
     }),
-    onSuccess: () => { toast.success("已保存"); navigate({ to: "/admin/quiz" }); },
+    onSuccess: () => {
+      toast.success("已保存");
+      navigate({
+        to: "/admin/quiz",
+        search: form.question_bank_id ? ({ bank: form.question_bank_id } as never) : ({} as never),
+      });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -177,6 +205,22 @@ function QuizEditPage() {
             <div><Label>Option C (EN)</Label><Textarea rows={2} value={form.option_c_en} onChange={(e) => set("option_c_en", e.target.value)} /></div>
             <div><Label>选项 D (中文)</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
             <div><Label>Option D (EN)</Label><Textarea rows={2} value={form.option_d_en} onChange={(e) => set("option_d_en", e.target.value)} /></div>
+          </div>
+          <div>
+            <Label>所属题库 *</Label>
+            <select
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={form.question_bank_id ?? ""}
+              onChange={(e) => set("question_bank_id", e.target.value || null)}
+            >
+              <option value="">— 未挂靠 —</option>
+              {banks.map((b) => (
+                <option key={b.id} value={b.id}>{bankLabel(b.id)}</option>
+              ))}
+            </select>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              题库来自左侧目录（三级：分类 › 模块 › 题库）。新增分类请到题库管理主页。
+            </p>
           </div>
           <div className="grid gap-4 md:grid-cols-4">
             <div>
