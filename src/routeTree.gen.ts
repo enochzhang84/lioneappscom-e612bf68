@@ -18,6 +18,7 @@ import { Route as ErrorRouteImport } from './routes/error'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CasesRouteImport } from './routes/cases'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AiRouteImport } from './routes/ai'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -105,6 +106,11 @@ const CasesRoute = CasesRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiRoute = AiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -346,6 +352,7 @@ const AuthenticatedAdminBlogIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/auth': typeof AuthRoute
   '/cases': typeof CasesRouteWithChildren
   '/contact': typeof ContactRoute
@@ -399,6 +406,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/auth': typeof AuthRoute
   '/cases': typeof CasesRouteWithChildren
   '/contact': typeof ContactRoute
@@ -446,6 +454,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/auth': typeof AuthRoute
   '/cases': typeof CasesRouteWithChildren
   '/contact': typeof ContactRoute
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/ai'
     | '/auth'
     | '/cases'
     | '/contact'
@@ -554,6 +564,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/ai'
     | '/auth'
     | '/cases'
     | '/contact'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/about'
+    | '/ai'
     | '/auth'
     | '/cases'
     | '/contact'
@@ -655,6 +667,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
+  AiRoute: typeof AiRoute
   AuthRoute: typeof AuthRoute
   CasesRoute: typeof CasesRouteWithChildren
   ContactRoute: typeof ContactRoute
@@ -736,6 +749,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai': {
+      id: '/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -1226,6 +1246,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
+  AiRoute: AiRoute,
   AuthRoute: AuthRoute,
   CasesRoute: CasesRouteWithChildren,
   ContactRoute: ContactRoute,
