@@ -266,7 +266,7 @@ export function QuizApp(props: QuizAppProps = {}) {
                 onSubmit={requestSubmitFromLast}
                 submitting={submit.isPending}
               />
-              <RulesTips total={TOTAL} pass={PASS} examSeconds={EXAM_SECONDS} />
+              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} />
             </div>
             <aside className="lg:sticky lg:top-6 self-start">
               <AnswerSheet
