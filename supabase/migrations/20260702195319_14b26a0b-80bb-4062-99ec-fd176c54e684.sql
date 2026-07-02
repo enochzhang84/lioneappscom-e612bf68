@@ -1,0 +1,1 @@
+UPDATE public.tool_items SET link_url = 'app:bible-kjv' WHERE id = '6ff1acc4-9ccf-462f-96f8-be6cea442690';

@@ -9,6 +9,7 @@ import { ArrowLeft, ExternalLink, Maximize2, Loader2, AlertTriangle } from "luci
 import { QuizApp } from "./p.drive.c1";
 import { BibleCUV } from "@/components/bible/BibleCUV";
 import { BibleCUNP } from "@/components/bible/BibleCUNP";
+import { BibleKJV } from "@/components/bible/BibleKJV";
 
 const AIR_BRAKE_PROPS = {
   embedded: true as const,
@@ -71,6 +72,7 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:drive-ab-commercial-driver": { render: () => <QuizApp {...COMMERCIAL_DRIVER_PROPS} /> },
   "app:bible-cuv": { render: () => <BibleCUV /> },
   "app:bible-cunp": { render: () => <BibleCUNP /> },
+  "app:bible-kjv": { render: () => <BibleKJV /> },
 };
 
 function examConfigToProps(cfg: ExamConfig) {

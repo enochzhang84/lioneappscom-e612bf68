@@ -82,12 +82,16 @@ export function BibleReader({
 
         {verses && (
           <article className="mt-6 space-y-3 text-[17px] md:text-lg leading-[2.1] text-foreground">
-            {verses.map((v) => (
-              <p key={v.pk} className="scroll-mt-24" id={`v${v.verse}`}>
-                <sup className="mr-1.5 text-primary font-semibold text-xs align-super">{v.verse}</sup>
-                {stripSpaces ? v.text.replace(/\s+/g, "") : v.text}
-              </p>
-            ))}
+            {verses.map((v) => {
+              let text = v.text.replace(/<[^>]+>/g, "");
+              if (stripSpaces) text = text.replace(/\s+/g, "");
+              return (
+                <p key={v.pk} className="scroll-mt-24" id={`v${v.verse}`}>
+                  <sup className="mr-1.5 text-primary font-semibold text-xs align-super">{v.verse}</sup>
+                  {text}
+                </p>
+              );
+            })}
           </article>
         )}
 
