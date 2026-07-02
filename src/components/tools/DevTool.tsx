@@ -1,6 +1,6 @@
 // 开发者工具：JSON / YAML / CSV / UUID / JWT / HEX ↔ RGB / 正则 / SQL / XML
 import * as React from "react";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 import { ToolShell, CopyButton, type FaqItem } from "./ToolShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
