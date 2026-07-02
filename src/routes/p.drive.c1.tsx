@@ -59,7 +59,7 @@ export const Route = createFileRoute("/p/drive/c1")({
   head: () => ({
     meta: [
       { title: "小型车 C1 模拟考试 · Lione Apps" },
-      { name: "description", content: "DMV 风格的小型车 C1 驾照笔试模拟考试，题库随机抽题、自动判分、错题回顾。" },
+      { name: "description", content: "小型车 C1 驾照笔试模拟考试，题库随机抽题、自动判分、错题回顾。" },
     ],
   }),
   component: QuizPage,
@@ -85,6 +85,8 @@ export type QuizAppProps = {
   subtitle?: string;
   backHref?: string;
   backLabel?: string;
+  /** Optional wrong-based passing rule (e.g. maxWrong=6 for C1 mock). */
+  maxWrong?: number;
 };
 
 const DEFAULT_TOTAL = 36;
@@ -98,6 +100,7 @@ export function QuizApp(props: QuizAppProps = {}) {
     pools,
     total: TOTAL = DEFAULT_TOTAL,
     pass: PASS = DEFAULT_PASS,
+    maxWrong: MAX_WRONG,
     examSeconds: EXAM_SECONDS = DEFAULT_SECONDS,
     title = "California DMV 驾照模拟考试",
     subtitle = "模拟考试与加州 DMV 正式考试一致,帮助考生熟悉考试流程。",
@@ -239,6 +242,7 @@ export function QuizApp(props: QuizAppProps = {}) {
             <Intro
               total={TOTAL}
               pass={PASS}
+              maxWrong={MAX_WRONG}
               examSeconds={EXAM_SECONDS}
               onStart={startExam}
               loading={load.isPending}
@@ -262,7 +266,7 @@ export function QuizApp(props: QuizAppProps = {}) {
                 onSubmit={requestSubmitFromLast}
                 submitting={submit.isPending}
               />
-              <RulesTips total={TOTAL} pass={PASS} examSeconds={EXAM_SECONDS} />
+              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} />
             </div>
             <aside className="lg:sticky lg:top-6 self-start">
               <AnswerSheet
@@ -282,7 +286,7 @@ export function QuizApp(props: QuizAppProps = {}) {
 
         {phase === "result" && grade && (
           <div className="mt-6">
-            <Result grade={grade} pass={PASS} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+            <Result grade={grade} pass={PASS} maxWrong={MAX_WRONG} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
           </div>
         )}
       </div>
@@ -440,8 +444,8 @@ function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => numb
 /* -------------------- Intro -------------------- */
 
 function Intro({
-  total, pass, examSeconds, onStart, loading, error,
-}: { total: number; pass: number; examSeconds: number; onStart: () => void; loading: boolean; error?: string }) {
+  total, pass, maxWrong, examSeconds, onStart, loading, error,
+}: { total: number; pass: number; maxWrong?: number; examSeconds: number; onStart: () => void; loading: boolean; error?: string }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
       <Card className="border-slate-200 shadow-sm rounded-2xl">
@@ -452,7 +456,7 @@ function Intro({
             </div>
             <div>
               <div className="text-lg font-semibold">开始模拟考试</div>
-              <div className="text-sm text-muted-foreground">DMV 风格 · 随机抽题 · 自动判分</div>
+              <div className="text-sm text-muted-foreground">随机抽题 · 自动判分</div>
             </div>
           </div>
           <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
@@ -468,7 +472,7 @@ function Intro({
         </CardContent>
       </Card>
       <div className="space-y-6">
-        <RulesCard total={total} pass={pass} examSeconds={examSeconds} />
+        <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
         <TipsCard />
       </div>
     </div>
@@ -717,16 +721,16 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 /* -------------------- Info cards -------------------- */
 
-function RulesTips({ total, pass, examSeconds }: { total: number; pass: number; examSeconds: number }) {
+function RulesTips({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <RulesCard total={total} pass={pass} examSeconds={examSeconds} />
+      <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
       <TipsCard />
     </div>
   );
 }
 
-function RulesCard({ total, pass, examSeconds }: { total: number; pass: number; examSeconds: number }) {
+function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 space-y-3">
@@ -735,7 +739,15 @@ function RulesCard({ total, pass, examSeconds }: { total: number; pass: number; 
           <h3 className="font-semibold text-slate-900">测试规则</h3>
         </div>
         <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
-          <li>本测试共 <b>{total}</b> 道题，答对 <b>{pass}</b> 题或以上即可通过。</li>
+          {typeof maxWrong === "number" ? (
+            <li>
+              本测试共 <b>{total}</b> 道题，最多允许错 <b>{maxWrong}</b> 题即可通过。
+            </li>
+          ) : (
+            <li>
+              本测试共 <b>{total}</b> 道题，答对 <b>{pass}</b> 题或以上即可通过。
+            </li>
+          )}
           <li>每题有多个选项，请选择最正确的答案。</li>
           <li>测试时间为 {Math.round(examSeconds / 60)} 分钟，开始后计时。</li>
           <li>您可以随时标记题目，方便之后查看。</li>
@@ -766,19 +778,66 @@ function TipsCard() {
 /* -------------------- Result -------------------- */
 
 function Result({
-  grade, pass, onRetake, onHome, retaking,
+  grade, pass, maxWrong, onRetake, onHome, retaking,
 }: {
   grade: GradeResult;
   pass: number;
+  maxWrong?: number;
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
 }) {
   const { total, correct: correctCount, wrong: wrongCount, results } = grade;
-  const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  const passed = correctCount >= pass;
   const wrongs = results.filter((r) => !r.is_correct);
+  const isWrongBased = typeof maxWrong === "number";
+  const passed = isWrongBased ? wrongCount <= maxWrong : correctCount >= pass;
 
+  if (isWrongBased) {
+    return (
+      <div className="space-y-8">
+        <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
+          <CardContent className="p-6 md:p-8">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                <div>
+                  <div className={cn("inline-flex items-center gap-2 text-xs font-medium px-2.5 py-1 rounded-full",
+                    passed ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
+                    {passed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                    {passed ? "通过" : "未通过"}
+                  </div>
+                  <div className="mt-3 text-2xl md:text-3xl font-bold">
+                    {passed ? "恭喜！你已通过本次 DMV 小型车 C1 模拟考试。" : "继续努力，再来一次！"}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {passed
+                      ? "本次考试最多允许错 6 题，你的错题数在允许范围内。"
+                      : "本次考试最多允许错 6 题，你的错题数超过了通过标准，建议先复习错题再重新测试。"}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-4 md:gap-8 text-center">
+                  <Stat label="总题数" value={total} />
+                  <Stat label="答对题数" value={correctCount} tone="pos" />
+                  <Stat label="答错题数" value={wrongCount} tone="neg" />
+                  <Stat label="允许错题数" value={maxWrong} />
+                  <Stat label="考试结果" value={passed ? "通过" : "未通过"} tone={passed ? "pos" : "neg"} />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
+                  {retaking ? "抽题中…" : "再考一次"}
+                </Button>
+                <Button variant="outline" onClick={onHome}>返回</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <ExamResultReview results={results} wrongs={wrongs} />
+      </div>
+    );
+  }
+
+  const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   return (
     <div className="space-y-8">
       <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
