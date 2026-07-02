@@ -78,7 +78,7 @@ export const getRandomQuizQuestions = createServerFn({ method: "GET" })
     // correct_answer/explanation. Never return answer keys to the client.
     const { data: rows, error } = await supabasePublic
       .from("quiz_questions")
-      .select("id, question, option_a, option_b, option_c, option_d, category, image_url, question_en, option_a_en, option_b_en, option_c_en, option_d_en")
+      .select("id, question_type, question, option_a, option_b, option_c, option_d, category, image_url, question_en, option_a_en, option_b_en, option_c_en, option_d_en")
       .eq("category", data.category)
       .eq("is_active", true);
     if (error) throw new Error(error.message);
