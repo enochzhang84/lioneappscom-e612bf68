@@ -129,9 +129,8 @@ export const NUMBER_UNITS: UnitDef[] = [
   { key: "billion",  name: "十亿 (B)", symbol: "B",        ...linear(1e9) },
   { key: "trillion", name: "万亿 (T)", symbol: "T",        ...linear(1e12) },
 ];
-
-
-
+// ========== 存储 · 基准：字节 (Byte) ==========
+export const STORAGE_UNITS: UnitDef[] = [
   // 基准：Byte
   { key: "bit",  name: "比特",    symbol: "bit", ...linear(1 / 8) },
   { key: "B",    name: "字节",    symbol: "B",   ...linear(1) },
