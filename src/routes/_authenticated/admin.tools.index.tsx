@@ -532,8 +532,10 @@ function itemPayload(it: Item, pageId: string, override?: Partial<Item>): ItemPa
     button_url: m.button_url ?? "",
     sort_order: m.sort_order,
     is_visible: m.is_visible,
+    status: m.status ?? "live",
   };
 }
+
 
 /* ---------------- Category detail ---------------- */
 
