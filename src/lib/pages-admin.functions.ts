@@ -32,6 +32,7 @@ const pageInput = z.object({
   show_in_nav: z.boolean().default(true),
   is_visible: z.boolean().default(true),
   sort_order: z.number().int().default(0),
+  show_in_admin_shortcut: z.boolean().default(false),
 });
 
 export const adminListPages = createServerFn({ method: "GET" })
