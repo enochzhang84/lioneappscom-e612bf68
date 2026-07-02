@@ -43,7 +43,7 @@ function Dashboard() {
       <section>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <StatCard title="页面" icon={FileText} value={pages.data?.length} to="/admin/pages" tone="blue" />
-          <StatCard title="工具" icon={Wrench} value={tools.data?.length} to="/admin/tools" tone="violet" />
+          <StatCard title="工具" icon={Wrench} value={undefined} to="/admin/tools" tone="violet" />
           <StatCard title="题目" icon={BookOpen} value={quiz.data?.length} to="/admin/quiz" tone="emerald" />
           <StatCard title="产品" icon={Package} value={products.data?.length} to="/admin/products" tone="amber" />
           <StatCard title="案例" icon={Briefcase} value={cases.data?.length} to="/admin/cases" tone="rose" />
