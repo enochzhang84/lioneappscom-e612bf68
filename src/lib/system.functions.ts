@@ -38,7 +38,7 @@ export type AdminActivityLog = {
   entity_type: string | null;
   entity_id: string | null;
   summary: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, string | number | boolean | null>;
   ip: string | null;
   user_agent: string | null;
   created_at: string;
