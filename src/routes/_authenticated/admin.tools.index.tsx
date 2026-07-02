@@ -753,10 +753,14 @@ function ItemPane({
             <Input value={draft.link_url ?? ""} onChange={(e) => patch({ link_url: e.target.value })} placeholder="留空 / http://... / app:drive-c1" />
           </Field>
           <Field label="排序"><Input type="number" value={draft.sort_order ?? 0} onChange={(e) => patch({ sort_order: parseInt(e.target.value) || 0 })} /></Field>
+          <Field label="开发状态">
+            <StatusSelect value={draft.status ?? "live"} onChange={(v) => patch({ status: v })} />
+          </Field>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch checked={draft.is_visible} onCheckedChange={(v) => patch({ is_visible: v })} />
-            <Label>显示在前台</Label>
+            <Label>显示在前台（关闭后无论状态如何前台都不显示）</Label>
           </div>
+
         </div>
       </Section>
 
