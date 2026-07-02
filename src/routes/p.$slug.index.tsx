@@ -308,9 +308,7 @@ function AiHubView({ page, categories, items }: {
               {q ? `没有找到与 "${query}" 相关的工具。` : "该分类暂无工具。"}
             </p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {visible.map((it) => <ItemCard key={it.id} pageSlug={page.slug} item={it} />)}
-            </div>
+            <ToolCardGrid pageSlug={page.slug} items={visible} />
           )}
         </section>
       </SiteLayout>
