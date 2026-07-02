@@ -159,12 +159,19 @@ function QuizEditPage() {
         manual_url: form.manual_url || null,
         google_keywords: form.google_keywords || null,
         category: form.category,
+        question_bank_id: form.question_bank_id,
         difficulty: form.difficulty,
         is_active: form.is_active,
         sort_order: form.sort_order,
       },
     }),
-    onSuccess: () => { toast.success("已保存"); navigate({ to: "/admin/quiz" }); },
+    onSuccess: () => {
+      toast.success("已保存");
+      navigate({
+        to: "/admin/quiz",
+        search: form.question_bank_id ? ({ bank: form.question_bank_id } as never) : ({} as never),
+      });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
