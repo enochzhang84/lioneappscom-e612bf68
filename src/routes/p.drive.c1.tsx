@@ -138,7 +138,6 @@ export function QuizApp(props: QuizAppProps = {}) {
     for (const k of optKeys) {
       parts.push((q as unknown as Record<string, string>)[`option_${k.toLowerCase()}`]);
     }
-    if (q.explanation) parts.push(q.explanation);
     setTranslating(true);
     try {
       const res = await translateFn({ data: { texts: parts, target: "en" } });
@@ -147,7 +146,6 @@ export function QuizApp(props: QuizAppProps = {}) {
       let i = 0;
       entry.question = out[i++];
       for (const k of optKeys) entry.options![k] = out[i++];
-      if (q.explanation) entry.explanation = out[i++];
       setTranslations((prev) => ({ ...prev, [q.id]: entry }));
     } catch (e) {
       console.error("translate error", e);
