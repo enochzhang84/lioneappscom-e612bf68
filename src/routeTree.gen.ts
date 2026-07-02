@@ -27,12 +27,19 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
+import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
 import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authenticated/admin.quiz'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
+import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
+import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authenticated/admin.logs'
+import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
 import { Route as AuthenticatedAdminCasesRouteImport } from './routes/_authenticated/admin.cases'
+import { Route as AuthenticatedAdminBlogRouteImport } from './routes/_authenticated/admin.blog'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAdminToolsIndexRouteImport } from './routes/_authenticated/admin.tools.index'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin.settings.index'
 import { Route as AuthenticatedAdminQuizIndexRouteImport } from './routes/_authenticated/admin.quiz.index'
@@ -135,6 +142,11 @@ const PDriveC1Route = PDriveC1RouteImport.update({
   path: '/p/drive/c1',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
@@ -146,6 +158,11 @@ const AuthenticatedAdminSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSeoRoute = AuthenticatedAdminSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminQuizRoute = AuthenticatedAdminQuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
@@ -162,11 +179,38 @@ const AuthenticatedAdminPagesRoute = AuthenticatedAdminPagesRouteImport.update({
   path: '/pages',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminLogsRoute = AuthenticatedAdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminFilesRoute = AuthenticatedAdminFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminCasesRoute = AuthenticatedAdminCasesRouteImport.update({
   id: '/cases',
   path: '/cases',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminBlogRoute = AuthenticatedAdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminToolsIndexRoute =
   AuthenticatedAdminToolsIndexRouteImport.update({
     id: '/',
@@ -253,12 +297,19 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/blog': typeof AuthenticatedAdminBlogRoute
   '/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
+  '/admin/files': typeof AuthenticatedAdminFilesRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
   '/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
+  '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
@@ -289,6 +340,13 @@ export interface FileRoutesByTo {
   '/update-password': typeof UpdatePasswordRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/blog': typeof AuthenticatedAdminBlogRoute
+  '/admin/files': typeof AuthenticatedAdminFilesRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/admin/seo': typeof AuthenticatedAdminSeoRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
@@ -322,12 +380,19 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/blog': typeof AuthenticatedAdminBlogRoute
   '/_authenticated/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
+  '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRoute
+  '/_authenticated/admin/logs': typeof AuthenticatedAdminLogsRoute
+  '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
   '/_authenticated/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
+  '/_authenticated/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
@@ -361,12 +426,19 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/admin/analytics'
+    | '/admin/blog'
     | '/admin/cases'
+    | '/admin/files'
+    | '/admin/logs'
+    | '/admin/notifications'
     | '/admin/pages'
     | '/admin/products'
     | '/admin/quiz'
+    | '/admin/seo'
     | '/admin/settings'
     | '/admin/tools'
+    | '/admin/users'
     | '/p/drive/c1'
     | '/admin/'
     | '/p/$slug/'
@@ -397,6 +469,13 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/admin/analytics'
+    | '/admin/blog'
+    | '/admin/files'
+    | '/admin/logs'
+    | '/admin/notifications'
+    | '/admin/seo'
+    | '/admin/users'
     | '/p/drive/c1'
     | '/admin'
     | '/p/$slug'
@@ -429,12 +508,19 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/blog'
     | '/_authenticated/admin/cases'
+    | '/_authenticated/admin/files'
+    | '/_authenticated/admin/logs'
+    | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/pages'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/quiz'
+    | '/_authenticated/admin/seo'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/tools'
+    | '/_authenticated/admin/users'
     | '/p/drive/c1'
     | '/_authenticated/admin/'
     | '/p/$slug/'
@@ -600,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PDriveC1RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/tools': {
       id: '/_authenticated/admin/tools'
       path: '/tools'
@@ -612,6 +705,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/seo': {
+      id: '/_authenticated/admin/seo'
+      path: '/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AuthenticatedAdminSeoRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/quiz': {
@@ -635,11 +735,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPagesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/notifications': {
+      id: '/_authenticated/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/logs': {
+      id: '/_authenticated/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AuthenticatedAdminLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/files': {
+      id: '/_authenticated/admin/files'
+      path: '/files'
+      fullPath: '/admin/files'
+      preLoaderRoute: typeof AuthenticatedAdminFilesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/cases': {
       id: '/_authenticated/admin/cases'
       path: '/cases'
       fullPath: '/admin/cases'
       preLoaderRoute: typeof AuthenticatedAdminCasesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/blog': {
+      id: '/_authenticated/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AuthenticatedAdminBlogRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/tools/': {
@@ -822,22 +957,36 @@ const AuthenticatedAdminToolsRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminBlogRoute: typeof AuthenticatedAdminBlogRoute
   AuthenticatedAdminCasesRoute: typeof AuthenticatedAdminCasesRouteWithChildren
+  AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRoute
+  AuthenticatedAdminLogsRoute: typeof AuthenticatedAdminLogsRoute
+  AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRouteWithChildren
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRouteWithChildren
   AuthenticatedAdminQuizRoute: typeof AuthenticatedAdminQuizRouteWithChildren
+  AuthenticatedAdminSeoRoute: typeof AuthenticatedAdminSeoRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
   AuthenticatedAdminToolsRoute: typeof AuthenticatedAdminToolsRouteWithChildren
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminBlogRoute: AuthenticatedAdminBlogRoute,
   AuthenticatedAdminCasesRoute: AuthenticatedAdminCasesRouteWithChildren,
+  AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRoute,
+  AuthenticatedAdminLogsRoute: AuthenticatedAdminLogsRoute,
+  AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRouteWithChildren,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRouteWithChildren,
   AuthenticatedAdminQuizRoute: AuthenticatedAdminQuizRouteWithChildren,
+  AuthenticatedAdminSeoRoute: AuthenticatedAdminSeoRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
   AuthenticatedAdminToolsRoute: AuthenticatedAdminToolsRouteWithChildren,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
