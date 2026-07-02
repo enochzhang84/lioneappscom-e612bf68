@@ -668,6 +668,17 @@ function ItemPane({
               </SelectContent>
             </Select>
           </Field>
+          <Field label="父项目（选择后成为该工具的子页面）">
+            <Select value={draft.parent_id ?? "__none"} onValueChange={(v) => patch({ parent_id: v === "__none" ? null : v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none">— 无（作为一级工具）—</SelectItem>
+                {parentCandidates.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.icon || "🧰"} {p.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
           <Field label="slug（详情页地址）">
             <Input value={draft.slug ?? ""} onChange={(e) => patch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
           </Field>
