@@ -15,6 +15,7 @@ import {
 import { translateTexts } from "@/lib/translate.functions";
 import { Languages, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ExamOptionList } from "@/components/exam/ExamOptionList";
 import {
   CheckCircle2,
   XCircle,
