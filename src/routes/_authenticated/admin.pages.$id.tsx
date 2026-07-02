@@ -188,6 +188,10 @@ function PageEditor() {
                 <Switch checked={isVisible} onCheckedChange={setIsVisible} id="vis" />
                 <Label htmlFor="vis">页面已启用（可访问）</Label>
               </div>
+              <div className="flex items-center gap-3">
+                <Switch checked={showInAdminShortcut} onCheckedChange={setShowInAdminShortcut} id="shortcut" />
+                <Label htmlFor="shortcut">显示在后台快捷编辑</Label>
+              </div>
             </div>
           </CardContent>
         </Card>
