@@ -194,6 +194,7 @@ function ItemDetail() {
   const imageKey = appKey.startsWith("app:image:") ? appKey.slice("app:image:".length) as ImageKind : null;
   const netKey = appKey.startsWith("app:net:") ? appKey.slice("app:net:".length) as NetworkKind : null;
   const simpleKey = appKey.startsWith("app:simple:") ? appKey.slice("app:simple:".length) : null;
+  const currencyKey = appKey.startsWith("app:currency:") ? appKey.slice("app:currency:".length) : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
   const embed = isDeveloping ? undefined : (converterKey
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
