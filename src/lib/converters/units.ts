@@ -70,12 +70,55 @@ export const VOLUME_UNITS: UnitDef[] = [
   { key: "ft3",  name: "立方英尺",   symbol: "ft³", ...linear(28.316846592) },
 ];
 
+// ========== 功率 · 基准：瓦特 (W) ==========
+export const POWER_UNITS: UnitDef[] = [
+  { key: "W",    name: "瓦特",       symbol: "W",    ...linear(1) },
+  { key: "kW",   name: "千瓦",       symbol: "kW",   ...linear(1000) },
+  { key: "MW",   name: "兆瓦",       symbol: "MW",   ...linear(1_000_000) },
+  { key: "hp",   name: "英制马力",   symbol: "hp",   ...linear(745.6998715822702) },
+  { key: "ps",   name: "公制马力",   symbol: "PS",   ...linear(735.49875) },
+  { key: "btuh", name: "BTU/小时",   symbol: "BTU/h", ...linear(0.29307107017) },
+  { key: "kcalh",name: "千卡/小时",  symbol: "kcal/h", ...linear(1.163) },
+];
+
+// ========== 油耗 · 基准：L/100km（数值越小越省油，与 mpg 成反比） ==========
+// L/100km ↔ mpg 是倒数关系，需要自定义 toBase/fromBase。
+export const FUEL_UNITS: UnitDef[] = [
+  { key: "l100km", name: "L/100km",  symbol: "L/100km",
+    toBase:   (v) => v,
+    fromBase: (v) => v },
+  { key: "kmpl",   name: "km/升",    symbol: "km/L",
+    toBase:   (v) => (v === 0 ? Infinity : 100 / v),
+    fromBase: (v) => (v === 0 ? Infinity : 100 / v) },
+  { key: "mpg_us", name: "美制 MPG", symbol: "mpg (US)",
+    toBase:   (v) => (v === 0 ? Infinity : 235.2145833 / v),
+    fromBase: (v) => (v === 0 ? Infinity : 235.2145833 / v) },
+  { key: "mpg_uk", name: "英制 MPG", symbol: "mpg (UK)",
+    toBase:   (v) => (v === 0 ? Infinity : 282.4809363 / v),
+    fromBase: (v) => (v === 0 ? Infinity : 282.4809363 / v) },
+];
+
+// ========== 数字缩放 · 基准：个（1） ==========
+export const NUMBER_UNITS: UnitDef[] = [
+  { key: "one",      name: "个",       symbol: "",         ...linear(1) },
+  { key: "wan",      name: "万",       symbol: "万",       ...linear(1e4) },
+  { key: "yi",       name: "亿",       symbol: "亿",       ...linear(1e8) },
+  { key: "zhao",     name: "兆（万亿）", symbol: "兆",     ...linear(1e12) },
+  { key: "thousand", name: "千 (K)",   symbol: "K",        ...linear(1e3) },
+  { key: "million",  name: "百万 (M)", symbol: "M",        ...linear(1e6) },
+  { key: "billion",  name: "十亿 (B)", symbol: "B",        ...linear(1e9) },
+  { key: "trillion", name: "万亿 (T)", symbol: "T",        ...linear(1e12) },
+];
+
 export const UNIT_SETS: Record<string, UnitDef[]> = {
   length: LENGTH_UNITS,
   area: AREA_UNITS,
   weight: WEIGHT_UNITS,
   temperature: TEMPERATURE_UNITS,
   volume: VOLUME_UNITS,
+  power: POWER_UNITS,
+  fuel: FUEL_UNITS,
+  number: NUMBER_UNITS,
 };
 
 export function getUnits(category: string): UnitDef[] | null {
