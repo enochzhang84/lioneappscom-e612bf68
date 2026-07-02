@@ -179,6 +179,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
   const items = itemsQ.data ?? [];
 
   const [openCat, setOpenCat] = useState<Record<string, boolean>>({});
+  const [openItem, setOpenItem] = useState<Record<string, boolean>>({});
   const [selection, setSelection] = useState<Selection>({ kind: "none" });
 
   useEffect(() => {
