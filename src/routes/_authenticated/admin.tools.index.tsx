@@ -410,6 +410,7 @@ type ItemPayloadT = {
   id?: string;
   page_id: string;
   category_id: string | null;
+  parent_id: string | null;
   slug: string; title: string; page_title: string; subtitle: string;
   icon: string; description: string; content: string; html_content: string;
   image_url: string | null; video_url: string; link_url: string;
