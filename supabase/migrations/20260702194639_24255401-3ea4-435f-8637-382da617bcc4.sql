@@ -1,0 +1,1 @@
+UPDATE public.tool_items SET link_url = 'app:bible-cunp' WHERE id = 'db3ca8ba-74c4-4f0d-a75c-98a8837a8387';
