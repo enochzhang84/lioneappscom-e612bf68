@@ -260,4 +260,124 @@ function StatsPanel({ stats }: { stats: ReturnType<typeof wordStats> }) {
   );
 }
 
+// -------- Custom UI tools --------
+
+function TextSortView() {
+  const [text, setText] = React.useState("");
+  const [order, setOrder] = React.useState<"asc" | "desc" | "natural-asc" | "natural-desc" | "length-asc" | "length-desc" | "reverse" | "shuffle">("asc");
+  const [dedupe, setDedupe] = React.useState(false);
+  const [trim, setTrim] = React.useState(true);
+  const output = React.useMemo(() => {
+    let lines = text.split(/\r?\n/);
+    if (trim) lines = lines.map((l) => l.trim());
+    lines = lines.filter((l) => l.length > 0);
+    if (dedupe) lines = Array.from(new Set(lines));
+    const nat = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+    switch (order) {
+      case "asc": lines.sort(); break;
+      case "desc": lines.sort().reverse(); break;
+      case "natural-asc": lines.sort(nat.compare); break;
+      case "natural-desc": lines.sort(nat.compare).reverse(); break;
+      case "length-asc": lines.sort((a, b) => a.length - b.length); break;
+      case "length-desc": lines.sort((a, b) => b.length - a.length); break;
+      case "reverse": lines.reverse(); break;
+      case "shuffle":
+        for (let i = lines.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [lines[i], lines[j]] = [lines[j], lines[i]]; }
+        break;
+    }
+    return lines.join("\n");
+  }, [text, order, dedupe, trim]);
+  return (
+    <ToolShell title="文本排序" intro="按字母、自然序（含数字）、长度或随机重排每行文本，支持去重和空行清理。" icon="🔀">
+      <section className="rounded-2xl border border-border bg-card p-5 md:p-6 shadow-sm space-y-4">
+        <div>
+          <div className="text-sm font-semibold mb-2">输入（每行一条）</div>
+          <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={"banana\napple\ncherry"} className="min-h-[160px] font-mono text-sm" />
+        </div>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <label className="flex items-center gap-1">排序:
+            <select className="ml-1 border rounded px-2 py-1" value={order} onChange={(e) => setOrder(e.target.value as typeof order)}>
+              <option value="asc">A → Z</option>
+              <option value="desc">Z → A</option>
+              <option value="natural-asc">自然序 A → Z（file1 &lt; file2 &lt; file10）</option>
+              <option value="natural-desc">自然序 Z → A</option>
+              <option value="length-asc">按长度短 → 长</option>
+              <option value="length-desc">按长度长 → 短</option>
+              <option value="reverse">反转原顺序</option>
+              <option value="shuffle">随机打乱</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-1"><input type="checkbox" checked={dedupe} onChange={(e) => setDedupe(e.target.checked)} /> 去重</label>
+          <label className="flex items-center gap-1"><input type="checkbox" checked={trim} onChange={(e) => setTrim(e.target.checked)} /> 去除每行首尾空白</label>
+        </div>
+        <div>
+          <div className="text-sm font-semibold mb-2 flex items-center justify-between"><span>输出（{output ? output.split("\n").length : 0} 行）</span>{output && <CopyButton text={output} />}</div>
+          <Textarea readOnly value={output} className="min-h-[160px] font-mono text-sm bg-muted/30" />
+        </div>
+      </section>
+    </ToolShell>
+  );
+}
+
+function TextCompareView() {
+  const [a, setA] = React.useState("Hello world\nThis is Lione Apps.\nEnjoy!");
+  const [b, setB] = React.useState("Hello world!\nThis is Lione Apps.\nEnjoy.");
+  const parts = React.useMemo(() => diffLines(a, b), [a, b]);
+  const added = parts.filter((p) => p.added).reduce((n, p) => n + (p.count ?? 0), 0);
+  const removed = parts.filter((p) => p.removed).reduce((n, p) => n + (p.count ?? 0), 0);
+  return (
+    <ToolShell title="文本比较" intro="比较两段文本的差异，按行显示新增、删除、保留三种状态，浏览器本地运行。" icon="🔍">
+      <section className="rounded-2xl border border-border bg-card p-5 md:p-6 shadow-sm space-y-4">
+        <div className="grid md:grid-cols-2 gap-3">
+          <div>
+            <div className="text-sm font-semibold mb-2">原文本 A</div>
+            <Textarea value={a} onChange={(e) => setA(e.target.value)} className="min-h-[180px] font-mono text-sm" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold mb-2">新文本 B</div>
+            <Textarea value={b} onChange={(e) => setB(e.target.value)} className="min-h-[180px] font-mono text-sm" />
+          </div>
+        </div>
+        <div className="text-xs text-muted-foreground">差异：<span className="text-emerald-600">+{added} 行新增</span> · <span className="text-destructive">-{removed} 行删除</span></div>
+        <div className="rounded-lg border border-border bg-muted/20 p-3 font-mono text-sm max-h-[400px] overflow-auto">
+          {parts.map((p, i) => (
+            <pre key={i} className={p.added ? "bg-emerald-50 text-emerald-800 px-2" : p.removed ? "bg-red-50 text-red-800 line-through px-2" : "px-2"}>{p.value}</pre>
+          ))}
+        </div>
+      </section>
+    </ToolShell>
+  );
+}
+
+function MarkdownToHtmlView() {
+  const [md, setMd] = React.useState("# 你好 Lione Apps\n\n这是一段 **Markdown** 示例。\n\n- 列表 1\n- 列表 2\n\n```js\nconsole.log('hi');\n```");
+  const html = React.useMemo(() => {
+    try { return marked.parse(md, { async: false, gfm: true, breaks: true }) as string; }
+    catch (e) { return "<pre style='color:red'>" + (e instanceof Error ? e.message : "解析失败") + "</pre>"; }
+  }, [md]);
+  return (
+    <ToolShell title="Markdown 转 HTML" intro="支持 GitHub Flavored Markdown（表格、代码块、任务列表），实时预览并可复制 HTML。" icon="📝">
+      <section className="rounded-2xl border border-border bg-card p-5 md:p-6 shadow-sm space-y-4">
+        <div className="grid md:grid-cols-2 gap-3">
+          <div>
+            <div className="text-sm font-semibold mb-2">Markdown 输入</div>
+            <Textarea value={md} onChange={(e) => setMd(e.target.value)} className="min-h-[280px] font-mono text-sm" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold mb-2 flex items-center justify-between"><span>预览</span><CopyButton text={html} label="复制 HTML" /></div>
+            <div className="rounded-lg border border-border bg-muted/20 p-4 min-h-[280px] prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
+          </div>
+        </div>
+        <details className="rounded-lg border border-border bg-muted/20 p-3">
+          <summary className="cursor-pointer text-sm font-semibold">查看原始 HTML</summary>
+          <Textarea readOnly value={html} className="mt-2 min-h-[180px] font-mono text-xs bg-white" />
+        </details>
+      </section>
+    </ToolShell>
+  );
+}
+
+export const TEXT_TOOL_EXTRA_KEYS = ["text-sort", "text-compare", "text-md-to-html"];
+
+
 export const TEXT_TOOL_KEYS = Object.keys(TOOLS);
