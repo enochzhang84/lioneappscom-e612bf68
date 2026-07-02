@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { getToolItem, type PageFull, type ToolItem, type ToolCategory } from "@/lib/cms.functions";
+import { getExamByCategory, type ExamConfig } from "@/lib/exams.functions";
 import { SiteLayout } from "@/components/SiteLayout";
 import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,20 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:drive-ab-commercial-driver": { render: () => <QuizApp {...COMMERCIAL_DRIVER_PROPS} /> },
 };
 
+function examConfigToProps(cfg: ExamConfig) {
+  return {
+    embedded: true as const,
+    category: cfg.category,
+    total: cfg.total_questions,
+    pass: cfg.pass_count,
+    examSeconds: cfg.time_seconds,
+    title: cfg.title,
+    subtitle: cfg.subtitle ?? undefined,
+    backHref: cfg.back_href ?? undefined,
+    backLabel: cfg.back_label ?? undefined,
+  };
+}
+
 class EmbedErrorBoundary extends React.Component<
   { fullPath?: string; children: React.ReactNode },
   { error: Error | null }
@@ -96,7 +111,14 @@ export const Route = createFileRoute("/p/$slug/i/$itemSlug")({
   loader: async ({ params }) => {
     const data = await getToolItem({ data: { pageSlug: params.slug, itemSlug: params.itemSlug } });
     if (!data) throw notFound();
-    return data;
+    // If the item points at a DB-managed exam, resolve it now so SSR can render title/subtitle.
+    const link = data.item.link_url?.trim() ?? "";
+    let exam: ExamConfig | null = null;
+    if (link.startsWith("app:exam:")) {
+      const category = link.slice("app:exam:".length);
+      if (category) exam = await getExamByCategory({ data: { category } });
+    }
+    return { ...data, exam };
   },
   head: ({ loaderData }) => ({
     meta: loaderData ? [{ title: `${loaderData.item.title} · ${loaderData.page.title}` }] : [],
