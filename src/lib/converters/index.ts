@@ -5,6 +5,9 @@ import { AREA_CONFIGS } from "./area";
 import { WEIGHT_CONFIGS } from "./weight";
 import { TEMPERATURE_CONFIGS } from "./temperature";
 import { VOLUME_CONFIGS } from "./volume";
+import { POWER_CONFIGS } from "./power";
+import { FUEL_CONFIGS } from "./fuel";
+import { NUMBER_CONFIGS } from "./number";
 import { getUnits } from "./units";
 
 const ALL: ConverterConfig[] = [
@@ -13,6 +16,9 @@ const ALL: ConverterConfig[] = [
   ...WEIGHT_CONFIGS,
   ...TEMPERATURE_CONFIGS,
   ...VOLUME_CONFIGS,
+  ...POWER_CONFIGS,
+  ...FUEL_CONFIGS,
+  ...NUMBER_CONFIGS,
 ];
 
 const INDEX = new Map<string, ConverterConfig>(ALL.map((c) => [c.key, c]));
