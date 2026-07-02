@@ -146,6 +146,8 @@ export const getPageBySlug = createServerFn({ method: "GET" })
     return row as PageFull | null;
   });
 
+export type ToolStatus = "developing" | "live" | "paused" | "hidden";
+
 export type ToolCategory = {
   id: string;
   page_id: string;
@@ -153,6 +155,7 @@ export type ToolCategory = {
   description: string | null;
   icon: string | null;
   sort_order: number;
+  status: ToolStatus;
 };
 
 export type ToolItem = {
@@ -173,6 +176,7 @@ export type ToolItem = {
   button_text: string | null;
   sort_order: number;
   created_at: string;
+  status: ToolStatus;
 };
 
 export const getToolsByPageSlug = createServerFn({ method: "GET" })
@@ -191,15 +195,17 @@ export const getToolsByPageSlug = createServerFn({ method: "GET" })
     const [{ data: cats, error: catErr }, { data: items, error: itemErr }] = await Promise.all([
       supabasePublic
         .from("tool_categories")
-        .select("id, page_id, title, description, icon, sort_order")
+        .select("id, page_id, title, description, icon, sort_order, status")
         .eq("page_id", (page as PageFull).id)
         .eq("is_visible", true)
+        .in("status", ["developing", "live"])
         .order("sort_order", { ascending: true }),
       supabasePublic
         .from("tool_items")
-        .select("id, page_id, category_id, parent_id, slug, title, subtitle, icon, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at")
+        .select("id, page_id, category_id, parent_id, slug, title, subtitle, icon, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at, status")
         .eq("page_id", (page as PageFull).id)
         .eq("is_visible", true)
+        .in("status", ["developing", "live"])
         .order("sort_order", { ascending: true }),
     ]);
     if (catErr) throw new Error(catErr.message);
@@ -210,6 +216,7 @@ export const getToolsByPageSlug = createServerFn({ method: "GET" })
       items: (items ?? []) as ToolItem[],
     };
   });
+
 
 export const getToolItem = createServerFn({ method: "GET" })
   .inputValidator((d: { pageSlug: string; itemSlug: string }) =>
