@@ -93,6 +93,7 @@ function PageEditor() {
       setShowInNav(page.show_in_nav ?? true);
       setIsVisible(page.is_visible ?? true);
       setSortOrder(page.sort_order ?? 0);
+      setShowInAdminShortcut((page as { show_in_admin_shortcut?: boolean }).show_in_admin_shortcut ?? false);
       setBlocks(Array.isArray(page.content) ? (page.content as Block[]) : []);
     }
   }, [page]);
