@@ -18,6 +18,8 @@ import { DevToolByKey } from "@/components/tools/DevTool";
 import { TimeToolByKey } from "@/components/tools/TimeTool";
 import { FileHashTool } from "@/components/tools/FileHashTool";
 import { AiToolByKey } from "@/components/ai/AiToolByKey";
+import { PdfTool, type PdfKind } from "@/components/tools/PdfTool";
+import { ImageTool, type ImageKind } from "@/components/tools/ImageTool";
 
 
 const AIR_BRAKE_PROPS = {
