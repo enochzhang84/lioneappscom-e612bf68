@@ -82,6 +82,7 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:bible-cunp": { render: () => <BibleCUNP /> },
   "app:bible-kjv": { render: () => <BibleKJV /> },
   "app:automotive": { render: () => <AutomotiveHub /> },
+  "app:file-hash": { render: () => <FileHashTool /> },
 };
 
 
