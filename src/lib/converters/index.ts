@@ -10,6 +10,7 @@ import { FUEL_CONFIGS } from "./fuel";
 import { NUMBER_CONFIGS } from "./number";
 import { SPEED_CONFIGS } from "./speed";
 import { PRESSURE_CONFIGS } from "./pressure";
+import { STORAGE_CONFIGS } from "./storage";
 import { getUnits } from "./units";
 
 const ALL: ConverterConfig[] = [
@@ -23,6 +24,7 @@ const ALL: ConverterConfig[] = [
   ...NUMBER_CONFIGS,
   ...SPEED_CONFIGS,
   ...PRESSURE_CONFIGS,
+  ...STORAGE_CONFIGS,
 ];
 
 

@@ -13,6 +13,10 @@ import { BibleKJV } from "@/components/bible/BibleKJV";
 import { UnitConverterByKey } from "@/components/converter/UnitConverter";
 import { CalculatorByKey } from "@/components/calculator/Calculator";
 import { AutomotiveHub } from "@/components/automotive/AutomotiveHub";
+import { TextToolByKey } from "@/components/tools/TextTool";
+import { DevToolByKey } from "@/components/tools/DevTool";
+import { TimeToolByKey } from "@/components/tools/TimeTool";
+import { FileHashTool } from "@/components/tools/FileHashTool";
 
 
 const AIR_BRAKE_PROPS = {
@@ -78,6 +82,7 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:bible-cunp": { render: () => <BibleCUNP /> },
   "app:bible-kjv": { render: () => <BibleKJV /> },
   "app:automotive": { render: () => <AutomotiveHub /> },
+  "app:file-hash": { render: () => <FileHashTool /> },
 };
 
 
@@ -175,11 +180,20 @@ function ItemDetail() {
   const appKey = item.link_url?.trim() || "";
   const converterKey = appKey.startsWith("app:converter:") ? appKey.slice("app:converter:".length) : null;
   const calculatorKey = appKey.startsWith("app:calculator:") ? appKey.slice("app:calculator:".length) : null;
+  const textKey = appKey.startsWith("app:text:") ? appKey.slice("app:text:".length) : null;
+  const devKey = appKey.startsWith("app:dev:") ? appKey.slice("app:dev:".length) : null;
+  const timeKey = appKey.startsWith("app:time:") ? appKey.slice("app:time:".length) : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
   const embed = isDeveloping ? undefined : (converterKey
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
     : calculatorKey
     ? { render: () => <CalculatorByKey configKey={calculatorKey} />, fullPath: undefined as string | undefined }
+    : textKey
+    ? { render: () => <TextToolByKey toolKey={textKey} />, fullPath: undefined as string | undefined }
+    : devKey
+    ? { render: () => <DevToolByKey toolKey={devKey} />, fullPath: undefined as string | undefined }
+    : timeKey
+    ? { render: () => <TimeToolByKey toolKey={timeKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
     : undefined)));

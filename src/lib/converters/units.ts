@@ -129,6 +129,24 @@ export const NUMBER_UNITS: UnitDef[] = [
   { key: "billion",  name: "十亿 (B)", symbol: "B",        ...linear(1e9) },
   { key: "trillion", name: "万亿 (T)", symbol: "T",        ...linear(1e12) },
 ];
+// ========== 存储 · 基准：字节 (Byte) ==========
+export const STORAGE_UNITS: UnitDef[] = [
+  // 基准：Byte
+  { key: "bit",  name: "比特",    symbol: "bit", ...linear(1 / 8) },
+  { key: "B",    name: "字节",    symbol: "B",   ...linear(1) },
+  // 十进制（磁盘、网络厂商）
+  { key: "KB",   name: "千字节",  symbol: "KB",  ...linear(1e3) },
+  { key: "MB",   name: "兆字节",  symbol: "MB",  ...linear(1e6) },
+  { key: "GB",   name: "吉字节",  symbol: "GB",  ...linear(1e9) },
+  { key: "TB",   name: "太字节",  symbol: "TB",  ...linear(1e12) },
+  { key: "PB",   name: "拍字节",  symbol: "PB",  ...linear(1e15) },
+  // 二进制（操作系统）
+  { key: "KiB",  name: "KiB",     symbol: "KiB", ...linear(1024) },
+  { key: "MiB",  name: "MiB",     symbol: "MiB", ...linear(1024 ** 2) },
+  { key: "GiB",  name: "GiB",     symbol: "GiB", ...linear(1024 ** 3) },
+  { key: "TiB",  name: "TiB",     symbol: "TiB", ...linear(1024 ** 4) },
+  { key: "PiB",  name: "PiB",     symbol: "PiB", ...linear(1024 ** 5) },
+];
 
 export const UNIT_SETS: Record<string, UnitDef[]> = {
   length: LENGTH_UNITS,
@@ -141,6 +159,7 @@ export const UNIT_SETS: Record<string, UnitDef[]> = {
   number: NUMBER_UNITS,
   speed: SPEED_UNITS,
   pressure: PRESSURE_UNITS,
+  storage: STORAGE_UNITS,
 };
 
 
