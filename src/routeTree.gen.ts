@@ -27,11 +27,13 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
+import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authenticated/admin.quiz'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminCasesRouteImport } from './routes/_authenticated/admin.cases'
+import { Route as AuthenticatedAdminToolsIndexRouteImport } from './routes/_authenticated/admin.tools.index'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin.settings.index'
 import { Route as AuthenticatedAdminQuizIndexRouteImport } from './routes/_authenticated/admin.quiz.index'
 import { Route as AuthenticatedAdminProductsIndexRouteImport } from './routes/_authenticated/admin.products.index'
@@ -133,6 +135,11 @@ const PDriveC1Route = PDriveC1RouteImport.update({
   path: '/p/drive/c1',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -160,6 +167,12 @@ const AuthenticatedAdminCasesRoute = AuthenticatedAdminCasesRouteImport.update({
   path: '/cases',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminToolsIndexRoute =
+  AuthenticatedAdminToolsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminToolsRoute,
+  } as any)
 const AuthenticatedAdminSettingsIndexRoute =
   AuthenticatedAdminSettingsIndexRouteImport.update({
     id: '/',
@@ -245,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
   '/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
+  '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/p/drive/c1': typeof PDriveC1Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
@@ -259,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
   '/admin/quiz/': typeof AuthenticatedAdminQuizIndexRoute
   '/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
+  '/admin/tools/': typeof AuthenticatedAdminToolsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -288,6 +303,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AuthenticatedAdminProductsIndexRoute
   '/admin/quiz': typeof AuthenticatedAdminQuizIndexRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsIndexRoute
+  '/admin/tools': typeof AuthenticatedAdminToolsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -311,6 +327,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
   '/_authenticated/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
+  '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/p/drive/c1': typeof PDriveC1Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
@@ -325,6 +342,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
   '/_authenticated/admin/quiz/': typeof AuthenticatedAdminQuizIndexRoute
   '/_authenticated/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
+  '/_authenticated/admin/tools/': typeof AuthenticatedAdminToolsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -348,6 +366,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/quiz'
     | '/admin/settings'
+    | '/admin/tools'
     | '/p/drive/c1'
     | '/admin/'
     | '/p/$slug/'
@@ -362,6 +381,7 @@ export interface FileRouteTypes {
     | '/admin/products/'
     | '/admin/quiz/'
     | '/admin/settings/'
+    | '/admin/tools/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -391,6 +411,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/quiz'
     | '/admin/settings'
+    | '/admin/tools'
   id:
     | '__root__'
     | '/'
@@ -413,6 +434,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/quiz'
     | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/tools'
     | '/p/drive/c1'
     | '/_authenticated/admin/'
     | '/p/$slug/'
@@ -427,6 +449,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/products/'
     | '/_authenticated/admin/quiz/'
     | '/_authenticated/admin/settings/'
+    | '/_authenticated/admin/tools/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -577,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PDriveC1RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/tools': {
+      id: '/_authenticated/admin/tools'
+      path: '/tools'
+      fullPath: '/admin/tools'
+      preLoaderRoute: typeof AuthenticatedAdminToolsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/settings': {
       id: '/_authenticated/admin/settings'
       path: '/settings'
@@ -611,6 +641,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/cases'
       preLoaderRoute: typeof AuthenticatedAdminCasesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/tools/': {
+      id: '/_authenticated/admin/tools/'
+      path: '/'
+      fullPath: '/admin/tools/'
+      preLoaderRoute: typeof AuthenticatedAdminToolsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminToolsRoute
     }
     '/_authenticated/admin/settings/': {
       id: '/_authenticated/admin/settings/'
@@ -770,12 +807,27 @@ const AuthenticatedAdminSettingsRouteWithChildren =
     AuthenticatedAdminSettingsRouteChildren,
   )
 
+interface AuthenticatedAdminToolsRouteChildren {
+  AuthenticatedAdminToolsIndexRoute: typeof AuthenticatedAdminToolsIndexRoute
+}
+
+const AuthenticatedAdminToolsRouteChildren: AuthenticatedAdminToolsRouteChildren =
+  {
+    AuthenticatedAdminToolsIndexRoute: AuthenticatedAdminToolsIndexRoute,
+  }
+
+const AuthenticatedAdminToolsRouteWithChildren =
+  AuthenticatedAdminToolsRoute._addFileChildren(
+    AuthenticatedAdminToolsRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCasesRoute: typeof AuthenticatedAdminCasesRouteWithChildren
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRouteWithChildren
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRouteWithChildren
   AuthenticatedAdminQuizRoute: typeof AuthenticatedAdminQuizRouteWithChildren
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
+  AuthenticatedAdminToolsRoute: typeof AuthenticatedAdminToolsRouteWithChildren
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -785,6 +837,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRouteWithChildren,
   AuthenticatedAdminQuizRoute: AuthenticatedAdminQuizRouteWithChildren,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
+  AuthenticatedAdminToolsRoute: AuthenticatedAdminToolsRouteWithChildren,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
