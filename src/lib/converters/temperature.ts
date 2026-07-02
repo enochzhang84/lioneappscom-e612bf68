@@ -13,7 +13,7 @@ const COMMON_FORMULAS = [
 const COMMON_FAQS = [
   { q: "为什么 -40°C 和 -40°F 相同？", a: "把两个公式联立求解，−40 是摄氏度与华氏度唯一相等的温度点。" },
   { q: "0K（绝对零度）是多少摄氏度？", a: "0K = −273.15°C = −459.67°F，是理论上的最低温度。" },
-  { q: "为什么温度不能像长度一样简单相乘？", a: "温度存在偏移量（如 32°F 对应 0°C），因此换算是"乘系数+加减常数"的仿射变换。" },
+  { q: "为什么温度不能像长度一样简单相乘？", a: "温度存在偏移量（如 32°F 对应 0°C），因此换算是「乘系数 + 加减常数」的仿射变换。" },
 ];
 
 function make(key: string, name: string, symbol: string, defaultValue: number, extra: {q:string;a:string}[] = []): ConverterConfig {
