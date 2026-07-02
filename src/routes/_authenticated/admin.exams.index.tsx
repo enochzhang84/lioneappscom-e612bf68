@@ -51,7 +51,6 @@ function ExamListPage() {
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-[1400px]">
       <PageHeader
-        icon={GraduationCap}
         title="考试管理"
         description="定义所有 DMV / 驾考类模拟考试的规则：抽题数量、及格分、时限、双语开关等。前台通过 category 自动匹配题库。"
         actions={

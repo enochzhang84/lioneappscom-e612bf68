@@ -46,6 +46,7 @@ import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminQuizIndexRouteImport } from './routes/_authenticated/admin.quiz.index'
 import { Route as AuthenticatedAdminProductsIndexRouteImport } from './routes/_authenticated/admin.products.index'
 import { Route as AuthenticatedAdminPagesIndexRouteImport } from './routes/_authenticated/admin.pages.index'
+import { Route as AuthenticatedAdminExamsIndexRouteImport } from './routes/_authenticated/admin.exams.index'
 import { Route as AuthenticatedAdminCasesIndexRouteImport } from './routes/_authenticated/admin.cases.index'
 import { Route as PSlugIItemSlugRouteImport } from './routes/p.$slug.i.$itemSlug'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
@@ -247,6 +248,12 @@ const AuthenticatedAdminPagesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminPagesRoute,
   } as any)
+const AuthenticatedAdminExamsIndexRoute =
+  AuthenticatedAdminExamsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminExamsRoute,
+  } as any)
 const AuthenticatedAdminCasesIndexRoute =
   AuthenticatedAdminCasesIndexRouteImport.update({
     id: '/',
@@ -306,7 +313,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
   '/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
-  '/admin/exams': typeof AuthenticatedAdminExamsRoute
+  '/admin/exams': typeof AuthenticatedAdminExamsRouteWithChildren
   '/admin/files': typeof AuthenticatedAdminFilesRoute
   '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -327,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
+  '/admin/exams/': typeof AuthenticatedAdminExamsIndexRoute
   '/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
   '/admin/quiz/': typeof AuthenticatedAdminQuizIndexRoute
@@ -349,7 +357,6 @@ export interface FileRoutesByTo {
   '/products/$slug': typeof ProductsSlugRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
-  '/admin/exams': typeof AuthenticatedAdminExamsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRoute
   '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -365,6 +372,7 @@ export interface FileRoutesByTo {
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/admin/cases': typeof AuthenticatedAdminCasesIndexRoute
+  '/admin/exams': typeof AuthenticatedAdminExamsIndexRoute
   '/admin/pages': typeof AuthenticatedAdminPagesIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsIndexRoute
   '/admin/quiz': typeof AuthenticatedAdminQuizIndexRoute
@@ -391,7 +399,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/blog': typeof AuthenticatedAdminBlogRoute
   '/_authenticated/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
-  '/_authenticated/admin/exams': typeof AuthenticatedAdminExamsRoute
+  '/_authenticated/admin/exams': typeof AuthenticatedAdminExamsRouteWithChildren
   '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRoute
   '/_authenticated/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
@@ -412,6 +420,7 @@ export interface FileRoutesById {
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
   '/_authenticated/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
+  '/_authenticated/admin/exams/': typeof AuthenticatedAdminExamsIndexRoute
   '/_authenticated/admin/pages/': typeof AuthenticatedAdminPagesIndexRoute
   '/_authenticated/admin/products/': typeof AuthenticatedAdminProductsIndexRoute
   '/_authenticated/admin/quiz/': typeof AuthenticatedAdminQuizIndexRoute
@@ -459,6 +468,7 @@ export interface FileRouteTypes {
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
     | '/admin/cases/'
+    | '/admin/exams/'
     | '/admin/pages/'
     | '/admin/products/'
     | '/admin/quiz/'
@@ -481,7 +491,6 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/admin/analytics'
     | '/admin/blog'
-    | '/admin/exams'
     | '/admin/files'
     | '/admin/logs'
     | '/admin/notifications'
@@ -497,6 +506,7 @@ export interface FileRouteTypes {
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
     | '/admin/cases'
+    | '/admin/exams'
     | '/admin/pages'
     | '/admin/products'
     | '/admin/quiz'
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
     | '/_authenticated/admin/cases/'
+    | '/_authenticated/admin/exams/'
     | '/_authenticated/admin/pages/'
     | '/_authenticated/admin/products/'
     | '/_authenticated/admin/quiz/'
@@ -831,6 +842,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPagesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminPagesRoute
     }
+    '/_authenticated/admin/exams/': {
+      id: '/_authenticated/admin/exams/'
+      path: '/'
+      fullPath: '/admin/exams/'
+      preLoaderRoute: typeof AuthenticatedAdminExamsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminExamsRoute
+    }
     '/_authenticated/admin/cases/': {
       id: '/_authenticated/admin/cases/'
       path: '/'
@@ -897,6 +915,20 @@ const AuthenticatedAdminCasesRouteChildren: AuthenticatedAdminCasesRouteChildren
 const AuthenticatedAdminCasesRouteWithChildren =
   AuthenticatedAdminCasesRoute._addFileChildren(
     AuthenticatedAdminCasesRouteChildren,
+  )
+
+interface AuthenticatedAdminExamsRouteChildren {
+  AuthenticatedAdminExamsIndexRoute: typeof AuthenticatedAdminExamsIndexRoute
+}
+
+const AuthenticatedAdminExamsRouteChildren: AuthenticatedAdminExamsRouteChildren =
+  {
+    AuthenticatedAdminExamsIndexRoute: AuthenticatedAdminExamsIndexRoute,
+  }
+
+const AuthenticatedAdminExamsRouteWithChildren =
+  AuthenticatedAdminExamsRoute._addFileChildren(
+    AuthenticatedAdminExamsRouteChildren,
   )
 
 interface AuthenticatedAdminPagesRouteChildren {
@@ -979,7 +1011,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminBlogRoute: typeof AuthenticatedAdminBlogRoute
   AuthenticatedAdminCasesRoute: typeof AuthenticatedAdminCasesRouteWithChildren
-  AuthenticatedAdminExamsRoute: typeof AuthenticatedAdminExamsRoute
+  AuthenticatedAdminExamsRoute: typeof AuthenticatedAdminExamsRouteWithChildren
   AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRoute
   AuthenticatedAdminLogsRoute: typeof AuthenticatedAdminLogsRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
@@ -997,7 +1029,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminBlogRoute: AuthenticatedAdminBlogRoute,
   AuthenticatedAdminCasesRoute: AuthenticatedAdminCasesRouteWithChildren,
-  AuthenticatedAdminExamsRoute: AuthenticatedAdminExamsRoute,
+  AuthenticatedAdminExamsRoute: AuthenticatedAdminExamsRouteWithChildren,
   AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRoute,
   AuthenticatedAdminLogsRoute: AuthenticatedAdminLogsRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
