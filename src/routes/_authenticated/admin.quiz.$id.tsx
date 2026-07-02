@@ -126,6 +126,8 @@ function QuizEditPage() {
     if (!isNew && q.data) {
       setForm({
         id: q.data.id,
+        question_type: ((q.data as { question_type?: QType }).question_type ?? "single_choice") as QType,
+        image_url: (q.data as { image_url?: string | null }).image_url ?? "",
         question: q.data.question,
         option_a: q.data.option_a,
         option_b: q.data.option_b,
