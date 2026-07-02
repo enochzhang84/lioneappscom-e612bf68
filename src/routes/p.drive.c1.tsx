@@ -461,7 +461,6 @@ function Exam({
   const questionEn = q.question_en || (showTranslation ? tr?.question : null);
   const showAiBadge = showTranslation && !q.question_en && !!tr?.question;
 
-  const isImageChoice = q.question_type === "image_choice";
   const isSignRecognition = q.question_type === "sign_recognition";
 
   return (
@@ -489,87 +488,28 @@ function Exam({
           </div>
         </div>
 
-        {/* Media: image_choice = big composite; sign_recognition = single sign; single_choice = optional */}
         {q.image_url && (
           <div className="flex justify-center">
             <img
               src={q.image_url}
               alt={isSignRecognition ? "路标" : "题目配图"}
               loading="lazy"
-              className={cn(
-                "w-auto object-contain rounded-xl border border-slate-200 bg-white p-3",
-                isImageChoice ? "max-h-[420px]" : isSignRecognition ? "max-h-64" : "max-h-64 md:max-h-80",
-              )}
+              className="w-auto max-h-[420px] object-contain rounded-xl border border-slate-200 bg-white p-3"
             />
           </div>
         )}
 
+        <ExamOptionList
+          options={options.map((o) => ({
+            key: o.key,
+            text: o.text,
+            textEn: o.textEn || (showTranslation ? tr?.options?.[o.key] : null),
+          }))}
+          selected={answers[q.id] ?? null}
+          onSelect={pick}
+          showTranslation={showTranslation}
+        />
 
-        <div className={cn("gap-3", isImageChoice ? "grid grid-cols-2 md:grid-cols-4" : "space-y-3")}>
-          {options.map(({ key, text, textEn }) => {
-            const selected = answers[q.id] === key;
-            const optEn = textEn || (showTranslation ? tr?.options?.[key] : null);
-            if (isImageChoice) {
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => pick(key)}
-                  className={cn(
-                    "rounded-xl border p-4 flex flex-col items-center justify-center gap-2 transition-all",
-                    selected
-                      ? "border-blue-500 bg-blue-50 shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
-                      : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "h-10 w-10 rounded-full grid place-items-center text-lg font-bold transition-colors",
-                      selected ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700",
-                    )}
-                  >
-                    {key}
-                  </span>
-                </button>
-              );
-            }
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => pick(key)}
-                className={cn(
-                  "w-full text-left rounded-xl border p-4 md:p-5 flex items-start gap-4 transition-all",
-                  selected
-                    ? "border-blue-500 bg-blue-50 shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
-                    : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40",
-                )}
-              >
-                <span
-                  className={cn(
-                    "shrink-0 h-6 w-6 rounded-full grid place-items-center text-[11px] mt-0.5 transition-colors",
-                    selected
-                      ? "bg-blue-600 border-2 border-blue-600 text-white"
-                      : "border-2 border-slate-300 bg-white",
-                  )}
-                >
-                  {selected && <span className="h-2 w-2 rounded-full bg-white" />}
-                </span>
-                <div className="flex-1 min-w-0 flex gap-2">
-                  <span className={cn("font-semibold", selected ? "text-blue-700" : "text-slate-700")}>{key}.</span>
-                  <div className="min-w-0">
-                    <div className={cn("text-sm md:text-base leading-relaxed", selected ? "text-slate-900" : "text-slate-700")}>
-                      {text}
-                    </div>
-                    {(showTranslation || textEn) && optEn && (
-                      <div className="mt-1 text-xs md:text-sm text-slate-500 italic leading-relaxed">{optEn}</div>
-                    )}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
 
 
         <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
