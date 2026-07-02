@@ -415,6 +415,33 @@ function NodeEditor({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          {!isEdit && parentType === "module" && (
+            <div>
+              <Label>创建类型</Label>
+              <div className="flex gap-2 mt-1">
+                <Button
+                  type="button"
+                  variant={type === "module" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setType("module")}
+                >
+                  考试项目（子模块）
+                </Button>
+                <Button
+                  type="button"
+                  variant={type === "bank" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setType("bank")}
+                >
+                  题库
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                考试项目可再嵌套题库（如「图标考试」下的官方/参考题库）。
+              </p>
+            </div>
+          )}
+
           <div>
             <Label>名称（中文）*</Label>
             <Input
