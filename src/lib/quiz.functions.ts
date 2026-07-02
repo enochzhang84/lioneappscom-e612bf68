@@ -34,6 +34,13 @@ export type GradedQuestion = {
   correct_answer: "A" | "B" | "C" | "D";
   explanation: string | null;
   explanation_en: string | null;
+  official_source: string | null;
+  manual_name: string | null;
+  manual_chapter: string | null;
+  manual_page: string | null;
+  manual_url: string | null;
+  google_keywords: string | null;
+  category: string;
   picked: "A" | "B" | "C" | "D" | null;
   is_correct: boolean;
 };
