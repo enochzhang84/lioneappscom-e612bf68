@@ -19,10 +19,23 @@ const AIR_BRAKE_PROPS = {
   backLabel: "← 返回驾考工具",
 };
 
+const COMBINATION_VEHICLE_PROPS = {
+  embedded: true as const,
+  category: "combination_vehicle",
+  total: 20,
+  pass: 16,
+  examSeconds: 30 * 60,
+  title: "A/B 照 · 组合车辆模拟考试",
+  subtitle: "DMV 风格 · 随机 20 题 · 30 分钟 · 16 题通过",
+  backHref: "/p/drive",
+  backLabel: "← 返回驾考工具",
+};
+
 const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath?: string }> = {
   "app:drive-c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "/p/drive/c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "app:drive-ab-air-brake": { render: () => <QuizApp {...AIR_BRAKE_PROPS} /> },
+  "app:drive-ab-combination-vehicle": { render: () => <QuizApp {...COMBINATION_VEHICLE_PROPS} /> },
 };
 
 class EmbedErrorBoundary extends React.Component<
