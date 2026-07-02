@@ -7,6 +7,7 @@ import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Maximize2, Loader2, AlertTriangle } from "lucide-react";
 import { QuizApp } from "./p.drive.c1";
+import { BibleCUV } from "@/components/bible/BibleCUV";
 
 const AIR_BRAKE_PROPS = {
   embedded: true as const,
