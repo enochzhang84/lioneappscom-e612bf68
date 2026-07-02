@@ -56,8 +56,60 @@ export type Database = {
         }
         Relationships: []
       }
+      media_assets: {
+        Row: {
+          alt_text: string | null
+          bucket: string
+          created_at: string
+          height: number | null
+          id: string
+          is_public: boolean
+          mime_type: string | null
+          name: string
+          path: string
+          size_bytes: number | null
+          tags: string[]
+          updated_at: string
+          uploaded_by: string | null
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          bucket?: string
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_public?: boolean
+          mime_type?: string | null
+          name: string
+          path: string
+          size_bytes?: number | null
+          tags?: string[]
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          bucket?: string
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_public?: boolean
+          mime_type?: string | null
+          name?: string
+          path?: string
+          size_bytes?: number | null
+          tags?: string[]
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Relationships: []
+      }
       pages: {
         Row: {
+          blocks: Json
           content: Json
           created_at: string
           id: string
@@ -71,6 +123,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          blocks?: Json
           content?: Json
           created_at?: string
           id?: string
@@ -84,6 +137,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          blocks?: Json
           content?: Json
           created_at?: string
           id?: string
@@ -274,6 +328,45 @@ export type Database = {
           question?: string
           question_en?: string | null
           sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_meta: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          og_image_url: string | null
+          path: string
+          robots: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          og_image_url?: string | null
+          path: string
+          robots?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          og_image_url?: string | null
+          path?: string
+          robots?: string
+          title?: string | null
           updated_at?: string
         }
         Relationships: []
