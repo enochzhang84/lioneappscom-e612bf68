@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { EmojiPicker } from "@/components/admin/EmojiPicker";
 
 export const Route = createFileRoute("/_authenticated/admin/tools/")({
   component: ToolsAdmin,
@@ -557,7 +558,7 @@ function CategoryPane({
         <div className="text-sm font-semibold">分类信息</div>
         <div className="grid gap-3 md:grid-cols-2">
           <Field label="分类名称"><Input value={draft.title ?? ""} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="驾照宝典" /></Field>
-          <Field label="图标 emoji"><Input value={draft.icon ?? ""} onChange={(e) => setDraft({ ...draft, icon: e.target.value })} placeholder="🚗" /></Field>
+          <Field label="图标 emoji"><EmojiPicker value={draft.icon} onChange={(v) => setDraft({ ...draft, icon: v })} /></Field>
           <Field label="简介"><Input value={draft.description ?? ""} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="各类驾照模拟考试" /></Field>
           <Field label="排序（小的在前）"><Input type="number" value={draft.sort_order ?? 0} onChange={(e) => setDraft({ ...draft, sort_order: parseInt(e.target.value) || 0 })} /></Field>
           <div className="flex items-center gap-3 md:col-span-2">
@@ -717,7 +718,7 @@ function ItemPane({
             <Input value={draft.slug ?? ""} onChange={(e) => patch({ slug: e.target.value })} pattern="[a-z0-9-]+" placeholder="c1-exam" />
           </Field>
           <Field label="标题"><Input value={draft.title ?? ""} onChange={(e) => patch({ title: e.target.value })} placeholder="小型车 C1 模拟考试" /></Field>
-          <Field label="图标 emoji"><Input value={draft.icon ?? ""} onChange={(e) => patch({ icon: e.target.value })} placeholder="🚗" /></Field>
+          <Field label="图标 emoji"><EmojiPicker value={draft.icon} onChange={(v) => patch({ icon: v })} /></Field>
           <div className="md:col-span-2">
             <Field label="简介（卡片描述）">
               <Input value={draft.description ?? ""} onChange={(e) => patch({ description: e.target.value })} placeholder="加州 DMV 驾照模拟考试" />
