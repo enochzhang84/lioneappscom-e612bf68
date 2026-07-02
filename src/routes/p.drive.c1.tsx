@@ -12,6 +12,8 @@ import {
   type GradedQuestion,
   type GradeResult,
 } from "@/lib/quiz.functions";
+import { translateTexts } from "@/lib/translate.functions";
+import { Languages, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
@@ -38,6 +40,12 @@ export const Route = createFileRoute("/p/drive/c1")({
 });
 
 type Phase = "intro" | "exam" | "result";
+
+type QuestionTranslation = {
+  question?: string;
+  options?: Partial<Record<"A" | "B" | "C" | "D", string>>;
+  explanation?: string;
+};
 
 export type QuizAppProps = {
   embedded?: boolean;
@@ -85,6 +93,10 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [current, setCurrent] = useState(0);
   const [grade, setGrade] = useState<GradeResult | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(EXAM_SECONDS);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [translations, setTranslations] = useState<Record<string, QuestionTranslation>>({});
+  const [translating, setTranslating] = useState(false);
+  const translateFn = useServerFn(translateTexts);
 
   async function startExam() {
     const rows = await load.mutateAsync();
@@ -116,6 +128,49 @@ export function QuizApp(props: QuizAppProps = {}) {
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
 
+  async function ensureTranslation(q: QuizQuestion) {
+    if (translations[q.id]) return;
+    const optKeys = (["A", "B", "C", "D"] as const).filter(
+      (k) => !!(q as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`],
+    );
+    const parts: string[] = [];
+    parts.push(q.question);
+    for (const k of optKeys) {
+      parts.push((q as unknown as Record<string, string>)[`option_${k.toLowerCase()}`]);
+    }
+    setTranslating(true);
+    try {
+      const res = await translateFn({ data: { texts: parts, target: "en" } });
+      const out = res.translations;
+      const entry: QuestionTranslation = { options: {} };
+      let i = 0;
+      entry.question = out[i++];
+      for (const k of optKeys) entry.options![k] = out[i++];
+      setTranslations((prev) => ({ ...prev, [q.id]: entry }));
+    } catch (e) {
+      console.error("translate error", e);
+    } finally {
+      setTranslating(false);
+    }
+  }
+
+  async function toggleTranslation() {
+    const next = !showTranslation;
+    setShowTranslation(next);
+    if (next && phase === "exam") {
+      const q = questions[current];
+      if (q) await ensureTranslation(q);
+    }
+  }
+
+  // auto-fetch translation when navigating between questions while enabled
+  useEffect(() => {
+    if (!showTranslation || phase !== "exam") return;
+    const q = questions[current];
+    if (q) void ensureTranslation(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, showTranslation, phase]);
+
   const body = (
     <div className="bg-[#F8FAFC] min-h-screen">
       <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-6 md:py-8">
@@ -130,7 +185,11 @@ export function QuizApp(props: QuizAppProps = {}) {
           backHref={backHref}
           backLabel={backLabel}
           onReset={phase !== "intro" ? resetToIntro : undefined}
+          showTranslation={showTranslation}
+          onToggleTranslation={toggleTranslation}
+          translating={translating}
         />
+
 
         {phase === "intro" && (
           <div className="mt-6">
@@ -154,6 +213,9 @@ export function QuizApp(props: QuizAppProps = {}) {
                 setAnswers={setAnswers}
                 current={current}
                 setCurrent={setCurrent}
+                showTranslation={showTranslation}
+                translations={translations}
+                translating={translating}
               />
               <RulesTips total={TOTAL} pass={PASS} examSeconds={EXAM_SECONDS} />
             </div>
@@ -195,6 +257,7 @@ function QuizPage() {
 
 function BlueBanner({
   embedded, phase, secondsLeft, current, total, title, subtitle, backHref, backLabel, onReset,
+  showTranslation, onToggleTranslation, translating,
 }: {
   embedded: boolean;
   phase: Phase;
@@ -206,6 +269,9 @@ function BlueBanner({
   backHref: string;
   backLabel: string;
   onReset?: () => void;
+  showTranslation?: boolean;
+  onToggleTranslation?: () => void;
+  translating?: boolean;
 }) {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
@@ -232,12 +298,31 @@ function BlueBanner({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {phase === "exam" && (
               <>
                 <StatChip icon={<Clock size={16} />} label="剩余时间" value={`${mm}:${ss}`} />
                 <StatChip icon={<ListChecks size={16} />} label="题目进度" value={`${current + 1} / ${total}`} />
               </>
+            )}
+            {onToggleTranslation && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onToggleTranslation}
+                className={cn(
+                  "border border-white/20 text-white",
+                  showTranslation ? "bg-white text-blue-700 hover:bg-white/90" : "bg-white/15 hover:bg-white/25",
+                )}
+                title="在线中英对照翻译"
+              >
+                {translating ? (
+                  <Loader2 size={14} className="mr-1 animate-spin" />
+                ) : (
+                  <Languages size={14} className="mr-1" />
+                )}
+                {showTranslation ? "中英对照 · 开" : "中英对照"}
+              </Button>
             )}
             {onReset && (
               <Button variant="secondary" size="sm" onClick={onReset} className="bg-white/15 hover:bg-white/25 text-white border border-white/20">
@@ -250,6 +335,7 @@ function BlueBanner({
     </div>
   );
 }
+
 
 function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
@@ -319,14 +405,19 @@ function Intro({
 
 function Exam({
   questions, answers, setAnswers, current, setCurrent,
+  showTranslation = false, translations = {}, translating = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, "A" | "B" | "C" | "D">>>;
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
+  showTranslation?: boolean;
+  translations?: Record<string, QuestionTranslation>;
+  translating?: boolean;
 }) {
   const q = questions[current];
+  const tr = translations[q?.id ?? ""];
   const options = useMemo(
     () =>
       (["A", "B", "C", "D"] as const)
@@ -343,6 +434,9 @@ function Exam({
     setAnswers((prev) => ({ ...prev, [q.id]: k }));
   }
 
+  const questionEn = q.question_en || (showTranslation ? tr?.question : null);
+  const showAiBadge = showTranslation && !q.question_en && !!tr?.question;
+
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 md:p-8 space-y-6">
@@ -352,9 +446,17 @@ function Exam({
             <h2 className="text-base md:text-lg font-semibold leading-relaxed whitespace-pre-wrap text-slate-900">
               {q.question}
             </h2>
-            {q.question_en && (
+            {(showTranslation || q.question_en) && questionEn && (
               <p className="mt-1.5 text-sm md:text-base text-slate-500 leading-relaxed whitespace-pre-wrap italic">
-                {q.question_en}
+                {questionEn}
+                {showAiBadge && (
+                  <span className="ml-2 not-italic text-[10px] uppercase tracking-wider bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">AI</span>
+                )}
+              </p>
+            )}
+            {showTranslation && !questionEn && translating && (
+              <p className="mt-1.5 text-xs text-slate-400 italic inline-flex items-center gap-1">
+                <Loader2 size={12} className="animate-spin" /> 正在翻译…
               </p>
             )}
           </div>
@@ -363,6 +465,7 @@ function Exam({
         <div className="space-y-3">
           {options.map(({ key, text, textEn }) => {
             const selected = answers[q.id] === key;
+            const optEn = textEn || (showTranslation ? tr?.options?.[key] : null);
             return (
               <button
                 key={key}
@@ -391,8 +494,8 @@ function Exam({
                     <div className={cn("text-sm md:text-base leading-relaxed", selected ? "text-slate-900" : "text-slate-700")}>
                       {text}
                     </div>
-                    {textEn && (
-                      <div className="mt-1 text-xs md:text-sm text-slate-500 italic leading-relaxed">{textEn}</div>
+                    {(showTranslation || textEn) && optEn && (
+                      <div className="mt-1 text-xs md:text-sm text-slate-500 italic leading-relaxed">{optEn}</div>
                     )}
                   </div>
                 </div>
@@ -400,6 +503,7 @@ function Exam({
             );
           })}
         </div>
+
 
         <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
           <Button
