@@ -12,6 +12,8 @@ import { BibleCUNP } from "@/components/bible/BibleCUNP";
 import { BibleKJV } from "@/components/bible/BibleKJV";
 import { UnitConverterByKey } from "@/components/converter/UnitConverter";
 import { CalculatorByKey } from "@/components/calculator/Calculator";
+import { AutomotiveHub } from "@/components/automotive/AutomotiveHub";
+
 
 const AIR_BRAKE_PROPS = {
   embedded: true as const,
