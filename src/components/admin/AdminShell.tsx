@@ -53,25 +53,29 @@ const STATIC_QUICK_EDIT: NavItem[] = [
   { to: "/admin/tools", label: "实用工具", icon: Wrench, group: QUICK_EDIT_GROUP },
 ];
 
+// Platform Admin — 11 个模块（宪法级顺序，勿随意增删）
 export const ADMIN_NAV: NavItem[] = [
-  { to: "/admin", label: "仪表盘", icon: LayoutDashboard, group: "概览" },
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, group: "Platform" },
 
-  { to: "/admin/pages", label: "页面管理", icon: FileText, group: "内容" },
-  { to: "/admin/tools", label: "工具管理", icon: Wrench, group: "内容" },
-  { to: "/admin/quiz", label: "题库管理", icon: BookOpen, group: "内容" },
-  { to: "/admin/exams", label: "考试管理", icon: GraduationCap, group: "内容" },
-  { to: "/admin/blog", label: "文章中心", icon: Newspaper, group: "内容" },
-  { to: "/admin/products", label: "产品", icon: Package, group: "内容" },
-  { to: "/admin/cases", label: "案例", icon: Briefcase, group: "内容" },
+  { to: "/admin/pages", label: "Content — 页面", icon: FileText, group: "Content" },
+  { to: "/admin/blog", label: "Content — 文章", icon: Newspaper, group: "Content" },
+  { to: "/admin/cases", label: "Content — 案例", icon: Briefcase, group: "Content" },
 
-  { to: "/admin/analytics", label: "网站运营中心", icon: BarChart3, group: "运营" },
-  { to: "/admin/seo", label: "SEO 管理", icon: Search, group: "运营" },
+  { to: "/admin/tools", label: "Tools — 工具", icon: Wrench, group: "Tools" },
+  { to: "/admin/quiz", label: "Tools — 题库", icon: BookOpen, group: "Tools" },
 
-  { to: "/admin/users", label: "用户管理", icon: Users, group: "系统" },
-  { to: "/admin/files", label: "文件管理", icon: FolderOpen, group: "系统" },
-  { to: "/admin/notifications", label: "通知中心", icon: Bell, group: "系统" },
-  { to: "/admin/logs", label: "操作日志", icon: ScrollText, group: "系统" },
-  { to: "/admin/settings", label: "站点设置", icon: Settings, group: "系统" },
+  { to: "/admin/exams", label: "Exams", icon: GraduationCap, group: "Exams" },
+
+  { to: "/admin/products", label: "Products", icon: Package, group: "Products" },
+
+  { to: "/admin/analytics", label: "Analytics", icon: BarChart3, group: "Analytics" },
+  { to: "/admin/seo", label: "SEO", icon: Search, group: "Analytics" },
+
+  { to: "/admin/users", label: "Users", icon: Users, group: "System" },
+  { to: "/admin/files", label: "Files", icon: FolderOpen, group: "System" },
+  { to: "/admin/notifications", label: "Notifications", icon: Bell, group: "System" },
+  { to: "/admin/logs", label: "Logs", icon: ScrollText, group: "System" },
+  { to: "/admin/settings", label: "Platform Settings", icon: Settings, group: "System" },
 ];
 
 
