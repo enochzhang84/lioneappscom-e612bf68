@@ -139,7 +139,10 @@ export const UNIT_SETS: Record<string, UnitDef[]> = {
   power: POWER_UNITS,
   fuel: FUEL_UNITS,
   number: NUMBER_UNITS,
+  speed: SPEED_UNITS,
+  pressure: PRESSURE_UNITS,
 };
+
 
 export function getUnits(category: string): UnitDef[] | null {
   return UNIT_SETS[category] ?? null;
