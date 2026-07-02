@@ -10,6 +10,7 @@ import { QuizApp } from "./p.drive.c1";
 import { BibleCUV } from "@/components/bible/BibleCUV";
 import { BibleCUNP } from "@/components/bible/BibleCUNP";
 import { BibleKJV } from "@/components/bible/BibleKJV";
+import { UnitConverterByKey } from "@/components/converter/UnitConverter";
 
 const AIR_BRAKE_PROPS = {
   embedded: true as const,
@@ -143,9 +144,20 @@ export const Route = createFileRoute("/p/$slug/i/$itemSlug")({
     }
     return { ...data, exam };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData ? [{ title: `${loaderData.item.title} · ${loaderData.page.title}` }] : [],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) return { meta: [] };
+    const { item, page } = loaderData;
+    const title = `${item.title} · ${page.title}`;
+    const desc = item.description || item.subtitle || `${item.title} - ${page.title}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+      ],
+    };
+  },
   component: ItemDetail,
 });
 
@@ -155,10 +167,13 @@ function ItemDetail() {
   };
 
   const appKey = item.link_url?.trim() || "";
+  const converterKey = appKey.startsWith("app:converter:") ? appKey.slice("app:converter:".length) : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
-  const embed = staticEmbed ?? (exam
+  const embed = converterKey
+    ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
+    : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
-    : undefined);
+    : undefined));
   if (embed) {
     return (
       <SiteLayout>

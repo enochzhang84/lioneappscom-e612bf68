@@ -1,174 +1,88 @@
 
-# Lione Apps Platform 后台架构重规划
+## 目标
 
-一次性搭好长期骨架，之后所有新功能"往里塞"，而不是"改后台"。
+在【实用工具 → 换算工具】下建立一个可扩展的**单位换算中心**。所有换算器共用一个 `UnitConverter` 组件，新增单位只需加配置，不写页面逻辑。第一阶段完整上线【长度换算】8 个单位，其他分类后续按 config 追加。
 
----
+## 架构（一次搭好，后续复用）
 
-## 一、核心理念
+**1. 通用组件 `src/components/converter/UnitConverter.tsx`**
 
-- **Platform First**：Lione Apps 不是一个网站后台，而是数字化平台。所有能力优先做成平台级公共模块。
-- **Build Once, Reuse Everywhere**：新功能先问"是否可复用 / 是否属于 Platform Core / 是否其它产品也能用"。
-- **一个 Sidebar**：整个 Platform Admin 只保留一套导航，不再新增第二个 sidebar。
-- **模块化产品 + 插件化工具**：产品可独立启用/隐藏；工具作为 Plugin 注册，加工具不改后台。
+单一组件驱动所有换算页面。Props：
+- `title` / `intro` — 页面标题、简介
+- `units` — 单位定义数组：`{ key, name, symbol, toBase(v), fromBase(v) }`（用"到基准单位"函数支持温度这类非线性换算）
+- `defaultUnit` / `defaultValue`
+- `examples` — 常用换算示例（[{ from, to, note }]）
+- `formulas` — 公式说明（Markdown 字符串数组）
+- `faqs` — [{ q, a }]
 
----
+组件内实现：
+- 输入框 + 单位下拉 → 实时算出所有其它单位
+- 结果表格（每行"复制"按钮 + 一键"复制全部"）
+- 示例、公式、FAQ 三个折叠区块
+- 移动端响应式
 
-## 二、后台顶层导航（唯一 Sidebar）
+**2. 单位配置 `src/lib/converters/`**
 
-```text
-📊 Dashboard          仪表盘
-📂 Content            页面 / 博客 / 案例 / 菜单 / SEO
-🧰 Tools              工具中心（Plugin 化）
-📚 Exams              考试与题库
-📦 Products           产品模块（Website / Church / Construction / CRM / AI …）
-📈 Analytics          运营中心（PV / UV / 转化 / 事件）
-👤 Users              用户 / 角色 / 权限
-📁 Files              文件 / 图片 / 媒体
-🔔 Notifications      通知中心
-📋 Logs               操作日志 / 审计
-⚙  Platform Settings  站点设置 / 品牌 / API Key / 邮件 / AI / 集成
-```
+- `types.ts` — `UnitDef`、`ConverterConfig` 类型
+- `length.ts` — 长度 8 单位（m / ft / in / cm / mm / km / mile / yd），每个单位一份 `ConverterConfig`（标题、简介、示例、公式、FAQ、SEO）
+- 后续 `area.ts` / `weight.ts` / `temperature.ts` / `volume.ts` / `finance.ts` … 按同样格式添加
 
-现有 15 个入口重新归到这 11 个 Group 下，不再散乱。
+一个 `getConverterConfig(key)` 索引函数，供插件使用。
 
----
+**3. 插件注册 `src/lib/plugin-registry.tools.ts`**（沿用现有 PluginRegistry）
 
-## 三、Platform Core（跨产品复用）
+注册单一插件 `app:converter`。组件从 `config.converterKey` 读配置 key（如 `length-m`），再调 `UnitConverter` 渲染。
 
-以下能力做成"和具体产品解耦"的核心层，官网、教会、装修、CRM、AI 全部共用：
+同时在 `src/routes/p.$slug.i.$itemSlug.tsx` 的 `EMBEDDED_APPS` 里添加分发逻辑：`app:converter:<key>` → 拿对应配置渲染。这样一个 link_url 直接指向单位配置，不必为每个单位改代码。
 
-- 认证 Auth / 角色 RBAC / 权限 Permission
-- 页面 Pages / 菜单 Menus / SEO Meta
-- 文件 Files / 图片 Media
-- 文章 Blog / 帮助文档 Docs
-- 通知 Notifications / 日志 Activity Logs
-- 运营统计 Analytics（pageviews + 自定义事件）
-- 搜索 Search / AI 接口 / 对外 API
-- 平台设置 Settings（品牌、域名、支付、集成）
+**4. SEO**
 
-产品模块只写"业务表 + 业务页面"，禁止重复实现上述能力。
+`p.$slug.i.$itemSlug.tsx` 的 `head()` 已从 tool_item / seo_meta 读取。给每个 tool_item 写入 seo_title / seo_description / seo_keywords（种子迁移里带上），Google 可独立收录。
 
----
+## 数据（migration + 数据插入）
 
-## 四、产品模块化（Product Modules）
+**Migration — 结构无需变**（沿用 tool_categories / tool_items）。仅需插入数据。
 
-每个产品是一个可插拔模块：
+**Insert 数据**（分两个 insert 调用，不动 schema）：
 
-- Website（官网）
-- Church（教会管理，含 HOC3）
-- Construction（装修报价）
-- CRM
-- AI Tools
-- DMV（作为 Tools 下的 Exam 模块）
+1. 在【换算工具】父分类下创建 9 个子分类：📏长度 / 📐面积 / ⚖️重量 / 🌡️温度 / 💧体积 / 💱金融 / 🏗️装修 / 🚚物流 / 🚗汽车。字段：icon(emoji)、slug、sort_order、is_active。
 
-统一 metadata：`key / name / icon / enabled / visible / route_prefix / required_roles`。
+2. 在【长度换算】下插入 8 个 tool_item：米 / 英尺 / 英寸 / 厘米 / 毫米 / 公里 / 英里 / 码。每条：
+   - `link_url = app:converter:length-<unit>`
+   - `seo_title` / `seo_description` / `seo_keywords`
+   - `sort_order`
 
-后台 Products 中心提供"启用/隐藏/排序"开关；导航根据启用状态动态生成。
+其它 8 个分类只建**分类**（空目录 + 前台标记"即将上线"），第二/三阶段再灌工具项。
 
----
+## 后台
 
-## 五、工具插件化（Tool Plugins）
+复用现有【工具管理】树，无需改后台代码：新分类和 items 会自动出现在树里，管理员可以编辑标题/简介/图标/SEO/启用停用/排序/复制链接（现有 UI 已支持）。
 
-工具（DMV、汇率、PDF、二维码、图片、世界时间、AI …）统一注册为 Tool Plugin：
+## 前台
 
-```text
-plugin = {
-  slug, name, icon, category,
-  component_key,        // 前端组件映射
-  config_schema,        // JSON Schema 参数
-  required_capability   // exams / files / ai …
-}
-```
+- `/p/tools`（换算工具页面）已按 tool_categories 渲染 → 自动显示 9 个新分类。
+- 点击【长度换算】进入分类页 → 显示 8 个单位卡片。
+- 点击卡片 → `/p/tools/i/<slug>` → EMBEDDED_APPS 分发到 `UnitConverter`。
 
-新增工具只需：
-1. 在 `tool_plugins` 里加一条记录
-2. 在前端 `PluginRegistry` 注册一个组件
+## 第一阶段交付清单
 
-不改 sidebar、不改路由、不改后台。
+- [ ] `src/lib/converters/types.ts`
+- [ ] `src/lib/converters/length.ts`（8 个 config，含 examples/formulas/FAQ/SEO）
+- [ ] `src/lib/converters/index.ts`（`getConverterConfig`）
+- [ ] `src/components/converter/UnitConverter.tsx`
+- [ ] `src/routes/p.$slug.i.$itemSlug.tsx` 加 `app:converter:*` 分发
+- [ ] Insert 9 个分类 + 8 个长度 tool_items（含 SEO）
+- [ ] 不动 DMV、圣经、其它现有工具
 
----
+## 第二 / 三阶段（本次不实现）
 
-## 六、统一 UI 规范（Design System）
+- 阶段 2：`area.ts` / `weight.ts` / `temperature.ts` / `volume.ts` + 对应 tool_items（温度用 `toBase/fromBase` 非线性映射，验证组件已支持）
+- 阶段 3：`finance.ts`（汇率需接实时 API，另做方案）/ 装修 / 物流 / 汽车
 
-所有模块必须用同一套组件，禁止各页面自定义：
+## 注意事项
 
-- `<PageHeader />` 顶部标题+操作区
-- `<DataTable />` 搜索 / 排序 / 分页 / 批量操作 / 列显示
-- `<FormPanel />` 表单弹窗（新增/编辑）
-- `<ConfirmDialog />` 危险操作确认
-- `<EmptyState />` / `<StatusBadge />` / `<Toolbar />`
-- 统一按钮层级（primary / secondary / ghost / destructive）
+- 不改 tool_categories / tool_items 结构，只加数据
+- 不重写现有插件系统，只加一个 `app:converter` 分发
+- 一份组件跑所有换算器，新单位只写 config
 
-现有 admin 页面逐步替换到这套组件。
-
----
-
-## 七、数据分层（Schema 约定）
-
-```text
-platform_*     Platform Core：platform_settings / platform_menus / platform_events
-content_*      内容层：content_pages / content_blocks / content_blog / content_seo
-product_*      产品模块：product_church_* / product_construction_* / product_crm_*
-tool_*         工具与插件：tool_plugins / tool_categories / tool_items
-exam_*         考试：exam_definitions / exam_questions / exam_attempts
-system_*       系统：system_users / system_roles / system_permissions / system_logs / system_notifications
-```
-
-现有表沿用当前命名（pages / tool_items / quiz_* 等），新表全部按上表前缀。
-
----
-
-## 八、权限模型
-
-- 角色：`super_admin / admin / editor / viewer / product_owner:<key>`
-- 权限：`<module>:<action>`（如 `content.pages.write`、`tools.plugin.install`）
-- 每个产品模块可挂"模块级角色"（比如 Church 的 pastor / member）
-- 后台菜单、按钮、API 都通过 `hasPermission()` 统一判定
-
----
-
-## 九、迁移计划（4 步，每步独立可上线）
-
-### 第 1 步 · 骨架统一
-- 重排 AdminShell 为 11 个模块
-- 抽 `PageHeader / DataTable / FormPanel / ConfirmDialog` 为 Platform UI Kit
-- 老页面继续可用，逐步切换
-
-### 第 2 步 · Platform Core 沉淀
-- 建 `platform_settings / platform_menus / system_permissions / system_roles`
-- 把菜单、品牌、邮件、AI Key 搬进 Platform Settings
-- 权限中间件统一（后端 + 前端）
-
-### 第 3 步 · 产品模块化
-- 建 `product_modules` 表（模块清单 + 启用状态）
-- Products 中心提供开关；sidebar 根据启用状态生成
-- Website 作为第一个模块跑通
-
-### 第 4 步 · 工具插件化
-- 建 `tool_plugins` 表 + 前端 `PluginRegistry`
-- 现有 DMV / 空气制动 / 组合车辆 / 商业驾驶迁移为 Plugin
-- 加工具 = 加一条记录 + 注册一个组件
-
----
-
-## 十、开发准则（每次动手前自检）
-
-1. 这是"平台能力"还是"业务功能"？—— 平台能力进 Platform Core
-2. 其它产品会不会用到？—— 会 → 抽公共
-3. 数据表前缀是否符合分层？
-4. UI 是否使用统一组件？
-5. 权限是否走 `hasPermission()`？
-6. 加工具/加页面是否需要改后台代码？—— 不应该
-
----
-
-## 十一、这次要不要立刻动手？
-
-这份规划是"宪法级"文档，落地建议分步走。请确认：
-
-- **A. 只保存规划**：把本文档存入 `.lovable/plan.md` 与 `mem://` 作为长期约束，暂不改代码。
-- **B. 立刻做第 1 步**：本轮同时开始"骨架统一 + Platform UI Kit"（约影响 AdminShell + 5~8 个组件文件，老功能不破坏）。
-- **C. A + B**：既保存规划，又立刻启动第 1 步。
-
-选一个，我按选择执行。
+确认后开始实现第一阶段。
