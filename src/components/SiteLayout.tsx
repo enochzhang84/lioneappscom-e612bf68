@@ -133,6 +133,12 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/blog" activeProps={{ className: "text-foreground font-medium" }}>博客</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
                   <Link to="/about" activeProps={{ className: "text-foreground font-medium" }}>关于我们</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
