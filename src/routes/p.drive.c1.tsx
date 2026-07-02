@@ -405,14 +405,19 @@ function Intro({
 
 function Exam({
   questions, answers, setAnswers, current, setCurrent,
+  showTranslation = false, translations = {}, translating = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, "A" | "B" | "C" | "D">>>;
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
+  showTranslation?: boolean;
+  translations?: Record<string, QuestionTranslation>;
+  translating?: boolean;
 }) {
   const q = questions[current];
+  const tr = translations[q?.id ?? ""];
   const options = useMemo(
     () =>
       (["A", "B", "C", "D"] as const)
@@ -429,6 +434,9 @@ function Exam({
     setAnswers((prev) => ({ ...prev, [q.id]: k }));
   }
 
+  const questionEn = q.question_en || (showTranslation ? tr?.question : null);
+  const showAiBadge = showTranslation && !q.question_en && !!tr?.question;
+
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 md:p-8 space-y-6">
@@ -438,9 +446,17 @@ function Exam({
             <h2 className="text-base md:text-lg font-semibold leading-relaxed whitespace-pre-wrap text-slate-900">
               {q.question}
             </h2>
-            {q.question_en && (
+            {(showTranslation || q.question_en) && questionEn && (
               <p className="mt-1.5 text-sm md:text-base text-slate-500 leading-relaxed whitespace-pre-wrap italic">
-                {q.question_en}
+                {questionEn}
+                {showAiBadge && (
+                  <span className="ml-2 not-italic text-[10px] uppercase tracking-wider bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">AI</span>
+                )}
+              </p>
+            )}
+            {showTranslation && !questionEn && translating && (
+              <p className="mt-1.5 text-xs text-slate-400 italic inline-flex items-center gap-1">
+                <Loader2 size={12} className="animate-spin" /> 正在翻译…
               </p>
             )}
           </div>
@@ -449,6 +465,7 @@ function Exam({
         <div className="space-y-3">
           {options.map(({ key, text, textEn }) => {
             const selected = answers[q.id] === key;
+            const optEn = textEn || (showTranslation ? tr?.options?.[key] : null);
             return (
               <button
                 key={key}
@@ -477,8 +494,8 @@ function Exam({
                     <div className={cn("text-sm md:text-base leading-relaxed", selected ? "text-slate-900" : "text-slate-700")}>
                       {text}
                     </div>
-                    {textEn && (
-                      <div className="mt-1 text-xs md:text-sm text-slate-500 italic leading-relaxed">{textEn}</div>
+                    {(showTranslation || textEn) && optEn && (
+                      <div className="mt-1 text-xs md:text-sm text-slate-500 italic leading-relaxed">{optEn}</div>
                     )}
                   </div>
                 </div>
@@ -486,6 +503,7 @@ function Exam({
             );
           })}
         </div>
+
 
         <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
           <Button
