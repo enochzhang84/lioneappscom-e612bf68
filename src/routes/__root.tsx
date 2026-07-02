@@ -103,7 +103,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData({
+      queryKey: ["public", "nav-pages"],
+      queryFn: () => listNavPages(),
+      staleTime: 60_000,
+    }),
 });
+
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
