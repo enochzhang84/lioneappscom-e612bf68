@@ -128,6 +128,51 @@ export function QuizApp(props: QuizAppProps = {}) {
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
 
+  async function ensureTranslation(q: QuizQuestion) {
+    if (translations[q.id]) return;
+    const optKeys = (["A", "B", "C", "D"] as const).filter(
+      (k) => !!(q as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`],
+    );
+    const parts: string[] = [];
+    parts.push(q.question);
+    for (const k of optKeys) {
+      parts.push((q as unknown as Record<string, string>)[`option_${k.toLowerCase()}`]);
+    }
+    if (q.explanation) parts.push(q.explanation);
+    setTranslating(true);
+    try {
+      const res = await translateFn({ data: { texts: parts, target: "en" } });
+      const out = res.translations;
+      const entry: QuestionTranslation = { options: {} };
+      let i = 0;
+      entry.question = out[i++];
+      for (const k of optKeys) entry.options![k] = out[i++];
+      if (q.explanation) entry.explanation = out[i++];
+      setTranslations((prev) => ({ ...prev, [q.id]: entry }));
+    } catch (e) {
+      console.error("translate error", e);
+    } finally {
+      setTranslating(false);
+    }
+  }
+
+  async function toggleTranslation() {
+    const next = !showTranslation;
+    setShowTranslation(next);
+    if (next && phase === "exam") {
+      const q = questions[current];
+      if (q) await ensureTranslation(q);
+    }
+  }
+
+  // auto-fetch translation when navigating between questions while enabled
+  useEffect(() => {
+    if (!showTranslation || phase !== "exam") return;
+    const q = questions[current];
+    if (q) void ensureTranslation(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, showTranslation, phase]);
+
   const body = (
     <div className="bg-[#F8FAFC] min-h-screen">
       <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-6 md:py-8">
@@ -142,7 +187,11 @@ export function QuizApp(props: QuizAppProps = {}) {
           backHref={backHref}
           backLabel={backLabel}
           onReset={phase !== "intro" ? resetToIntro : undefined}
+          showTranslation={showTranslation}
+          onToggleTranslation={toggleTranslation}
+          translating={translating}
         />
+
 
         {phase === "intro" && (
           <div className="mt-6">
