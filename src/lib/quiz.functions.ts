@@ -12,6 +12,11 @@ export type QuizQuestion = {
   option_c: string | null;
   option_d: string | null;
   category: string;
+  question_en: string | null;
+  option_a_en: string | null;
+  option_b_en: string | null;
+  option_c_en: string | null;
+  option_d_en: string | null;
 };
 
 export type GradedQuestion = {
@@ -21,8 +26,14 @@ export type GradedQuestion = {
   option_b: string;
   option_c: string | null;
   option_d: string | null;
+  question_en: string | null;
+  option_a_en: string | null;
+  option_b_en: string | null;
+  option_c_en: string | null;
+  option_d_en: string | null;
   correct_answer: "A" | "B" | "C" | "D";
   explanation: string | null;
+  explanation_en: string | null;
   picked: "A" | "B" | "C" | "D" | null;
   is_correct: boolean;
 };
