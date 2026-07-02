@@ -111,7 +111,6 @@ function LogsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={ScrollText}
         title="操作日志"
         description="审计管理员在后台执行的动作：登录、内容修改、发布、删除等。"
         actions={

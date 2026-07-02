@@ -122,7 +122,6 @@ function NotificationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={Bell}
         title="通知中心"
         description="发布后台公告、系统通知；记录发布者与阅读状态。"
         actions={
