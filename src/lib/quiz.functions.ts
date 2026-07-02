@@ -12,6 +12,7 @@ export type QuizQuestion = {
   option_c: string | null;
   option_d: string | null;
   category: string;
+  image_url: string | null;
   question_en: string | null;
   option_a_en: string | null;
   option_b_en: string | null;
@@ -22,6 +23,7 @@ export type QuizQuestion = {
 export type GradedQuestion = {
   id: string;
   question: string;
+  image_url: string | null;
   option_a: string;
   option_b: string;
   option_c: string | null;
@@ -65,7 +67,7 @@ export const getRandomQuizQuestions = createServerFn({ method: "GET" })
     // correct_answer/explanation. Never return answer keys to the client.
     const { data: rows, error } = await supabasePublic
       .from("quiz_questions")
-      .select("id, question, option_a, option_b, option_c, option_d, category, question_en, option_a_en, option_b_en, option_c_en, option_d_en")
+      .select("id, question, option_a, option_b, option_c, option_d, category, image_url, question_en, option_a_en, option_b_en, option_c_en, option_d_en")
       .eq("category", data.category)
       .eq("is_active", true);
     if (error) throw new Error(error.message);
@@ -92,7 +94,7 @@ export const gradeQuiz = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("quiz_questions")
-      .select("id, question, option_a, option_b, option_c, option_d, correct_answer, explanation, question_en, option_a_en, option_b_en, option_c_en, option_d_en, explanation_en, official_source, manual_name, manual_chapter, manual_page, manual_url, google_keywords, category")
+      .select("id, question, image_url, option_a, option_b, option_c, option_d, correct_answer, explanation, question_en, option_a_en, option_b_en, option_c_en, option_d_en, explanation_en, official_source, manual_name, manual_chapter, manual_page, manual_url, google_keywords, category")
       .in("id", data.ids);
     if (error) throw new Error(error.message);
 
@@ -108,6 +110,7 @@ export const gradeQuiz = createServerFn({ method: "POST" })
         return {
           id: r.id as string,
           question: r.question as string,
+          image_url: (r as unknown as { image_url: string | null }).image_url ?? null,
           option_a: r.option_a as string,
           option_b: r.option_b as string,
           option_c: (r.option_c as string | null) ?? null,

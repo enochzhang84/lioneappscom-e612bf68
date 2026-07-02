@@ -486,6 +486,18 @@ function Exam({
           </div>
         </div>
 
+        {q.image_url && (
+          <div className="flex justify-center">
+            <img
+              src={q.image_url}
+              alt="题目配图"
+              loading="lazy"
+              className="max-h-64 md:max-h-80 w-auto object-contain rounded-xl border border-slate-200 bg-white p-3"
+            />
+          </div>
+        )}
+
+
         <div className="space-y-3">
           {options.map(({ key, text, textEn }) => {
             const selected = answers[q.id] === key;
@@ -885,6 +897,16 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
             {isRight ? "正确" : pick ? "错误" : "未答"}
           </span>
         </div>
+        {r.image_url && (
+          <div className="flex justify-center">
+            <img
+              src={r.image_url}
+              alt="题目配图"
+              loading="lazy"
+              className="max-h-56 w-auto object-contain rounded-lg border border-slate-200 bg-white p-2"
+            />
+          </div>
+        )}
         <div className="space-y-2">
           {opts.map(({ key, text, textEn }) => {
             const isCorrect = key === correct;
