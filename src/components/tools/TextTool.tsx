@@ -83,7 +83,7 @@ const TOOLS: Record<string, ToolDef> = {
       { label: "繁体 → 简体", run: (s) => getOpenCC("t2s")(s) },
     ],
     faqs: [
-      { q: "为什么"面"翻译成"麵"而不是"面"？", a: "OpenCC 使用台湾常用词典 (twp)，考虑词组语义，比字对字更自然。" },
+      { q: "为什么『面』翻译成『麵』而不是『面』？", a: "OpenCC 使用台湾常用词典 (twp)，考虑词组语义，比字对字更自然。" },
     ],
   },
   "text-dedupe": {
