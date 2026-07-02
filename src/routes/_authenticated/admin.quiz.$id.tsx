@@ -112,6 +112,7 @@ function QuizEditPage() {
         manual_url: (q.data as { manual_url?: string | null }).manual_url ?? "",
         google_keywords: (q.data as { google_keywords?: string | null }).google_keywords ?? "",
         category: q.data.category,
+        question_bank_id: (q.data as { question_bank_id?: string | null }).question_bank_id ?? null,
         difficulty: q.data.difficulty ?? "medium",
         is_active: q.data.is_active,
         sort_order: q.data.sort_order ?? 0,
