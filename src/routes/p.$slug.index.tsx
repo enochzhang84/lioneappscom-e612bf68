@@ -44,6 +44,9 @@ function DynamicPage() {
   };
 
   if (isToolsPage(page)) {
+    if (page.slug === "ai") {
+      return <AiHubView page={page} categories={bundle?.categories ?? []} items={bundle?.items ?? []} />;
+    }
     return <ToolsPageView page={page} categories={bundle?.categories ?? []} items={bundle?.items ?? []} />;
   }
 
