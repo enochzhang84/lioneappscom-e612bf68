@@ -72,7 +72,7 @@ function AdminLayout() {
           <NavItem to="/admin/products" icon={<Package size={16} />} label="产品" />
           <NavItem to="/admin/cases" icon={<Briefcase size={16} />} label="案例" />
           <NavItem to="/admin/pages" icon={<FileText size={16} />} label="页面管理" />
-          <NavItem to="/admin/quiz" icon={<ClipboardList size={16} />} label="题库管理" />
+          <NavItem to="/admin/tools" icon={<Wrench size={16} />} label="工具管理" />
           <NavItem to="/admin/settings" icon={<Settings size={16} />} label="站点设置" />
         </nav>
         <div className="p-3 border-t border-border space-y-2">
