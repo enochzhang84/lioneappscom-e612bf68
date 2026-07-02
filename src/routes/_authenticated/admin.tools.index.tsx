@@ -44,6 +44,15 @@ export const Route = createFileRoute("/_authenticated/admin/tools/")({
   component: ToolsAdmin,
 });
 
+type ToolStatus = "developing" | "live" | "paused" | "hidden";
+
+const STATUS_OPTIONS: { value: ToolStatus; label: string; hint: string }[] = [
+  { value: "live", label: "已上线", hint: "前台正常显示" },
+  { value: "developing", label: "开发中", hint: "前台显示 Coming Soon" },
+  { value: "paused", label: "暂停", hint: "暂时不在前台显示" },
+  { value: "hidden", label: "隐藏", hint: "完全不在前台显示" },
+];
+
 type Category = {
   id: string;
   page_id: string;
@@ -52,6 +61,7 @@ type Category = {
   icon: string | null;
   sort_order: number;
   is_visible: boolean;
+  status: ToolStatus;
 };
 type Item = {
   id: string;
@@ -75,7 +85,9 @@ type Item = {
   button_url: string | null;
   sort_order: number;
   is_visible: boolean;
+  status: ToolStatus;
 };
+
 
 type Selection =
   | { kind: "none" }
