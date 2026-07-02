@@ -115,6 +115,7 @@ function PageEditor() {
         show_in_nav: showInNav,
         is_visible: isVisible,
         sort_order: sortOrder,
+        show_in_admin_shortcut: showInAdminShortcut,
         content: blocks as unknown as Record<string, unknown>[],
       },
     });
