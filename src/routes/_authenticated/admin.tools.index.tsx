@@ -608,7 +608,7 @@ function CategoryPane({
 /* ---------------- Item detail ---------------- */
 
 function ItemPane({
-  item, cats, allItems, pageSlug, onSave, onDelete, onAddChild, onSelectItem, onDeleteChild,
+  item, cats, allItems, pageSlug, onSave, onDelete, onAddChild, onSelectItem, onDeleteChild, onMoveChild,
 }: {
   item: Item;
   cats: Category[];
@@ -619,7 +619,9 @@ function ItemPane({
   onAddChild: () => void;
   onSelectItem: (id: string) => void;
   onDeleteChild: (id: string, title: string) => void;
+  onMoveChild: (id: string, dir: -1 | 1) => void;
 }) {
+
   const [draft, setDraft] = useState(item);
   useEffect(() => setDraft(item), [item]);
   const dirty = JSON.stringify(draft) !== JSON.stringify(item);
