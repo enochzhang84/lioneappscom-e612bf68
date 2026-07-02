@@ -129,7 +129,17 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [translations, setTranslations] = useState<Record<string, QuestionTranslation>>({});
   const [translating, setTranslating] = useState(false);
+  const [confirmUnanswered, setConfirmUnanswered] = useState(false);
   const translateFn = useServerFn(translateTexts);
+
+  function requestSubmitFromLast() {
+    const unanswered = questions.filter((q) => !answers[q.id]).length;
+    if (unanswered > 0) {
+      setConfirmUnanswered(true);
+      return;
+    }
+    void submitExam();
+  }
 
   async function startExam() {
     const rows = await load.mutateAsync();
@@ -249,6 +259,8 @@ export function QuizApp(props: QuizAppProps = {}) {
                 showTranslation={showTranslation}
                 translations={translations}
                 translating={translating}
+                onSubmit={requestSubmitFromLast}
+                submitting={submit.isPending}
               />
               <RulesTips total={TOTAL} pass={PASS} examSeconds={EXAM_SECONDS} />
             </div>
@@ -276,6 +288,35 @@ export function QuizApp(props: QuizAppProps = {}) {
       </div>
 
       {phase === "exam" && <CountdownTicker onTick={setSecondsLeft} />}
+
+      {confirmUnanswered && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => (submit.isPending ? null : setConfirmUnanswered(false))}
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">还有未作答的题目</h3>
+            <p className="text-sm text-slate-600">
+              你还有 {questions.filter((q) => !answers[q.id]).length} 道题未作答，是否确认提交？
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setConfirmUnanswered(false)} disabled={submit.isPending}>
+                继续答题
+              </Button>
+              <Button
+                onClick={async () => {
+                  await submitExam();
+                  setConfirmUnanswered(false);
+                }}
+                disabled={submit.isPending}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {submit.isPending ? "评分中…" : "确认提交"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -439,6 +480,7 @@ function Intro({
 function Exam({
   questions, answers, setAnswers, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
+  onSubmit, submitting = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -448,6 +490,8 @@ function Exam({
   showTranslation?: boolean;
   translations?: Record<string, QuestionTranslation>;
   translating?: boolean;
+  onSubmit?: () => void;
+  submitting?: boolean;
 }) {
   const q = questions[current];
   const tr = translations[q?.id ?? ""];
@@ -530,13 +574,22 @@ function Exam({
           >
             <ArrowLeft size={16} className="mr-1" /> 上一题
           </Button>
-          <Button
-            onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
-            disabled={current >= questions.length - 1}
-            className="mt-4 bg-blue-600 hover:bg-blue-700"
-          >
-            下一题 <ArrowRight size={16} className="ml-1" />
-          </Button>
+          {current >= questions.length - 1 ? (
+            <Button
+              onClick={() => onSubmit?.()}
+              disabled={submitting || !onSubmit}
+              className="mt-4 bg-blue-600 hover:bg-blue-700"
+            >
+              {submitting ? "评分中…" : "提交答案"}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
+              className="mt-4 bg-blue-600 hover:bg-blue-700"
+            >
+              下一题 <ArrowRight size={16} className="ml-1" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
