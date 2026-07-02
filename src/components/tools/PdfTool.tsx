@@ -239,10 +239,9 @@ async function runCompress(file: File, level: "low" | "medium" | "high") {
     src.setProducer(""); src.setCreator("");
   }
   if (level === "high") {
-    // Drop annotations & non-essential resources
+    // Drop annotations from each page (best-effort)
     for (const page of src.getPages()) {
-      const dict = page.node;
-      try { dict.delete(dict.context.obj("Annots").asPDFName ? dict.context.obj("Annots").asPDFName() : (dict as unknown as { context: { obj: (n: string) => unknown } }).context.obj("Annots") as never); } catch { /* noop */ }
+      try { page.node.delete(src.context.obj("Annots") as never); } catch { /* noop */ }
     }
   }
   const bytes = await src.save({
