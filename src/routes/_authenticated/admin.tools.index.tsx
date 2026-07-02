@@ -341,7 +341,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                   </div>
                   {isOpen && (
                     <ul className="ml-5 border-l border-border pl-2 mt-0.5 space-y-0.5">
-                      {topItems.map((it) => {
+                      {topItems.map((it, ti) => {
                         const iSel = selection.kind === "item" && selection.id === it.id;
                         const children = items
                           .filter((x) => x.parent_id === it.id)
@@ -364,17 +364,33 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                               <span>{it.icon || "🧰"}</span>
                               <span className={`flex-1 truncate ${!it.is_visible ? "text-muted-foreground line-through" : ""}`}>{it.title || "(未命名)"}</span>
                               {children.length > 0 && <span className="text-[10px] text-muted-foreground">{children.length}</span>}
+                              <div className="hidden group-hover:flex items-center">
+                                <button type="button" title="上移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(it.id, -1); }} disabled={ti === 0}>
+                                  <ArrowUp size={11} />
+                                </button>
+                                <button type="button" title="下移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(it.id, 1); }} disabled={ti === topItems.length - 1}>
+                                  <ArrowDown size={11} />
+                                </button>
+                              </div>
                             </div>
                             {iOpen && children.length > 0 && (
                               <ul className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
-                                {children.map((ch) => {
+                                {children.map((ch, chi) => {
                                   const cSel = selection.kind === "item" && selection.id === ch.id;
                                   return (
                                     <li key={ch.id}
-                                      className={`flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${cSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
+                                      className={`group flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${cSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
                                       onClick={() => setSelection({ kind: "item", id: ch.id })}>
                                       <span>{ch.icon || "📄"}</span>
                                       <span className={`flex-1 truncate ${!ch.is_visible ? "text-muted-foreground line-through" : ""}`}>{ch.title || "(未命名)"}</span>
+                                      <div className="hidden group-hover:flex items-center">
+                                        <button type="button" title="上移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(ch.id, -1); }} disabled={chi === 0}>
+                                          <ArrowUp size={11} />
+                                        </button>
+                                        <button type="button" title="下移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(ch.id, 1); }} disabled={chi === children.length - 1}>
+                                          <ArrowDown size={11} />
+                                        </button>
+                                      </div>
                                     </li>
                                   );
                                 })}
@@ -390,6 +406,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                           </li>
                         );
                       })}
+
                       <li>
                         <button
                           type="button"
