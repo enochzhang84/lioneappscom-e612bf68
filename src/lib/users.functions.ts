@@ -54,13 +54,11 @@ export const adminListUsers = createServerFn({ method: "GET" })
     return users;
   });
 
-const ROLES = ["admin", "moderator", "user"] as const;
+const ROLE_SCHEMA = z.object({ userId: z.string().uuid(), role: z.literal("admin") });
 
 export const adminGrantRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string; role: "admin" | "moderator" | "user" }) =>
-    z.object({ userId: z.string().uuid(), role: z.enum(ROLES) }).parse(d),
-  )
+  .inputValidator((d: { userId: string; role: "admin" }) => ROLE_SCHEMA.parse(d))
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -72,9 +70,7 @@ export const adminGrantRole = createServerFn({ method: "POST" })
 
 export const adminRevokeRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string; role: "admin" | "moderator" | "user" }) =>
-    z.object({ userId: z.string().uuid(), role: z.enum(ROLES) }).parse(d),
-  )
+  .inputValidator((d: { userId: string; role: "admin" }) => ROLE_SCHEMA.parse(d))
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
     if (data.role === "admin" && data.userId === context.userId) {
@@ -86,6 +82,7 @@ export const adminRevokeRole = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const adminDeleteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
