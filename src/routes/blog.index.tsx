@@ -6,7 +6,7 @@ import { listPublishedPosts } from "@/lib/blog.functions";
 
 const listQO = queryOptions({
   queryKey: ["blog", "list"],
-  queryFn: async () => await (listPublishedPosts as unknown as () => Promise<Awaited<ReturnType<typeof listPublishedPosts>>>)(),
+  queryFn: () => listPublishedPosts(),
 });
 
 export const Route = createFileRoute("/blog/")({
@@ -19,11 +19,9 @@ export const Route = createFileRoute("/blog/")({
     ],
   }),
   loader: async ({ context }) => {
-    const fn = listPublishedPosts;
-    await context.queryClient.ensureQueryData({
-      ...listQO, queryFn: () => (fn as unknown as () => Promise<unknown>)(),
-    });
+    await context.queryClient.ensureQueryData(listQO);
   },
+
   component: BlogIndex,
   errorComponent: ({ error }) => (
     <SiteLayout><div className="max-w-3xl mx-auto px-6 py-20 text-red-600">{error.message}</div></SiteLayout>

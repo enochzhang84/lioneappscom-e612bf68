@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { adminListPosts, adminDeletePost, adminUpsertPost, type BlogPost } from "@/lib/blog.functions";
 
-export const Route = createFileRoute("/_authenticated/admin/blog")({
+export const Route = createFileRoute("/_authenticated/admin/blog/")({
   component: BlogList,
 });
 
