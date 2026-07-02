@@ -497,15 +497,18 @@ export type Database = {
           description: string | null
           icon: string | null
           id: string
+          include_in_exam: boolean
           is_active: boolean
           legacy_category: string | null
           metadata: Json
           name: string
           name_en: string | null
           node_type: string
+          notes: string | null
           parent_id: string | null
           slug: string
           sort_order: number
+          source: string | null
           updated_at: string
         }
         Insert: {
@@ -513,15 +516,18 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          include_in_exam?: boolean
           is_active?: boolean
           legacy_category?: string | null
           metadata?: Json
           name: string
           name_en?: string | null
           node_type: string
+          notes?: string | null
           parent_id?: string | null
           slug: string
           sort_order?: number
+          source?: string | null
           updated_at?: string
         }
         Update: {
@@ -529,15 +535,18 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          include_in_exam?: boolean
           is_active?: boolean
           legacy_category?: string | null
           metadata?: Json
           name?: string
           name_en?: string | null
           node_type?: string
+          notes?: string | null
           parent_id?: string | null
           slug?: string
           sort_order?: number
+          source?: string | null
           updated_at?: string
         }
         Relationships: [
