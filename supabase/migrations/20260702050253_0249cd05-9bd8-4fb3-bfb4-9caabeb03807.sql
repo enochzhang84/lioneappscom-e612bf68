@@ -1,0 +1,1 @@
+ALTER TABLE public.pages ADD COLUMN IF NOT EXISTS show_in_admin_shortcut BOOLEAN NOT NULL DEFAULT false;
