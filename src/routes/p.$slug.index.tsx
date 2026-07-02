@@ -359,7 +359,7 @@ function AiHubView({ page, categories, items }: {
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => navigate({ search: { cat: c.slug || c.id }, replace: false })}
+                  onClick={() => navigate({ search: { cat: c.id }, replace: false })}
                   className={`group text-left h-full rounded-2xl border border-border bg-card p-5 transition
                     ${developing ? "opacity-70" : "hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"}`}
                 >
