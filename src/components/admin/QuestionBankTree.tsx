@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ChevronRight, ChevronDown, Plus, Pencil, Trash2, Eye, EyeOff, Folder, FolderOpen, Layers, Target, TargetIcon } from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, Pencil, Trash2, Eye, EyeOff, Folder, FolderOpen, Layers, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -182,6 +182,7 @@ function TreeItem({
 
   const delFn = useServerFn(adminDeleteBankNode);
   const toggleFn = useServerFn(adminToggleBankNodeActive);
+  const toggleExamFn = useServerFn(adminToggleBankNodeInExam);
   const qc = useQueryClient();
 
   const del = useMutation({
@@ -198,6 +199,15 @@ function TreeItem({
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "bank-nodes"] }),
     onError: (e: Error) => toast.error(e.message),
   });
+  const toggleInExam = useMutation({
+    mutationFn: (v: { id: string; include_in_exam: boolean }) => toggleExamFn({ data: v }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "bank-nodes"] });
+      toast.success("已更新参与模拟考试");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const Icon = isBank ? Layers : isOpen && hasChildren ? FolderOpen : Folder;
 
