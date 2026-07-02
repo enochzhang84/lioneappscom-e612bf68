@@ -143,6 +143,8 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
         case "watermark": await opWatermark(files[0], wm); break;
         case "ico": await opIco(files[0]); break;
         case "qrcode": await opQr(qrText); break;
+        case "id-photo": await opIdPhoto(files[0], idPresets[idPreset], idBg); break;
+        case "barcode": await opBarcode(bcText, bcFormat); break;
       }
       toast.success("处理完成，已开始下载");
     } catch (e) {
