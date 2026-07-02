@@ -169,9 +169,12 @@ function ItemDetail() {
 
   const appKey = item.link_url?.trim() || "";
   const converterKey = appKey.startsWith("app:converter:") ? appKey.slice("app:converter:".length) : null;
+  const calculatorKey = appKey.startsWith("app:calculator:") ? appKey.slice("app:calculator:".length) : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
   const embed = converterKey
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
+    : calculatorKey
+    ? { render: () => <CalculatorByKey configKey={calculatorKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
     : undefined));
