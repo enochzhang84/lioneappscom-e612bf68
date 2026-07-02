@@ -204,29 +204,30 @@ function ToolsPageView({ page, categories, items }: {
                 <ComingSoonPanel title={activeCat?.title ?? ""} description={activeCat?.description ?? null} />
               )
             ) : (
-              <div className="space-y-8 pb-16">
-                {visibleGroups.map(({ top, children }) =>
-                  children.length === 0 ? (
-                    <div key={top.id} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      <ItemCard pageSlug={page.slug} item={top} />
-                    </div>
-                  ) : (
-                    <section key={top.id}>
-                      <div className="flex items-baseline gap-2 mb-3">
-                        <span className="text-lg">{top.icon || "🧰"}</span>
-                        <h3 className="text-base font-semibold">{top.title}</h3>
-                        {top.description && (
-                          <span className="text-xs text-muted-foreground">· {top.description}</span>
-                        )}
-                      </div>
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {(q ? children.filter(matches) : children).map((ch) => (
-                          <ItemCard key={ch.id} pageSlug={page.slug} item={ch} />
-                        ))}
-                      </div>
-                    </section>
-                  ),
-                )}
+              <div className="space-y-10 pb-16">
+                {(() => {
+                  const standalone = visibleGroups.filter((g) => g.children.length === 0).map((g) => g.top);
+                  const grouped = visibleGroups.filter((g) => g.children.length > 0);
+                  return (
+                    <>
+                      {standalone.length > 0 && (
+                        <ToolCardGrid pageSlug={page.slug} items={standalone} />
+                      )}
+                      {grouped.map(({ top, children }) => (
+                        <section key={top.id}>
+                          <div className="flex items-baseline gap-2 mb-3">
+                            <span className="text-lg">{top.icon || "🧰"}</span>
+                            <h3 className="text-base font-semibold">{top.title}</h3>
+                            {top.description && (
+                              <span className="text-xs text-muted-foreground">· {top.description}</span>
+                            )}
+                          </div>
+                          <ToolCardGrid pageSlug={page.slug} items={q ? children.filter(matches) : children} />
+                        </section>
+                      ))}
+                    </>
+                  );
+                })()}
               </div>
             )}
 
@@ -307,9 +308,7 @@ function AiHubView({ page, categories, items }: {
               {q ? `没有找到与 "${query}" 相关的工具。` : "该分类暂无工具。"}
             </p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {visible.map((it) => <ItemCard key={it.id} pageSlug={page.slug} item={it} />)}
-            </div>
+            <ToolCardGrid pageSlug={page.slug} items={visible} />
           )}
         </section>
       </SiteLayout>
@@ -393,6 +392,17 @@ function AiHubView({ page, categories, items }: {
         )}
       </section>
     </SiteLayout>
+  );
+}
+
+function ToolCardGrid({ pageSlug, items }: { pageSlug: string; items: ToolItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {items.map((it) => (
+        <ItemCard key={it.id} pageSlug={pageSlug} item={it} />
+      ))}
+    </div>
   );
 }
 
