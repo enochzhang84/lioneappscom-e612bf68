@@ -69,8 +69,8 @@ export const ADMIN_NAV: NavItem[] = [
 
   { to: "/admin/users", label: "用户管理", icon: Users, group: "系统" },
   { to: "/admin/files", label: "文件管理", icon: FolderOpen, group: "系统" },
-  { to: "/admin/notifications", label: "通知中心", icon: Bell, group: "系统", soon: true },
-  { to: "/admin/logs", label: "操作日志", icon: ScrollText, group: "系统", soon: true },
+  { to: "/admin/notifications", label: "通知中心", icon: Bell, group: "系统" },
+  { to: "/admin/logs", label: "操作日志", icon: ScrollText, group: "系统" },
   { to: "/admin/settings", label: "站点设置", icon: Settings, group: "系统" },
 ];
 
