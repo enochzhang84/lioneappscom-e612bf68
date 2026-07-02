@@ -77,7 +77,9 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:bible-cuv": { render: () => <BibleCUV /> },
   "app:bible-cunp": { render: () => <BibleCUNP /> },
   "app:bible-kjv": { render: () => <BibleKJV /> },
+  "app:automotive": { render: () => <AutomotiveHub /> },
 };
+
 
 function examConfigToProps(cfg: ExamConfig) {
   return {
