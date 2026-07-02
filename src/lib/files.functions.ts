@@ -114,7 +114,7 @@ export const adminUpdateMedia = createServerFn({ method: "POST" })
     }).parse(d))
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    const patch: Record<string, unknown> = {};
+    const patch: { alt_text?: string | null; tags?: string[] } = {};
     if (data.alt_text !== undefined) patch.alt_text = data.alt_text;
     if (data.tags !== undefined) patch.tags = data.tags;
     const { error } = await context.supabase
