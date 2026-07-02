@@ -104,12 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData({
-      queryKey: ["public", "nav-pages"],
-      queryFn: () => listNavPages(),
-      staleTime: 60_000,
-    }),
+  loader: ({ context }) => ensurePlatformData(context.queryClient),
 });
 
 
@@ -152,7 +147,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <PlatformProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+
       <Outlet />
     </QueryClientProvider>
   );
