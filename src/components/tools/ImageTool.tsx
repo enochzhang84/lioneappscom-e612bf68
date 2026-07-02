@@ -85,6 +85,20 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
   // qrcode
   const [qrText, setQrText] = React.useState("https://lioneapps.com");
   const [qrPreview, setQrPreview] = React.useState<string>("");
+  // id-photo
+  const idPresets = React.useMemo(() => ({
+    "1inch": { name: "1 寸", w: 295, h: 413 },
+    "2inch": { name: "2 寸", w: 413, h: 626 },
+    "small2": { name: "小 2 寸", w: 413, h: 531 },
+    "passport": { name: "护照 (33×48mm)", w: 390, h: 567 },
+    "visa": { name: "美国签证 (2×2 in)", w: 600, h: 600 },
+  }), []);
+  const [idPreset, setIdPreset] = React.useState<keyof typeof idPresets>("1inch");
+  const [idBg, setIdBg] = React.useState("#ffffff");
+  // barcode
+  const [bcText, setBcText] = React.useState("LIONEAPPS-2026");
+  const [bcFormat, setBcFormat] = React.useState<"CODE128" | "CODE39" | "EAN13" | "EAN8" | "UPC" | "ITF14">("CODE128");
+  const bcPreviewRef = React.useRef<HTMLCanvasElement | null>(null);
 
   // Load natural size when a file is present (for resize/crop defaults)
   React.useEffect(() => {
