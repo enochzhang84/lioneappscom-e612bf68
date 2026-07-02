@@ -41,6 +41,12 @@ export const Route = createFileRoute("/p/drive/c1")({
 
 type Phase = "intro" | "exam" | "result";
 
+type QuestionTranslation = {
+  question?: string;
+  options?: Partial<Record<"A" | "B" | "C" | "D", string>>;
+  explanation?: string;
+};
+
 export type QuizAppProps = {
   embedded?: boolean;
   category?: string;
