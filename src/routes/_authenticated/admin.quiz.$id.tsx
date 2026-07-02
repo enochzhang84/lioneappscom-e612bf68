@@ -22,8 +22,14 @@ type Form = {
   option_b: string;
   option_c: string;
   option_d: string;
+  question_en: string;
+  option_a_en: string;
+  option_b_en: string;
+  option_c_en: string;
+  option_d_en: string;
   correct_answer: "A" | "B" | "C" | "D";
   explanation: string;
+  explanation_en: string;
   category: string;
   difficulty: string;
   is_active: boolean;
@@ -36,8 +42,14 @@ const empty: Form = {
   option_b: "",
   option_c: "",
   option_d: "",
+  question_en: "",
+  option_a_en: "",
+  option_b_en: "",
+  option_c_en: "",
+  option_d_en: "",
   correct_answer: "A",
   explanation: "",
+  explanation_en: "",
   category: "c1",
   difficulty: "medium",
   is_active: true,
