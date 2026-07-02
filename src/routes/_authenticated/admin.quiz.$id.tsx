@@ -160,6 +160,8 @@ function QuizEditPage() {
     mutationFn: () => upsertFn({
       data: {
         id: form.id,
+        question_type: form.question_type,
+        image_url: form.image_url || null,
         question: form.question,
         option_a: form.option_a,
         option_b: form.option_b,
