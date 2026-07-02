@@ -1,7 +1,9 @@
-// 文本类工具：字数统计、大小写、繁简、去重、Base64、URL、MD5、SHA256、HTML entity
+// 文本类工具：字数统计、大小写、繁简、去重、Base64、URL、MD5、SHA256、HTML entity、排序、比较、Markdown 转 HTML
 import * as React from "react";
 import SparkMD5 from "spark-md5";
 import { Converter as OpenCCConverter } from "opencc-js";
+import { marked } from "marked";
+import { diffLines } from "diff";
 import { ToolShell, CopyButton, type FaqItem } from "./ToolShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
