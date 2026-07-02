@@ -78,6 +78,7 @@ export const adminUpsertPage = createServerFn({ method: "POST" })
           show_in_nav: data.show_in_nav,
           is_visible: data.is_visible,
           sort_order: data.sort_order,
+          show_in_admin_shortcut: data.show_in_admin_shortcut,
         })
         .eq("id", data.id);
       if (error) throw new Error(error.message);
@@ -94,6 +95,7 @@ export const adminUpsertPage = createServerFn({ method: "POST" })
         show_in_nav: data.show_in_nav,
         is_visible: data.is_visible,
         sort_order: data.sort_order,
+        show_in_admin_shortcut: data.show_in_admin_shortcut,
       })
       .select("id")
       .single();
