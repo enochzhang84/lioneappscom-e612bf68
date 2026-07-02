@@ -1,0 +1,1 @@
+UPDATE public.tool_items SET link_url = 'app:bible-cuv' WHERE id = 'f805bd74-88fd-447e-a537-d81f17c82926';
