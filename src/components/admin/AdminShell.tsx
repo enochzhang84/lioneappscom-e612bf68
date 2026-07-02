@@ -5,6 +5,7 @@ import {
   FileText,
   Wrench,
   BookOpen,
+  GraduationCap,
   Newspaper,
   BarChart3,
   Search,
