@@ -245,7 +245,7 @@ function AiHubView({ page, categories, items }: {
   const navigate = Route.useNavigate();
   const [query, setQuery] = useState("");
 
-  const activeCat = search.cat ? categories.find(c => c.slug === search.cat || c.id === search.cat) ?? null : null;
+  const activeCat = search.cat ? categories.find(c => c.id === search.cat) ?? null : null;
 
   const q = query.trim().toLowerCase();
   const matches = (it: ToolItem) =>
