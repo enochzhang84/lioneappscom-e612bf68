@@ -163,7 +163,7 @@ function ScopePanel({
         description="该操作不可恢复。依赖此键的产品模块将回退到默认值。"
         destructive
         confirmLabel="删除"
-        onConfirm={() => confirm && deleteM.mutate({ data: { id: confirm.id } })}
+        onConfirm={() => { if (confirm) deleteM.mutate({ data: { id: confirm.id } }); }}
       />
     </FormPanel>
   );
