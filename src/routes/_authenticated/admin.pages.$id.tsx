@@ -243,9 +243,9 @@ function PageEditor() {
       )}
       {isNew && pageType === "tools" && (
         <Card>
-          <CardHeader><CardTitle>工具页面分类与内容</CardTitle></CardHeader>
+          <CardHeader><CardTitle>📁 工具管理</CardTitle></CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            请先保存页面后，即可在此管理工具类别和工具项目。
+            请先保存页面后，即可在此以树形目录方式统一管理所有一级工具（分类）和它们下面的项目。
           </CardContent>
         </Card>
       )}
