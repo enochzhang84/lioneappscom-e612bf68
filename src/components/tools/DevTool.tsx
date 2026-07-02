@@ -1,6 +1,8 @@
-// 开发者工具：JSON / YAML / CSV / UUID / JWT / HEX ↔ RGB / 正则 / SQL / XML
+// 开发者工具：JSON / YAML / CSV / UUID / JWT / HEX ↔ RGB / 正则 / SQL / XML / Cron / HTTP Status
 import * as React from "react";
 import * as yaml from "js-yaml";
+import xmlFormat from "xml-formatter";
+import cronstrue from "cronstrue";
 import { ToolShell, CopyButton, type FaqItem } from "./ToolShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
