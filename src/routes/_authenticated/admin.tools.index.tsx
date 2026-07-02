@@ -669,7 +669,7 @@ function ItemPane({
             <Button size="sm" variant="ghost" onClick={onAddChild}><Plus size={14} className="mr-1" />新增子页面</Button>
           </div>
           <ul className="divide-y divide-border">
-            {children.map((ch) => (
+            {children.map((ch, ci) => (
               <li key={ch.id} className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/40">
                 <span className="text-lg">{ch.icon || "📄"}</span>
                 <button type="button" className="flex-1 text-left" onClick={() => onSelectItem(ch.id)}>
@@ -677,11 +677,14 @@ function ItemPane({
                   <div className="text-xs text-muted-foreground">/p/{pageSlug || "…"}/i/{ch.slug}</div>
                 </button>
                 {!ch.is_visible && <span className="text-xs text-muted-foreground">隐藏</span>}
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="上移" onClick={() => onMoveChild(ch.id, -1)} disabled={ci === 0}><ArrowUp size={14} /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="下移" onClick={() => onMoveChild(ch.id, 1)} disabled={ci === children.length - 1}><ArrowDown size={14} /></Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" title="删除" onClick={() => onDeleteChild(ch.id, ch.title)}>
                   <Trash2 size={14} />
                 </Button>
               </li>
             ))}
+
           </ul>
         </div>
       )}
