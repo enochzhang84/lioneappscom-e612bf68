@@ -107,7 +107,9 @@ const itemInput = z.object({
   button_url: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
+  status: statusEnum.default("live"),
 });
+
 
 
 export const adminListItems = createServerFn({ method: "GET" })
