@@ -59,7 +59,9 @@ export const adminUpsertCategory = createServerFn({ method: "POST" })
       icon: data.icon ?? null,
       sort_order: data.sort_order,
       is_visible: data.is_visible,
+      status: data.status,
     };
+
     if (data.id) {
       const { error } = await context.supabase
         .from("tool_categories").update(payload).eq("id", data.id);
