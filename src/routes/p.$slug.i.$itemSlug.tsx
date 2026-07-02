@@ -44,9 +44,25 @@ const COMMERCIAL_DRIVER_PROPS = {
   backLabel: "← 返回驾考工具",
 };
 
+const C1_MOCK_PROPS = {
+  embedded: true as const,
+  pools: [
+    { category: "c1", count: 36 },
+    { category: "c1_signs", count: 12 },
+  ],
+  total: 48,
+  pass: 42, // 允许错 6 题
+  examSeconds: 60 * 60,
+  title: "DMV 小型车 C1 模拟考",
+  subtitle: "DMV 风格 · 36 道笔试 + 12 道图标 · 共 48 题 · 60 分钟 · 最多可错 6 题",
+  backHref: "/p/drive",
+  backLabel: "← 返回驾考工具",
+};
+
 const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath?: string }> = {
   "app:drive-c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "/p/drive/c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
+  "app:drive-c1-mock": { render: () => <QuizApp {...C1_MOCK_PROPS} /> },
   "app:drive-ab-air-brake": { render: () => <QuizApp {...AIR_BRAKE_PROPS} /> },
   "app:drive-ab-combination-vehicle": { render: () => <QuizApp {...COMBINATION_VEHICLE_PROPS} /> },
   "app:drive-ab-commercial-driver": { render: () => <QuizApp {...COMMERCIAL_DRIVER_PROPS} /> },
