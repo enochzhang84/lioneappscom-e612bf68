@@ -42,6 +42,11 @@ const CONFIGS: Record<ImageKind, Config> = {
     accept: "image/png,image/jpeg", multiple: false, needsFile: true },
   qrcode: { title: "二维码生成", icon: "🔳", intro: "把文字或网址生成二维码 PNG，可直接下载。",
     accept: "", multiple: false, needsFile: false },
+  "id-photo": { title: "证件照尺寸调整", icon: "🪪", intro: "按常见证件照尺寸（1 寸/2 寸/护照/签证）居中裁剪并填色底。",
+    accept: "image/jpeg,image/png,image/webp", multiple: false, needsFile: true,
+    faqs: [{ q: "白底/蓝底/红底怎么选？", a: "选择需要的底色后，工具会用该颜色填充空白区域。" }] },
+  barcode: { title: "条形码生成", icon: "📊", intro: "根据 CODE128/EAN-13/UPC 等格式生成条形码 PNG，浏览器本地生成。",
+    accept: "", multiple: false, needsFile: false },
 };
 
 async function loadImage(file: File): Promise<HTMLImageElement> {
