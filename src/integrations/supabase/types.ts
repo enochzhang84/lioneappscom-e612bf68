@@ -552,6 +552,7 @@ export type Database = {
           explanation_en: string | null
           google_keywords: string | null
           id: string
+          image_url: string | null
           is_active: boolean
           manual_chapter: string | null
           manual_name: string | null
@@ -580,6 +581,7 @@ export type Database = {
           explanation_en?: string | null
           google_keywords?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           manual_chapter?: string | null
           manual_name?: string | null
@@ -608,6 +610,7 @@ export type Database = {
           explanation_en?: string | null
           google_keywords?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           manual_chapter?: string | null
           manual_name?: string | null
