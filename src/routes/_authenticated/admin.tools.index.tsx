@@ -56,6 +56,7 @@ type Item = {
   id: string;
   page_id: string;
   category_id: string | null;
+  parent_id: string | null;
   slug: string;
   title: string;
   page_title: string | null;
