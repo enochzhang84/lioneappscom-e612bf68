@@ -267,6 +267,16 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
     mItem.mutate({ data: itemPayload(a, pageId, { sort_order: b.sort_order }) });
     mItem.mutate({ data: itemPayload(b, pageId, { sort_order: a.sort_order }) });
   }
+  function moveItemById(id: string, dir: -1 | 1) {
+    const cur = items.find((i) => i.id === id);
+    if (!cur) return;
+    const siblings = items
+      .filter((i) => i.category_id === cur.category_id && (i.parent_id ?? null) === (cur.parent_id ?? null))
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const idx = siblings.findIndex((i) => i.id === id);
+    moveItem(siblings, idx, dir);
+  }
+
   function duplicateItem(it: Item) {
     const stamp = Date.now().toString(36);
     const catItems = items.filter((i) => i.category_id === it.category_id);
@@ -331,7 +341,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                   </div>
                   {isOpen && (
                     <ul className="ml-5 border-l border-border pl-2 mt-0.5 space-y-0.5">
-                      {topItems.map((it) => {
+                      {topItems.map((it, ti) => {
                         const iSel = selection.kind === "item" && selection.id === it.id;
                         const children = items
                           .filter((x) => x.parent_id === it.id)
@@ -354,17 +364,33 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                               <span>{it.icon || "🧰"}</span>
                               <span className={`flex-1 truncate ${!it.is_visible ? "text-muted-foreground line-through" : ""}`}>{it.title || "(未命名)"}</span>
                               {children.length > 0 && <span className="text-[10px] text-muted-foreground">{children.length}</span>}
+                              <div className="hidden group-hover:flex items-center">
+                                <button type="button" title="上移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(it.id, -1); }} disabled={ti === 0}>
+                                  <ArrowUp size={11} />
+                                </button>
+                                <button type="button" title="下移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(it.id, 1); }} disabled={ti === topItems.length - 1}>
+                                  <ArrowDown size={11} />
+                                </button>
+                              </div>
                             </div>
                             {iOpen && children.length > 0 && (
                               <ul className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
-                                {children.map((ch) => {
+                                {children.map((ch, chi) => {
                                   const cSel = selection.kind === "item" && selection.id === ch.id;
                                   return (
                                     <li key={ch.id}
-                                      className={`flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${cSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
+                                      className={`group flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${cSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
                                       onClick={() => setSelection({ kind: "item", id: ch.id })}>
                                       <span>{ch.icon || "📄"}</span>
                                       <span className={`flex-1 truncate ${!ch.is_visible ? "text-muted-foreground line-through" : ""}`}>{ch.title || "(未命名)"}</span>
+                                      <div className="hidden group-hover:flex items-center">
+                                        <button type="button" title="上移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(ch.id, -1); }} disabled={chi === 0}>
+                                          <ArrowUp size={11} />
+                                        </button>
+                                        <button type="button" title="下移" className="p-0.5 hover:bg-muted rounded disabled:opacity-30" onClick={(e) => { e.stopPropagation(); moveItemById(ch.id, 1); }} disabled={chi === children.length - 1}>
+                                          <ArrowDown size={11} />
+                                        </button>
+                                      </div>
                                     </li>
                                   );
                                 })}
@@ -380,6 +406,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                           </li>
                         );
                       })}
+
                       <li>
                         <button
                           type="button"
@@ -430,8 +457,10 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             onAddChild={() => addItemUnder(selectedItem.category_id ?? "", selectedItem.id)}
             onSelectItem={(id) => setSelection({ kind: "item", id })}
             onDeleteChild={(id, title) => { if (confirm(`删除子页面「${title}」？`)) mItemDel.mutate({ data: { id } }); }}
+            onMoveChild={(id, dir) => moveItemById(id, dir)}
           />
         )}
+
       </section>
     </div>
   );
@@ -579,7 +608,7 @@ function CategoryPane({
 /* ---------------- Item detail ---------------- */
 
 function ItemPane({
-  item, cats, allItems, pageSlug, onSave, onDelete, onAddChild, onSelectItem, onDeleteChild,
+  item, cats, allItems, pageSlug, onSave, onDelete, onAddChild, onSelectItem, onDeleteChild, onMoveChild,
 }: {
   item: Item;
   cats: Category[];
@@ -590,7 +619,9 @@ function ItemPane({
   onAddChild: () => void;
   onSelectItem: (id: string) => void;
   onDeleteChild: (id: string, title: string) => void;
+  onMoveChild: (id: string, dir: -1 | 1) => void;
 }) {
+
   const [draft, setDraft] = useState(item);
   useEffect(() => setDraft(item), [item]);
   const dirty = JSON.stringify(draft) !== JSON.stringify(item);
@@ -638,7 +669,7 @@ function ItemPane({
             <Button size="sm" variant="ghost" onClick={onAddChild}><Plus size={14} className="mr-1" />新增子页面</Button>
           </div>
           <ul className="divide-y divide-border">
-            {children.map((ch) => (
+            {children.map((ch, ci) => (
               <li key={ch.id} className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/40">
                 <span className="text-lg">{ch.icon || "📄"}</span>
                 <button type="button" className="flex-1 text-left" onClick={() => onSelectItem(ch.id)}>
@@ -646,11 +677,14 @@ function ItemPane({
                   <div className="text-xs text-muted-foreground">/p/{pageSlug || "…"}/i/{ch.slug}</div>
                 </button>
                 {!ch.is_visible && <span className="text-xs text-muted-foreground">隐藏</span>}
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="上移" onClick={() => onMoveChild(ch.id, -1)} disabled={ci === 0}><ArrowUp size={14} /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="下移" onClick={() => onMoveChild(ch.id, 1)} disabled={ci === children.length - 1}><ArrowDown size={14} /></Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" title="删除" onClick={() => onDeleteChild(ch.id, ch.title)}>
                   <Trash2 size={14} />
                 </Button>
               </li>
             ))}
+
           </ul>
         </div>
       )}
