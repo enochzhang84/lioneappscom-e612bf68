@@ -38,6 +38,7 @@ const questionInput = z.object({
   manual_url: z.string().nullable().optional(),
   google_keywords: z.string().nullable().optional(),
   category: z.string().min(1).max(40).default("c1"),
+  question_bank_id: z.string().uuid().nullable().optional(),
   difficulty: z.string().max(20).default("medium"),
   is_active: z.boolean().default(true),
   sort_order: z.number().int().default(0),
