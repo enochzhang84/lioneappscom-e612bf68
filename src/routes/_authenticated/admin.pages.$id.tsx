@@ -79,6 +79,7 @@ function PageEditor() {
   const [pageType, setPageType] = useState<PageType>("content");
   const [showInNav, setShowInNav] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const [showInAdminShortcut, setShowInAdminShortcut] = useState(false);
   const [sortOrder, setSortOrder] = useState(0);
   const [blocks, setBlocks] = useState<Block[]>([]);
 
