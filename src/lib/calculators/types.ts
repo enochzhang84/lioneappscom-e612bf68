@@ -26,7 +26,7 @@ export type CalcOutput = {
 
 export type CalculatorConfig = {
   key: string;
-  category: "decoration" | "logistics" | "finance";
+  category: "decoration" | "logistics" | "finance" | "automotive";
   title: string;
   intro: string;
   inputs: CalcInput[];
