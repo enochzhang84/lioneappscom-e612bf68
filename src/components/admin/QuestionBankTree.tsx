@@ -22,16 +22,19 @@ import {
 type NodeType = "category" | "module" | "bank";
 
 const TYPE_LABEL: Record<NodeType, string> = {
-  category: "一级分类",
-  module: "二级模块",
+  category: "考试分类",
+  module: "考试项目",
   bank: "题库",
 };
 
+// Default child type. Modules can hold both sub-modules (exam projects) and banks;
+// the editor lets the admin switch when creating under a module.
 const NEXT_TYPE: Record<NodeType, NodeType | null> = {
   category: "module",
   module: "bank",
   bank: null,
 };
+
 
 type TreeNode = BankNode & { children: TreeNode[] };
 
