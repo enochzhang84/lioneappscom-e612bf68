@@ -830,6 +830,54 @@ export type Database = {
           },
         ]
       }
+      tool_plugins: {
+        Row: {
+          category: string | null
+          code: string
+          component_key: string
+          created_at: string
+          default_config: Json
+          description: string | null
+          enabled: boolean
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          component_key: string
+          created_at?: string
+          default_config?: Json
+          description?: string | null
+          enabled?: boolean
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          component_key?: string
+          created_at?: string
+          default_config?: Json
+          description?: string | null
+          enabled?: boolean
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
