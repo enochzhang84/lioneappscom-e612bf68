@@ -1,6 +1,26 @@
 // 所有单位定义（按 category 分组）。新增单位只需在这里加一行。
 import { linear, type UnitDef } from "./types";
 
+// ========== 速度 · 基准：米/秒 (m/s) ==========
+export const SPEED_UNITS: UnitDef[] = [
+  { key: "ms",   name: "米/秒",     symbol: "m/s",  ...linear(1) },
+  { key: "kmh",  name: "公里/小时", symbol: "km/h", ...linear(1 / 3.6) },
+  { key: "mph",  name: "英里/小时", symbol: "mph",  ...linear(0.44704) },
+  { key: "knot", name: "节",        symbol: "knot", ...linear(0.514444) },
+  { key: "fps",  name: "英尺/秒",   symbol: "ft/s", ...linear(0.3048) },
+];
+
+// ========== 压力 · 基准：帕斯卡 (Pa) ==========
+export const PRESSURE_UNITS: UnitDef[] = [
+  { key: "pa",  name: "帕",     symbol: "Pa",  ...linear(1) },
+  { key: "kpa", name: "千帕",   symbol: "kPa", ...linear(1_000) },
+  { key: "mpa", name: "兆帕",   symbol: "MPa", ...linear(1_000_000) },
+  { key: "bar", name: "巴",     symbol: "bar", ...linear(100_000) },
+  { key: "psi", name: "PSI",    symbol: "psi", ...linear(6894.757293168) },
+  { key: "atm", name: "大气压", symbol: "atm", ...linear(101_325) },
+];
+
+
 // ========== 长度 · 基准：米 (m) ==========
 export const LENGTH_UNITS: UnitDef[] = [
   { key: "m",    name: "米",   symbol: "m",    ...linear(1) },
