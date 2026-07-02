@@ -259,6 +259,8 @@ export function QuizApp(props: QuizAppProps = {}) {
                 showTranslation={showTranslation}
                 translations={translations}
                 translating={translating}
+                onSubmit={requestSubmitFromLast}
+                submitting={submit.isPending}
               />
               <RulesTips total={TOTAL} pass={PASS} examSeconds={EXAM_SECONDS} />
             </div>
