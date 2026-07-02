@@ -130,9 +130,8 @@ export const NUMBER_UNITS: UnitDef[] = [
   { key: "trillion", name: "万亿 (T)", symbol: "T",        ...linear(1e12) },
 ];
 
-export const NUMBER_UNITS: UnitDef[] = NUMBER_UNITS_INNER;
-// placeholder — replaced below by real re-export style
-export const STORAGE_UNITS: UnitDef[] = [
+
+
   // 基准：Byte
   { key: "bit",  name: "比特",    symbol: "bit", ...linear(1 / 8) },
   { key: "B",    name: "字节",    symbol: "B",   ...linear(1) },
