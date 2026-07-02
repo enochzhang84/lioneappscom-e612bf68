@@ -184,6 +184,7 @@ function ItemDetail() {
   const textKey = appKey.startsWith("app:text:") ? appKey.slice("app:text:".length) : null;
   const devKey = appKey.startsWith("app:dev:") ? appKey.slice("app:dev:".length) : null;
   const timeKey = appKey.startsWith("app:time:") ? appKey.slice("app:time:".length) : null;
+  const aiKey = appKey.startsWith("app:ai:") ? appKey.slice("app:ai:".length) : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
   const embed = isDeveloping ? undefined : (converterKey
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
@@ -195,6 +196,8 @@ function ItemDetail() {
     ? { render: () => <DevToolByKey toolKey={devKey} />, fullPath: undefined as string | undefined }
     : timeKey
     ? { render: () => <TimeToolByKey toolKey={timeKey} />, fullPath: undefined as string | undefined }
+    : aiKey
+    ? { render: () => <AiToolByKey toolKey={aiKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
     : undefined)));
