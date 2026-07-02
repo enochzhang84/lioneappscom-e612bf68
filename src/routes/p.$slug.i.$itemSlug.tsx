@@ -7,9 +7,22 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Maximize2, Loader2, AlertTriangle } from "lucide-react";
 import { QuizApp } from "./p.drive.c1";
 
+const AIR_BRAKE_PROPS = {
+  embedded: true as const,
+  category: "air_brake",
+  total: 25,
+  pass: 20,
+  examSeconds: 45 * 60,
+  title: "A/B 照 · 空气制动模拟考试",
+  subtitle: "DMV 风格 · 中英双语 · 随机 25 题 · 45 分钟 · 20 题通过",
+  backHref: "/p/drive",
+  backLabel: "← 返回驾考工具",
+};
+
 const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath?: string }> = {
   "app:drive-c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "/p/drive/c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
+  "app:drive-ab-air-brake": { render: () => <QuizApp {...AIR_BRAKE_PROPS} /> },
 };
 
 class EmbedErrorBoundary extends React.Component<
