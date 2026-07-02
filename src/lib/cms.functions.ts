@@ -234,10 +234,11 @@ export const getToolItem = createServerFn({ method: "GET" })
     if (!page) return null;
     const { data: item, error: itemErr } = await supabasePublic
       .from("tool_items")
-      .select("id, page_id, category_id, parent_id, slug, title, subtitle, icon, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at")
+      .select("id, page_id, category_id, parent_id, slug, title, subtitle, icon, description, content, html_content, image_url, video_url, link_url, button_text, sort_order, created_at, status")
       .eq("page_id", (page as PageFull).id)
       .eq("slug", data.itemSlug)
       .eq("is_visible", true)
+      .in("status", ["developing", "live"])
       .maybeSingle();
     if (itemErr) throw new Error(itemErr.message);
     if (!item) return null;
@@ -246,9 +247,10 @@ export const getToolItem = createServerFn({ method: "GET" })
     if (catId) {
       const { data: cat } = await supabasePublic
         .from("tool_categories")
-        .select("id, page_id, title, description, icon, sort_order")
+        .select("id, page_id, title, description, icon, sort_order, status")
         .eq("id", catId)
         .maybeSingle();
+
       category = (cat as ToolCategory | null) ?? null;
     }
     return { page: page as PageFull, item: item as ToolItem, category };
