@@ -58,7 +58,7 @@ export const getRandomQuizQuestions = createServerFn({ method: "GET" })
     // correct_answer/explanation. Never return answer keys to the client.
     const { data: rows, error } = await supabasePublic
       .from("quiz_questions")
-      .select("id, question, option_a, option_b, option_c, option_d, category")
+      .select("id, question, option_a, option_b, option_c, option_d, category, question_en, option_a_en, option_b_en, option_c_en, option_d_en")
       .eq("category", data.category)
       .eq("is_active", true);
     if (error) throw new Error(error.message);
@@ -85,7 +85,7 @@ export const gradeQuiz = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("quiz_questions")
-      .select("id, question, option_a, option_b, option_c, option_d, correct_answer, explanation")
+      .select("id, question, option_a, option_b, option_c, option_d, correct_answer, explanation, question_en, option_a_en, option_b_en, option_c_en, option_d_en, explanation_en")
       .in("id", data.ids);
     if (error) throw new Error(error.message);
 
@@ -104,8 +104,14 @@ export const gradeQuiz = createServerFn({ method: "POST" })
           option_b: r.option_b as string,
           option_c: (r.option_c as string | null) ?? null,
           option_d: (r.option_d as string | null) ?? null,
+          question_en: (r.question_en as string | null) ?? null,
+          option_a_en: (r.option_a_en as string | null) ?? null,
+          option_b_en: (r.option_b_en as string | null) ?? null,
+          option_c_en: (r.option_c_en as string | null) ?? null,
+          option_d_en: (r.option_d_en as string | null) ?? null,
           correct_answer: correct,
           explanation: (r.explanation as string | null) ?? null,
+          explanation_en: (r.explanation_en as string | null) ?? null,
           picked,
           is_correct: picked === correct,
         };
