@@ -18,7 +18,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, ChevronDown, ChevronRight, Pencil, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/pages/$id")({
   component: PageEditor,
@@ -191,60 +191,44 @@ function PageEditor() {
 
         <Card>
           <CardHeader>
-            <CardTitle>页面编辑</CardTitle>
+            <CardTitle>页面内容</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm" onClick={() => {
-                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理类别"); }
-                window.setTimeout(() => {
-                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  document.getElementById("add-tool-category")?.click();
-                }, 300);
-              }}>
-                <Plus size={14} className="mr-1" /> 增加新类别
-              </Button>
-              <Button type="button" size="sm" onClick={() => {
-                if (pageType !== "tools") { setPageType("tools"); toast.info("已切换为「实用工具页面」，保存后可管理项目"); }
-                window.setTimeout(() => {
-                  document.getElementById("tools-content-manager")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  document.getElementById("add-tool-item")?.click();
-                }, 300);
-              }}>
-                <Plus size={14} className="mr-1" /> 增加新项目
-              </Button>
-              <div className="w-full" />
-              {pageType !== "tools" && (Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
-                <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
-                  <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
-                </Button>
-              ))}
-            </div>
-
-            {pageType === "tools" && (
-              <p className="text-sm text-muted-foreground">实用工具页面的内容请使用下方「工具类别」和「工具项目」管理。</p>
-            )}
-
-            {pageType !== "tools" && blocks.length === 0 && (
-              <p className="text-sm text-muted-foreground">还没有内容块，点击上方按钮添加。</p>
-            )}
-
-
-            {pageType !== "tools" && <div className="space-y-3">
-              {blocks.map((b, i) => (
-                <div key={i} className="rounded-md border border-border p-4 space-y-2 bg-background">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground uppercase">{BLOCK_LABEL[b.type]}</span>
-                    <div className="flex items-center gap-1">
-                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, -1)} disabled={i === 0}><ArrowUp size={14} /></Button>
-                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}><ArrowDown size={14} /></Button>
-                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeBlock(i)}><Trash2 size={14} /></Button>
-                    </div>
-                  </div>
-                  <BlockEditor block={b} onChange={(patch) => updateBlock(i, patch)} />
+            {pageType === "tools" ? (
+              <p className="text-sm text-muted-foreground">
+                当前是「实用工具页面」。所有一级工具（分类）和它们下面的项目请到下方
+                <span className="font-medium text-foreground"> 已添加工具 </span>
+                区域统一管理。
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(BLOCK_LABEL) as Block["type"][]).map((t) => (
+                    <Button key={t} type="button" size="sm" variant="outline" onClick={() => addBlock(t)}>
+                      <Plus size={14} className="mr-1" />{BLOCK_LABEL[t]}
+                    </Button>
+                  ))}
                 </div>
-              ))}
-            </div>}
+                {blocks.length === 0 && (
+                  <p className="text-sm text-muted-foreground">还没有内容块，点击上方按钮添加。</p>
+                )}
+                <div className="space-y-3">
+                  {blocks.map((b, i) => (
+                    <div key={i} className="rounded-md border border-border p-4 space-y-2 bg-background">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground uppercase">{BLOCK_LABEL[b.type]}</span>
+                        <div className="flex items-center gap-1">
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, -1)} disabled={i === 0}><ArrowUp size={14} /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}><ArrowDown size={14} /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeBlock(i)}><Trash2 size={14} /></Button>
+                        </div>
+                      </div>
+                      <BlockEditor block={b} onChange={(patch) => updateBlock(i, patch)} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -309,7 +293,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
 
   const mCat = useMutation({
     mutationFn: upsertCat,
-    onSuccess: () => { toast.success("已保存"); refreshCats(); },
+    onSuccess: () => { refreshCats(); },
     onError: (e: Error) => toast.error(e.message),
   });
   const mCatDel = useMutation({
@@ -319,7 +303,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
   });
   const mItem = useMutation({
     mutationFn: upsertItem,
-    onSuccess: () => { toast.success("已保存"); refreshItems(); },
+    onSuccess: () => { refreshItems(); },
     onError: (e: Error) => toast.error(e.message),
   });
   const mItemDel = useMutation({
@@ -331,217 +315,312 @@ function ToolsManager({ pageId }: { pageId: string }) {
   const [catDrafts, setCatDrafts] = useState<Record<string, Partial<Category>>>({});
   const [itemDrafts, setItemDrafts] = useState<Record<string, Partial<Item>>>({});
   const [openCat, setOpenCat] = useState<Record<string, boolean>>({});
-  const [openItem, setOpenItem] = useState<Record<string, boolean>>({});
+  const [editingCat, setEditingCat] = useState<Record<string, boolean>>({});
+  const [editingItem, setEditingItem] = useState<Record<string, boolean>>({});
+  const [newCatDraft, setNewCatDraft] = useState<Partial<Category> | null>(null);
+  const [newItemDrafts, setNewItemDrafts] = useState<Record<string, Partial<Item>>>({});
 
-  const cats = catsQ.data ?? [];
+  const cats = [...(catsQ.data ?? [])].sort((a, b) => a.sort_order - b.sort_order);
   const items = itemsQ.data ?? [];
 
-  function newCat() {
-    const tmpId = `new-${Date.now()}`;
-    setCatDrafts({ ...catDrafts, [tmpId]: { title: "", description: "", icon: "", sort_order: cats.length, is_visible: true } });
-    setOpenCat({ ...openCat, [tmpId]: true });
+  function addCategory() {
+    setNewCatDraft({ title: "", description: "", icon: "", sort_order: cats.length, is_visible: true });
   }
-  function newItem() {
-    const tmpId = `new-${Date.now()}`;
+  function addItemUnder(catId: string) {
     const stamp = Date.now().toString(36);
-    setItemDrafts({ ...itemDrafts, [tmpId]: {
-      slug: `item-${stamp}`,
-      title: "未命名项目",
-      description: "",
-      category_id: cats[0]?.id ?? null,
-      sort_order: items.length,
-      is_visible: true,
-    } });
-    setOpenItem({ ...openItem, [tmpId]: true });
+    const itemsInCat = items.filter(i => i.category_id === catId);
+    setOpenCat({ ...openCat, [catId]: true });
+    setNewItemDrafts({
+      ...newItemDrafts,
+      [catId]: {
+        slug: `item-${stamp}`,
+        title: "未命名项目",
+        description: "",
+        category_id: catId,
+        sort_order: itemsInCat.length,
+        is_visible: true,
+      },
+    });
   }
+
+  function saveCatPatch(c: Category, patchOverride?: Partial<Category>) {
+    const merged = { ...c, ...(catDrafts[c.id] ?? {}), ...(patchOverride ?? {}) };
+    mCat.mutate({ data: {
+      id: c.id, page_id: pageId,
+      title: merged.title, description: merged.description ?? "",
+      icon: merged.icon ?? "", sort_order: merged.sort_order, is_visible: merged.is_visible,
+    } }, { onSuccess: () => {
+      if (!patchOverride) toast.success("已保存");
+      const n = { ...catDrafts }; delete n[c.id]; setCatDrafts(n);
+      setEditingCat((s) => ({ ...s, [c.id]: false }));
+    } });
+  }
+
+  function moveCategory(idx: number, dir: -1 | 1) {
+    const j = idx + dir;
+    if (j < 0 || j >= cats.length) return;
+    const a = cats[idx]; const b = cats[j];
+    mCat.mutate({ data: { id: a.id, page_id: pageId, title: a.title, description: a.description ?? "", icon: a.icon ?? "", sort_order: b.sort_order, is_visible: a.is_visible } });
+    mCat.mutate({ data: { id: b.id, page_id: pageId, title: b.title, description: b.description ?? "", icon: b.icon ?? "", sort_order: a.sort_order, is_visible: b.is_visible } });
+  }
+
+  function duplicateCategory(c: Category) {
+    mCat.mutate({ data: {
+      page_id: pageId,
+      title: `${c.title} 副本`,
+      description: c.description ?? "",
+      icon: c.icon ?? "",
+      sort_order: cats.length,
+      is_visible: c.is_visible,
+    } }, { onSuccess: () => toast.success("已复制类别") });
+  }
+
+  type ItemPayload = {
+    id?: string; page_id: string; category_id: string | null; slug: string; title: string;
+    page_title: string; subtitle: string; icon: string; description: string; content: string;
+    html_content: string; image_url: string | null; video_url: string; link_url: string;
+    external_url: string; internal_url: string; button_text: string; button_url: string;
+    sort_order: number; is_visible: boolean;
+  };
+  function itemPayload(it: Item, override?: Partial<Item>): ItemPayload {
+    const m = { ...it, ...override };
+    return {
+      id: m.id, page_id: pageId,
+      category_id: m.category_id ?? null,
+      slug: m.slug, title: m.title,
+      page_title: m.page_title ?? "",
+      subtitle: m.subtitle ?? "", icon: m.icon ?? "",
+      description: m.description ?? "", content: m.content ?? "",
+      html_content: m.html_content ?? "",
+      image_url: m.image_url ?? null, video_url: m.video_url ?? "",
+      link_url: m.link_url ?? "",
+      external_url: m.external_url ?? "", internal_url: m.internal_url ?? "",
+      button_text: m.button_text ?? "", button_url: m.button_url ?? "",
+      sort_order: m.sort_order, is_visible: m.is_visible,
+    };
+  }
+
+  function saveItemPatch(it: Item) {
+    const draft = { ...it, ...(itemDrafts[it.id] ?? {}) } as Item;
+    mItem.mutate({ data: itemPayload(draft) }, { onSuccess: () => {
+      toast.success("已保存");
+      const n = { ...itemDrafts }; delete n[it.id]; setItemDrafts(n);
+      setEditingItem((s) => ({ ...s, [it.id]: false }));
+    } });
+  }
+
+  function moveItem(catItems: Item[], idx: number, dir: -1 | 1) {
+    const j = idx + dir;
+    if (j < 0 || j >= catItems.length) return;
+    const a = catItems[idx]; const b = catItems[j];
+    mItem.mutate({ data: itemPayload(a, { sort_order: b.sort_order }) });
+    mItem.mutate({ data: itemPayload(b, { sort_order: a.sort_order }) });
+  }
+
+  function duplicateItem(it: Item) {
+    const stamp = Date.now().toString(36);
+    const catItems = items.filter(i => i.category_id === it.category_id);
+    const cloned: Item = { ...it, id: "" as unknown as string, slug: `${it.slug}-copy-${stamp}`, title: `${it.title} 副本`, sort_order: catItems.length };
+    const p = itemPayload(cloned);
+    delete (p as { id?: string }).id;
+    mItem.mutate({ data: p }, { onSuccess: () => toast.success("已复制项目") });
+  }
+
+  const totalItems = items.length;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>工具页面分类与内容</CardTitle>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <CardTitle>已添加工具</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              统一管理这个页面下的所有一级工具（分类）及其项目。共 {cats.length} 个工具 / {totalItems} 个项目。
+            </p>
+          </div>
+          <Button type="button" size="sm" onClick={addCategory}>
+            <Plus size={14} className="mr-1" /> 增加新类别
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-8">
-        {/* Categories */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">工具类别（左侧导航栏）</h3>
-            <Button id="add-tool-category" type="button" size="sm" onClick={newCat}><Plus size={14} className="mr-1" /> 增加新类别</Button>
-          </div>
-          {cats.length === 0 && Object.keys(catDrafts).length === 0 && (
-            <p className="text-sm text-muted-foreground">还没有类别。</p>
-          )}
+      <CardContent className="space-y-3">
+        {cats.length === 0 && !newCatDraft && (
+          <p className="text-sm text-muted-foreground">还没有工具，点击右上角「增加新类别」开始添加。</p>
+        )}
 
-          <div className="space-y-2">
-            {cats.map((c) => {
-              const draft = { ...c, ...(catDrafts[c.id] ?? {}) } as Category;
-              const dirty = Object.keys(catDrafts[c.id] ?? {}).length > 0;
-              const isOpen = openCat[c.id] ?? false;
-              return (
-                <div key={c.id} className="rounded-md border border-border bg-background">
-                  <button
-                    type="button"
-                    onClick={() => setOpenCat({ ...openCat, [c.id]: !isOpen })}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-muted/40"
-                  >
+        <ul className="space-y-2">
+          {cats.map((c, ci) => {
+            const draft = { ...c, ...(catDrafts[c.id] ?? {}) } as Category;
+            const dirty = Object.keys(catDrafts[c.id] ?? {}).length > 0;
+            const isOpen = openCat[c.id] ?? false;
+            const isEditing = editingCat[c.id] ?? false;
+            const catItems = items
+              .filter(i => i.category_id === c.id)
+              .sort((a, b) => a.sort_order - b.sort_order);
+            return (
+              <li key={c.id} className="rounded-md border border-border bg-background">
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/30">
+                  <button type="button" className="flex items-center gap-2 flex-1 text-left"
+                    onClick={() => setOpenCat({ ...openCat, [c.id]: !isOpen })}>
                     {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                    <span className="text-lg">{draft.icon || "🧰"}</span>
+                    <span className="text-lg">{draft.icon || "📁"}</span>
                     <span className="font-medium">{draft.title || "(未命名)"}</span>
-                    <span className="ml-auto text-xs text-muted-foreground">排序 {draft.sort_order}</span>
+                    <span className="text-xs text-muted-foreground">({catItems.length})</span>
                     {!draft.is_visible && <span className="text-xs text-muted-foreground">隐藏</span>}
                   </button>
-                  {isOpen && (
-                    <div className="p-3 border-t border-border space-y-3">
-                      <CategoryFormFields
-                        value={draft}
-                        onPatch={(p) => setCatDrafts({ ...catDrafts, [c.id]: { ...(catDrafts[c.id] ?? {}), ...p } })}
-                      />
-                      <div className="flex gap-2">
-                        <Button type="button" size="sm" disabled={!dirty || mCat.isPending}
-                          onClick={() => mCat.mutate({ data: { id: c.id, page_id: pageId,
-                            title: draft.title, description: draft.description ?? "",
-                            icon: draft.icon ?? "", sort_order: draft.sort_order,
-                            is_visible: draft.is_visible } },
-                            { onSuccess: () => { const n = { ...catDrafts }; delete n[c.id]; setCatDrafts(n); } })}>
-                          保存
-                        </Button>
-                        <Button type="button" size="sm" variant="ghost"
-                          onClick={() => { if (confirm(`删除项目栏「${c.title}」及其下所有内容？`)) mCatDel.mutate({ data: { id: c.id } }); }}>
-                          <Trash2 size={14} className="mr-1" /> 删除
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1">
+                    <IconBtn title="上移" onClick={() => moveCategory(ci, -1)} disabled={ci === 0}><ArrowUp size={14} /></IconBtn>
+                    <IconBtn title="下移" onClick={() => moveCategory(ci, 1)} disabled={ci === cats.length - 1}><ArrowDown size={14} /></IconBtn>
+                    <IconBtn title="编辑" onClick={() => { setOpenCat({ ...openCat, [c.id]: true }); setEditingCat({ ...editingCat, [c.id]: !isEditing }); }}><Pencil size={14} /></IconBtn>
+                    <IconBtn title="复制" onClick={() => duplicateCategory(c)}><Copy size={14} /></IconBtn>
+                    <IconBtn title="删除" onClick={() => { if (confirm(`删除工具「${c.title}」及其下所有项目？`)) mCatDel.mutate({ data: { id: c.id } }); }}><Trash2 size={14} /></IconBtn>
+                  </div>
                 </div>
-              );
-            })}
-            {Object.entries(catDrafts).filter(([k]) => k.startsWith("new-")).map(([tmpId, d]) => (
-              <div key={tmpId} className="rounded-md border border-primary/40 bg-background p-3 space-y-3">
-                <div className="text-xs text-primary uppercase font-medium">新类别</div>
-                <CategoryFormFields
-                  value={d as Category}
-                  onPatch={(p) => setCatDrafts({ ...catDrafts, [tmpId]: { ...d, ...p } })}
-                />
-                <div className="flex gap-2">
-                  <Button type="button" size="sm" disabled={!(d.title && d.title.trim())}
-                    onClick={() => mCat.mutate(
-                      { data: { page_id: pageId, title: d.title ?? "", description: d.description ?? "",
-                        icon: d.icon ?? "", sort_order: d.sort_order ?? 0, is_visible: d.is_visible ?? true } },
-                      { onSuccess: () => { const n = { ...catDrafts }; delete n[tmpId]; setCatDrafts(n); } },
-                    )}>
-                    创建
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost"
-                    onClick={() => { const n = { ...catDrafts }; delete n[tmpId]; setCatDrafts(n); }}>
-                    取消
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Items */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">工具项目（右侧内容）</h3>
-            <Button id="add-tool-item" type="button" size="sm" onClick={newItem}>
-              <Plus size={14} className="mr-1" /> 增加新项目
-            </Button>
-          </div>
-          {cats.length === 0 && <p className="text-xs text-muted-foreground">提示：还没有类别，新项目会先保存为「未分类」，可以稍后再指定类别。</p>}
-          {cats.length > 0 && items.length === 0 && Object.keys(itemDrafts).length === 0 && (
-            <p className="text-sm text-muted-foreground">还没有项目。</p>
+                {isOpen && (
+                  <div className="p-3 border-t border-border space-y-3">
+                    {isEditing && (
+                      <div className="rounded border border-border bg-muted/20 p-3 space-y-3">
+                        <div className="text-xs uppercase font-medium text-muted-foreground">编辑类别</div>
+                        <CategoryFormFields
+                          value={draft}
+                          onPatch={(p) => setCatDrafts({ ...catDrafts, [c.id]: { ...(catDrafts[c.id] ?? {}), ...p } })}
+                        />
+                        <div className="flex gap-2">
+                          <Button type="button" size="sm" disabled={!dirty || mCat.isPending} onClick={() => saveCatPatch(c)}>保存类别</Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => {
+                            const n = { ...catDrafts }; delete n[c.id]; setCatDrafts(n);
+                            setEditingCat({ ...editingCat, [c.id]: false });
+                          }}>取消</Button>
+                        </div>
+                      </div>
+                    )}
+
+                    <ul className="space-y-2 pl-3 border-l-2 border-border">
+                      {catItems.length === 0 && !newItemDrafts[c.id] && (
+                        <li className="text-xs text-muted-foreground pl-2">此工具下还没有项目。</li>
+                      )}
+                      {catItems.map((it, ii) => {
+                        const idraft = { ...it, ...(itemDrafts[it.id] ?? {}) } as Item;
+                        const iDirty = Object.keys(itemDrafts[it.id] ?? {}).length > 0;
+                        const iEditing = editingItem[it.id] ?? false;
+                        return (
+                          <li key={it.id} className="rounded border border-border bg-background">
+                            <div className="flex items-center gap-2 px-3 py-2">
+                              <span className="text-muted-foreground select-none">├─</span>
+                              <span>{idraft.icon || "📄"}</span>
+                              <span className="font-medium text-sm">{idraft.title || "(未命名)"}</span>
+                              {!idraft.is_visible && <span className="text-xs text-muted-foreground">隐藏</span>}
+                              <div className="ml-auto flex items-center gap-1">
+                                <IconBtn title="上移" onClick={() => moveItem(catItems, ii, -1)} disabled={ii === 0}><ArrowUp size={14} /></IconBtn>
+                                <IconBtn title="下移" onClick={() => moveItem(catItems, ii, 1)} disabled={ii === catItems.length - 1}><ArrowDown size={14} /></IconBtn>
+                                <IconBtn title="编辑" onClick={() => setEditingItem({ ...editingItem, [it.id]: !iEditing })}><Pencil size={14} /></IconBtn>
+                                <IconBtn title="复制" onClick={() => duplicateItem(it)}><Copy size={14} /></IconBtn>
+                                <IconBtn title="删除" onClick={() => { if (confirm(`删除项目「${it.title}」？`)) mItemDel.mutate({ data: { id: it.id } }); }}><Trash2 size={14} /></IconBtn>
+                              </div>
+                            </div>
+                            {iEditing && (
+                              <div className="p-3 border-t border-border space-y-3">
+                                <ItemFormFields
+                                  value={idraft}
+                                  cats={cats}
+                                  onPatch={(p) => setItemDrafts({ ...itemDrafts, [it.id]: { ...(itemDrafts[it.id] ?? {}), ...p } })}
+                                />
+                                <div className="flex gap-2">
+                                  <Button type="button" size="sm" disabled={!iDirty || mItem.isPending} onClick={() => saveItemPatch(it)}>保存项目</Button>
+                                  <Button type="button" size="sm" variant="ghost" onClick={() => {
+                                    const n = { ...itemDrafts }; delete n[it.id]; setItemDrafts(n);
+                                    setEditingItem({ ...editingItem, [it.id]: false });
+                                  }}>取消</Button>
+                                </div>
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
+                      {newItemDrafts[c.id] && (
+                        <li className="rounded border border-primary/40 bg-background p-3 space-y-3">
+                          <div className="text-xs text-primary uppercase font-medium">新项目</div>
+                          <ItemFormFields
+                            value={newItemDrafts[c.id] as Item}
+                            cats={cats}
+                            onPatch={(p) => setNewItemDrafts({ ...newItemDrafts, [c.id]: { ...newItemDrafts[c.id], ...p } })}
+                          />
+                          <div className="flex gap-2">
+                            <Button type="button" size="sm" onClick={() => {
+                              const d = newItemDrafts[c.id];
+                              mItem.mutate({ data: {
+                                page_id: pageId, category_id: d.category_id ?? c.id,
+                                slug: d.slug ?? "", title: d.title ?? "",
+                                page_title: d.page_title ?? "",
+                                subtitle: d.subtitle ?? "", icon: d.icon ?? "",
+                                description: d.description ?? "",
+                                content: d.content ?? "", html_content: d.html_content ?? "",
+                                image_url: d.image_url ?? null,
+                                video_url: d.video_url ?? "", link_url: d.link_url ?? "",
+                                external_url: d.external_url ?? "", internal_url: d.internal_url ?? "",
+                                button_text: d.button_text ?? "", button_url: d.button_url ?? "",
+                                sort_order: d.sort_order ?? 0, is_visible: d.is_visible ?? true,
+                              } }, { onSuccess: () => {
+                                toast.success("已创建");
+                                const n = { ...newItemDrafts }; delete n[c.id]; setNewItemDrafts(n);
+                              } });
+                            }}>创建</Button>
+                            <Button type="button" size="sm" variant="ghost" onClick={() => {
+                              const n = { ...newItemDrafts }; delete n[c.id]; setNewItemDrafts(n);
+                            }}>取消</Button>
+                          </div>
+                        </li>
+                      )}
+                      <li>
+                        <Button type="button" size="sm" variant="outline" onClick={() => addItemUnder(c.id)}>
+                          <Plus size={14} className="mr-1" /> 增加新项目
+                        </Button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+
+          {newCatDraft && (
+            <li className="rounded-md border border-primary/40 bg-background p-3 space-y-3">
+              <div className="text-xs text-primary uppercase font-medium">新类别</div>
+              <CategoryFormFields
+                value={newCatDraft as Category}
+                onPatch={(p) => setNewCatDraft({ ...newCatDraft, ...p })}
+              />
+              <div className="flex gap-2">
+                <Button type="button" size="sm" disabled={!(newCatDraft.title && newCatDraft.title.trim())}
+                  onClick={() => mCat.mutate(
+                    { data: {
+                      page_id: pageId,
+                      title: newCatDraft.title ?? "",
+                      description: newCatDraft.description ?? "",
+                      icon: newCatDraft.icon ?? "",
+                      sort_order: newCatDraft.sort_order ?? 0,
+                      is_visible: newCatDraft.is_visible ?? true,
+                    } },
+                    { onSuccess: () => { toast.success("已创建"); setNewCatDraft(null); } },
+                  )}>创建</Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => setNewCatDraft(null)}>取消</Button>
+              </div>
+            </li>
           )}
-
-          <div className="space-y-2">
-            {items.map((it) => {
-              const draft = { ...it, ...(itemDrafts[it.id] ?? {}) } as Item;
-              const dirty = Object.keys(itemDrafts[it.id] ?? {}).length > 0;
-              const isOpen = openItem[it.id] ?? false;
-              const cat = cats.find(c => c.id === draft.category_id);
-              return (
-                <div key={it.id} className="rounded-md border border-border bg-background">
-                  <button type="button"
-                    onClick={() => setOpenItem({ ...openItem, [it.id]: !isOpen })}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-muted/40">
-                    {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                    <span className="font-medium">{draft.title || "(未命名)"}</span>
-                    <span className="text-xs text-muted-foreground">/ {cat?.title ?? "未分类"}</span>
-                    <span className="ml-auto text-xs text-muted-foreground">排序 {draft.sort_order}</span>
-                    {!draft.is_visible && <span className="text-xs text-muted-foreground">隐藏</span>}
-                  </button>
-                  {isOpen && (
-                    <div className="p-3 border-t border-border space-y-3">
-                      <ItemFormFields
-                        value={draft}
-                        cats={cats}
-                        onPatch={(p) => setItemDrafts({ ...itemDrafts, [it.id]: { ...(itemDrafts[it.id] ?? {}), ...p } })}
-                      />
-                      <div className="flex gap-2">
-                        <Button type="button" size="sm" disabled={!dirty || mItem.isPending}
-                          onClick={() => mItem.mutate({ data: { id: it.id, page_id: pageId,
-                            category_id: draft.category_id, slug: draft.slug, title: draft.title,
-                            page_title: draft.page_title ?? "",
-                            subtitle: draft.subtitle ?? "", icon: draft.icon ?? "",
-                            description: draft.description ?? "", content: draft.content ?? "",
-                            html_content: draft.html_content ?? "",
-                            image_url: draft.image_url ?? null, video_url: draft.video_url ?? "",
-                            link_url: draft.link_url ?? "",
-                            external_url: draft.external_url ?? "", internal_url: draft.internal_url ?? "",
-                            button_text: draft.button_text ?? "", button_url: draft.button_url ?? "",
-                            sort_order: draft.sort_order, is_visible: draft.is_visible } },
-                            { onSuccess: () => { const n = { ...itemDrafts }; delete n[it.id]; setItemDrafts(n); } })}>
-
-                          保存
-                        </Button>
-                        <Button type="button" size="sm" variant="ghost"
-                          onClick={() => { if (confirm(`删除内容「${it.title}」？`)) mItemDel.mutate({ data: { id: it.id } }); }}>
-                          <Trash2 size={14} className="mr-1" /> 删除
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            {Object.entries(itemDrafts).filter(([k]) => k.startsWith("new-")).map(([tmpId, d]) => (
-              <div key={tmpId} className="rounded-md border border-primary/40 bg-background p-3 space-y-3">
-                <div className="text-xs text-primary uppercase font-medium">新项目</div>
-                <ItemFormFields
-                  value={d as Item}
-                  cats={cats}
-                  onPatch={(p) => setItemDrafts({ ...itemDrafts, [tmpId]: { ...d, ...p } })}
-                />
-                <div className="flex gap-2">
-                  <Button type="button" size="sm"
-                    onClick={() => mItem.mutate(
-                      { data: { page_id: pageId, category_id: d.category_id ?? null,
-                        slug: d.slug ?? "", title: d.title ?? "",
-                        page_title: d.page_title ?? "",
-                        subtitle: d.subtitle ?? "", icon: d.icon ?? "",
-                        description: d.description ?? "",
-                        content: d.content ?? "", html_content: d.html_content ?? "",
-                        image_url: d.image_url ?? null,
-                        video_url: d.video_url ?? "", link_url: d.link_url ?? "",
-                        external_url: d.external_url ?? "", internal_url: d.internal_url ?? "",
-                        button_text: d.button_text ?? "", button_url: d.button_url ?? "",
-                        sort_order: d.sort_order ?? 0, is_visible: d.is_visible ?? true } },
-                      { onSuccess: () => { const n = { ...itemDrafts }; delete n[tmpId]; setItemDrafts(n); } },
-                    )}>
-
-                    创建
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost"
-                    onClick={() => { const n = { ...itemDrafts }; delete n[tmpId]; setItemDrafts(n); }}>
-                    取消
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        </ul>
       </CardContent>
     </Card>
+  );
+}
+
+function IconBtn({ children, title, disabled, onClick }: {
+  children: React.ReactNode; title?: string; disabled?: boolean; onClick?: () => void;
+}) {
+  return (
+    <Button type="button" size="icon" variant="ghost" className="h-7 w-7" title={title} disabled={disabled} onClick={onClick}>
+      {children}
+    </Button>
   );
 }
 
