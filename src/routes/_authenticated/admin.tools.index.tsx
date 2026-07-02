@@ -408,12 +408,12 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             key={selectedCat.id}
             category={selectedCat}
             pageId={pageId}
-            items={items.filter((i) => i.category_id === selectedCat.id).sort((a, b) => a.sort_order - b.sort_order)}
+            items={items.filter((i) => i.category_id === selectedCat.id && !i.parent_id).sort((a, b) => a.sort_order - b.sort_order)}
             onSave={(patch) => mCat.mutate({ data: catPayload(selectedCat, pageId, patch) }, { onSuccess: () => toast.success("已保存") })}
             onDelete={() => { if (confirm(`删除分类「${selectedCat.title}」及其下所有工具？`)) { mCatDel.mutate({ data: { id: selectedCat.id } }); setSelection({ kind: "none" }); } }}
             onAddItem={() => addItemUnder(selectedCat.id)}
             onSelectItem={(id) => setSelection({ kind: "item", id })}
-            onMoveItem={(idx, dir) => moveItem(items.filter((i) => i.category_id === selectedCat.id).sort((a, b) => a.sort_order - b.sort_order), idx, dir)}
+            onMoveItem={(idx, dir) => moveItem(items.filter((i) => i.category_id === selectedCat.id && !i.parent_id).sort((a, b) => a.sort_order - b.sort_order), idx, dir)}
             onDeleteItem={(id, title) => { if (confirm(`删除工具「${title}」？`)) mItemDel.mutate({ data: { id } }); }}
             onDuplicateItem={duplicateItem}
           />
