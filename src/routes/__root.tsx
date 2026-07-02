@@ -119,6 +119,26 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let sid = window.sessionStorage.getItem("la_sid");
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      window.sessionStorage.setItem("la_sid", sid);
+    }
+    const send = () => {
+      const path = window.location.pathname;
+      if (path.startsWith("/admin") || path.startsWith("/_authenticated") || path.startsWith("/api/")) return;
+      import("../lib/analytics.functions").then(({ trackPageView }) => {
+        trackPageView({ data: { path, referrer: document.referrer || undefined, sessionId: sid! } }).catch(() => {});
+      });
+    };
+    send();
+    const unsub = router.subscribe("onResolved", () => send());
+    return () => unsub();
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -127,3 +147,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+

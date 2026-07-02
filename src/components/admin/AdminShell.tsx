@@ -40,19 +40,20 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/tools", label: "工具管理", icon: Wrench, group: "内容" },
   { to: "/admin/quiz", label: "题库管理", icon: BookOpen, group: "内容" },
   { to: "/admin/exams", label: "考试管理", icon: GraduationCap, group: "内容" },
-  { to: "/admin/blog", label: "文章中心", icon: Newspaper, group: "内容", soon: true },
+  { to: "/admin/blog", label: "文章中心", icon: Newspaper, group: "内容" },
   { to: "/admin/products", label: "产品", icon: Package, group: "内容" },
   { to: "/admin/cases", label: "案例", icon: Briefcase, group: "内容" },
 
-  { to: "/admin/analytics", label: "网站运营中心", icon: BarChart3, group: "运营", soon: true },
+  { to: "/admin/analytics", label: "网站运营中心", icon: BarChart3, group: "运营" },
   { to: "/admin/seo", label: "SEO 管理", icon: Search, group: "运营" },
 
-  { to: "/admin/users", label: "用户管理", icon: Users, group: "系统", soon: true },
+  { to: "/admin/users", label: "用户管理", icon: Users, group: "系统" },
   { to: "/admin/files", label: "文件管理", icon: FolderOpen, group: "系统" },
   { to: "/admin/notifications", label: "通知中心", icon: Bell, group: "系统", soon: true },
   { to: "/admin/logs", label: "操作日志", icon: ScrollText, group: "系统", soon: true },
   { to: "/admin/settings", label: "系统设置", icon: Settings, group: "系统" },
 ];
+
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
