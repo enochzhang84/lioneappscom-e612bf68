@@ -120,6 +120,7 @@ export const gradeQuiz = createServerFn({ method: "POST" })
         const rr = r as unknown as Record<string, string | null>;
         return {
           id: r.id as string,
+          question_type: ((r as unknown as { question_type?: QuestionType }).question_type ?? "single_choice") as QuestionType,
           question: r.question as string,
           image_url: (r as unknown as { image_url: string | null }).image_url ?? null,
           option_a: r.option_a as string,
