@@ -244,9 +244,13 @@ function TreeItem({
           {isBank && node.question_count > 0 && (
             <span className="ml-1 text-xs text-muted-foreground">{node.question_count}</span>
           )}
+          {isBank && !node.include_in_exam && (
+            <span className="ml-1 text-[10px] rounded bg-slate-200 text-slate-700 px-1 py-0.5">未参与</span>
+          )}
           {!node.is_active && (
             <span className="ml-1 text-[10px] rounded bg-yellow-100 text-yellow-800 px-1 py-0.5">隐藏</span>
           )}
+
         </div>
         <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 shrink-0">
           {canAddChild && (
@@ -267,6 +271,19 @@ function TreeItem({
           >
             <Pencil size={13} />
           </button>
+          {isBank && (
+            <button
+              type="button"
+              className={"p-1 rounded hover:bg-background " + (node.include_in_exam ? "text-primary" : "text-muted-foreground")}
+              title={node.include_in_exam ? "移出模拟考试" : "加入模拟考试"}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleInExam.mutate({ id: node.id, include_in_exam: !node.include_in_exam });
+              }}
+            >
+              <Target size={13} />
+            </button>
+          )}
           <button
             type="button"
             className="p-1 rounded hover:bg-background text-muted-foreground"
@@ -278,6 +295,7 @@ function TreeItem({
           >
             {node.is_active ? <Eye size={13} /> : <EyeOff size={13} />}
           </button>
+
           <button
             type="button"
             className="p-1 rounded hover:bg-background text-destructive"
