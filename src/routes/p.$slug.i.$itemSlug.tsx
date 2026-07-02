@@ -20,6 +20,7 @@ import { FileHashTool } from "@/components/tools/FileHashTool";
 import { AiToolByKey } from "@/components/ai/AiToolByKey";
 import { PdfTool, type PdfKind } from "@/components/tools/PdfTool";
 import { ImageTool, type ImageKind } from "@/components/tools/ImageTool";
+import { NetworkTool, type NetworkKind } from "@/components/tools/NetworkTool";
 
 
 const AIR_BRAKE_PROPS = {
@@ -189,6 +190,7 @@ function ItemDetail() {
   const aiKey = appKey.startsWith("app:ai:") ? appKey.slice("app:ai:".length) : null;
   const pdfKey = appKey.startsWith("app:pdf:") ? appKey.slice("app:pdf:".length) as PdfKind : null;
   const imageKey = appKey.startsWith("app:image:") ? appKey.slice("app:image:".length) as ImageKind : null;
+  const netKey = appKey.startsWith("app:net:") ? appKey.slice("app:net:".length) as NetworkKind : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
   const embed = isDeveloping ? undefined : (converterKey
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
@@ -206,6 +208,8 @@ function ItemDetail() {
     ? { render: () => <PdfTool kind={pdfKey} />, fullPath: undefined as string | undefined }
     : imageKey
     ? { render: () => <ImageTool kind={imageKey} />, fullPath: undefined as string | undefined }
+    : netKey
+    ? { render: () => <NetworkTool kind={netKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
     : undefined)));
