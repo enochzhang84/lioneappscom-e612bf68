@@ -13,6 +13,10 @@ import { BibleKJV } from "@/components/bible/BibleKJV";
 import { UnitConverterByKey } from "@/components/converter/UnitConverter";
 import { CalculatorByKey } from "@/components/calculator/Calculator";
 import { AutomotiveHub } from "@/components/automotive/AutomotiveHub";
+import { TextToolByKey } from "@/components/tools/TextTool";
+import { DevToolByKey } from "@/components/tools/DevTool";
+import { TimeToolByKey } from "@/components/tools/TimeTool";
+import { FileHashTool } from "@/components/tools/FileHashTool";
 
 
 const AIR_BRAKE_PROPS = {
