@@ -80,9 +80,30 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const groups = Array.from(new Set(ADMIN_NAV.map((n) => n.group)));
+  const listShortcuts = useServerFn(adminListShortcutPages);
+  const { data: shortcutPages } = useQuery({
+    queryKey: ["admin", "shortcut-pages"],
+    queryFn: () => listShortcuts(),
+    staleTime: 60_000,
+  });
 
-  const active = [...ADMIN_NAV]
+  const dynamicQuickEdit: NavItem[] = (shortcutPages ?? []).map((p) => ({
+    to: `/admin/pages/${p.id}`,
+    label: p.nav_label || p.title || p.slug,
+    icon: PencilLine,
+    group: QUICK_EDIT_GROUP,
+  }));
+
+  const nav: NavItem[] = [
+    ADMIN_NAV[0], // 仪表盘
+    ...STATIC_QUICK_EDIT,
+    ...dynamicQuickEdit,
+    ...ADMIN_NAV.slice(1),
+  ];
+
+  const groups = Array.from(new Set(nav.map((n) => n.group)));
+
+  const active = [...nav]
     .filter((n) => pathname === n.to || pathname.startsWith(n.to + "/"))
     .sort((a, b) => b.to.length - a.to.length)[0];
 
@@ -125,21 +146,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               <ul className="space-y-0.5">
-                {ADMIN_NAV.filter((n) => n.group === g).map((n) => {
+                {nav.filter((n) => n.group === g).map((n) => {
                   const isActive =
                     pathname === n.to || (n.to !== "/admin" && pathname.startsWith(n.to + "/")) ||
                     (n.to === "/admin" && pathname === "/admin");
                   const Icon = n.icon;
+                  const isQuickEdit = n.group === QUICK_EDIT_GROUP;
                   return (
-                    <li key={n.to}>
+                    <li key={`${n.group}:${n.to}:${n.label}`}>
                       <Link
                         to={n.to}
+                        search={n.search as never}
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                          isActive
+                          isActive && !isQuickEdit
                             ? "bg-blue-50 text-blue-700 font-medium"
                             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                           collapsed && "justify-center px-0",
+                          isQuickEdit && !collapsed && "pl-6",
                         )}
                         title={collapsed ? n.label : undefined}
                       >
@@ -162,6 +186,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
+
 
         <div className="border-t border-slate-100 p-2 space-y-1">
           <a
