@@ -197,8 +197,8 @@ function PageEditor() {
             {pageType === "tools" ? (
               <p className="text-sm text-muted-foreground">
                 当前是「实用工具页面」。所有一级工具（分类）和它们下面的项目请到下方
-                <span className="font-medium text-foreground"> 已添加工具 </span>
-                区域统一管理。
+                <span className="font-medium text-foreground"> 工具管理 </span>
+                区域统一管理。以后新增的一级工具会自动进入「工具管理」，新增项目会自动归属到当前展开的一级工具下。
               </p>
             ) : (
               <>
