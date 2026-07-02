@@ -226,6 +226,53 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
           </div>
         )}
 
+        {kind === "id-photo" && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">尺寸</label>
+              <select value={idPreset} onChange={(e) => setIdPreset(e.target.value as keyof typeof idPresets)}
+                className="w-full h-10 px-3 rounded-lg border border-border bg-card text-sm">
+                {Object.entries(idPresets).map(([k, v]) => <option key={k} value={k}>{v.name} · {v.w}×{v.h}px</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">底色</label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={idBg} onChange={(e) => setIdBg(e.target.value)} className="h-10 w-16 rounded border border-border" />
+                {["#ffffff", "#438edb", "#dc2626"].map((c) => (
+                  <button key={c} type="button" onClick={() => setIdBg(c)} className="h-8 w-8 rounded border border-border" style={{ background: c }} title={c} />
+                ))}
+              </div>
+            </div>
+            <p className="col-span-full text-xs text-muted-foreground">工具会按所选尺寸居中裁剪原图，并用底色填充空白区域。</p>
+          </div>
+        )}
+
+        {kind === "barcode" && (
+          <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <TextField label="内容" value={bcText} onChange={setBcText} />
+              <div>
+                <label className="block text-sm font-medium mb-1.5">格式</label>
+                <select value={bcFormat} onChange={(e) => setBcFormat(e.target.value as typeof bcFormat)}
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-card text-sm">
+                  <option value="CODE128">CODE128（推荐）</option>
+                  <option value="CODE39">CODE39</option>
+                  <option value="EAN13">EAN-13（13 位数字）</option>
+                  <option value="EAN8">EAN-8（8 位数字）</option>
+                  <option value="UPC">UPC-A（12 位数字）</option>
+                  <option value="ITF14">ITF-14（14 位数字）</option>
+                </select>
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-white p-4 flex justify-center">
+              <canvas ref={bcPreviewRef} />
+            </div>
+          </div>
+        )}
+
+
+
         <div className="flex flex-wrap items-center gap-3">
           <Button onClick={run} disabled={busy || (cfg.needsFile && files.length === 0)}>
             {busy ? <Loader2 size={14} className="mr-1.5 animate-spin" /> : <Download size={14} className="mr-1.5" />}
