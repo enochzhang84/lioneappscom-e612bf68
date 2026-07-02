@@ -74,21 +74,32 @@ export const getRandomQuizQuestions = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }): Promise<QuizQuestion[]> => {
     const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    // Exclude any bank that is inactive or opted out of exam pools; this lets
+    // multiple banks share one category (e.g. c1_signs) and be pooled together.
+    const { data: excluded } = await supabasePublic
+      .from("question_bank_nodes")
+      .select("id")
+      .eq("node_type", "bank")
+      .or("is_active.eq.false,include_in_exam.eq.false");
+    const excludedIds = new Set(((excluded ?? []) as Array<{ id: string }>).map((b) => b.id));
     // Only select non-sensitive columns; anon lacks column grants for
     // correct_answer/explanation. Never return answer keys to the client.
     const { data: rows, error } = await supabasePublic
       .from("quiz_questions")
-      .select("id, question_type, question, option_a, option_b, option_c, option_d, category, image_url, question_en, option_a_en, option_b_en, option_c_en, option_d_en")
+      .select("id, question_type, question, option_a, option_b, option_c, option_d, category, image_url, question_en, option_a_en, option_b_en, option_c_en, option_d_en, question_bank_id")
       .eq("category", data.category)
       .eq("is_active", true);
     if (error) throw new Error(error.message);
-    const list = (rows ?? []) as QuizQuestion[];
+    const list = ((rows ?? []) as Array<QuizQuestion & { question_bank_id: string | null }>)
+      .filter((q) => !q.question_bank_id || !excludedIds.has(q.question_bank_id))
+      .map(({ question_bank_id: _bank, ...rest }) => rest as QuizQuestion);
     for (let i = list.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [list[i], list[j]] = [list[j], list[i]];
     }
     return list.slice(0, data.count);
   });
+
 
 const answerEnum = z.enum(["A", "B", "C", "D"]);
 
