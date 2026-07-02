@@ -34,6 +34,13 @@ export type GradedQuestion = {
   correct_answer: "A" | "B" | "C" | "D";
   explanation: string | null;
   explanation_en: string | null;
+  official_source: string | null;
+  manual_name: string | null;
+  manual_chapter: string | null;
+  manual_page: string | null;
+  manual_url: string | null;
+  google_keywords: string | null;
+  category: string;
   picked: "A" | "B" | "C" | "D" | null;
   is_correct: boolean;
 };
@@ -85,7 +92,7 @@ export const gradeQuiz = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("quiz_questions")
-      .select("id, question, option_a, option_b, option_c, option_d, correct_answer, explanation, question_en, option_a_en, option_b_en, option_c_en, option_d_en, explanation_en")
+      .select("id, question, option_a, option_b, option_c, option_d, correct_answer, explanation, question_en, option_a_en, option_b_en, option_c_en, option_d_en, explanation_en, official_source, manual_name, manual_chapter, manual_page, manual_url, google_keywords, category")
       .in("id", data.ids);
     if (error) throw new Error(error.message);
 
@@ -97,6 +104,7 @@ export const gradeQuiz = createServerFn({ method: "POST" })
       .map((r) => {
         const picked = (data.answers[r.id as string] ?? null) as "A" | "B" | "C" | "D" | null;
         const correct = r.correct_answer as "A" | "B" | "C" | "D";
+        const rr = r as unknown as Record<string, string | null>;
         return {
           id: r.id as string,
           question: r.question as string,
@@ -112,6 +120,13 @@ export const gradeQuiz = createServerFn({ method: "POST" })
           correct_answer: correct,
           explanation: (r.explanation as string | null) ?? null,
           explanation_en: (r.explanation_en as string | null) ?? null,
+          official_source: rr.official_source ?? null,
+          manual_name: rr.manual_name ?? null,
+          manual_chapter: rr.manual_chapter ?? null,
+          manual_page: rr.manual_page ?? null,
+          manual_url: rr.manual_url ?? null,
+          google_keywords: rr.google_keywords ?? null,
+          category: (r.category as string) ?? "",
           picked,
           is_correct: picked === correct,
         };

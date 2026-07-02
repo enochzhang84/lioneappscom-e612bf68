@@ -30,6 +30,12 @@ type Form = {
   correct_answer: "A" | "B" | "C" | "D";
   explanation: string;
   explanation_en: string;
+  official_source: string;
+  manual_name: string;
+  manual_chapter: string;
+  manual_page: string;
+  manual_url: string;
+  google_keywords: string;
   category: string;
   difficulty: string;
   is_active: boolean;
@@ -50,6 +56,12 @@ const empty: Form = {
   correct_answer: "A",
   explanation: "",
   explanation_en: "",
+  official_source: "",
+  manual_name: "",
+  manual_chapter: "",
+  manual_page: "",
+  manual_url: "",
+  google_keywords: "",
   category: "c1",
   difficulty: "medium",
   is_active: true,
@@ -88,6 +100,12 @@ function QuizEditPage() {
         correct_answer: q.data.correct_answer as "A" | "B" | "C" | "D",
         explanation: q.data.explanation ?? "",
         explanation_en: (q.data as { explanation_en?: string | null }).explanation_en ?? "",
+        official_source: (q.data as { official_source?: string | null }).official_source ?? "",
+        manual_name: (q.data as { manual_name?: string | null }).manual_name ?? "",
+        manual_chapter: (q.data as { manual_chapter?: string | null }).manual_chapter ?? "",
+        manual_page: (q.data as { manual_page?: string | null }).manual_page ?? "",
+        manual_url: (q.data as { manual_url?: string | null }).manual_url ?? "",
+        google_keywords: (q.data as { google_keywords?: string | null }).google_keywords ?? "",
         category: q.data.category,
         difficulty: q.data.difficulty ?? "medium",
         is_active: q.data.is_active,
@@ -113,6 +131,12 @@ function QuizEditPage() {
         correct_answer: form.correct_answer,
         explanation: form.explanation || null,
         explanation_en: form.explanation_en || null,
+        official_source: form.official_source || null,
+        manual_name: form.manual_name || null,
+        manual_chapter: form.manual_chapter || null,
+        manual_page: form.manual_page || null,
+        manual_url: form.manual_url || null,
+        google_keywords: form.google_keywords || null,
         category: form.category,
         difficulty: form.difficulty,
         is_active: form.is_active,
@@ -189,6 +213,19 @@ function QuizEditPage() {
             <Label>Explanation (English)</Label>
             <Textarea rows={3} value={form.explanation_en} onChange={(e) => set("explanation_en", e.target.value)} />
           </div>
+
+          <div className="pt-4 border-t space-y-4">
+            <div className="text-sm font-semibold text-slate-800">📚 学习中心 · 官方资料</div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div><Label>官方资料来源 (official_source)</Label><Input value={form.official_source} onChange={(e) => set("official_source", e.target.value)} placeholder="California Driver Handbook" /></div>
+              <div><Label>手册名称 (manual_name)</Label><Input value={form.manual_name} onChange={(e) => set("manual_name", e.target.value)} placeholder="California Commercial Driver Handbook" /></div>
+              <div><Label>手册章节 (manual_chapter)</Label><Input value={form.manual_chapter} onChange={(e) => set("manual_chapter", e.target.value)} placeholder="Chapter 5" /></div>
+              <div><Label>手册页码 (manual_page)</Label><Input value={form.manual_page} onChange={(e) => set("manual_page", e.target.value)} placeholder="Page 87" /></div>
+              <div className="md:col-span-2"><Label>官方手册链接 (manual_url)</Label><Input value={form.manual_url} onChange={(e) => set("manual_url", e.target.value)} placeholder="https://www.dmv.ca.gov/..." /></div>
+              <div className="md:col-span-2"><Label>Google 搜索关键词 (google_keywords)</Label><Input value={form.google_keywords} onChange={(e) => set("google_keywords", e.target.value)} placeholder="留空则使用题目 + 手册名" /></div>
+            </div>
+          </div>
+
           <div className="flex items-center gap-2">
             <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
             <span className="text-sm">启用（在考试中出现）</span>

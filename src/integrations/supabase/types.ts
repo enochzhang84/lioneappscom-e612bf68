@@ -148,8 +148,14 @@ export type Database = {
           difficulty: string | null
           explanation: string | null
           explanation_en: string | null
+          google_keywords: string | null
           id: string
           is_active: boolean
+          manual_chapter: string | null
+          manual_name: string | null
+          manual_page: string | null
+          manual_url: string | null
+          official_source: string | null
           option_a: string
           option_a_en: string | null
           option_b: string
@@ -170,8 +176,14 @@ export type Database = {
           difficulty?: string | null
           explanation?: string | null
           explanation_en?: string | null
+          google_keywords?: string | null
           id?: string
           is_active?: boolean
+          manual_chapter?: string | null
+          manual_name?: string | null
+          manual_page?: string | null
+          manual_url?: string | null
+          official_source?: string | null
           option_a: string
           option_a_en?: string | null
           option_b: string
@@ -192,8 +204,14 @@ export type Database = {
           difficulty?: string | null
           explanation?: string | null
           explanation_en?: string | null
+          google_keywords?: string | null
           id?: string
           is_active?: boolean
+          manual_chapter?: string | null
+          manual_name?: string | null
+          manual_page?: string | null
+          manual_url?: string | null
+          official_source?: string | null
           option_a?: string
           option_a_en?: string | null
           option_b?: string

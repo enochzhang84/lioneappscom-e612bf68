@@ -27,7 +27,31 @@ import {
   Bookmark,
   Lightbulb,
   ScrollText,
+  BookOpen,
+  Search,
+  ExternalLink,
+  ChevronDown,
+  GraduationCap,
 } from "lucide-react";
+
+const DEFAULT_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/california-driver-handbook/";
+const CDL_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/commercial-driver-handbook/";
+const CDL_CATEGORIES = new Set(["air_brake", "combination_vehicle", "commercial_driver"]);
+
+function defaultManualName(category: string): string {
+  return CDL_CATEGORIES.has(category)
+    ? "California Commercial Driver Handbook"
+    : "California Driver Handbook";
+}
+function defaultManualUrl(category: string): string {
+  return CDL_CATEGORIES.has(category) ? CDL_HANDBOOK_URL : DEFAULT_HANDBOOK_URL;
+}
+function buildGoogleQuery(r: GradedQuestion): string {
+  if (r.google_keywords && r.google_keywords.trim()) return r.google_keywords.trim();
+  const q = (r.question_en && r.question_en.trim()) || r.question;
+  const manual = r.manual_name?.trim() || defaultManualName(r.category);
+  return `${q} ${manual}`;
+}
 
 export const Route = createFileRoute("/p/drive/c1")({
   head: () => ({
@@ -782,6 +806,7 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
   const correct = r.correct_answer;
   const pick = r.picked;
   const isRight = r.is_correct;
+  const [showLearn, setShowLearn] = useState(!isRight);
   const opts = (["A", "B", "C", "D"] as const)
     .map((k) => ({
       key: k,
@@ -854,7 +879,74 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
             )}
           </div>
         )}
+
+        <LearningCenter r={r} open={showLearn} onToggle={() => setShowLearn((v) => !v)} />
       </CardContent>
     </Card>
+  );
+}
+
+function LearningCenter({
+  r, open, onToggle,
+}: { r: GradedQuestion; open: boolean; onToggle: () => void }) {
+  const manualName = r.manual_name?.trim() || defaultManualName(r.category);
+  const manualUrl = r.manual_url?.trim() || defaultManualUrl(r.category);
+  const chapter = r.manual_chapter?.trim();
+  const page = r.manual_page?.trim();
+  const source = r.official_source?.trim() || manualName;
+  const googleQ = buildGoogleQuery(r);
+  const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(googleQ)}`;
+
+  return (
+    <div className="rounded-lg border border-blue-200 bg-blue-50/40">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-50 rounded-lg"
+      >
+        <span className="flex items-center gap-2">
+          <GraduationCap size={16} /> 学习中心 · 查看解析
+        </span>
+        <ChevronDown
+          size={16}
+          className={cn("transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open && (
+        <div className="px-3 pb-3 pt-1 space-y-3">
+          <div className="rounded-md bg-white border border-blue-100 p-3 text-sm space-y-1">
+            <div className="flex items-center gap-2 text-xs font-semibold text-blue-800">
+              <BookOpen size={14} /> 📚 官方资料来源
+            </div>
+            <div className="text-slate-700">{source}</div>
+            {(chapter || page) && (
+              <div className="text-xs text-slate-500">
+                {chapter}{chapter && page ? " · " : ""}{page}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={googleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-white border border-slate-200 text-sm text-slate-700 hover:border-blue-400 hover:text-blue-700 transition-colors"
+            >
+              <Search size={14} /> 🔍 Google 搜索相关资料
+              <ExternalLink size={12} className="opacity-60" />
+            </a>
+            <a
+              href={manualUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm transition-colors"
+            >
+              <BookOpen size={14} /> 📘 查看官方手册
+              <ExternalLink size={12} className="opacity-80" />
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
