@@ -444,8 +444,8 @@ function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => numb
 /* -------------------- Intro -------------------- */
 
 function Intro({
-  total, pass, examSeconds, onStart, loading, error,
-}: { total: number; pass: number; examSeconds: number; onStart: () => void; loading: boolean; error?: string }) {
+  total, pass, maxWrong, examSeconds, onStart, loading, error,
+}: { total: number; pass: number; maxWrong?: number; examSeconds: number; onStart: () => void; loading: boolean; error?: string }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
       <Card className="border-slate-200 shadow-sm rounded-2xl">
@@ -456,7 +456,7 @@ function Intro({
             </div>
             <div>
               <div className="text-lg font-semibold">开始模拟考试</div>
-              <div className="text-sm text-muted-foreground">DMV 风格 · 随机抽题 · 自动判分</div>
+              <div className="text-sm text-muted-foreground">随机抽题 · 自动判分</div>
             </div>
           </div>
           <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
