@@ -1,4 +1,4 @@
-// Admin CRUD for question_bank_nodes (three-level tree: category → module → bank).
+// Admin CRUD for question_bank_nodes (multi-level tree: category → module → [module] → bank).
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
@@ -24,22 +24,26 @@ export type BankNode = {
   sort_order: number;
   is_active: boolean;
   legacy_category: string | null;
+  source: string | null;
+  include_in_exam: boolean;
+  notes: string | null;
   question_count: number;
 };
 
-// List every node + question count per bank. Small dataset, single call.
+const BANK_SELECT =
+  "id,parent_id,node_type,name,name_en,slug,icon,description,sort_order,is_active,legacy_category,source,include_in_exam,notes";
+
 export const adminListBankNodes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await ensureAdmin(context.supabase, context.userId);
     const { data: nodes, error } = await context.supabase
       .from("question_bank_nodes")
-      .select("id,parent_id,node_type,name,name_en,slug,icon,description,sort_order,is_active,legacy_category")
+      .select(BANK_SELECT)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
     if (error) throw new Error(error.message);
 
-    // count questions per bank
     const { data: counts, error: cErr } = await context.supabase
       .from("quiz_questions")
       .select("question_bank_id");
@@ -52,8 +56,8 @@ export const adminListBankNodes = createServerFn({ method: "GET" })
     }
 
     return (nodes ?? []).map((n) => ({
-      ...n,
-      question_count: countMap.get(n.id) ?? 0,
+      ...(n as Omit<BankNode, "question_count">),
+      question_count: countMap.get((n as { id: string }).id) ?? 0,
     })) as BankNode[];
   });
 
@@ -68,6 +72,9 @@ const upsertInput = z.object({
   description: z.string().max(500).nullable().optional(),
   sort_order: z.number().int().default(0),
   is_active: z.boolean().default(true),
+  source: z.string().max(200).nullable().optional(),
+  include_in_exam: z.boolean().default(true),
+  notes: z.string().max(1000).nullable().optional(),
 });
 
 export const adminUpsertBankNode = createServerFn({ method: "POST" })
@@ -85,6 +92,9 @@ export const adminUpsertBankNode = createServerFn({ method: "POST" })
       description: data.description ?? null,
       sort_order: data.sort_order,
       is_active: data.is_active,
+      source: data.source ?? null,
+      include_in_exam: data.include_in_exam,
+      notes: data.notes ?? null,
     };
     if (data.id) {
       const { error } = await context.supabase.from("question_bank_nodes").update(payload).eq("id", data.id);
@@ -102,7 +112,6 @@ export const adminDeleteBankNode = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    // Cascades to children via FK; questions get SET NULL on question_bank_id.
     const { error } = await context.supabase.from("question_bank_nodes").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -117,6 +126,19 @@ export const adminToggleBankNodeActive = createServerFn({ method: "POST" })
     await ensureAdmin(context.supabase, context.userId);
     const { error } = await context.supabase
       .from("question_bank_nodes").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminToggleBankNodeInExam = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; include_in_exam: boolean }) =>
+    z.object({ id: z.string().uuid(), include_in_exam: z.boolean() }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase
+      .from("question_bank_nodes").update({ include_in_exam: data.include_in_exam }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
