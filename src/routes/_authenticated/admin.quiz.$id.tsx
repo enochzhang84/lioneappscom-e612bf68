@@ -182,8 +182,12 @@ function QuizEditPage() {
             <div><Label>排序</Label><Input type="number" value={form.sort_order} onChange={(e) => set("sort_order", Number(e.target.value) || 0)} /></div>
           </div>
           <div>
-            <Label>题目解释</Label>
-            <Textarea rows={4} value={form.explanation} onChange={(e) => set("explanation", e.target.value)} />
+            <Label>题目解释 (中文)</Label>
+            <Textarea rows={3} value={form.explanation} onChange={(e) => set("explanation", e.target.value)} />
+          </div>
+          <div>
+            <Label>Explanation (English)</Label>
+            <Textarea rows={3} value={form.explanation_en} onChange={(e) => set("explanation_en", e.target.value)} />
           </div>
           <div className="flex items-center gap-2">
             <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
