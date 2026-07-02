@@ -582,10 +582,14 @@ function CategoryPane({
           <Field label="图标 emoji"><EmojiPicker value={draft.icon} onChange={(v) => setDraft({ ...draft, icon: v })} /></Field>
           <Field label="简介"><Input value={draft.description ?? ""} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="各类驾照模拟考试" /></Field>
           <Field label="排序（小的在前）"><Input type="number" value={draft.sort_order ?? 0} onChange={(e) => setDraft({ ...draft, sort_order: parseInt(e.target.value) || 0 })} /></Field>
+          <Field label="开发状态">
+            <StatusSelect value={draft.status ?? "live"} onChange={(v) => setDraft({ ...draft, status: v })} />
+          </Field>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch checked={draft.is_visible} onCheckedChange={(v) => setDraft({ ...draft, is_visible: v })} />
-            <Label>显示在前台</Label>
+            <Label>显示在前台（关闭后无论状态如何前台都不显示）</Label>
           </div>
+
         </div>
         <div className="flex gap-2">
           <Button size="sm" disabled={!dirty} onClick={() => onSave(draft)}>保存</Button>
