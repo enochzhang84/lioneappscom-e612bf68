@@ -21,6 +21,7 @@ import { AiToolByKey } from "@/components/ai/AiToolByKey";
 import { PdfTool, type PdfKind } from "@/components/tools/PdfTool";
 import { ImageTool, type ImageKind } from "@/components/tools/ImageTool";
 import { NetworkTool, type NetworkKind } from "@/components/tools/NetworkTool";
+import { SimpleToolByKey } from "@/components/tools/SimpleTool";
 
 
 const AIR_BRAKE_PROPS = {
