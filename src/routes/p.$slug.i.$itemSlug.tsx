@@ -20,6 +20,7 @@ import { FileHashTool } from "@/components/tools/FileHashTool";
 import { AiToolByKey } from "@/components/ai/AiToolByKey";
 import { PdfTool, type PdfKind } from "@/components/tools/PdfTool";
 import { ImageTool, type ImageKind } from "@/components/tools/ImageTool";
+import { NetworkTool, type NetworkKind } from "@/components/tools/NetworkTool";
 
 
 const AIR_BRAKE_PROPS = {
