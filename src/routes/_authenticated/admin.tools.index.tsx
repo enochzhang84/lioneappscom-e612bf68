@@ -457,8 +457,10 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             onAddChild={() => addItemUnder(selectedItem.category_id ?? "", selectedItem.id)}
             onSelectItem={(id) => setSelection({ kind: "item", id })}
             onDeleteChild={(id, title) => { if (confirm(`删除子页面「${title}」？`)) mItemDel.mutate({ data: { id } }); }}
+            onMoveChild={(id, dir) => moveItemById(id, dir)}
           />
         )}
+
       </section>
     </div>
   );
