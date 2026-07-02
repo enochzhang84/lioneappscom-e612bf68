@@ -1,0 +1,1 @@
+GRANT SELECT (question_en, option_a_en, option_b_en, option_c_en, option_d_en) ON public.quiz_questions TO anon;

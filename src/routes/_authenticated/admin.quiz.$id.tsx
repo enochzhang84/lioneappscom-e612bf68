@@ -22,8 +22,14 @@ type Form = {
   option_b: string;
   option_c: string;
   option_d: string;
+  question_en: string;
+  option_a_en: string;
+  option_b_en: string;
+  option_c_en: string;
+  option_d_en: string;
   correct_answer: "A" | "B" | "C" | "D";
   explanation: string;
+  explanation_en: string;
   category: string;
   difficulty: string;
   is_active: boolean;
@@ -36,8 +42,14 @@ const empty: Form = {
   option_b: "",
   option_c: "",
   option_d: "",
+  question_en: "",
+  option_a_en: "",
+  option_b_en: "",
+  option_c_en: "",
+  option_d_en: "",
   correct_answer: "A",
   explanation: "",
+  explanation_en: "",
   category: "c1",
   difficulty: "medium",
   is_active: true,
@@ -68,8 +80,14 @@ function QuizEditPage() {
         option_b: q.data.option_b,
         option_c: q.data.option_c ?? "",
         option_d: q.data.option_d ?? "",
+        question_en: (q.data as { question_en?: string | null }).question_en ?? "",
+        option_a_en: (q.data as { option_a_en?: string | null }).option_a_en ?? "",
+        option_b_en: (q.data as { option_b_en?: string | null }).option_b_en ?? "",
+        option_c_en: (q.data as { option_c_en?: string | null }).option_c_en ?? "",
+        option_d_en: (q.data as { option_d_en?: string | null }).option_d_en ?? "",
         correct_answer: q.data.correct_answer as "A" | "B" | "C" | "D",
         explanation: q.data.explanation ?? "",
+        explanation_en: (q.data as { explanation_en?: string | null }).explanation_en ?? "",
         category: q.data.category,
         difficulty: q.data.difficulty ?? "medium",
         is_active: q.data.is_active,
@@ -87,8 +105,14 @@ function QuizEditPage() {
         option_b: form.option_b,
         option_c: form.option_c || null,
         option_d: form.option_d || null,
+        question_en: form.question_en || null,
+        option_a_en: form.option_a_en || null,
+        option_b_en: form.option_b_en || null,
+        option_c_en: form.option_c_en || null,
+        option_d_en: form.option_d_en || null,
         correct_answer: form.correct_answer,
         explanation: form.explanation || null,
+        explanation_en: form.explanation_en || null,
         category: form.category,
         difficulty: form.difficulty,
         is_active: form.is_active,
@@ -113,14 +137,22 @@ function QuizEditPage() {
       <Card>
         <CardContent className="p-6 space-y-5">
           <div>
-            <Label>题目 *</Label>
+            <Label>题目 (中文) *</Label>
             <Textarea rows={3} value={form.question} onChange={(e) => set("question", e.target.value)} />
           </div>
+          <div>
+            <Label>Question (English)</Label>
+            <Textarea rows={3} value={form.question_en} onChange={(e) => set("question_en", e.target.value)} placeholder="Optional English translation" />
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <div><Label>选项 A *</Label><Textarea rows={2} value={form.option_a} onChange={(e) => set("option_a", e.target.value)} /></div>
-            <div><Label>选项 B *</Label><Textarea rows={2} value={form.option_b} onChange={(e) => set("option_b", e.target.value)} /></div>
-            <div><Label>选项 C</Label><Textarea rows={2} value={form.option_c} onChange={(e) => set("option_c", e.target.value)} /></div>
-            <div><Label>选项 D</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
+            <div><Label>选项 A (中文) *</Label><Textarea rows={2} value={form.option_a} onChange={(e) => set("option_a", e.target.value)} /></div>
+            <div><Label>Option A (EN)</Label><Textarea rows={2} value={form.option_a_en} onChange={(e) => set("option_a_en", e.target.value)} /></div>
+            <div><Label>选项 B (中文) *</Label><Textarea rows={2} value={form.option_b} onChange={(e) => set("option_b", e.target.value)} /></div>
+            <div><Label>Option B (EN)</Label><Textarea rows={2} value={form.option_b_en} onChange={(e) => set("option_b_en", e.target.value)} /></div>
+            <div><Label>选项 C (中文)</Label><Textarea rows={2} value={form.option_c} onChange={(e) => set("option_c", e.target.value)} /></div>
+            <div><Label>Option C (EN)</Label><Textarea rows={2} value={form.option_c_en} onChange={(e) => set("option_c_en", e.target.value)} /></div>
+            <div><Label>选项 D (中文)</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
+            <div><Label>Option D (EN)</Label><Textarea rows={2} value={form.option_d_en} onChange={(e) => set("option_d_en", e.target.value)} /></div>
           </div>
           <div className="grid gap-4 md:grid-cols-4">
             <div>
@@ -150,8 +182,12 @@ function QuizEditPage() {
             <div><Label>排序</Label><Input type="number" value={form.sort_order} onChange={(e) => set("sort_order", Number(e.target.value) || 0)} /></div>
           </div>
           <div>
-            <Label>题目解释</Label>
-            <Textarea rows={4} value={form.explanation} onChange={(e) => set("explanation", e.target.value)} />
+            <Label>题目解释 (中文)</Label>
+            <Textarea rows={3} value={form.explanation} onChange={(e) => set("explanation", e.target.value)} />
+          </div>
+          <div>
+            <Label>Explanation (English)</Label>
+            <Textarea rows={3} value={form.explanation_en} onChange={(e) => set("explanation_en", e.target.value)} />
           </div>
           <div className="flex items-center gap-2">
             <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
