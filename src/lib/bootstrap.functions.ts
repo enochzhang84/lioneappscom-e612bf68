@@ -1,6 +1,8 @@
 // Admin detection + first-admin bootstrap.
-// Uses the signed-in user's session and database RLS, so it does not require
-// SUPABASE_SERVICE_ROLE_KEY on VPS deployments.
+// The public RLS INSERT policy on user_roles has been removed to eliminate
+// the race where any authenticated user could self-claim admin. All writes go
+// through this server function using the service-role client with a strict
+// "no admin exists yet" precondition.
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -19,16 +21,25 @@ export const claimFirstAdmin = createServerFn({ method: "POST" })
     if (mineErr) throw new Error(mineErr.message);
     if (mine) return { is_admin: true, claimed: false };
 
-    // 2) Not an admin yet. Attempt first-admin bootstrap as the current user.
-    // RLS + trigger allow this only when no admin exists; otherwise it fails.
-    try {
-      const { error } = await supabase
-        .from("user_roles")
-        .insert({ user_id: userId, role: "admin" });
-      if (error) return { is_admin: false, claimed: false };
-      return { is_admin: true, claimed: true };
-    } catch (e) {
-      console.error("[claimFirstAdmin] bootstrap skipped:", (e as Error).message);
+    // 2) Not an admin yet. Bootstrap only if no admin exists at all.
+    //    Uses the service-role client because the public "self-claim" RLS
+    //    policy has been dropped for security. The `unique(user_id, role)`
+    //    constraint + the pre-check together prevent duplicate/late claims.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { count, error: countErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id", { count: "exact", head: true })
+      .eq("role", "admin");
+    if (countErr) throw new Error(countErr.message);
+    if ((count ?? 0) > 0) return { is_admin: false, claimed: false };
+
+    const { error: insErr } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: userId, role: "admin" });
+    if (insErr) {
+      console.error("[claimFirstAdmin] bootstrap failed:", insErr.message);
       return { is_admin: false, claimed: false };
     }
+    return { is_admin: true, claimed: true };
   });
