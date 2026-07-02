@@ -253,7 +253,9 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
           button_url: "",
           sort_order: siblings.length,
           is_visible: true,
+          status: "developing" as ToolStatus,
         },
+
       },
       {
         onSuccess: (r) => {
