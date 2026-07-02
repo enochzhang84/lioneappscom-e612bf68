@@ -721,16 +721,16 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 /* -------------------- Info cards -------------------- */
 
-function RulesTips({ total, pass, examSeconds }: { total: number; pass: number; examSeconds: number }) {
+function RulesTips({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <RulesCard total={total} pass={pass} examSeconds={examSeconds} />
+      <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
       <TipsCard />
     </div>
   );
 }
 
-function RulesCard({ total, pass, examSeconds }: { total: number; pass: number; examSeconds: number }) {
+function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 space-y-3">
@@ -739,7 +739,15 @@ function RulesCard({ total, pass, examSeconds }: { total: number; pass: number; 
           <h3 className="font-semibold text-slate-900">测试规则</h3>
         </div>
         <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
-          <li>本测试共 <b>{total}</b> 道题，答对 <b>{pass}</b> 题或以上即可通过。</li>
+          {typeof maxWrong === "number" ? (
+            <li>
+              本测试共 <b>{total}</b> 道题，最多允许错 <b>{maxWrong}</b> 题即可通过。
+            </li>
+          ) : (
+            <li>
+              本测试共 <b>{total}</b> 道题，答对 <b>{pass}</b> 题或以上即可通过。
+            </li>
+          )}
           <li>每题有多个选项，请选择最正确的答案。</li>
           <li>测试时间为 {Math.round(examSeconds / 60)} 分钟，开始后计时。</li>
           <li>您可以随时标记题目，方便之后查看。</li>
