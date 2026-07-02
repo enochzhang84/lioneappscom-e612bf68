@@ -32,6 +32,7 @@ export type QuizQuestion = {
 
 export type GradedQuestion = {
   id: string;
+  question_type: QuestionType;
   question: string;
   image_url: string | null;
   option_a: string;
