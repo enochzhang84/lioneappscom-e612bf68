@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   getRandomQuizQuestions,
+  getMixedRandomQuestions,
   gradeQuiz,
   type QuizQuestion,
   type GradedQuestion,
@@ -75,6 +76,8 @@ type QuestionTranslation = {
 export type QuizAppProps = {
   embedded?: boolean;
   category?: string;
+  /** Optional mixed pools; overrides `category` when provided. */
+  pools?: { category: string; count: number }[];
   total?: number;
   pass?: number;
   examSeconds?: number;
@@ -92,19 +95,24 @@ export function QuizApp(props: QuizAppProps = {}) {
   const {
     embedded = false,
     category = "c1",
+    pools,
     total: TOTAL = DEFAULT_TOTAL,
     pass: PASS = DEFAULT_PASS,
     examSeconds: EXAM_SECONDS = DEFAULT_SECONDS,
     title = "California DMV 驾照模拟考试",
-    subtitle = "模拟考试与加州 DMV 正式考试一致，帮助考生熟悉考试流程。",
+    subtitle = "模拟考试与加州 DMV 正式考试一致,帮助考生熟悉考试流程。",
     backHref = "/p/drive",
     backLabel = "← 返回驾考工具",
   } = props;
 
   const fetchFn = useServerFn(getRandomQuizQuestions);
+  const fetchMixedFn = useServerFn(getMixedRandomQuestions);
   const gradeFn = useServerFn(gradeQuiz);
   const load = useMutation({
-    mutationFn: () => fetchFn({ data: { category, count: TOTAL } }),
+    mutationFn: () =>
+      pools && pools.length > 0
+        ? fetchMixedFn({ data: { pools } })
+        : fetchFn({ data: { category, count: TOTAL } }),
   });
   const submit = useMutation({
     mutationFn: (vars: { ids: string[]; answers: Record<string, "A" | "B" | "C" | "D"> }) =>

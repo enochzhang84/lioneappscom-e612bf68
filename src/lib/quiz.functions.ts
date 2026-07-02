@@ -101,6 +101,56 @@ export const getRandomQuizQuestions = createServerFn({ method: "GET" })
   });
 
 
+// Mixed-pool random draw: fetch N from each specified category, then shuffle.
+// Used by综合模拟考 (e.g. C1 = 36 written + 12 signs = 48).
+export const getMixedRandomQuestions = createServerFn({ method: "GET" })
+  .inputValidator((d: { pools: { category: string; count: number }[] }) =>
+    z.object({
+      pools: z
+        .array(
+          z.object({
+            category: z.string().min(1).max(40),
+            count: z.number().int().min(1).max(200),
+          }),
+        )
+        .min(1)
+        .max(6),
+    }).parse(d),
+  )
+  .handler(async ({ data }): Promise<QuizQuestion[]> => {
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: excluded } = await supabasePublic
+      .from("question_bank_nodes")
+      .select("id")
+      .eq("node_type", "bank")
+      .or("is_active.eq.false,include_in_exam.eq.false");
+    const excludedIds = new Set(((excluded ?? []) as Array<{ id: string }>).map((b) => b.id));
+
+    const combined: QuizQuestion[] = [];
+    for (const pool of data.pools) {
+      const { data: rows, error } = await supabasePublic
+        .from("quiz_questions")
+        .select("id, question_type, question, option_a, option_b, option_c, option_d, category, image_url, question_en, option_a_en, option_b_en, option_c_en, option_d_en, question_bank_id")
+        .eq("category", pool.category)
+        .eq("is_active", true);
+      if (error) throw new Error(error.message);
+      const list = ((rows ?? []) as Array<QuizQuestion & { question_bank_id: string | null }>)
+        .filter((q) => !q.question_bank_id || !excludedIds.has(q.question_bank_id))
+        .map(({ question_bank_id: _bank, ...rest }) => rest as QuizQuestion);
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+      combined.push(...list.slice(0, pool.count));
+    }
+    // Final shuffle so written & sign questions are interleaved.
+    for (let i = combined.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [combined[i], combined[j]] = [combined[j], combined[i]];
+    }
+    return combined;
+  });
+
 const answerEnum = z.enum(["A", "B", "C", "D"]);
 
 export const gradeQuiz = createServerFn({ method: "POST" })
