@@ -33,7 +33,7 @@ function Dashboard() {
   const cases = useQuery({ queryKey: ["admin", "cases"], queryFn: () => lc() });
   const settings = useQuery({ queryKey: ["admin", "settings"], queryFn: () => ls() });
   const pages = useQuery({ queryKey: ["admin", "pages"], queryFn: () => lPages() });
-  const tools = useQuery({ queryKey: ["admin", "tools", "flat"], queryFn: () => lTools() });
+  const tools = useQuery({ queryKey: ["admin", "tool-categories"], queryFn: () => lTools() });
   const quiz = useQuery({ queryKey: ["admin", "quiz", "all"], queryFn: () => lQuiz({ data: {} }) });
 
   return (
