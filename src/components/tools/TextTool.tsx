@@ -173,12 +173,18 @@ function wordStats(s: string) {
 }
 
 export function TextToolByKey({ toolKey }: { toolKey: string }) {
+  // Custom-UI tools
+  if (toolKey === "text-sort") return <TextSortView />;
+  if (toolKey === "text-compare") return <TextCompareView />;
+  if (toolKey === "text-md-to-html") return <MarkdownToHtmlView />;
+
   const tool = TOOLS[toolKey];
   const [text, setText] = React.useState("");
   const [output, setOutput] = React.useState("");
   const [running, setRunning] = React.useState<string | null>(null);
 
   if (!tool) return <div className="p-10 text-center text-sm text-destructive">未找到工具：{toolKey}</div>;
+
 
   async function run(op: Op) {
     setRunning(op.label);
