@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,19 @@ import {
   type GradeResult,
 } from "@/lib/quiz.functions";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, XCircle, ArrowLeft, ArrowRight, RotateCcw, ClipboardCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  ArrowLeft,
+  ArrowRight,
+  RotateCcw,
+  ClipboardCheck,
+  Clock,
+  ListChecks,
+  Bookmark,
+  Lightbulb,
+  ScrollText,
+} from "lucide-react";
 
 export const Route = createFileRoute("/p/drive/c1")({
   head: () => ({
@@ -28,6 +40,7 @@ export const Route = createFileRoute("/p/drive/c1")({
 type Phase = "intro" | "exam" | "result";
 const TOTAL = 36;
 const PASS = 30;
+const EXAM_SECONDS = 60 * 60;
 
 export function QuizApp({ embedded = false }: { embedded?: boolean }) {
   const fetchFn = useServerFn(getRandomQuizQuestions);
@@ -43,16 +56,20 @@ export function QuizApp({ embedded = false }: { embedded?: boolean }) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, "A" | "B" | "C" | "D">>({});
+  const [marked, setMarked] = useState<Record<string, boolean>>({});
   const [current, setCurrent] = useState(0);
   const [grade, setGrade] = useState<GradeResult | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(EXAM_SECONDS);
 
   async function startExam() {
     const rows = await load.mutateAsync();
     if (!rows.length) return;
     setQuestions(rows);
     setAnswers({});
+    setMarked({});
     setCurrent(0);
     setGrade(null);
+    setSecondsLeft(EXAM_SECONDS);
     setPhase("exam");
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
@@ -61,6 +78,7 @@ export function QuizApp({ embedded = false }: { embedded?: boolean }) {
     setPhase("intro");
     setQuestions([]);
     setAnswers({});
+    setMarked({});
     setCurrent(0);
     setGrade(null);
   }
@@ -74,44 +92,62 @@ export function QuizApp({ embedded = false }: { embedded?: boolean }) {
   }
 
   const body = (
-    <>
-      <section className="border-b border-border bg-white">
-        <div className="mx-auto max-w-4xl px-4 md:px-8 py-6 flex items-center justify-between gap-4">
-          <div>
-            {!embedded && (
-              <div className="text-xs text-muted-foreground mb-1">
-                <Link to="/p/$slug" params={{ slug: "drive" }} className="hover:text-foreground">← 返回驾考工具</Link>
-              </div>
-            )}
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight">小型车 C1 模拟考试</h1>
-          </div>
-          {phase !== "intro" && (
-            <Button variant="ghost" size="sm" onClick={resetToIntro}>
-              <RotateCcw size={14} className="mr-1" /> 重新开始
-            </Button>
-          )}
-        </div>
-      </section>
+    <div className="bg-[#F8FAFC] min-h-screen">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-6 md:py-8">
+        {/* Blue banner */}
+        <BlueBanner
+          embedded={embedded}
+          phase={phase}
+          secondsLeft={secondsLeft}
+          current={current}
+          total={questions.length || TOTAL}
+          onReset={phase !== "intro" ? resetToIntro : undefined}
+        />
 
-      <div className="mx-auto max-w-4xl px-4 md:px-8 py-8 md:py-12">
-        {phase === "intro" && <Intro onStart={startExam} loading={load.isPending} error={load.error?.message} />}
-        {phase === "exam" && (
-          <Exam
-            questions={questions}
-            answers={answers}
-            setAnswers={setAnswers}
-            current={current}
-            setCurrent={setCurrent}
-            onSubmit={submitExam}
-            submitting={submit.isPending}
-            submitError={submit.error?.message}
-          />
+        {phase === "intro" && (
+          <div className="mt-6">
+            <Intro onStart={startExam} loading={load.isPending} error={load.error?.message} />
+          </div>
         )}
+
+        {phase === "exam" && (
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
+            <div className="min-w-0 space-y-6">
+              <Exam
+                questions={questions}
+                answers={answers}
+                setAnswers={setAnswers}
+                current={current}
+                setCurrent={setCurrent}
+              />
+              <RulesTips />
+            </div>
+            <aside className="lg:sticky lg:top-6 self-start">
+              <AnswerSheet
+                questions={questions}
+                answers={answers}
+                marked={marked}
+                setMarked={setMarked}
+                current={current}
+                setCurrent={setCurrent}
+                onSubmit={submitExam}
+                submitting={submit.isPending}
+                submitError={submit.error?.message}
+              />
+            </aside>
+          </div>
+        )}
+
         {phase === "result" && grade && (
-          <Result grade={grade} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+          <div className="mt-6">
+            <Result grade={grade} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+          </div>
         )}
       </div>
-    </>
+
+      {/* Countdown timer runs but does not auto-submit (UI only) */}
+      {phase === "exam" && <CountdownTicker onTick={setSecondsLeft} />}
+    </div>
   );
 
   return embedded ? body : <SiteLayout>{body}</SiteLayout>;
@@ -121,52 +157,141 @@ function QuizPage() {
   return <QuizApp />;
 }
 
+/* -------------------- Banner -------------------- */
 
-function Intro({ onStart, loading, error }: { onStart: () => void; loading: boolean; error?: string }) {
+function BlueBanner({
+  embedded, phase, secondsLeft, current, total, onReset,
+}: {
+  embedded: boolean;
+  phase: Phase;
+  secondsLeft: number;
+  current: number;
+  total: number;
+  onReset?: () => void;
+}) {
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
   return (
-    <Card className="border-border">
-      <CardContent className="p-8 md:p-10 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary grid place-items-center">
-            <ClipboardCheck size={24} />
+    <div className="rounded-2xl overflow-hidden shadow-sm border border-blue-900/10">
+      <div className="bg-gradient-to-r from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb] text-white">
+        <div className="px-5 md:px-8 py-5 md:py-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] items-center gap-5">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-2xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/20">
+              <ClipboardCheck size={26} />
+            </div>
+            <div className="min-w-0">
+              {!embedded && (
+                <Link
+                  to="/p/$slug"
+                  params={{ slug: "drive" }}
+                  className="text-[11px] uppercase tracking-wider text-white/70 hover:text-white"
+                >
+                  ← 返回驾考工具
+                </Link>
+              )}
+              <h1 className="text-lg md:text-2xl font-bold tracking-tight truncate">
+                California DMV 驾照模拟考试
+              </h1>
+              <p className="text-xs md:text-sm text-white/80 mt-0.5">
+                模拟考试与加州 DMV 正式考试一致，帮助考生熟悉考试流程。
+              </p>
+            </div>
           </div>
-          <div>
-            <div className="text-lg font-semibold">开始模拟考试</div>
-            <div className="text-sm text-muted-foreground">DMV 风格 · 随机抽题 · 自动判分</div>
+
+          <div className="flex items-center gap-3">
+            {phase === "exam" && (
+              <>
+                <StatChip icon={<Clock size={16} />} label="剩余时间" value={`${mm}:${ss}`} />
+                <StatChip icon={<ListChecks size={16} />} label="题目进度" value={`${current + 1} / ${total}`} />
+              </>
+            )}
+            {onReset && (
+              <Button variant="secondary" size="sm" onClick={onReset} className="bg-white/15 hover:bg-white/25 text-white border border-white/20">
+                <RotateCcw size={14} className="mr-1" /> 重新开始
+              </Button>
+            )}
           </div>
         </div>
-        <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
-          <li>共 <b>{TOTAL}</b> 道题，随机从题库抽取。</li>
-          <li>答对 <b>{PASS}</b> 题及以上为通过。</li>
-          <li>交卷后将显示成绩、正确答案与错题回顾。</li>
-          <li>建议使用真实考试的状态答题，不要中途查找答案。</li>
-        </ul>
-        {error && <div className="text-sm text-destructive">{error}</div>}
-        <Button size="lg" onClick={onStart} disabled={loading} className="w-full md:w-auto">
-          {loading ? "抽题中…" : "开始考试"}
-        </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
+function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="bg-white text-slate-900 rounded-xl px-4 py-2.5 shadow-sm min-w-[130px]">
+      <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+        <span className="text-blue-600">{icon}</span>
+        {label}
+      </div>
+      <div className="text-lg font-bold tabular-nums leading-tight">{value}</div>
+    </div>
+  );
+}
+
+/* -------------------- Countdown (display-only) -------------------- */
+
+function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => number)) => void }) {
+  const ref = useRef(onTick);
+  ref.current = onTick;
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      ref.current((s: number) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return null;
+}
+
+/* -------------------- Intro -------------------- */
+
+function Intro({ onStart, loading, error }: { onStart: () => void; loading: boolean; error?: string }) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
+      <Card className="border-slate-200 shadow-sm rounded-2xl">
+        <CardContent className="p-8 md:p-10 space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 grid place-items-center">
+              <ClipboardCheck size={24} />
+            </div>
+            <div>
+              <div className="text-lg font-semibold">开始模拟考试</div>
+              <div className="text-sm text-muted-foreground">DMV 风格 · 随机抽题 · 自动判分</div>
+            </div>
+          </div>
+          <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
+            <li>共 <b>{TOTAL}</b> 道题，随机从题库抽取。</li>
+            <li>答对 <b>{PASS}</b> 题及以上为通过。</li>
+            <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+            <li>建议使用真实考试的状态答题，不要中途查找答案。</li>
+          </ul>
+          {error && <div className="text-sm text-destructive">{error}</div>}
+          <Button size="lg" onClick={onStart} disabled={loading} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+            {loading ? "抽题中…" : "开始考试"}
+          </Button>
+        </CardContent>
+      </Card>
+      <div className="space-y-6">
+        <RulesCard />
+        <TipsCard />
+      </div>
+    </div>
+  );
+}
+
+/* -------------------- Exam -------------------- */
+
 function Exam({
-  questions, answers, setAnswers, current, setCurrent, onSubmit, submitting, submitError,
+  questions, answers, setAnswers, current, setCurrent,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, "A" | "B" | "C" | "D">>>;
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
-  onSubmit: () => void;
-  submitting: boolean;
-  submitError?: string;
 }) {
   const q = questions[current];
-  const answered = Object.keys(answers).length;
-  const progress = Math.round((answered / questions.length) * 100);
-  const [confirming, setConfirming] = useState(false);
-
   const options = useMemo(
     () =>
       (["A", "B", "C", "D"] as const)
@@ -180,104 +305,171 @@ function Exam({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Progress */}
-      <div>
-        <div className="flex items-center justify-between text-sm mb-2">
-          <div className="font-medium">第 <span className="text-primary">{current + 1}</span> / {questions.length} 题</div>
-          <div className="text-muted-foreground">已答 {answered} / {questions.length}</div>
-        </div>
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
-          <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
-        </div>
-      </div>
-
-      {/* Question */}
-      <Card className="border-border">
-        <CardContent className="p-6 md:p-8 space-y-5">
-          <div className="text-base md:text-lg font-medium leading-relaxed whitespace-pre-wrap">
+    <Card className="border-slate-200 shadow-sm rounded-2xl">
+      <CardContent className="p-6 md:p-8 space-y-6">
+        <div className="flex items-baseline gap-3">
+          <span className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">
+            {current + 1}.
+          </span>
+          <h2 className="text-base md:text-lg font-semibold leading-relaxed whitespace-pre-wrap text-slate-900">
             {q.question}
-          </div>
-          <div className="space-y-3">
-            {options.map(({ key, text }) => {
-              const selected = answers[q.id] === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => pick(key)}
+          </h2>
+        </div>
+
+        <div className="space-y-3">
+          {options.map(({ key, text }) => {
+            const selected = answers[q.id] === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => pick(key)}
+                className={cn(
+                  "w-full text-left rounded-xl border p-4 md:p-5 flex items-start gap-4 transition-all",
+                  selected
+                    ? "border-blue-500 bg-blue-50 shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
+                    : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40",
+                )}
+              >
+                <span
                   className={cn(
-                    "w-full text-left rounded-xl border p-4 md:p-5 flex items-start gap-4 transition-colors",
+                    "shrink-0 h-6 w-6 rounded-full grid place-items-center text-[11px] mt-0.5 transition-colors",
                     selected
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                      : "border-border bg-white hover:border-primary/40 hover:bg-accent/40",
+                      ? "bg-blue-600 border-2 border-blue-600 text-white"
+                      : "border-2 border-slate-300 bg-white",
                   )}
                 >
-                  <span
-                    className={cn(
-                      "shrink-0 h-8 w-8 rounded-full grid place-items-center text-sm font-semibold",
-                      selected ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
-                    )}
-                  >
-                    {key}
+                  {selected && <span className="h-2 w-2 rounded-full bg-white" />}
+                </span>
+                <div className="flex-1 min-w-0 flex gap-2">
+                  <span className={cn("font-semibold", selected ? "text-blue-700" : "text-slate-700")}>
+                    {key}.
                   </span>
-                  <span className="text-sm md:text-base leading-relaxed">{text}</span>
-                </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                  <span className={cn("text-sm md:text-base leading-relaxed", selected ? "text-slate-900" : "text-slate-700")}>
+                    {text}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-      {/* Nav buttons */}
-      <div className="flex flex-wrap gap-2 justify-between">
-        <Button variant="outline" onClick={() => setCurrent((i) => Math.max(0, i - 1))} disabled={current === 0}>
-          <ArrowLeft size={16} className="mr-1" /> 上一题
-        </Button>
-        <div className="flex gap-2">
-          {current < questions.length - 1 ? (
-            <Button onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}>
-              下一题 <ArrowRight size={16} className="ml-1" />
-            </Button>
-          ) : null}
-          <Button variant={answered === questions.length ? "default" : "secondary"} onClick={() => setConfirming(true)}>
-            交卷
+        {/* Bottom nav */}
+        <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
+          <Button
+            variant="outline"
+            onClick={() => setCurrent((i) => Math.max(0, i - 1))}
+            disabled={current === 0}
+            className="mt-4"
+          >
+            <ArrowLeft size={16} className="mr-1" /> 上一题
+          </Button>
+          <Button
+            onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
+            disabled={current >= questions.length - 1}
+            className="mt-4 bg-blue-600 hover:bg-blue-700"
+          >
+            下一题 <ArrowRight size={16} className="ml-1" />
           </Button>
         </div>
-      </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-      {/* Grid navigator */}
-      <Card className="border-border">
-        <CardContent className="p-4 md:p-5">
-          <div className="text-xs text-muted-foreground mb-3">题号导航</div>
-          <div className="grid grid-cols-8 md:grid-cols-12 gap-2">
-            {questions.map((qq, i) => {
-              const done = !!answers[qq.id];
-              const active = i === current;
-              return (
-                <button
-                  key={qq.id}
-                  type="button"
-                  onClick={() => setCurrent(i)}
-                  className={cn(
-                    "h-9 rounded-md text-sm font-medium border transition-colors",
-                    active
-                      ? "border-primary bg-primary text-primary-foreground"
+/* -------------------- Answer sheet -------------------- */
+
+function AnswerSheet({
+  questions, answers, marked, setMarked, current, setCurrent, onSubmit, submitting, submitError,
+}: {
+  questions: QuizQuestion[];
+  answers: Record<string, "A" | "B" | "C" | "D">;
+  marked: Record<string, boolean>;
+  setMarked: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  current: number;
+  setCurrent: React.Dispatch<React.SetStateAction<number>>;
+  onSubmit: () => void;
+  submitting: boolean;
+  submitError?: string;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const answered = Object.keys(answers).length;
+  const markedCount = Object.values(marked).filter(Boolean).length;
+  const unanswered = questions.length - answered;
+
+  const currentId = questions[current]?.id;
+  const isMarked = currentId ? !!marked[currentId] : false;
+
+  return (
+    <Card className="border-slate-200 shadow-sm rounded-2xl">
+      <CardContent className="p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-slate-900">答题卡</h3>
+          <button
+            type="button"
+            onClick={() => currentId && setMarked((m) => ({ ...m, [currentId]: !m[currentId] }))}
+            className={cn(
+              "text-xs inline-flex items-center gap-1 px-2 py-1 rounded-md border transition-colors",
+              isMarked
+                ? "bg-amber-50 text-amber-700 border-amber-200"
+                : "text-slate-500 border-slate-200 hover:bg-slate-50",
+            )}
+          >
+            <Bookmark size={12} className={isMarked ? "fill-amber-500 text-amber-500" : ""} />
+            {isMarked ? "已标记" : "标记本题"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+          <LegendDot color="bg-emerald-500" label={`已答 ${answered}`} />
+          <LegendDot color="bg-white border border-slate-300" label={`未答 ${unanswered}`} />
+          <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
+          <LegendDot color="bg-blue-600" label="当前题" />
+        </div>
+
+        <div className="grid grid-cols-6 gap-2">
+          {questions.map((qq, i) => {
+            const done = !!answers[qq.id];
+            const flagged = !!marked[qq.id];
+            const active = i === current;
+            return (
+              <button
+                key={qq.id}
+                type="button"
+                onClick={() => setCurrent(i)}
+                className={cn(
+                  "h-9 rounded-md text-sm font-medium border transition-colors tabular-nums",
+                  active
+                    ? "bg-blue-600 border-blue-600 text-white shadow"
+                    : flagged
+                      ? "bg-amber-100 border-amber-300 text-amber-800"
                       : done
-                        ? "border-primary/40 bg-primary/10 text-primary"
-                        : "border-border bg-white text-muted-foreground hover:bg-accent",
-                  )}
-                >
-                  {i + 1}
-                </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                        ? "bg-emerald-100 border-emerald-300 text-emerald-800"
+                        : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                )}
+              >
+                {i + 1}
+              </button>
+            );
+          })}
+        </div>
+
+        <Button
+          onClick={() => setConfirming(true)}
+          className="w-full bg-blue-600 hover:bg-blue-700"
+        >
+          结束考试
+        </Button>
+        <p className="text-[11px] text-center text-slate-500">
+          已答 {answered} / {questions.length}
+        </p>
+      </CardContent>
 
       {confirming && (
-        <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4" onClick={() => submitting ? null : setConfirming(false)}>
+        <div
+          className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4"
+          onClick={() => (submitting ? null : setConfirming(false))}
+        >
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold">确认交卷？</h3>
             <p className="text-sm text-muted-foreground">
@@ -287,14 +479,75 @@ function Exam({
             {submitError && <p className="text-sm text-destructive">{submitError}</p>}
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setConfirming(false)} disabled={submitting}>取消</Button>
-              <Button onClick={onSubmit} disabled={submitting}>{submitting ? "评分中…" : "确认交卷"}</Button>
+              <Button onClick={onSubmit} disabled={submitting} className="bg-blue-600 hover:bg-blue-700">
+                {submitting ? "评分中…" : "确认交卷"}
+              </Button>
             </div>
           </div>
         </div>
       )}
+    </Card>
+  );
+}
+
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-1.5 text-slate-600">
+      <span className={cn("h-3 w-3 rounded-sm", color)} />
+      {label}
     </div>
   );
 }
+
+/* -------------------- Bottom info cards -------------------- */
+
+function RulesTips() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <RulesCard />
+      <TipsCard />
+    </div>
+  );
+}
+
+function RulesCard() {
+  return (
+    <Card className="border-slate-200 shadow-sm rounded-2xl">
+      <CardContent className="p-6 space-y-3">
+        <div className="flex items-center gap-2">
+          <ScrollText size={18} className="text-blue-600" />
+          <h3 className="font-semibold text-slate-900">测试规则</h3>
+        </div>
+        <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
+          <li>本测试共 <b>{TOTAL}</b> 道题，答对 <b>{PASS}</b> 题或以上即可通过。</li>
+          <li>每题有 4 个选项，请选择最正确的答案。</li>
+          <li>测试时间为 60 分钟，开始后计时。</li>
+          <li>您可以随时标记题目，方便之后查看。</li>
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TipsCard() {
+  return (
+    <Card className="border-amber-200 bg-amber-50/50 shadow-sm rounded-2xl">
+      <CardContent className="p-6 space-y-3">
+        <div className="flex items-center gap-2">
+          <Lightbulb size={18} className="text-amber-600" />
+          <h3 className="font-semibold text-slate-900">考试提示</h3>
+        </div>
+        <ul className="text-sm text-slate-700 space-y-2 list-disc pl-5">
+          <li>仔细阅读每个问题和所有选项。</li>
+          <li>不确定的题目可以先标记，稍后再回来。</li>
+          <li>交卷后可查看正确答案与详细解析。</li>
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* -------------------- Result -------------------- */
 
 function Result({
   grade, onRetake, onHome, retaking,
@@ -311,8 +564,7 @@ function Result({
 
   return (
     <div className="space-y-8">
-      {/* Score summary */}
-      <Card className={cn("border-border", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
+      <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
         <CardContent className="p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
@@ -335,7 +587,7 @@ function Result({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
-            <Button onClick={onRetake} disabled={retaking}>
+            <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
               {retaking ? "抽题中…" : "再考一次"}
             </Button>
             <Button variant="outline" onClick={onHome}>返回</Button>
@@ -343,7 +595,6 @@ function Result({
         </CardContent>
       </Card>
 
-      {/* Wrong review */}
       {wrongs.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold">错题回顾（{wrongs.length}）</h2>
@@ -355,7 +606,6 @@ function Result({
         </section>
       )}
 
-      {/* Full analysis */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">全部题目解析</h2>
         <div className="space-y-4">
@@ -389,7 +639,7 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
     .filter((o) => o.text && o.text.trim() !== "");
 
   return (
-    <Card className="border-border">
+    <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-5 md:p-6 space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div className="text-sm font-medium">
@@ -417,7 +667,7 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
                   "rounded-lg border p-3 text-sm flex items-start gap-3",
                   isCorrect && "border-emerald-500 bg-emerald-50",
                   !isCorrect && isPicked && "border-red-400 bg-red-50",
-                  !isCorrect && !isPicked && "border-border bg-white",
+                  !isCorrect && !isPicked && "border-slate-200 bg-white",
                 )}
               >
                 <span className={cn(
@@ -436,8 +686,10 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
           <div>正确答案：<b className="text-emerald-700">{correct}</b></div>
         </div>
         {r.explanation && (
-          <div className="text-sm rounded-lg bg-muted/50 p-3 leading-relaxed">
-            <div className="text-xs font-semibold text-muted-foreground mb-1">解析</div>
+          <div className="text-sm rounded-lg bg-emerald-50 border border-emerald-200 p-3 leading-relaxed">
+            <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1">
+              <CheckCircle2 size={12} /> 答案解析
+            </div>
             {r.explanation}
           </div>
         )}
