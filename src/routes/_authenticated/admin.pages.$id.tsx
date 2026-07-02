@@ -433,9 +433,10 @@ function ToolsManager({ pageId }: { pageId: string }) {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <CardTitle>已添加工具</CardTitle>
+            <CardTitle>📁 工具管理</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              统一管理这个页面下的所有一级工具（分类）及其项目。共 {cats.length} 个工具 / {totalItems} 个项目。
+              树形目录管理这个页面下的所有一级工具（分类）及其项目。共 {cats.length} 个一级工具 / {totalItems} 个项目。
+              新增的一级工具会自动出现在这里；在某个一级工具下点击「增加新项目」，新项目会自动归属到该工具。
             </p>
           </div>
           <Button type="button" size="sm" onClick={addCategory}>
@@ -445,7 +446,7 @@ function ToolsManager({ pageId }: { pageId: string }) {
       </CardHeader>
       <CardContent className="space-y-3">
         {cats.length === 0 && !newCatDraft && (
-          <p className="text-sm text-muted-foreground">还没有工具，点击右上角「增加新类别」开始添加。</p>
+          <p className="text-sm text-muted-foreground">还没有一级工具，点击右上角「增加新类别」开始添加（例如：驾照宝典、换算工具、世界时间）。</p>
         )}
 
         <ul className="space-y-2">
