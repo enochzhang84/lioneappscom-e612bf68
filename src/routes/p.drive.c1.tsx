@@ -288,6 +288,35 @@ export function QuizApp(props: QuizAppProps = {}) {
       </div>
 
       {phase === "exam" && <CountdownTicker onTick={setSecondsLeft} />}
+
+      {confirmUnanswered && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => (submit.isPending ? null : setConfirmUnanswered(false))}
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">还有未作答的题目</h3>
+            <p className="text-sm text-slate-600">
+              你还有 {questions.filter((q) => !answers[q.id]).length} 道题未作答，是否确认提交？
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setConfirmUnanswered(false)} disabled={submit.isPending}>
+                继续答题
+              </Button>
+              <Button
+                onClick={async () => {
+                  await submitExam();
+                  setConfirmUnanswered(false);
+                }}
+                disabled={submit.isPending}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {submit.isPending ? "评分中…" : "确认提交"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
