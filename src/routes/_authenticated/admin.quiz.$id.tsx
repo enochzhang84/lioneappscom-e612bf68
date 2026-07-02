@@ -30,6 +30,12 @@ type Form = {
   correct_answer: "A" | "B" | "C" | "D";
   explanation: string;
   explanation_en: string;
+  official_source: string;
+  manual_name: string;
+  manual_chapter: string;
+  manual_page: string;
+  manual_url: string;
+  google_keywords: string;
   category: string;
   difficulty: string;
   is_active: boolean;
@@ -50,6 +56,12 @@ const empty: Form = {
   correct_answer: "A",
   explanation: "",
   explanation_en: "",
+  official_source: "",
+  manual_name: "",
+  manual_chapter: "",
+  manual_page: "",
+  manual_url: "",
+  google_keywords: "",
   category: "c1",
   difficulty: "medium",
   is_active: true,
