@@ -142,3 +142,16 @@ export const adminMovePage = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const adminListShortcutPages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { data, error } = await context.supabase
+      .from("pages")
+      .select("id, slug, nav_label, title")
+      .eq("show_in_admin_shortcut", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
