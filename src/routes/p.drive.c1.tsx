@@ -87,6 +87,10 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [current, setCurrent] = useState(0);
   const [grade, setGrade] = useState<GradeResult | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(EXAM_SECONDS);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [translations, setTranslations] = useState<Record<string, QuestionTranslation>>({});
+  const [translating, setTranslating] = useState(false);
+  const translateFn = useServerFn(translateTexts);
 
   async function startExam() {
     const rows = await load.mutateAsync();
