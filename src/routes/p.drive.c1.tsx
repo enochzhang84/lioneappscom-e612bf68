@@ -767,26 +767,75 @@ function Result({
         </CardContent>
       </Card>
 
-      {wrongs.length > 0 && (
+      <ExamResultReview results={results} wrongs={wrongs} />
+    </div>
+  );
+}
+
+export function ExamResultReview({
+  results, wrongs,
+}: { results: GradedQuestion[]; wrongs: GradedQuestion[] }) {
+  const [showAll, setShowAll] = useState(false);
+  const hasWrong = wrongs.length > 0;
+
+  return (
+    <>
+      {hasWrong ? (
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold">错题回顾（{wrongs.length}）</h2>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">错题回顾</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              你本次答错了 <b className="text-red-600">{wrongs.length}</b> 题，建议优先复习以下题目。
+            </p>
+          </div>
           <div className="space-y-4">
             {wrongs.map((r, i) => (
               <ReviewItem key={r.id} r={r} idx={i + 1} />
             ))}
           </div>
         </section>
+      ) : (
+        <Card className="border-emerald-200 bg-emerald-50/60 shadow-sm rounded-2xl">
+          <CardContent className="p-6 md:p-8 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-emerald-500 text-white grid place-items-center">
+              <CheckCircle2 size={24} />
+            </div>
+            <div>
+              <div className="text-lg font-semibold text-emerald-800">恭喜！本次没有错题。</div>
+              <div className="text-sm text-emerald-700/80 mt-0.5">全部作答正确，可继续查看完整解析巩固知识点。</div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">全部题目解析</h2>
-        <div className="space-y-4">
-          {results.map((r, i) => (
-            <ReviewItem key={r.id} r={r} idx={i + 1} />
-          ))}
-        </div>
+      <section className="space-y-4 mt-8">
+        {!showAll ? (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              onClick={() => setShowAll(true)}
+              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              <BookOpen size={16} className="mr-1.5" /> 查看全部题目解析（{results.length}）
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">全部题目解析（{results.length}）</h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowAll(false)}>
+                收起
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {results.map((r, i) => (
+                <ReviewItem key={r.id} r={r} idx={i + 1} />
+              ))}
+            </div>
+          </>
+        )}
       </section>
-    </div>
+    </>
   );
 }
 
