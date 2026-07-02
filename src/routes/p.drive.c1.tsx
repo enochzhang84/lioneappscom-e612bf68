@@ -38,15 +38,40 @@ export const Route = createFileRoute("/p/drive/c1")({
 });
 
 type Phase = "intro" | "exam" | "result";
-const TOTAL = 36;
-const PASS = 30;
-const EXAM_SECONDS = 60 * 60;
 
-export function QuizApp({ embedded = false }: { embedded?: boolean }) {
+export type QuizAppProps = {
+  embedded?: boolean;
+  category?: string;
+  total?: number;
+  pass?: number;
+  examSeconds?: number;
+  title?: string;
+  subtitle?: string;
+  backHref?: string;
+  backLabel?: string;
+};
+
+const DEFAULT_TOTAL = 36;
+const DEFAULT_PASS = 30;
+const DEFAULT_SECONDS = 60 * 60;
+
+export function QuizApp(props: QuizAppProps = {}) {
+  const {
+    embedded = false,
+    category = "c1",
+    total: TOTAL = DEFAULT_TOTAL,
+    pass: PASS = DEFAULT_PASS,
+    examSeconds: EXAM_SECONDS = DEFAULT_SECONDS,
+    title = "California DMV 驾照模拟考试",
+    subtitle = "模拟考试与加州 DMV 正式考试一致，帮助考生熟悉考试流程。",
+    backHref = "/p/drive",
+    backLabel = "← 返回驾考工具",
+  } = props;
+
   const fetchFn = useServerFn(getRandomQuizQuestions);
   const gradeFn = useServerFn(gradeQuiz);
   const load = useMutation({
-    mutationFn: () => fetchFn({ data: { category: "c1", count: TOTAL } }),
+    mutationFn: () => fetchFn({ data: { category, count: TOTAL } }),
   });
   const submit = useMutation({
     mutationFn: (vars: { ids: string[]; answers: Record<string, "A" | "B" | "C" | "D"> }) =>
@@ -94,19 +119,29 @@ export function QuizApp({ embedded = false }: { embedded?: boolean }) {
   const body = (
     <div className="bg-[#F8FAFC] min-h-screen">
       <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-6 md:py-8">
-        {/* Blue banner */}
         <BlueBanner
           embedded={embedded}
           phase={phase}
           secondsLeft={secondsLeft}
           current={current}
           total={questions.length || TOTAL}
+          title={title}
+          subtitle={subtitle}
+          backHref={backHref}
+          backLabel={backLabel}
           onReset={phase !== "intro" ? resetToIntro : undefined}
         />
 
         {phase === "intro" && (
           <div className="mt-6">
-            <Intro onStart={startExam} loading={load.isPending} error={load.error?.message} />
+            <Intro
+              total={TOTAL}
+              pass={PASS}
+              examSeconds={EXAM_SECONDS}
+              onStart={startExam}
+              loading={load.isPending}
+              error={load.error?.message}
+            />
           </div>
         )}
 
@@ -120,7 +155,7 @@ export function QuizApp({ embedded = false }: { embedded?: boolean }) {
                 current={current}
                 setCurrent={setCurrent}
               />
-              <RulesTips />
+              <RulesTips total={TOTAL} pass={PASS} examSeconds={EXAM_SECONDS} />
             </div>
             <aside className="lg:sticky lg:top-6 self-start">
               <AnswerSheet
@@ -140,12 +175,11 @@ export function QuizApp({ embedded = false }: { embedded?: boolean }) {
 
         {phase === "result" && grade && (
           <div className="mt-6">
-            <Result grade={grade} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+            <Result grade={grade} pass={PASS} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
           </div>
         )}
       </div>
 
-      {/* Countdown timer runs but does not auto-submit (UI only) */}
       {phase === "exam" && <CountdownTicker onTick={setSecondsLeft} />}
     </div>
   );
@@ -160,13 +194,17 @@ function QuizPage() {
 /* -------------------- Banner -------------------- */
 
 function BlueBanner({
-  embedded, phase, secondsLeft, current, total, onReset,
+  embedded, phase, secondsLeft, current, total, title, subtitle, backHref, backLabel, onReset,
 }: {
   embedded: boolean;
   phase: Phase;
   secondsLeft: number;
   current: number;
   total: number;
+  title: string;
+  subtitle: string;
+  backHref: string;
+  backLabel: string;
   onReset?: () => void;
 }) {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
@@ -182,20 +220,15 @@ function BlueBanner({
             </div>
             <div className="min-w-0">
               {!embedded && (
-                <Link
-                  to="/p/$slug"
-                  params={{ slug: "drive" }}
+                <a
+                  href={backHref}
                   className="text-[11px] uppercase tracking-wider text-white/70 hover:text-white"
                 >
-                  ← 返回驾考工具
-                </Link>
+                  {backLabel}
+                </a>
               )}
-              <h1 className="text-lg md:text-2xl font-bold tracking-tight truncate">
-                California DMV 驾照模拟考试
-              </h1>
-              <p className="text-xs md:text-sm text-white/80 mt-0.5">
-                模拟考试与加州 DMV 正式考试一致，帮助考生熟悉考试流程。
-              </p>
+              <h1 className="text-lg md:text-2xl font-bold tracking-tight truncate">{title}</h1>
+              <p className="text-xs md:text-sm text-white/80 mt-0.5">{subtitle}</p>
             </div>
           </div>
 
@@ -230,7 +263,7 @@ function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-/* -------------------- Countdown (display-only) -------------------- */
+/* -------------------- Countdown -------------------- */
 
 function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => number)) => void }) {
   const ref = useRef(onTick);
@@ -246,7 +279,9 @@ function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => numb
 
 /* -------------------- Intro -------------------- */
 
-function Intro({ onStart, loading, error }: { onStart: () => void; loading: boolean; error?: string }) {
+function Intro({
+  total, pass, examSeconds, onStart, loading, error,
+}: { total: number; pass: number; examSeconds: number; onStart: () => void; loading: boolean; error?: string }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
       <Card className="border-slate-200 shadow-sm rounded-2xl">
@@ -261,10 +296,10 @@ function Intro({ onStart, loading, error }: { onStart: () => void; loading: bool
             </div>
           </div>
           <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
-            <li>共 <b>{TOTAL}</b> 道题，随机从题库抽取。</li>
-            <li>答对 <b>{PASS}</b> 题及以上为通过。</li>
+            <li>共 <b>{total}</b> 道题，随机从题库抽取。</li>
+            <li>答对 <b>{pass}</b> 题及以上为通过。</li>
+            <li>考试时长 <b>{Math.round(examSeconds / 60)}</b> 分钟。</li>
             <li>交卷后将显示成绩、正确答案与错题回顾。</li>
-            <li>建议使用真实考试的状态答题，不要中途查找答案。</li>
           </ul>
           {error && <div className="text-sm text-destructive">{error}</div>}
           <Button size="lg" onClick={onStart} disabled={loading} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
@@ -273,7 +308,7 @@ function Intro({ onStart, loading, error }: { onStart: () => void; loading: bool
         </CardContent>
       </Card>
       <div className="space-y-6">
-        <RulesCard />
+        <RulesCard total={total} pass={pass} examSeconds={examSeconds} />
         <TipsCard />
       </div>
     </div>
@@ -295,7 +330,11 @@ function Exam({
   const options = useMemo(
     () =>
       (["A", "B", "C", "D"] as const)
-        .map((k) => ({ key: k, text: (q as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`] }))
+        .map((k) => ({
+          key: k,
+          text: (q as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`],
+          textEn: (q as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}_en`],
+        }))
         .filter((o) => o.text && o.text.trim() !== ""),
     [q],
   );
@@ -308,16 +347,21 @@ function Exam({
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 md:p-8 space-y-6">
         <div className="flex items-baseline gap-3">
-          <span className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">
-            {current + 1}.
-          </span>
-          <h2 className="text-base md:text-lg font-semibold leading-relaxed whitespace-pre-wrap text-slate-900">
-            {q.question}
-          </h2>
+          <span className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">{current + 1}.</span>
+          <div className="min-w-0">
+            <h2 className="text-base md:text-lg font-semibold leading-relaxed whitespace-pre-wrap text-slate-900">
+              {q.question}
+            </h2>
+            {q.question_en && (
+              <p className="mt-1.5 text-sm md:text-base text-slate-500 leading-relaxed whitespace-pre-wrap italic">
+                {q.question_en}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3">
-          {options.map(({ key, text }) => {
+          {options.map(({ key, text, textEn }) => {
             const selected = answers[q.id] === key;
             return (
               <button
@@ -342,19 +386,21 @@ function Exam({
                   {selected && <span className="h-2 w-2 rounded-full bg-white" />}
                 </span>
                 <div className="flex-1 min-w-0 flex gap-2">
-                  <span className={cn("font-semibold", selected ? "text-blue-700" : "text-slate-700")}>
-                    {key}.
-                  </span>
-                  <span className={cn("text-sm md:text-base leading-relaxed", selected ? "text-slate-900" : "text-slate-700")}>
-                    {text}
-                  </span>
+                  <span className={cn("font-semibold", selected ? "text-blue-700" : "text-slate-700")}>{key}.</span>
+                  <div className="min-w-0">
+                    <div className={cn("text-sm md:text-base leading-relaxed", selected ? "text-slate-900" : "text-slate-700")}>
+                      {text}
+                    </div>
+                    {textEn && (
+                      <div className="mt-1 text-xs md:text-sm text-slate-500 italic leading-relaxed">{textEn}</div>
+                    )}
+                  </div>
                 </div>
               </button>
             );
           })}
         </div>
 
-        {/* Bottom nav */}
         <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
           <Button
             variant="outline"
@@ -454,10 +500,7 @@ function AnswerSheet({
           })}
         </div>
 
-        <Button
-          onClick={() => setConfirming(true)}
-          className="w-full bg-blue-600 hover:bg-blue-700"
-        >
+        <Button onClick={() => setConfirming(true)} className="w-full bg-blue-600 hover:bg-blue-700">
           结束考试
         </Button>
         <p className="text-[11px] text-center text-slate-500">
@@ -499,18 +542,18 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   );
 }
 
-/* -------------------- Bottom info cards -------------------- */
+/* -------------------- Info cards -------------------- */
 
-function RulesTips() {
+function RulesTips({ total, pass, examSeconds }: { total: number; pass: number; examSeconds: number }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <RulesCard />
+      <RulesCard total={total} pass={pass} examSeconds={examSeconds} />
       <TipsCard />
     </div>
   );
 }
 
-function RulesCard() {
+function RulesCard({ total, pass, examSeconds }: { total: number; pass: number; examSeconds: number }) {
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 space-y-3">
@@ -519,9 +562,9 @@ function RulesCard() {
           <h3 className="font-semibold text-slate-900">测试规则</h3>
         </div>
         <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
-          <li>本测试共 <b>{TOTAL}</b> 道题，答对 <b>{PASS}</b> 题或以上即可通过。</li>
-          <li>每题有 4 个选项，请选择最正确的答案。</li>
-          <li>测试时间为 60 分钟，开始后计时。</li>
+          <li>本测试共 <b>{total}</b> 道题，答对 <b>{pass}</b> 题或以上即可通过。</li>
+          <li>每题有多个选项，请选择最正确的答案。</li>
+          <li>测试时间为 {Math.round(examSeconds / 60)} 分钟，开始后计时。</li>
           <li>您可以随时标记题目，方便之后查看。</li>
         </ul>
       </CardContent>
@@ -550,16 +593,17 @@ function TipsCard() {
 /* -------------------- Result -------------------- */
 
 function Result({
-  grade, onRetake, onHome, retaking,
+  grade, pass, onRetake, onHome, retaking,
 }: {
   grade: GradeResult;
+  pass: number;
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
 }) {
   const { total, correct: correctCount, wrong: wrongCount, results } = grade;
   const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  const passed = correctCount >= PASS;
+  const passed = correctCount >= pass;
   const wrongs = results.filter((r) => !r.is_correct);
 
   return (
@@ -577,7 +621,7 @@ function Result({
                 得分 {correctCount} / {total}
               </div>
               <div className="text-sm text-muted-foreground mt-1">
-                通过分数线：{PASS} / {total}
+                通过分数线：{pass} / {total}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4 md:gap-8 text-center">
@@ -635,16 +679,23 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
   const pick = r.picked;
   const isRight = r.is_correct;
   const opts = (["A", "B", "C", "D"] as const)
-    .map((k) => ({ key: k, text: (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`] }))
+    .map((k) => ({
+      key: k,
+      text: (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`],
+      textEn: (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}_en`],
+    }))
     .filter((o) => o.text && o.text.trim() !== "");
 
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-5 md:p-6 space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium min-w-0">
             <span className="text-muted-foreground mr-2">Q{idx}.</span>
             {r.question}
+            {r.question_en && (
+              <div className="mt-1 text-xs text-slate-500 italic font-normal">{r.question_en}</div>
+            )}
           </div>
           <span
             className={cn(
@@ -657,7 +708,7 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
           </span>
         </div>
         <div className="space-y-2">
-          {opts.map(({ key, text }) => {
+          {opts.map(({ key, text, textEn }) => {
             const isCorrect = key === correct;
             const isPicked = key === pick;
             return (
@@ -676,7 +727,10 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
                     : isPicked ? "bg-red-500 text-white"
                     : "bg-muted text-foreground",
                 )}>{key}</span>
-                <span className="leading-relaxed">{text}</span>
+                <div className="min-w-0">
+                  <div className="leading-relaxed">{text}</div>
+                  {textEn && <div className="mt-0.5 text-xs text-slate-500 italic">{textEn}</div>}
+                </div>
               </div>
             );
           })}
@@ -690,7 +744,10 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
             <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1">
               <CheckCircle2 size={12} /> 答案解析
             </div>
-            {r.explanation}
+            <div>{r.explanation}</div>
+            {r.explanation_en && (
+              <div className="mt-1 text-xs text-emerald-800/70 italic">{r.explanation_en}</div>
+            )}
           </div>
         )}
       </CardContent>
