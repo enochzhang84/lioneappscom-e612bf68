@@ -8,6 +8,8 @@ import { VOLUME_CONFIGS } from "./volume";
 import { POWER_CONFIGS } from "./power";
 import { FUEL_CONFIGS } from "./fuel";
 import { NUMBER_CONFIGS } from "./number";
+import { SPEED_CONFIGS } from "./speed";
+import { PRESSURE_CONFIGS } from "./pressure";
 import { getUnits } from "./units";
 
 const ALL: ConverterConfig[] = [
@@ -19,7 +21,10 @@ const ALL: ConverterConfig[] = [
   ...POWER_CONFIGS,
   ...FUEL_CONFIGS,
   ...NUMBER_CONFIGS,
+  ...SPEED_CONFIGS,
+  ...PRESSURE_CONFIGS,
 ];
+
 
 const INDEX = new Map<string, ConverterConfig>(ALL.map((c) => [c.key, c]));
 
