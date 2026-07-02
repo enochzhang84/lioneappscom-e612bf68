@@ -127,12 +127,15 @@ export const Route = createFileRoute("/p/$slug/i/$itemSlug")({
 });
 
 function ItemDetail() {
-  const { page, item, category } = Route.useLoaderData() as {
-    page: PageFull; item: ToolItem; category: ToolCategory | null;
+  const { page, item, category, exam } = Route.useLoaderData() as {
+    page: PageFull; item: ToolItem; category: ToolCategory | null; exam: ExamConfig | null;
   };
 
   const appKey = item.link_url?.trim() || "";
-  const embed = appKey ? EMBEDDED_APPS[appKey] : undefined;
+  const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
+  const embed = staticEmbed ?? (exam
+    ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
+    : undefined);
   if (embed) {
     return (
       <SiteLayout>
