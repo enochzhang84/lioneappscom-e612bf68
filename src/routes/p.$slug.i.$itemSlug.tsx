@@ -173,7 +173,7 @@ function ItemDetail() {
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
-    : undefined);
+    : undefined));
   if (embed) {
     return (
       <SiteLayout>
