@@ -213,6 +213,9 @@ export function QuizApp(props: QuizAppProps = {}) {
                 setAnswers={setAnswers}
                 current={current}
                 setCurrent={setCurrent}
+                showTranslation={showTranslation}
+                translations={translations}
+                translating={translating}
               />
               <RulesTips total={TOTAL} pass={PASS} examSeconds={EXAM_SECONDS} />
             </div>
