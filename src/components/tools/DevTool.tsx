@@ -372,7 +372,7 @@ function RegexTester() {
       <div><div className="text-sm font-semibold mb-2">测试文本</div><Textarea value={text} onChange={(e) => setText(e.target.value)} className="min-h-[120px] font-mono text-sm" /></div>
       <div><div className="text-sm font-semibold mb-2">替换为</div><Input value={replace} onChange={(e) => setReplace(e.target.value)} className="font-mono" /></div>
       {!result.ok && <div className="text-sm text-destructive">✗ {result.err}</div>}
-      {result.ok && (
+      {result.ok && result.matches && (
         <div className="grid md:grid-cols-2 gap-3">
           <div className="rounded-lg border border-border bg-muted/20 p-3">
             <div className="text-sm font-semibold mb-2">匹配（共 {result.matches.length} 项）</div>
@@ -382,8 +382,8 @@ function RegexTester() {
             </ul>
           </div>
           <div className="rounded-lg border border-border bg-muted/20 p-3">
-            <div className="text-sm font-semibold mb-2 flex items-center justify-between"><span>替换结果</span><CopyButton text={result.replaced} /></div>
-            <Textarea readOnly value={result.replaced} className="min-h-[120px] font-mono text-sm bg-white" />
+            <div className="text-sm font-semibold mb-2 flex items-center justify-between"><span>替换结果</span><CopyButton text={result.replaced ?? ""} /></div>
+            <Textarea readOnly value={result.replaced ?? ""} className="min-h-[120px] font-mono text-sm bg-white" />
           </div>
         </div>
       )}
