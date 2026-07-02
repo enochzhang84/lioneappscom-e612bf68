@@ -137,14 +137,22 @@ function QuizEditPage() {
       <Card>
         <CardContent className="p-6 space-y-5">
           <div>
-            <Label>题目 *</Label>
+            <Label>题目 (中文) *</Label>
             <Textarea rows={3} value={form.question} onChange={(e) => set("question", e.target.value)} />
           </div>
+          <div>
+            <Label>Question (English)</Label>
+            <Textarea rows={3} value={form.question_en} onChange={(e) => set("question_en", e.target.value)} placeholder="Optional English translation" />
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <div><Label>选项 A *</Label><Textarea rows={2} value={form.option_a} onChange={(e) => set("option_a", e.target.value)} /></div>
-            <div><Label>选项 B *</Label><Textarea rows={2} value={form.option_b} onChange={(e) => set("option_b", e.target.value)} /></div>
-            <div><Label>选项 C</Label><Textarea rows={2} value={form.option_c} onChange={(e) => set("option_c", e.target.value)} /></div>
-            <div><Label>选项 D</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
+            <div><Label>选项 A (中文) *</Label><Textarea rows={2} value={form.option_a} onChange={(e) => set("option_a", e.target.value)} /></div>
+            <div><Label>Option A (EN)</Label><Textarea rows={2} value={form.option_a_en} onChange={(e) => set("option_a_en", e.target.value)} /></div>
+            <div><Label>选项 B (中文) *</Label><Textarea rows={2} value={form.option_b} onChange={(e) => set("option_b", e.target.value)} /></div>
+            <div><Label>Option B (EN)</Label><Textarea rows={2} value={form.option_b_en} onChange={(e) => set("option_b_en", e.target.value)} /></div>
+            <div><Label>选项 C (中文)</Label><Textarea rows={2} value={form.option_c} onChange={(e) => set("option_c", e.target.value)} /></div>
+            <div><Label>Option C (EN)</Label><Textarea rows={2} value={form.option_c_en} onChange={(e) => set("option_c_en", e.target.value)} /></div>
+            <div><Label>选项 D (中文)</Label><Textarea rows={2} value={form.option_d} onChange={(e) => set("option_d", e.target.value)} /></div>
+            <div><Label>Option D (EN)</Label><Textarea rows={2} value={form.option_d_en} onChange={(e) => set("option_d_en", e.target.value)} /></div>
           </div>
           <div className="grid gap-4 md:grid-cols-4">
             <div>
