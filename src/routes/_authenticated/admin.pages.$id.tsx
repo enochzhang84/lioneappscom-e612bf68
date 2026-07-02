@@ -18,7 +18,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, ArrowUp, ArrowDown, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, ChevronDown, ChevronRight, Pencil, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/pages/$id")({
   component: PageEditor,
