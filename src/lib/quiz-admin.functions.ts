@@ -92,6 +92,8 @@ export const adminUpsertQuiz = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
     const payload = {
+      question_type: data.question_type,
+      image_url: data.image_url ?? null,
       question: data.question,
       option_a: data.option_a,
       option_b: data.option_b,
