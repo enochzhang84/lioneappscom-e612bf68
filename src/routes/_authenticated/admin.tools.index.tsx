@@ -423,9 +423,13 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             key={selectedItem.id}
             item={selectedItem}
             cats={cats}
+            allItems={items}
             pageSlug={""}
             onSave={(patch) => mItem.mutate({ data: itemPayload(selectedItem, pageId, patch) }, { onSuccess: () => toast.success("已保存") })}
-            onDelete={() => { if (confirm(`删除工具「${selectedItem.title}」？`)) { mItemDel.mutate({ data: { id: selectedItem.id } }); setSelection({ kind: "category", id: selectedItem.category_id ?? "" }); } }}
+            onDelete={() => { if (confirm(`删除工具「${selectedItem.title}」？该操作会同时删除其下所有子页面。`)) { mItemDel.mutate({ data: { id: selectedItem.id } }); setSelection({ kind: "category", id: selectedItem.category_id ?? "" }); } }}
+            onAddChild={() => addItemUnder(selectedItem.category_id ?? "", selectedItem.id)}
+            onSelectItem={(id) => setSelection({ kind: "item", id })}
+            onDeleteChild={(id, title) => { if (confirm(`删除子页面「${title}」？`)) mItemDel.mutate({ data: { id } }); }}
           />
         )}
       </section>
