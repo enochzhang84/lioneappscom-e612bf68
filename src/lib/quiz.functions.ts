@@ -4,8 +4,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+export type QuestionType =
+  | "single_choice"
+  | "image_choice"
+  | "sign_recognition"
+  | "multiple_choice"
+  | "true_false"
+  | "fill_blank"
+  | "hotspot";
+
 export type QuizQuestion = {
   id: string;
+  question_type: QuestionType;
   question: string;
   option_a: string;
   option_b: string;
