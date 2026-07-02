@@ -75,12 +75,27 @@ const empty: Form = {
 
 function QuizEditPage() {
   const { id } = useParams({ from: "/_authenticated/admin/quiz/$id" });
+  const { bank: bankFromUrl } = useSearch({ from: "/_authenticated/admin/quiz/$id" });
   const isNew = id === "new";
   const navigate = useNavigate();
   const getFn = useServerFn(adminGetQuiz);
   const upsertFn = useServerFn(adminUpsertQuiz);
+  const nodesFn = useServerFn(adminListBankNodes);
 
-  const [form, setForm] = useState<Form>(empty);
+  const nodesQuery = useQuery({ queryKey: ["admin", "bank-nodes"], queryFn: () => nodesFn({}) });
+  const banks = (nodesQuery.data ?? []).filter((n) => n.node_type === "bank");
+  const bankLabel = (id: string) => {
+    const list = nodesQuery.data ?? [];
+    const byId = new Map(list.map((n) => [n.id, n]));
+    const parts: string[] = [];
+    let cur = byId.get(id);
+    while (cur) { parts.unshift(cur.name); cur = cur.parent_id ? byId.get(cur.parent_id) : undefined; }
+    return parts.join(" › ");
+  };
+
+  const [form, setForm] = useState<Form>(() =>
+    isNew && bankFromUrl ? { ...empty, question_bank_id: bankFromUrl } : empty,
+  );
 
   const q = useQuery({
     queryKey: ["admin", "quiz", id],
