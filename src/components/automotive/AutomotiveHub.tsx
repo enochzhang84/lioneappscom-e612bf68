@@ -84,9 +84,10 @@ export function AutomotiveHub() {
       </nav>
 
       {/* 内容区 —— 复用现有 UnitConverter / Calculator 组件 */}
-      <div key={current.key} className="-mx-4 md:-mx-6">
+      <div key={current.key}>
         {current.render()}
       </div>
+
     </div>
   );
 }
