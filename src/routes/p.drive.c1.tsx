@@ -27,7 +27,31 @@ import {
   Bookmark,
   Lightbulb,
   ScrollText,
+  BookOpen,
+  Search,
+  ExternalLink,
+  ChevronDown,
+  GraduationCap,
 } from "lucide-react";
+
+const DEFAULT_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/california-driver-handbook/";
+const CDL_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/commercial-driver-handbook/";
+const CDL_CATEGORIES = new Set(["air_brake", "combination_vehicle", "commercial_driver"]);
+
+function defaultManualName(category: string): string {
+  return CDL_CATEGORIES.has(category)
+    ? "California Commercial Driver Handbook"
+    : "California Driver Handbook";
+}
+function defaultManualUrl(category: string): string {
+  return CDL_CATEGORIES.has(category) ? CDL_HANDBOOK_URL : DEFAULT_HANDBOOK_URL;
+}
+function buildGoogleQuery(r: GradedQuestion): string {
+  if (r.google_keywords && r.google_keywords.trim()) return r.google_keywords.trim();
+  const q = (r.question_en && r.question_en.trim()) || r.question;
+  const manual = r.manual_name?.trim() || defaultManualName(r.category);
+  return `${q} ${manual}`;
+}
 
 export const Route = createFileRoute("/p/drive/c1")({
   head: () => ({
