@@ -778,19 +778,66 @@ function TipsCard() {
 /* -------------------- Result -------------------- */
 
 function Result({
-  grade, pass, onRetake, onHome, retaking,
+  grade, pass, maxWrong, onRetake, onHome, retaking,
 }: {
   grade: GradeResult;
   pass: number;
+  maxWrong?: number;
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
 }) {
   const { total, correct: correctCount, wrong: wrongCount, results } = grade;
-  const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  const passed = correctCount >= pass;
   const wrongs = results.filter((r) => !r.is_correct);
+  const isWrongBased = typeof maxWrong === "number";
+  const passed = isWrongBased ? wrongCount <= maxWrong : correctCount >= pass;
 
+  if (isWrongBased) {
+    return (
+      <div className="space-y-8">
+        <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
+          <CardContent className="p-6 md:p-8">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                <div>
+                  <div className={cn("inline-flex items-center gap-2 text-xs font-medium px-2.5 py-1 rounded-full",
+                    passed ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
+                    {passed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                    {passed ? "通过" : "未通过"}
+                  </div>
+                  <div className="mt-3 text-2xl md:text-3xl font-bold">
+                    {passed ? "恭喜！你已通过本次 DMV 小型车 C1 模拟考试。" : "继续努力，再来一次！"}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {passed
+                      ? "本次考试最多允许错 6 题，你的错题数在允许范围内。"
+                      : "本次考试最多允许错 6 题，你的错题数超过了通过标准，建议先复习错题再重新测试。"}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-4 md:gap-8 text-center">
+                  <Stat label="总题数" value={total} />
+                  <Stat label="答对题数" value={correctCount} tone="pos" />
+                  <Stat label="答错题数" value={wrongCount} tone="neg" />
+                  <Stat label="允许错题数" value={maxWrong} />
+                  <Stat label="考试结果" value={passed ? "通过" : "未通过"} tone={passed ? "pos" : "neg"} />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
+                  {retaking ? "抽题中…" : "再考一次"}
+                </Button>
+                <Button variant="outline" onClick={onHome}>返回</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <ExamResultReview results={results} wrongs={wrongs} />
+      </div>
+    );
+  }
+
+  const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   return (
     <div className="space-y-8">
       <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
