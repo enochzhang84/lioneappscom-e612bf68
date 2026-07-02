@@ -31,14 +31,18 @@ export const trackPageView = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data }) => {
-    const supa = publicClient();
-    await supa.from("page_views").insert({
+    // Use service-role admin client so RLS on page_views can stay locked down
+    // (no public INSERT policy). Input is validated above and only writes
+    // non-sensitive analytics fields.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("page_views").insert({
       path: data.path,
       referrer: data.referrer ?? null,
       session_id: data.sessionId ?? null,
     });
     return { ok: true };
   });
+
 
 // ---------- Admin dashboards ----------
 export type AnalyticsSummary = {
