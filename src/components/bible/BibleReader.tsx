@@ -84,6 +84,8 @@ export function BibleReader({
           <article className="mt-6 space-y-3 text-[17px] md:text-lg leading-[2.1] text-foreground">
             {verses.map((v) => {
               let text = v.text.replace(/<[^>]+>/g, "");
+              // Strip Strong's numbers attached to words (e.g. "And2532", "hand5495")
+              text = text.replace(/([A-Za-z\u4e00-\u9fff])\d+/g, "$1");
               if (stripSpaces) text = text.replace(/\s+/g, "");
               return (
                 <p key={v.pk} className="scroll-mt-24" id={`v${v.verse}`}>
