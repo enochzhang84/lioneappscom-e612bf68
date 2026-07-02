@@ -1,5 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   LayoutDashboard,
   FileText,
@@ -20,10 +22,15 @@ import {
   LogOut,
   Package,
   Briefcase,
+  Home,
+  Info,
+  Mail,
+  PencilLine,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { adminListShortcutPages } from "@/lib/pages-admin.functions";
 
 type NavItem = {
   to: string;
@@ -31,7 +38,20 @@ type NavItem = {
   icon: React.ComponentType<{ size?: number; className?: string }>;
   group: string;
   soon?: boolean;
+  params?: Record<string, string>;
+  search?: Record<string, string>;
 };
+
+const QUICK_EDIT_GROUP = "页面编辑";
+
+const STATIC_QUICK_EDIT: NavItem[] = [
+  { to: "/admin/settings", label: "首页", icon: Home, group: QUICK_EDIT_GROUP, search: { section: "hero" } },
+  { to: "/admin/products", label: "产品", icon: Package, group: QUICK_EDIT_GROUP },
+  { to: "/admin/cases", label: "案例", icon: Briefcase, group: QUICK_EDIT_GROUP },
+  { to: "/admin/settings", label: "关于我们", icon: Info, group: QUICK_EDIT_GROUP, search: { section: "about" } },
+  { to: "/admin/settings", label: "联系我们", icon: Mail, group: QUICK_EDIT_GROUP, search: { section: "contact" } },
+  { to: "/admin/tools", label: "实用工具", icon: Wrench, group: QUICK_EDIT_GROUP },
+];
 
 export const ADMIN_NAV: NavItem[] = [
   { to: "/admin", label: "仪表盘", icon: LayoutDashboard, group: "概览" },
@@ -51,8 +71,9 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/files", label: "文件管理", icon: FolderOpen, group: "系统" },
   { to: "/admin/notifications", label: "通知中心", icon: Bell, group: "系统", soon: true },
   { to: "/admin/logs", label: "操作日志", icon: ScrollText, group: "系统", soon: true },
-  { to: "/admin/settings", label: "系统设置", icon: Settings, group: "系统" },
+  { to: "/admin/settings", label: "站点设置", icon: Settings, group: "系统" },
 ];
+
 
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
