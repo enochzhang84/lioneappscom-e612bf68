@@ -140,6 +140,57 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_exams: {
+        Row: {
+          back_href: string | null
+          back_label: string | null
+          bilingual: boolean
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          pass_count: number
+          sort_order: number
+          subtitle: string | null
+          time_seconds: number
+          title: string
+          total_questions: number
+          updated_at: string
+        }
+        Insert: {
+          back_href?: string | null
+          back_label?: string | null
+          bilingual?: boolean
+          category: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          pass_count?: number
+          sort_order?: number
+          subtitle?: string | null
+          time_seconds?: number
+          title: string
+          total_questions?: number
+          updated_at?: string
+        }
+        Update: {
+          back_href?: string | null
+          back_label?: string | null
+          bilingual?: boolean
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          pass_count?: number
+          sort_order?: number
+          subtitle?: string | null
+          time_seconds?: number
+          title?: string
+          total_questions?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quiz_questions: {
         Row: {
           category: string
