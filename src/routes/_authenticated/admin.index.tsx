@@ -25,14 +25,12 @@ function Dashboard() {
   const lc = useServerFn(adminListCases);
   const ls = useServerFn(adminListSettings);
   const lPages = useServerFn(adminListPages);
-  const lTools = useServerFn(adminListCategories);
   const lQuiz = useServerFn(adminListQuiz);
 
   const products = useQuery({ queryKey: ["admin", "products"], queryFn: () => lp() });
   const cases = useQuery({ queryKey: ["admin", "cases"], queryFn: () => lc() });
   const settings = useQuery({ queryKey: ["admin", "settings"], queryFn: () => ls() });
   const pages = useQuery({ queryKey: ["admin", "pages"], queryFn: () => lPages() });
-  const tools = useQuery({ queryKey: ["admin", "tool-categories"], queryFn: () => lTools() });
   const quiz = useQuery({ queryKey: ["admin", "quiz", "all"], queryFn: () => lQuiz({ data: {} as { category?: string } }) });
 
   return (
