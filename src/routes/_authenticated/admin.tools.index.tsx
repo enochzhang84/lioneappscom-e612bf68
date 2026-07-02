@@ -300,9 +300,10 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
             {cats.map((c, ci) => {
               const isOpen = openCat[c.id] ?? false;
               const isSel = selection.kind === "category" && selection.id === c.id;
-              const catItems = items
-                .filter((i) => i.category_id === c.id)
+              const topItems = items
+                .filter((i) => i.category_id === c.id && !i.parent_id)
                 .sort((a, b) => a.sort_order - b.sort_order);
+              const totalItems = items.filter((i) => i.category_id === c.id).length;
               return (
                 <li key={c.id}>
                   <div
@@ -318,7 +319,7 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                     </button>
                     <span className="text-base">{c.icon || "📁"}</span>
                     <span className={`flex-1 truncate ${!c.is_visible ? "text-muted-foreground line-through" : ""}`}>{c.title || "(未命名)"}</span>
-                    <span className="text-xs text-muted-foreground">{catItems.length}</span>
+                    <span className="text-xs text-muted-foreground">{totalItems}</span>
                     <div className="hidden group-hover:flex items-center">
                       <button type="button" title="上移" className="p-0.5 hover:bg-muted rounded" onClick={(e) => { e.stopPropagation(); moveCategory(ci, -1); }} disabled={ci === 0}>
                         <ArrowUp size={12} />
@@ -330,16 +331,52 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
                   </div>
                   {isOpen && (
                     <ul className="ml-5 border-l border-border pl-2 mt-0.5 space-y-0.5">
-                      {catItems.map((it) => {
+                      {topItems.map((it) => {
                         const iSel = selection.kind === "item" && selection.id === it.id;
+                        const children = items
+                          .filter((x) => x.parent_id === it.id)
+                          .sort((a, b) => a.sort_order - b.sort_order);
+                        const iOpen = openItem[it.id] ?? true;
                         return (
-                          <li
-                            key={it.id}
-                            className={`flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${iSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
-                            onClick={() => setSelection({ kind: "item", id: it.id })}
-                          >
-                            <span>{it.icon || "🧰"}</span>
-                            <span className={`flex-1 truncate ${!it.is_visible ? "text-muted-foreground line-through" : ""}`}>{it.title || "(未命名)"}</span>
+                          <li key={it.id}>
+                            <div
+                              className={`group flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${iSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
+                              onClick={() => setSelection({ kind: "item", id: it.id })}
+                            >
+                              {children.length > 0 ? (
+                                <button type="button" className="p-0.5 hover:bg-muted rounded"
+                                  onClick={(e) => { e.stopPropagation(); setOpenItem({ ...openItem, [it.id]: !iOpen }); }}>
+                                  {iOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                                </button>
+                              ) : (
+                                <span className="w-4" />
+                              )}
+                              <span>{it.icon || "🧰"}</span>
+                              <span className={`flex-1 truncate ${!it.is_visible ? "text-muted-foreground line-through" : ""}`}>{it.title || "(未命名)"}</span>
+                              {children.length > 0 && <span className="text-[10px] text-muted-foreground">{children.length}</span>}
+                            </div>
+                            {iOpen && children.length > 0 && (
+                              <ul className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
+                                {children.map((ch) => {
+                                  const cSel = selection.kind === "item" && selection.id === ch.id;
+                                  return (
+                                    <li key={ch.id}
+                                      className={`flex items-center gap-1 rounded px-1.5 py-1 cursor-pointer text-xs ${cSel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/60"}`}
+                                      onClick={() => setSelection({ kind: "item", id: ch.id })}>
+                                      <span>{ch.icon || "📄"}</span>
+                                      <span className={`flex-1 truncate ${!ch.is_visible ? "text-muted-foreground line-through" : ""}`}>{ch.title || "(未命名)"}</span>
+                                    </li>
+                                  );
+                                })}
+                                <li>
+                                  <button type="button"
+                                    className="w-full text-left text-[11px] text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted/60"
+                                    onClick={() => addItemUnder(c.id, it.id)}>
+                                    + 新子页面
+                                  </button>
+                                </li>
+                              </ul>
+                            )}
                           </li>
                         );
                       })}
