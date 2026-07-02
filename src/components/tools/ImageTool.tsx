@@ -408,3 +408,30 @@ async function opQr(text: string) {
   const res = await fetch(dataUrl);
   saveAs(await res.blob(), "qrcode.png");
 }
+
+async function opIdPhoto(file: File, target: { w: number; h: number; name: string }, bg: string) {
+  const img = await loadImage(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = target.w; canvas.height = target.h;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, target.w, target.h);
+  // cover-fit: scale so image fully covers, center-crop
+  const scale = Math.max(target.w / img.naturalWidth, target.h / img.naturalHeight);
+  const dw = img.naturalWidth * scale;
+  const dh = img.naturalHeight * scale;
+  const dx = (target.w - dw) / 2;
+  const dy = (target.h - dh) / 2;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, dx, dy, dw, dh);
+  const blob = await canvasToBlob(canvas, "image/jpeg", 0.92);
+  saveAs(blob, `id-photo-${target.w}x${target.h}.jpg`);
+}
+
+async function opBarcode(text: string, format: string) {
+  if (!text.trim()) throw new Error("请输入条形码内容");
+  const canvas = document.createElement("canvas");
+  JsBarcode(canvas, text, { format, width: 3, height: 140, displayValue: true, margin: 20 });
+  const blob = await canvasToBlob(canvas, "image/png");
+  saveAs(blob, `barcode-${format.toLowerCase()}.png`);
+}
