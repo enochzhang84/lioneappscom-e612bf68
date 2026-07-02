@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
@@ -137,6 +138,11 @@ const PDriveC1Route = PDriveC1RouteImport.update({
   id: '/p/drive/c1',
   path: '/p/drive/c1',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
   id: '/tools',
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
@@ -314,6 +321,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
@@ -356,6 +364,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
@@ -398,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/seo'
     | '/admin/settings'
     | '/admin/tools'
+    | '/admin/users'
     | '/p/drive/c1'
     | '/admin/'
     | '/p/$slug/'
@@ -431,6 +441,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/blog'
     | '/admin/seo'
+    | '/admin/users'
     | '/p/drive/c1'
     | '/admin'
     | '/p/$slug'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/seo'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/tools'
+    | '/_authenticated/admin/users'
     | '/p/drive/c1'
     | '/_authenticated/admin/'
     | '/p/$slug/'
@@ -636,6 +648,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/p/drive/c1'
       preLoaderRoute: typeof PDriveC1RouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/tools': {
       id: '/_authenticated/admin/tools'
@@ -889,6 +908,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminSeoRoute: typeof AuthenticatedAdminSeoRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
   AuthenticatedAdminToolsRoute: typeof AuthenticatedAdminToolsRouteWithChildren
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -902,6 +922,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminSeoRoute: AuthenticatedAdminSeoRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
   AuthenticatedAdminToolsRoute: AuthenticatedAdminToolsRouteWithChildren,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
