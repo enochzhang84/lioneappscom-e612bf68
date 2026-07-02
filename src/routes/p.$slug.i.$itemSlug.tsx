@@ -7,6 +7,7 @@ import { mediaUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Maximize2, Loader2, AlertTriangle } from "lucide-react";
 import { QuizApp } from "./p.drive.c1";
+import { BibleCUV } from "@/components/bible/BibleCUV";
 
 const AIR_BRAKE_PROPS = {
   embedded: true as const,
@@ -67,6 +68,7 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:drive-ab-air-brake": { render: () => <QuizApp {...AIR_BRAKE_PROPS} /> },
   "app:drive-ab-combination-vehicle": { render: () => <QuizApp {...COMBINATION_VEHICLE_PROPS} /> },
   "app:drive-ab-commercial-driver": { render: () => <QuizApp {...COMMERCIAL_DRIVER_PROPS} /> },
+  "app:bible-cuv": { render: () => <BibleCUV /> },
 };
 
 function examConfigToProps(cfg: ExamConfig) {
