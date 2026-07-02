@@ -85,6 +85,8 @@ export type QuizAppProps = {
   subtitle?: string;
   backHref?: string;
   backLabel?: string;
+  /** Optional wrong-based passing rule (e.g. maxWrong=6 for C1 mock). */
+  maxWrong?: number;
 };
 
 const DEFAULT_TOTAL = 36;
