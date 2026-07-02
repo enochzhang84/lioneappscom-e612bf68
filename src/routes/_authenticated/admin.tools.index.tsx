@@ -493,6 +493,7 @@ function catPayload(c: Category, pageId: string, override?: Partial<Category>) {
     icon: m.icon ?? "",
     sort_order: m.sort_order,
     is_visible: m.is_visible,
+    status: m.status ?? "live",
   };
 }
 
@@ -506,7 +507,9 @@ type ItemPayloadT = {
   image_url: string | null; video_url: string; link_url: string;
   external_url: string; internal_url: string; button_text: string; button_url: string;
   sort_order: number; is_visible: boolean;
+  status: ToolStatus;
 };
+
 function itemPayload(it: Item, pageId: string, override?: Partial<Item>): ItemPayloadT {
   const m = { ...it, ...override };
   return {
