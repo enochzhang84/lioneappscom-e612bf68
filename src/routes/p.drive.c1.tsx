@@ -257,6 +257,7 @@ function QuizPage() {
 
 function BlueBanner({
   embedded, phase, secondsLeft, current, total, title, subtitle, backHref, backLabel, onReset,
+  showTranslation, onToggleTranslation, translating,
 }: {
   embedded: boolean;
   phase: Phase;
@@ -268,6 +269,9 @@ function BlueBanner({
   backHref: string;
   backLabel: string;
   onReset?: () => void;
+  showTranslation?: boolean;
+  onToggleTranslation?: () => void;
+  translating?: boolean;
 }) {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
@@ -294,12 +298,31 @@ function BlueBanner({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {phase === "exam" && (
               <>
                 <StatChip icon={<Clock size={16} />} label="剩余时间" value={`${mm}:${ss}`} />
                 <StatChip icon={<ListChecks size={16} />} label="题目进度" value={`${current + 1} / ${total}`} />
               </>
+            )}
+            {onToggleTranslation && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onToggleTranslation}
+                className={cn(
+                  "border border-white/20 text-white",
+                  showTranslation ? "bg-white text-blue-700 hover:bg-white/90" : "bg-white/15 hover:bg-white/25",
+                )}
+                title="在线中英对照翻译"
+              >
+                {translating ? (
+                  <Loader2 size={14} className="mr-1 animate-spin" />
+                ) : (
+                  <Languages size={14} className="mr-1" />
+                )}
+                {showTranslation ? "中英对照 · 开" : "中英对照"}
+              </Button>
             )}
             {onReset && (
               <Button variant="secondary" size="sm" onClick={onReset} className="bg-white/15 hover:bg-white/25 text-white border border-white/20">
@@ -312,6 +335,7 @@ function BlueBanner({
     </div>
   );
 }
+
 
 function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
