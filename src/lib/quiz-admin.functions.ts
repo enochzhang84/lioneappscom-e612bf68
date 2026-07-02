@@ -46,13 +46,19 @@ const questionInput = z.object({
 
 export const adminListQuiz = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { category?: string } | undefined) =>
-    z.object({ category: z.string().max(40).optional() }).parse(d ?? {}),
+  .inputValidator((d: { category?: string; bankId?: string | null } | undefined) =>
+    z.object({
+      category: z.string().max(40).optional(),
+      bankId: z.string().uuid().nullable().optional(),
+    }).parse(d ?? {}),
   )
   .handler(async ({ context, data }) => {
     await ensureAdmin(context.supabase, context.userId);
-    let q = context.supabase.from("quiz_questions").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
-    if (data.category) q = q.eq("category", data.category);
+    let q = context.supabase.from("quiz_questions").select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (data.bankId) q = q.eq("question_bank_id", data.bankId);
+    else if (data.category) q = q.eq("category", data.category);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return rows ?? [];
