@@ -7,8 +7,9 @@ import { getPublishedPost } from "@/lib/blog.functions";
 
 const postQO = (slug: string) => queryOptions({
   queryKey: ["blog", "post", slug],
-  queryFn: async () => await (getPublishedPost as unknown as (a: { data: { slug: string } }) => Promise<Awaited<ReturnType<typeof getPublishedPost>>>)({ data: { slug } }),
+  queryFn: () => getPublishedPost({ data: { slug } }),
 });
+
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ context, params }) => {
