@@ -407,6 +407,48 @@ export type Database = {
         }
         Relationships: []
       }
+      product_modules: {
+        Row: {
+          category: string | null
+          code: string
+          config: Json
+          created_at: string
+          enabled: boolean
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           created_at: string
