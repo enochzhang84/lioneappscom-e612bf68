@@ -44,6 +44,15 @@ export const Route = createFileRoute("/_authenticated/admin/tools/")({
   component: ToolsAdmin,
 });
 
+type ToolStatus = "developing" | "live" | "paused" | "hidden";
+
+const STATUS_OPTIONS: { value: ToolStatus; label: string; hint: string }[] = [
+  { value: "live", label: "已上线", hint: "前台正常显示" },
+  { value: "developing", label: "开发中", hint: "前台显示 Coming Soon" },
+  { value: "paused", label: "暂停", hint: "暂时不在前台显示" },
+  { value: "hidden", label: "隐藏", hint: "完全不在前台显示" },
+];
+
 type Category = {
   id: string;
   page_id: string;
@@ -52,6 +61,7 @@ type Category = {
   icon: string | null;
   sort_order: number;
   is_visible: boolean;
+  status: ToolStatus;
 };
 type Item = {
   id: string;
@@ -75,7 +85,9 @@ type Item = {
   button_url: string | null;
   sort_order: number;
   is_visible: boolean;
+  status: ToolStatus;
 };
+
 
 type Selection =
   | { kind: "none" }
@@ -201,7 +213,9 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
           icon: "📁",
           sort_order: cats.length,
           is_visible: true,
+          status: "developing" as ToolStatus,
         },
+
       },
       {
         onSuccess: (r) => {
@@ -239,7 +253,9 @@ function ToolsWorkbench({ pageId }: { pageId: string }) {
           button_url: "",
           sort_order: siblings.length,
           is_visible: true,
+          status: "developing" as ToolStatus,
         },
+
       },
       {
         onSuccess: (r) => {
@@ -477,6 +493,7 @@ function catPayload(c: Category, pageId: string, override?: Partial<Category>) {
     icon: m.icon ?? "",
     sort_order: m.sort_order,
     is_visible: m.is_visible,
+    status: m.status ?? "live",
   };
 }
 
@@ -490,7 +507,9 @@ type ItemPayloadT = {
   image_url: string | null; video_url: string; link_url: string;
   external_url: string; internal_url: string; button_text: string; button_url: string;
   sort_order: number; is_visible: boolean;
+  status: ToolStatus;
 };
+
 function itemPayload(it: Item, pageId: string, override?: Partial<Item>): ItemPayloadT {
   const m = { ...it, ...override };
   return {
@@ -513,8 +532,10 @@ function itemPayload(it: Item, pageId: string, override?: Partial<Item>): ItemPa
     button_url: m.button_url ?? "",
     sort_order: m.sort_order,
     is_visible: m.is_visible,
+    status: m.status ?? "live",
   };
 }
+
 
 /* ---------------- Category detail ---------------- */
 
@@ -561,10 +582,14 @@ function CategoryPane({
           <Field label="图标 emoji"><EmojiPicker value={draft.icon} onChange={(v) => setDraft({ ...draft, icon: v })} /></Field>
           <Field label="简介"><Input value={draft.description ?? ""} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="各类驾照模拟考试" /></Field>
           <Field label="排序（小的在前）"><Input type="number" value={draft.sort_order ?? 0} onChange={(e) => setDraft({ ...draft, sort_order: parseInt(e.target.value) || 0 })} /></Field>
+          <Field label="开发状态">
+            <StatusSelect value={draft.status ?? "live"} onChange={(v) => setDraft({ ...draft, status: v })} />
+          </Field>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch checked={draft.is_visible} onCheckedChange={(v) => setDraft({ ...draft, is_visible: v })} />
-            <Label>显示在前台</Label>
+            <Label>显示在前台（关闭后无论状态如何前台都不显示）</Label>
           </div>
+
         </div>
         <div className="flex gap-2">
           <Button size="sm" disabled={!dirty} onClick={() => onSave(draft)}>保存</Button>
@@ -728,10 +753,14 @@ function ItemPane({
             <Input value={draft.link_url ?? ""} onChange={(e) => patch({ link_url: e.target.value })} placeholder="留空 / http://... / app:drive-c1" />
           </Field>
           <Field label="排序"><Input type="number" value={draft.sort_order ?? 0} onChange={(e) => patch({ sort_order: parseInt(e.target.value) || 0 })} /></Field>
+          <Field label="开发状态">
+            <StatusSelect value={draft.status ?? "live"} onChange={(v) => patch({ status: v })} />
+          </Field>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch checked={draft.is_visible} onCheckedChange={(v) => patch({ is_visible: v })} />
-            <Label>显示在前台</Label>
+            <Label>显示在前台（关闭后无论状态如何前台都不显示）</Label>
           </div>
+
         </div>
       </Section>
 
@@ -805,5 +834,21 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <Label className="text-xs text-muted-foreground">{label}</Label>
       {children}
     </div>
+  );
+}
+
+function StatusSelect({ value, onChange }: { value: ToolStatus; onChange: (v: ToolStatus) => void }) {
+  return (
+    <Select value={value} onValueChange={(v) => onChange(v as ToolStatus)}>
+      <SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectContent>
+        {STATUS_OPTIONS.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            <span className="font-medium">{o.label}</span>
+            <span className="text-xs text-muted-foreground ml-2">{o.hint}</span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

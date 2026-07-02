@@ -18,6 +18,8 @@ async function ensureAdmin(supabase: SupabaseClient<Database>, userId: string) {
 
 const uuid = z.string().uuid();
 
+const statusEnum = z.enum(["developing", "live", "paused", "hidden"]);
+
 // ---------- Categories ----------
 const categoryInput = z.object({
   id: uuid.optional(),
@@ -27,7 +29,9 @@ const categoryInput = z.object({
   icon: z.string().max(20).nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
+  status: statusEnum.default("live"),
 });
+
 
 export const adminListCategories = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -55,7 +59,9 @@ export const adminUpsertCategory = createServerFn({ method: "POST" })
       icon: data.icon ?? null,
       sort_order: data.sort_order,
       is_visible: data.is_visible,
+      status: data.status,
     };
+
     if (data.id) {
       const { error } = await context.supabase
         .from("tool_categories").update(payload).eq("id", data.id);
@@ -101,7 +107,9 @@ const itemInput = z.object({
   button_url: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
+  status: statusEnum.default("live"),
 });
+
 
 
 export const adminListItems = createServerFn({ method: "GET" })
@@ -144,7 +152,9 @@ export const adminUpsertItem = createServerFn({ method: "POST" })
       button_url: data.button_url ?? null,
       sort_order: data.sort_order,
       is_visible: data.is_visible,
+      status: data.status,
     };
+
     if (data.id) {
       const { error } = await context.supabase
         .from("tool_items").update(payload).eq("id", data.id);

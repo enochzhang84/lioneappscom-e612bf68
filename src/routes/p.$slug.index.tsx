@@ -190,10 +190,16 @@ function ToolsPageView({ page, categories, items }: {
 
             {categories.length === 0 ? (
               <p className="text-muted-foreground text-sm py-8">此工具页面还没有类别。请在后台添加。</p>
+            ) : activeCat && activeCat.status === "developing" ? (
+              <ComingSoonPanel title={activeCat.title} description={activeCat.description} />
             ) : visibleGroups.length === 0 ? (
-              <p className="text-muted-foreground text-sm py-8">
-                {query ? `没有找到与 "${query}" 相关的工具。` : "此类别下暂无项目。"}
-              </p>
+              query ? (
+                <p className="text-muted-foreground text-sm py-8">
+                  没有找到与 "{query}" 相关的工具。
+                </p>
+              ) : (
+                <ComingSoonPanel title={activeCat?.title ?? ""} description={activeCat?.description ?? null} />
+              )
             ) : (
               <div className="space-y-8 pb-16">
                 {visibleGroups.map(({ top, children }) =>
@@ -220,6 +226,7 @@ function ToolsPageView({ page, categories, items }: {
                 )}
               </div>
             )}
+
           </main>
         </div>
       </div>
@@ -229,9 +236,10 @@ function ToolsPageView({ page, categories, items }: {
 
 
 function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
+  const isDeveloping = item.status === "developing";
   const external = item.link_url && /^https?:\/\//.test(item.link_url);
   const inner = (
-    <div className="group h-full rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition">
+    <div className={`group h-full rounded-xl border border-border bg-card p-4 transition ${isDeveloping ? "opacity-70 cursor-not-allowed" : "hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5"}`}>
       <div className="flex items-start gap-3">
         <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 grid place-items-center text-xl">
           {item.icon || "🧰"}
@@ -239,7 +247,13 @@ function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-sm font-semibold truncate">{item.title}</h3>
-            <ArrowRight size={14} className="text-muted-foreground group-hover:text-primary shrink-0 transition" />
+            {isDeveloping ? (
+              <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200">
+                Coming Soon
+              </span>
+            ) : (
+              <ArrowRight size={14} className="text-muted-foreground group-hover:text-primary shrink-0 transition" />
+            )}
           </div>
           {item.description && (
             <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">{item.description}</p>
@@ -248,11 +262,12 @@ function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
       </div>
     </div>
   );
+  if (isDeveloping) {
+    return <div aria-disabled="true">{inner}</div>;
+  }
   if (external) {
     return <a href={item.link_url!} target="_blank" rel="noreferrer">{inner}</a>;
   }
-  // Internal links (e.g. "/p/drive/c1") route through the SPA. Embedded-app markers
-  // like "app:drive-c1" must go through the detail page, not be used as href.
   if (item.link_url && item.link_url.startsWith("/")) {
     return <a href={item.link_url}>{inner}</a>;
   }
@@ -263,6 +278,24 @@ function ItemCard({ pageSlug, item }: { pageSlug: string; item: ToolItem }) {
     </Link>
   );
 }
+
+function ComingSoonPanel({ title, description }: { title: string; description: string | null }) {
+  return (
+    <div className="mx-auto max-w-xl py-16 text-center">
+      <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+        <span>🚧</span> Coming Soon · 即将上线
+      </div>
+      <h3 className="mt-5 text-xl font-semibold">{title || "该分类"}</h3>
+      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+        {description || "该分类正在持续开发中，敬请期待。"}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground/80">
+        Lione Apps 会陆续在此分类下发布新的工具。
+      </p>
+    </div>
+  );
+}
+
 
 
 function BlockRender({ block }: { block: Block }) {

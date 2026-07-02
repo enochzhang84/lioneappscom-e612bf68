@@ -167,17 +167,41 @@ function ItemDetail() {
     page: PageFull; item: ToolItem; category: ToolCategory | null; exam: ExamConfig | null;
   };
 
+  const isDeveloping = item.status === "developing";
   const appKey = item.link_url?.trim() || "";
   const converterKey = appKey.startsWith("app:converter:") ? appKey.slice("app:converter:".length) : null;
   const calculatorKey = appKey.startsWith("app:calculator:") ? appKey.slice("app:calculator:".length) : null;
   const staticEmbed = appKey ? EMBEDDED_APPS[appKey] : undefined;
-  const embed = converterKey
+  const embed = isDeveloping ? undefined : (converterKey
     ? { render: () => <UnitConverterByKey configKey={converterKey} />, fullPath: undefined as string | undefined }
     : calculatorKey
     ? { render: () => <CalculatorByKey configKey={calculatorKey} />, fullPath: undefined as string | undefined }
     : (staticEmbed ?? (exam
     ? { render: () => <QuizApp {...examConfigToProps(exam)} />, fullPath: undefined as string | undefined }
-    : undefined));
+    : undefined)));
+
+  if (isDeveloping) {
+    return (
+      <SiteLayout>
+        <div className="mx-auto max-w-2xl px-6 py-16 md:py-24 text-center">
+          <Button asChild variant="ghost" size="sm" className="mb-6 -ml-2">
+            <Link to="/p/$slug" params={{ slug: page.slug }} search={{ cat: category?.id }}>
+              <ArrowLeft size={14} className="mr-1" /> 返回 {page.title}
+            </Link>
+          </Button>
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+            <span>🚧</span> Coming Soon · 即将上线
+          </div>
+          <h1 className="mt-6 text-3xl md:text-4xl font-bold tracking-tight">{item.title}</h1>
+          {item.subtitle && <p className="mt-3 text-lg text-muted-foreground">{item.subtitle}</p>}
+          <p className="mt-6 text-base text-muted-foreground leading-relaxed">
+            {item.description || "该工具正在持续开发中，敬请期待。"}
+          </p>
+        </div>
+      </SiteLayout>
+    );
+  }
+
   if (embed) {
     return (
       <SiteLayout>
