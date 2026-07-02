@@ -121,6 +121,13 @@ export function ImageTool({ kind }: { kind: ImageKind }) {
     QRCode.toDataURL(qrText, { width: 320, margin: 2 }).then(setQrPreview).catch(() => setQrPreview(""));
   }, [kind, qrText]);
 
+  // Live barcode preview
+  React.useEffect(() => {
+    if (kind !== "barcode" || !bcPreviewRef.current) return;
+    try { JsBarcode(bcPreviewRef.current, bcText || " ", { format: bcFormat, width: 2, height: 90, displayValue: true }); }
+    catch { /* invalid code for chosen format */ }
+  }, [kind, bcText, bcFormat]);
+
   async function run() {
     if (cfg.needsFile && files.length === 0) { toast.error("请先上传图片"); return; }
     setBusy(true);
