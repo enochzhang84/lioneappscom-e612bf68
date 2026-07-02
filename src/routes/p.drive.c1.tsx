@@ -806,6 +806,7 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
   const correct = r.correct_answer;
   const pick = r.picked;
   const isRight = r.is_correct;
+  const [showLearn, setShowLearn] = useState(!isRight);
   const opts = (["A", "B", "C", "D"] as const)
     .map((k) => ({
       key: k,
