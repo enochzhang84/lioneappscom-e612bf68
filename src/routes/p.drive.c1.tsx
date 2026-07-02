@@ -12,6 +12,8 @@ import {
   type GradedQuestion,
   type GradeResult,
 } from "@/lib/quiz.functions";
+import { translateTexts } from "@/lib/translate.functions";
+import { Languages, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
