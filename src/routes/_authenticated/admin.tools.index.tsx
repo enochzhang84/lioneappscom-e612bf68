@@ -422,6 +422,7 @@ function itemPayload(it: Item, pageId: string, override?: Partial<Item>): ItemPa
   return {
     id: m.id, page_id: pageId,
     category_id: m.category_id ?? null,
+    parent_id: m.parent_id ?? null,
     slug: m.slug, title: m.title,
     page_title: m.page_title ?? "",
     subtitle: m.subtitle ?? "",
