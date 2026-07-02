@@ -33,6 +33,7 @@ import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminCasesRouteImport } from './routes/_authenticated/admin.cases'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAdminToolsIndexRouteImport } from './routes/_authenticated/admin.tools.index'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin.settings.index'
 import { Route as AuthenticatedAdminQuizIndexRouteImport } from './routes/_authenticated/admin.quiz.index'
@@ -167,6 +168,12 @@ const AuthenticatedAdminCasesRoute = AuthenticatedAdminCasesRouteImport.update({
   path: '/cases',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminToolsIndexRoute =
   AuthenticatedAdminToolsIndexRouteImport.update({
     id: '/',
@@ -253,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
   '/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
@@ -289,6 +297,7 @@ export interface FileRoutesByTo {
   '/update-password': typeof UpdatePasswordRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
@@ -322,6 +331,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/admin/analytics'
     | '/admin/cases'
     | '/admin/pages'
     | '/admin/products'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/admin/analytics'
     | '/p/drive/c1'
     | '/admin'
     | '/p/$slug'
@@ -429,6 +441,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/cases'
     | '/_authenticated/admin/pages'
     | '/_authenticated/admin/products'
@@ -642,6 +655,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCasesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/tools/': {
       id: '/_authenticated/admin/tools/'
       path: '/'
@@ -822,6 +842,7 @@ const AuthenticatedAdminToolsRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminCasesRoute: typeof AuthenticatedAdminCasesRouteWithChildren
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRouteWithChildren
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRouteWithChildren
@@ -832,6 +853,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminCasesRoute: AuthenticatedAdminCasesRouteWithChildren,
   AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRouteWithChildren,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRouteWithChildren,
