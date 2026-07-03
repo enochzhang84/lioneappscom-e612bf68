@@ -200,6 +200,10 @@ export function QuizApp(props: QuizAppProps = {}) {
     setQuestions(rows);
     setAnswers({});
     setMarked({});
+    setSkipped({});
+    setCorrectMap({});
+    setPassStopShown(false);
+    setShowPassStop(false);
     setCurrent(0);
     setGrade(null);
     setSecondsLeft(EXAM_SECONDS);
@@ -212,6 +216,10 @@ export function QuizApp(props: QuizAppProps = {}) {
     setQuestions([]);
     setAnswers({});
     setMarked({});
+    setSkipped({});
+    setCorrectMap({});
+    setPassStopShown(false);
+    setShowPassStop(false);
     setCurrent(0);
     setGrade(null);
   }
