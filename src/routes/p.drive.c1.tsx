@@ -965,8 +965,14 @@ function Result({
 
 
   const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const answeredCount = total - skippedCount;
   return (
     <div className="space-y-8">
+      {earlyEnded && passed && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 px-5 py-3 text-sm">
+          您已达到 DMV 小型车 C1 模拟考试通过标准，并选择提前结束考试。
+        </div>
+      )}
       <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
         <CardContent className="p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -974,7 +980,7 @@ function Result({
               <div className={cn("inline-flex items-center gap-2 text-xs font-medium px-2.5 py-1 rounded-full",
                 passed ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
                 {passed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                {passed ? "通过" : "未通过"}
+                {passed ? "PASS 通过" : "FAIL 未通过"}
               </div>
               <div className="mt-3 text-2xl md:text-3xl font-bold">
                 得分 {correctCount} / {total}
@@ -983,12 +989,14 @@ function Result({
                 通过条件：答对 ≥ {pass} 题
               </div>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-4 md:gap-6 text-center">
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6 text-center">
               <Stat label="总题数" value={total} />
-              <Stat label="答对" value={correctCount} tone="pos" />
-              <Stat label="答错" value={wrongCount - skippedCount >= 0 ? wrongCount - skippedCount : wrongCount} tone="neg" />
-              <Stat label="跳过" value={skippedCount} />
+              <Stat label="已答题数" value={answeredCount} />
+              <Stat label="正确题数" value={correctCount} tone="pos" />
+              <Stat label="错误题数" value={Math.max(0, wrongCount - skippedCount)} tone="neg" />
+              <Stat label="跳过题数" value={skippedCount} />
               <Stat label="正确率" value={`${rate}%`} />
+              <Stat label="结果" value={passed ? "PASS" : "FAIL"} tone={passed ? "pos" : "neg"} />
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
