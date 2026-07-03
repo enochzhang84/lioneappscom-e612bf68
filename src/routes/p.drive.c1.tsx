@@ -346,7 +346,7 @@ export function QuizApp(props: QuizAppProps = {}) {
 
         {phase === "result" && grade && (
           <div className="mt-6">
-            <Result grade={grade} pass={PASS} maxWrong={MAX_WRONG} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+            <Result grade={grade} pass={PASS} maxWrong={MAX_WRONG} skippedCount={Object.values(skipped).filter(Boolean).length} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
           </div>
         )}
       </div>
