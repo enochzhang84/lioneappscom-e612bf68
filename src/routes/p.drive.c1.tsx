@@ -1385,7 +1385,7 @@ function AiAnalysisSheet({
           <section className="rounded-lg border border-slate-200 bg-white p-3">
             <div className="text-xs font-semibold text-slate-500 mb-1">💡 相关知识点</div>
             <div className="text-slate-700 leading-relaxed">
-              {r.knowledge_point?.trim() || "本题考察加州驾驶规则的基础知识,建议结合手册对应章节复习。"}
+              {"本题考察加州驾驶规则的基础知识,建议结合手册对应章节复习。"}
             </div>
           </section>
 
