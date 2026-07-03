@@ -1231,9 +1231,24 @@ function LearningCenter({
               href={googleUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                // 预览 iframe 沙箱下直接跳转会被 Google 拒绝，改用 window.open 顶层打开
+                e.preventDefault();
+                window.open(googleUrl, "_blank", "noopener,noreferrer");
+              }}
               className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-white border border-slate-200 text-sm text-slate-700 hover:border-blue-400 hover:text-blue-700 transition-colors"
             >
               <Search size={14} /> 🔍 Google 搜索相关资料
+              <ExternalLink size={12} className="opacity-60" />
+            </a>
+            <a
+              href={`https://duckduckgo.com/?q=${encodeURIComponent(googleQ)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-white border border-slate-200 text-sm text-slate-700 hover:border-blue-400 hover:text-blue-700 transition-colors"
+              title="备用搜索（预览内可用）"
+            >
+              <Search size={14} /> 🦆 DuckDuckGo
               <ExternalLink size={12} className="opacity-60" />
             </a>
             <a
