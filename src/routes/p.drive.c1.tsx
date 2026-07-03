@@ -35,7 +35,15 @@ import {
   ExternalLink,
   ChevronDown,
   GraduationCap,
+  Sparkles,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 const DEFAULT_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/california-driver-handbook/";
 const CDL_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/commercial-driver-handbook/";
