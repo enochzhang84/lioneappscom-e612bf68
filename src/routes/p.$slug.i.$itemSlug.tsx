@@ -63,16 +63,12 @@ const COMMERCIAL_DRIVER_PROPS = {
 
 const C1_MOCK_PROPS = {
   embedded: true as const,
-  pools: [
-    { category: "c1", count: 36 },
-    { category: "c1_signs", count: 12 },
-  ],
-  total: 48,
-  pass: 42, // 允许错 6 题
-  maxWrong: 6,
+  category: "c1",
+  total: 36,
+  pass: 30,
   examSeconds: 60 * 60,
   title: "DMV 小型车 C1 模拟考",
-  subtitle: "36 道笔试 + 12 道图标 · 共 48 题 · 60 分钟 · 最多可错 6 题",
+  subtitle: "随机 36 题 · 60 分钟 · 答对 30 题通过",
   backHref: "/p/drive",
   backLabel: "← 返回驾考工具",
 };

@@ -9,6 +9,7 @@ import {
   getRandomQuizQuestions,
   getMixedRandomQuestions,
   gradeQuiz,
+  checkAnswer,
   type QuizQuestion,
   type GradedQuestion,
   type GradeResult,
@@ -126,6 +127,8 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, "A" | "B" | "C" | "D">>({});
   const [marked, setMarked] = useState<Record<string, boolean>>({});
+  const [skipped, setSkipped] = useState<Record<string, boolean>>({});
+  const [correctMap, setCorrectMap] = useState<Record<string, boolean>>({});
   const [current, setCurrent] = useState(0);
   const [grade, setGrade] = useState<GradeResult | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(EXAM_SECONDS);
@@ -133,7 +136,54 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [translations, setTranslations] = useState<Record<string, QuestionTranslation>>({});
   const [translating, setTranslating] = useState(false);
   const [confirmUnanswered, setConfirmUnanswered] = useState(false);
+  const [passStopShown, setPassStopShown] = useState(false);
+  const [showPassStop, setShowPassStop] = useState(false);
   const translateFn = useServerFn(translateTexts);
+  const checkFn = useServerFn(checkAnswer);
+
+  const correctCount = Object.values(correctMap).filter(Boolean).length;
+
+  // Pass-and-stop: only for correct-count-based exams (no maxWrong rule).
+  useEffect(() => {
+    if (phase !== "exam") return;
+    if (typeof MAX_WRONG === "number") return;
+    if (!passStopShown && correctCount >= PASS) {
+      setPassStopShown(true);
+      setShowPassStop(true);
+    }
+  }, [correctCount, phase, PASS, MAX_WRONG, passStopShown]);
+
+  async function handlePick(qid: string, key: "A" | "B" | "C" | "D") {
+    setAnswers((prev) => ({ ...prev, [qid]: key }));
+    setSkipped((prev) => {
+      if (!prev[qid]) return prev;
+      const { [qid]: _, ...rest } = prev;
+      return rest;
+    });
+    try {
+      const res = await checkFn({ data: { id: qid, answer: key } });
+      setCorrectMap((prev) => ({ ...prev, [qid]: res.is_correct }));
+    } catch (e) {
+      console.error("checkAnswer error", e);
+    }
+  }
+
+  function handleSkip() {
+    const q = questions[current];
+    if (!q) return;
+    setSkipped((prev) => ({ ...prev, [q.id]: true }));
+    setAnswers((prev) => {
+      if (!(q.id in prev)) return prev;
+      const { [q.id]: _, ...rest } = prev;
+      return rest;
+    });
+    setCorrectMap((prev) => {
+      if (!(q.id in prev)) return prev;
+      const { [q.id]: _, ...rest } = prev;
+      return rest;
+    });
+    setCurrent((i) => Math.min(questions.length - 1, i + 1));
+  }
 
   function requestSubmitFromLast() {
     const unanswered = questions.filter((q) => !answers[q.id]).length;
@@ -150,6 +200,10 @@ export function QuizApp(props: QuizAppProps = {}) {
     setQuestions(rows);
     setAnswers({});
     setMarked({});
+    setSkipped({});
+    setCorrectMap({});
+    setPassStopShown(false);
+    setShowPassStop(false);
     setCurrent(0);
     setGrade(null);
     setSecondsLeft(EXAM_SECONDS);
@@ -162,6 +216,10 @@ export function QuizApp(props: QuizAppProps = {}) {
     setQuestions([]);
     setAnswers({});
     setMarked({});
+    setSkipped({});
+    setCorrectMap({});
+    setPassStopShown(false);
+    setShowPassStop(false);
     setCurrent(0);
     setGrade(null);
   }
@@ -257,7 +315,8 @@ export function QuizApp(props: QuizAppProps = {}) {
               <Exam
                 questions={questions}
                 answers={answers}
-                setAnswers={setAnswers}
+                onPick={handlePick}
+                onSkip={handleSkip}
                 current={current}
                 setCurrent={setCurrent}
                 showTranslation={showTranslation}
@@ -274,6 +333,7 @@ export function QuizApp(props: QuizAppProps = {}) {
                 answers={answers}
                 marked={marked}
                 setMarked={setMarked}
+                skipped={skipped}
                 current={current}
                 setCurrent={setCurrent}
                 onSubmit={submitExam}
@@ -286,7 +346,7 @@ export function QuizApp(props: QuizAppProps = {}) {
 
         {phase === "result" && grade && (
           <div className="mt-6">
-            <Result grade={grade} pass={PASS} maxWrong={MAX_WRONG} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+            <Result grade={grade} pass={PASS} maxWrong={MAX_WRONG} skippedCount={Object.values(skipped).filter(Boolean).length} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
           </div>
         )}
       </div>
@@ -316,6 +376,40 @@ export function QuizApp(props: QuizAppProps = {}) {
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 {submit.isPending ? "评分中…" : "确认提交"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPassStop && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => (submit.isPending ? null : setShowPassStop(false))}
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-emerald-100 text-emerald-600 grid place-items-center">
+                <CheckCircle2 size={22} />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">恭喜！你已通过</h3>
+            </div>
+            <p className="text-sm text-slate-600">
+              你已答对 <b className="text-emerald-600">{correctCount}</b> 题，达到 DMV 小型车 C1 模拟考通过标准（{PASS} 题）。
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowPassStop(false)} disabled={submit.isPending}>
+                继续答完剩余题目
+              </Button>
+              <Button
+                onClick={async () => {
+                  setShowPassStop(false);
+                  await submitExam();
+                }}
+                disabled={submit.isPending}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                {submit.isPending ? "评分中…" : "查看成绩"}
               </Button>
             </div>
           </div>
@@ -482,13 +576,14 @@ function Intro({
 /* -------------------- Exam -------------------- */
 
 function Exam({
-  questions, answers, setAnswers, current, setCurrent,
+  questions, answers, onPick, onSkip, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
-  setAnswers: React.Dispatch<React.SetStateAction<Record<string, "A" | "B" | "C" | "D">>>;
+  onPick: (qid: string, key: "A" | "B" | "C" | "D") => void;
+  onSkip: () => void;
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
   showTranslation?: boolean;
@@ -512,7 +607,7 @@ function Exam({
   );
 
   function pick(k: "A" | "B" | "C" | "D") {
-    setAnswers((prev) => ({ ...prev, [q.id]: k }));
+    onPick(q.id, k);
   }
 
   const questionEn = q.question_en || (showTranslation ? tr?.question : null);
@@ -578,22 +673,33 @@ function Exam({
           >
             <ArrowLeft size={16} className="mr-1" /> 上一题
           </Button>
-          {current >= questions.length - 1 ? (
-            <Button
-              onClick={() => onSubmit?.()}
-              disabled={submitting || !onSubmit}
-              className="mt-4 bg-blue-600 hover:bg-blue-700"
-            >
-              {submitting ? "评分中…" : "提交答案"}
-            </Button>
-          ) : (
-            <Button
-              onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
-              className="mt-4 bg-blue-600 hover:bg-blue-700"
-            >
-              下一题 <ArrowRight size={16} className="ml-1" />
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {current < questions.length - 1 && (
+              <Button
+                variant="outline"
+                onClick={onSkip}
+                className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
+              >
+                跳过
+              </Button>
+            )}
+            {current >= questions.length - 1 ? (
+              <Button
+                onClick={() => onSubmit?.()}
+                disabled={submitting || !onSubmit}
+                className="mt-4 bg-blue-600 hover:bg-blue-700"
+              >
+                {submitting ? "评分中…" : "提交答案"}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
+                className="mt-4 bg-blue-600 hover:bg-blue-700"
+              >
+                下一题 <ArrowRight size={16} className="ml-1" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -603,12 +709,13 @@ function Exam({
 /* -------------------- Answer sheet -------------------- */
 
 function AnswerSheet({
-  questions, answers, marked, setMarked, current, setCurrent, onSubmit, submitting, submitError,
+  questions, answers, marked, setMarked, skipped, current, setCurrent, onSubmit, submitting, submitError,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
   marked: Record<string, boolean>;
   setMarked: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  skipped: Record<string, boolean>;
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
   onSubmit: () => void;
@@ -618,7 +725,8 @@ function AnswerSheet({
   const [confirming, setConfirming] = useState(false);
   const answered = Object.keys(answers).length;
   const markedCount = Object.values(marked).filter(Boolean).length;
-  const unanswered = questions.length - answered;
+  const skippedCount = Object.values(skipped).filter(Boolean).length;
+  const unanswered = questions.length - answered - skippedCount;
 
   const currentId = questions[current]?.id;
   const isMarked = currentId ? !!marked[currentId] : false;
@@ -644,16 +752,19 @@ function AnswerSheet({
         </div>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
-          <LegendDot color="bg-emerald-500" label={`已答 ${answered}`} />
-          <LegendDot color="bg-white border border-slate-300" label={`未答 ${unanswered}`} />
+          <LegendDot color="bg-white border border-slate-300" label={`未答 ${Math.max(0, unanswered)}`} />
+          <LegendDot color="bg-blue-500" label={`已答 ${answered}`} />
+          <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
           <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
-          <LegendDot color="bg-blue-600" label="当前题" />
+          <LegendDot color="bg-emerald-500" label="答对" />
+          <LegendDot color="bg-red-500" label="答错" />
         </div>
 
         <div className="grid grid-cols-6 gap-2">
           {questions.map((qq, i) => {
             const done = !!answers[qq.id];
             const flagged = !!marked[qq.id];
+            const wasSkipped = !!skipped[qq.id];
             const active = i === current;
             return (
               <button
@@ -663,12 +774,14 @@ function AnswerSheet({
                 className={cn(
                   "h-9 rounded-md text-sm font-medium border transition-colors tabular-nums",
                   active
-                    ? "bg-blue-600 border-blue-600 text-white shadow"
+                    ? "bg-blue-600 border-blue-600 text-white shadow ring-2 ring-blue-300"
                     : flagged
                       ? "bg-amber-100 border-amber-300 text-amber-800"
-                      : done
-                        ? "bg-emerald-100 border-emerald-300 text-emerald-800"
-                        : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                      : wasSkipped
+                        ? "bg-orange-100 border-orange-300 text-orange-800"
+                        : done
+                          ? "bg-blue-100 border-blue-300 text-blue-800"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
                 )}
               >
                 {i + 1}
@@ -676,6 +789,7 @@ function AnswerSheet({
             );
           })}
         </div>
+
 
         <Button onClick={() => setConfirming(true)} className="w-full bg-blue-600 hover:bg-blue-700">
           结束考试
@@ -778,11 +892,12 @@ function TipsCard() {
 /* -------------------- Result -------------------- */
 
 function Result({
-  grade, pass, maxWrong, onRetake, onHome, retaking,
+  grade, pass, maxWrong, skippedCount = 0, onRetake, onHome, retaking,
 }: {
   grade: GradeResult;
   pass: number;
   maxWrong?: number;
+  skippedCount?: number;
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
@@ -853,12 +968,14 @@ function Result({
                 得分 {correctCount} / {total}
               </div>
               <div className="text-sm text-muted-foreground mt-1">
-                通过分数线：{pass} / {total}
+                通过条件：答对 ≥ {pass} 题
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 md:gap-8 text-center">
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-4 md:gap-6 text-center">
+              <Stat label="总题数" value={total} />
               <Stat label="答对" value={correctCount} tone="pos" />
-              <Stat label="答错" value={wrongCount} tone="neg" />
+              <Stat label="答错" value={wrongCount - skippedCount >= 0 ? wrongCount - skippedCount : wrongCount} tone="neg" />
+              <Stat label="跳过" value={skippedCount} />
               <Stat label="正确率" value={`${rate}%`} />
             </div>
           </div>
@@ -870,6 +987,7 @@ function Result({
           </div>
         </CardContent>
       </Card>
+
 
       <ExamResultReview results={results} wrongs={wrongs} />
     </div>
