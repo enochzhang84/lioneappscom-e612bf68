@@ -35,7 +35,15 @@ import {
   ExternalLink,
   ChevronDown,
   GraduationCap,
+  Sparkles,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 const DEFAULT_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/california-driver-handbook/";
 const CDL_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/commercial-driver-handbook/";
@@ -1195,8 +1203,7 @@ function LearningCenter({
   const chapter = r.manual_chapter?.trim();
   const page = r.manual_page?.trim();
   const source = r.official_source?.trim() || manualName;
-  const googleQ = buildGoogleQuery(r);
-  const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(googleQ)}`;
+  const [aiOpen, setAiOpen] = useState(false);
 
   return (
     <div className="rounded-lg border border-blue-200 bg-blue-50/40">
@@ -1227,34 +1234,14 @@ function LearningCenter({
             )}
           </div>
           <div className="flex flex-wrap gap-2">
-            <a
-              href={`https://duckduckgo.com/?q=${encodeURIComponent(googleQ)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-white border border-slate-200 text-sm text-slate-700 hover:border-blue-400 hover:text-blue-700 transition-colors"
-              title="搜索相关资料"
+            <button
+              type="button"
+              onClick={() => setAiOpen(true)}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-sm transition-colors shadow-sm"
+              title="打开 AI 智能解析"
             >
-              <Search size={14} /> 🔍 搜索相关资料
-              <ExternalLink size={12} className="opacity-60" />
-            </a>
-            <a
-              href={googleUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                e.preventDefault();
-                const w = window.open(googleUrl, "_blank", "noopener,noreferrer");
-                if (!w) {
-                  navigator.clipboard?.writeText(googleUrl);
-                  alert("预览环境浏览器策略阻止了 Google，链接已复制到剪贴板，发布后可正常打开。");
-                }
-              }}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-white border border-slate-200 text-sm text-slate-500 hover:border-blue-400 hover:text-blue-700 transition-colors"
-              title="预览环境可能被浏览器安全策略阻止；发布后正常"
-            >
-              <Search size={14} /> Google
-              <ExternalLink size={12} className="opacity-60" />
-            </a>
+              <Sparkles size={14} /> 🤖 AI 智能解析
+            </button>
             <a
               href={manualUrl}
               target="_blank"
@@ -1269,8 +1256,148 @@ function LearningCenter({
               <ExternalLink size={12} className="opacity-80" />
             </a>
           </div>
+          <AiAnalysisSheet
+            open={aiOpen}
+            onOpenChange={setAiOpen}
+            r={r}
+            manualName={manualName}
+            manualUrl={manualUrl}
+            chapter={chapter}
+            page={page}
+          />
         </div>
       )}
     </div>
   );
 }
+
+function AiAnalysisSheet({
+  open,
+  onOpenChange,
+  r,
+  manualName,
+  manualUrl,
+  chapter,
+  page,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  r: GradedQuestion;
+  manualName: string;
+  manualUrl: string;
+  chapter?: string;
+  page?: string;
+}) {
+  const correct = r.correct_answer;
+  const opts = (["A", "B", "C", "D"] as const)
+    .map((k) => ({
+      key: k,
+      text: (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`],
+    }))
+    .filter((o) => o.text && o.text.trim() !== "");
+  const wrongOpts = opts.filter((o) => o.key !== correct);
+  const correctText = opts.find((o) => o.key === correct)?.text ?? "";
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2 text-base">
+            <Sparkles size={16} className="text-indigo-600" /> AI 智能解析
+          </SheetTitle>
+          <SheetDescription className="text-xs">
+            基于题目、官方手册与法规知识的结构化分析
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="mt-4 space-y-4 text-sm">
+          <section className="rounded-lg border border-slate-200 bg-white p-3">
+            <div className="text-xs font-semibold text-slate-500 mb-1">📝 题目</div>
+            <div className="text-slate-800 leading-relaxed">{r.question}</div>
+          </section>
+
+          <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+            <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1">
+              <CheckCircle2 size={12} /> 正确答案：{correct}
+            </div>
+            <div className="text-slate-800">{correctText}</div>
+            {r.explanation && (
+              <div className="mt-2 text-slate-700 leading-relaxed">
+                <span className="font-medium">为什么正确：</span>
+                {r.explanation}
+              </div>
+            )}
+          </section>
+
+          {wrongOpts.length > 0 && (
+            <section className="rounded-lg border border-red-200 bg-red-50/60 p-3">
+              <div className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-1">
+                <XCircle size={12} /> 其他选项为什么不对
+              </div>
+              <ul className="space-y-1.5 text-slate-700">
+                {wrongOpts.map((o) => (
+                  <li key={o.key} className="leading-relaxed">
+                    <b className="text-red-700">{o.key}.</b> {o.text}
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      与本题正确答案 {correct} 冲突，不符合加州驾驶手册对应规定。
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="rounded-lg border border-blue-200 bg-blue-50/60 p-3">
+            <div className="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1">
+              <BookOpen size={12} /> 官方手册章节
+            </div>
+            <div className="text-slate-800">{manualName}</div>
+            {(chapter || page) && (
+              <div className="text-xs text-slate-500 mt-0.5">
+                {chapter}
+                {chapter && page ? " · " : ""}
+                {page}
+              </div>
+            )}
+            <a
+              href={manualUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open(manualUrl, "_blank", "noopener,noreferrer");
+              }}
+              className="mt-2 inline-flex items-center gap-1 text-xs text-blue-700 hover:underline"
+            >
+              打开官方手册 <ExternalLink size={11} />
+            </a>
+          </section>
+
+          <section className="rounded-lg border border-slate-200 bg-white p-3">
+            <div className="text-xs font-semibold text-slate-500 mb-1">⚖️ 官方法规引用</div>
+            <div className="text-slate-700 leading-relaxed">
+              {r.official_source?.trim()
+                ? r.official_source
+                : "California Vehicle Code (CVC) 及 California Driver Handbook 相关章节。"}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-slate-200 bg-white p-3">
+            <div className="text-xs font-semibold text-slate-500 mb-1">💡 相关知识点</div>
+            <div className="text-slate-700 leading-relaxed">
+              {"本题考察加州驾驶规则的基础知识,建议结合手册对应章节复习。"}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
+            <div className="text-xs font-semibold text-slate-500 mb-1">🔮 相似考题推荐</div>
+            <div className="text-xs text-slate-500 leading-relaxed">
+              AI 相似题推荐即将上线。届时可在此直接向 AI 提问,获取个性化讲解与更多同类练习题。
+            </div>
+          </section>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
