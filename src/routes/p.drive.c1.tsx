@@ -542,13 +542,14 @@ function Intro({
 /* -------------------- Exam -------------------- */
 
 function Exam({
-  questions, answers, setAnswers, current, setCurrent,
+  questions, answers, onPick, onSkip, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
-  setAnswers: React.Dispatch<React.SetStateAction<Record<string, "A" | "B" | "C" | "D">>>;
+  onPick: (qid: string, key: "A" | "B" | "C" | "D") => void;
+  onSkip: () => void;
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
   showTranslation?: boolean;
@@ -572,7 +573,7 @@ function Exam({
   );
 
   function pick(k: "A" | "B" | "C" | "D") {
-    setAnswers((prev) => ({ ...prev, [q.id]: k }));
+    onPick(q.id, k);
   }
 
   const questionEn = q.question_en || (showTranslation ? tr?.question : null);
