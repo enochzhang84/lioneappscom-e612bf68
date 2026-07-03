@@ -1,7 +1,8 @@
 import * as React from "react";
 import { PDFDocument, degrees } from "pdf-lib";
 import JSZip from "jszip";
-import { saveAs } from "file-saver";
+import fileSaver from "file-saver";
+const { saveAs } = fileSaver;
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ToolShell, type FaqItem } from "./ToolShell";
