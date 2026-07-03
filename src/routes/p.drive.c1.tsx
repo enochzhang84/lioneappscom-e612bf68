@@ -138,6 +138,7 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [confirmUnanswered, setConfirmUnanswered] = useState(false);
   const [passStopShown, setPassStopShown] = useState(false);
   const [showPassStop, setShowPassStop] = useState(false);
+  const [earlyEnded, setEarlyEnded] = useState(false);
   const translateFn = useServerFn(translateTexts);
   const checkFn = useServerFn(checkAnswer);
 
