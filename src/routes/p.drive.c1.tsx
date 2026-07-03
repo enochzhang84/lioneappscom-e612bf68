@@ -9,6 +9,7 @@ import {
   getRandomQuizQuestions,
   getMixedRandomQuestions,
   gradeQuiz,
+  checkAnswer,
   type QuizQuestion,
   type GradedQuestion,
   type GradeResult,
