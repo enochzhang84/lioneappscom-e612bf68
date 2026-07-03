@@ -1203,8 +1203,7 @@ function LearningCenter({
   const chapter = r.manual_chapter?.trim();
   const page = r.manual_page?.trim();
   const source = r.official_source?.trim() || manualName;
-  const googleQ = buildGoogleQuery(r);
-  const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(googleQ)}`;
+  const [aiOpen, setAiOpen] = useState(false);
 
   return (
     <div className="rounded-lg border border-blue-200 bg-blue-50/40">
