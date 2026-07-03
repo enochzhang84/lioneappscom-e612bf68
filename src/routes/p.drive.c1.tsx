@@ -407,6 +407,7 @@ export function QuizApp(props: QuizAppProps = {}) {
               <Button
                 onClick={async () => {
                   setShowPassStop(false);
+                  setEarlyEnded(true);
                   await submitExam();
                 }}
                 disabled={submit.isPending}
