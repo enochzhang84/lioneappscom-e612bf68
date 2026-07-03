@@ -315,7 +315,8 @@ export function QuizApp(props: QuizAppProps = {}) {
               <Exam
                 questions={questions}
                 answers={answers}
-                setAnswers={setAnswers}
+                onPick={handlePick}
+                onSkip={handleSkip}
                 current={current}
                 setCurrent={setCurrent}
                 showTranslation={showTranslation}
@@ -332,6 +333,7 @@ export function QuizApp(props: QuizAppProps = {}) {
                 answers={answers}
                 marked={marked}
                 setMarked={setMarked}
+                skipped={skipped}
                 current={current}
                 setCurrent={setCurrent}
                 onSubmit={submitExam}
