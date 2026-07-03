@@ -675,12 +675,13 @@ function Exam({
 /* -------------------- Answer sheet -------------------- */
 
 function AnswerSheet({
-  questions, answers, marked, setMarked, current, setCurrent, onSubmit, submitting, submitError,
+  questions, answers, marked, setMarked, skipped, current, setCurrent, onSubmit, submitting, submitError,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
   marked: Record<string, boolean>;
   setMarked: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  skipped: Record<string, boolean>;
   current: number;
   setCurrent: React.Dispatch<React.SetStateAction<number>>;
   onSubmit: () => void;
@@ -690,7 +691,8 @@ function AnswerSheet({
   const [confirming, setConfirming] = useState(false);
   const answered = Object.keys(answers).length;
   const markedCount = Object.values(marked).filter(Boolean).length;
-  const unanswered = questions.length - answered;
+  const skippedCount = Object.values(skipped).filter(Boolean).length;
+  const unanswered = questions.length - answered - skippedCount;
 
   const currentId = questions[current]?.id;
   const isMarked = currentId ? !!marked[currentId] : false;
@@ -716,16 +718,19 @@ function AnswerSheet({
         </div>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
-          <LegendDot color="bg-emerald-500" label={`已答 ${answered}`} />
-          <LegendDot color="bg-white border border-slate-300" label={`未答 ${unanswered}`} />
+          <LegendDot color="bg-white border border-slate-300" label={`未答 ${Math.max(0, unanswered)}`} />
+          <LegendDot color="bg-blue-500" label={`已答 ${answered}`} />
+          <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
           <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
-          <LegendDot color="bg-blue-600" label="当前题" />
+          <LegendDot color="bg-emerald-500" label="答对" />
+          <LegendDot color="bg-red-500" label="答错" />
         </div>
 
         <div className="grid grid-cols-6 gap-2">
           {questions.map((qq, i) => {
             const done = !!answers[qq.id];
             const flagged = !!marked[qq.id];
+            const wasSkipped = !!skipped[qq.id];
             const active = i === current;
             return (
               <button
@@ -735,12 +740,14 @@ function AnswerSheet({
                 className={cn(
                   "h-9 rounded-md text-sm font-medium border transition-colors tabular-nums",
                   active
-                    ? "bg-blue-600 border-blue-600 text-white shadow"
+                    ? "bg-blue-600 border-blue-600 text-white shadow ring-2 ring-blue-300"
                     : flagged
                       ? "bg-amber-100 border-amber-300 text-amber-800"
-                      : done
-                        ? "bg-emerald-100 border-emerald-300 text-emerald-800"
-                        : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                      : wasSkipped
+                        ? "bg-orange-100 border-orange-300 text-orange-800"
+                        : done
+                          ? "bg-blue-100 border-blue-300 text-blue-800"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
                 )}
               >
                 {i + 1}
@@ -748,6 +755,7 @@ function AnswerSheet({
             );
           })}
         </div>
+
 
         <Button onClick={() => setConfirming(true)} className="w-full bg-blue-600 hover:bg-blue-700">
           结束考试
