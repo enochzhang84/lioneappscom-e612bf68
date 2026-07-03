@@ -968,12 +968,14 @@ function Result({
                 得分 {correctCount} / {total}
               </div>
               <div className="text-sm text-muted-foreground mt-1">
-                通过分数线：{pass} / {total}
+                通过条件：答对 ≥ {pass} 题
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 md:gap-8 text-center">
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-4 md:gap-6 text-center">
+              <Stat label="总题数" value={total} />
               <Stat label="答对" value={correctCount} tone="pos" />
-              <Stat label="答错" value={wrongCount} tone="neg" />
+              <Stat label="答错" value={wrongCount - skippedCount >= 0 ? wrongCount - skippedCount : wrongCount} tone="neg" />
+              <Stat label="跳过" value={skippedCount} />
               <Stat label="正确率" value={`${rate}%`} />
             </div>
           </div>
@@ -985,6 +987,7 @@ function Result({
           </div>
         </CardContent>
       </Card>
+
 
       <ExamResultReview results={results} wrongs={wrongs} />
     </div>
