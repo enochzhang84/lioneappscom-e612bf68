@@ -906,6 +906,10 @@ function Result({
   const wrongs = results.filter((r) => !r.is_correct);
   const isWrongBased = typeof maxWrong === "number";
   const passed = isWrongBased ? wrongCount <= maxWrong : correctCount >= pass;
+  const lawCount = results.filter((r) => r.category !== "c1_signs").length;
+  const signsCount = results.filter((r) => r.category === "c1_signs").length;
+  const actualWrong = Math.max(0, wrongCount - skippedCount);
+  const rateAll = total > 0 ? Math.round((correctCount / total) * 100) : 0;
 
   if (isWrongBased) {
     return (
@@ -918,24 +922,26 @@ function Result({
                   <div className={cn("inline-flex items-center gap-2 text-xs font-medium px-2.5 py-1 rounded-full",
                     passed ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
                     {passed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                    {passed ? "通过" : "未通过"}
+                    {passed ? "PASS 通过" : "FAIL 未通过"}
                   </div>
                   <div className="mt-3 text-2xl md:text-3xl font-bold">
                     {passed ? "恭喜！你已通过本次 DMV 小型车 C1 模拟考试。" : "继续努力，再来一次！"}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
                     {passed
-                      ? "本次考试最多允许错 6 题，你的错题数在允许范围内。"
-                      : "本次考试最多允许错 6 题，你的错题数超过了通过标准，建议先复习错题再重新测试。"}
+                      ? `本次考试最多允许错 ${maxWrong} 题，你的错题数在允许范围内。`
+                      : `本次考试最多允许错 ${maxWrong} 题，你的错题数超过通过标准，建议先复习错题再重新测试。`}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-4 md:gap-8 text-center">
-                  <Stat label="总题数" value={total} />
-                  <Stat label="答对题数" value={correctCount} tone="pos" />
-                  <Stat label="答错题数" value={wrongCount} tone="neg" />
-                  <Stat label="允许错题数" value={maxWrong} />
-                  <Stat label="考试结果" value={passed ? "通过" : "未通过"} tone={passed ? "pos" : "neg"} />
-                </div>
+              </div>
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6 text-center">
+                <Stat label="总题数" value={total} />
+                <Stat label="交通法规题" value={lawCount} />
+                <Stat label="交通标志题" value={signsCount} />
+                <Stat label="答对" value={correctCount} tone="pos" />
+                <Stat label="答错" value={actualWrong} tone="neg" />
+                <Stat label="跳过" value={skippedCount} />
+                <Stat label="正确率" value={`${rateAll}%`} />
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
@@ -951,6 +957,7 @@ function Result({
       </div>
     );
   }
+
 
   const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   return (
