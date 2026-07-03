@@ -896,12 +896,13 @@ function TipsCard() {
 /* -------------------- Result -------------------- */
 
 function Result({
-  grade, pass, maxWrong, skippedCount = 0, onRetake, onHome, retaking,
+  grade, pass, maxWrong, skippedCount = 0, earlyEnded = false, onRetake, onHome, retaking,
 }: {
   grade: GradeResult;
   pass: number;
   maxWrong?: number;
   skippedCount?: number;
+  earlyEnded?: boolean;
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
