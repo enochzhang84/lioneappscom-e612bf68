@@ -153,6 +153,23 @@ export const getMixedRandomQuestions = createServerFn({ method: "GET" })
 
 const answerEnum = z.enum(["A", "B", "C", "D"]);
 
+// Lightweight single-question grader. Returns only is_correct so we can
+// support "pass-and-stop" during live exams without exposing the full key set.
+export const checkAnswer = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; answer: "A" | "B" | "C" | "D" }) =>
+    z.object({ id: z.string().uuid(), answer: answerEnum }).parse(d),
+  )
+  .handler(async ({ data }): Promise<{ is_correct: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("quiz_questions")
+      .select("correct_answer")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { is_correct: !!row && row.correct_answer === data.answer };
+  });
+
 export const gradeQuiz = createServerFn({ method: "POST" })
   .inputValidator((d: { ids: string[]; answers: Record<string, "A" | "B" | "C" | "D"> }) =>
     z.object({
