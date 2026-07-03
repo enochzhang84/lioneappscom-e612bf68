@@ -1272,6 +1272,48 @@ function LearningCenter({
   );
 }
 
+type AiAnalysis = {
+  why_correct: string;
+  why_wrong: { key: "A" | "B" | "C" | "D"; text: string; reason: string }[];
+  exam_point: string;
+  exam_tips: string;
+  official_reference: string;
+  related_knowledge: string[];
+  similar_questions: { question: string; hint: string }[];
+};
+
+function buildAiPrompt(r: GradedQuestion, manualName: string): { system: string; user: string } {
+  const opts = (["A", "B", "C", "D"] as const)
+    .map((k) => {
+      const t = (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`];
+      return t ? `${k}. ${t}` : null;
+    })
+    .filter(Boolean)
+    .join("\n");
+  const system =
+    "你是加州 DMV 驾照考试的资深教练与考试专家,精通 California Driver Handbook 与 California Vehicle Code (CVC)。请针对给定考题输出**结构化 JSON**,内容详实、专业、口吻友好,面向准备 DMV 考试的中文考生。**只输出 JSON,不要 Markdown 代码块。**";
+  const user = `请分析以下 DMV 考题,并严格按以下 JSON 结构输出:
+
+{
+  "why_correct": "为什么正确答案(${r.correct_answer})是正确的,详细说明,不少于100字",
+  "why_wrong": [ { "key": "A", "text": "选项原文", "reason": "为什么这个选项错误(2-3句)" }, ... 除正确答案外的每个选项都要有 ],
+  "exam_point": "本题在 DMV 考试中考查的核心交通法规/知识点(2-4句)",
+  "exam_tips": "考试技巧,包括容易混淆的地方、记忆口诀、注意事项(2-4句)",
+  "official_reference": "对应的 ${manualName} 章节名 + California Vehicle Code(CVC) 具体条文号(如 CVC §22350),尽量准确",
+  "related_knowledge": [ "延伸知识点1", "延伸知识点2", "延伸知识点3" ],
+  "similar_questions": [ { "question": "同类型考题题干", "hint": "答题要点提示" }, { ... }, { ... } ]
+}
+
+【题目】${r.question}
+【选项】
+${opts}
+【正确答案】${r.correct_answer}
+${r.explanation ? `【已有简要解析】${r.explanation}` : ""}
+
+请直接输出 JSON。`;
+  return { system, user };
+}
+
 function AiAnalysisSheet({
   open,
   onOpenChange,
@@ -1296,109 +1338,202 @@ function AiAnalysisSheet({
       text: (r as unknown as Record<string, string | null>)[`option_${k.toLowerCase()}`],
     }))
     .filter((o) => o.text && o.text.trim() !== "");
-  const wrongOpts = opts.filter((o) => o.key !== correct);
   const correctText = opts.find((o) => o.key === correct)?.text ?? "";
+
+  const runAi = useServerFn(runAiTool);
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["ai-analysis", r.id],
+    queryFn: async () => {
+      const { system, user } = buildAiPrompt(r, manualName);
+      const res = await runAi({ data: { toolKey: "dmv-analysis", system, user, temperature: 0.4 } });
+      let raw = (res.output || "").trim();
+      raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+      const s = raw.indexOf("{");
+      const e = raw.lastIndexOf("}");
+      if (s !== -1 && e !== -1) raw = raw.slice(s, e + 1);
+      return JSON.parse(raw) as AiAnalysis;
+    },
+    enabled: open,
+    staleTime: 1000 * 60 * 60,
+    retry: 1,
+  });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2 text-base">
-            <Sparkles size={16} className="text-indigo-600" /> AI 智能解析
-          </SheetTitle>
-          <SheetDescription className="text-xs">
-            基于题目、官方手册与法规知识的结构化分析
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto bg-slate-50 p-0">
+        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-200 px-5 py-4">
+          <SheetHeader className="space-y-1">
+            <SheetTitle className="flex items-center gap-2 text-base">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 text-white">
+                <Sparkles size={14} />
+              </span>
+              AI 智能学习助手
+            </SheetTitle>
+            <SheetDescription className="text-xs text-slate-500">
+              基于 California Driver Handbook 与 CVC 法规的结构化讲解
+            </SheetDescription>
+          </SheetHeader>
+        </div>
 
-        <div className="mt-4 space-y-4 text-sm">
-          <section className="rounded-lg border border-slate-200 bg-white p-3">
-            <div className="text-xs font-semibold text-slate-500 mb-1">📝 题目</div>
+        <div className="px-5 py-4 space-y-3.5 text-sm">
+          {/* 题目卡 */}
+          <AiCard tone="slate" icon="📝" title="题目">
             <div className="text-slate-800 leading-relaxed">{r.question}</div>
-          </section>
-
-          <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-            <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1">
-              <CheckCircle2 size={12} /> 正确答案：{correct}
+            <div className="mt-2 text-xs text-slate-500">
+              正确答案 <b className="text-emerald-700">{correct}</b> · {correctText}
             </div>
-            <div className="text-slate-800">{correctText}</div>
-            {r.explanation && (
-              <div className="mt-2 text-slate-700 leading-relaxed">
-                <span className="font-medium">为什么正确：</span>
-                {r.explanation}
-              </div>
-            )}
-          </section>
+          </AiCard>
 
-          {wrongOpts.length > 0 && (
-            <section className="rounded-lg border border-red-200 bg-red-50/60 p-3">
-              <div className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-1">
-                <XCircle size={12} /> 其他选项为什么不对
-              </div>
-              <ul className="space-y-1.5 text-slate-700">
-                {wrongOpts.map((o) => (
-                  <li key={o.key} className="leading-relaxed">
-                    <b className="text-red-700">{o.key}.</b> {o.text}
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      与本题正确答案 {correct} 冲突，不符合加州驾驶手册对应规定。
+          {isLoading || isFetching ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-6 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
+              <Loader2 className="animate-spin" size={20} />
+              AI 正在为你生成深度解析…
+            </div>
+          ) : isError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="font-medium mb-1">AI 解析加载失败</div>
+              <div className="text-xs text-red-600 mb-2">{(error as Error)?.message ?? "未知错误"}</div>
+              <Button size="sm" variant="outline" onClick={() => refetch()}>
+                重试
+              </Button>
+            </div>
+          ) : data ? (
+            <>
+              {/* 1. 为什么正确答案正确 */}
+              <AiCard tone="emerald" icon="✅" title={`为什么正确答案 ${correct} 是正确的`}>
+                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap">{data.why_correct}</p>
+              </AiCard>
+
+              {/* 2. 其他选项为什么错误 */}
+              {data.why_wrong?.length > 0 && (
+                <AiCard tone="rose" icon="❌" title="其他选项为什么错误">
+                  <ul className="space-y-3">
+                    {data.why_wrong.map((w) => (
+                      <li key={w.key} className="rounded-lg bg-white/70 border border-rose-100 p-3">
+                        <div className="text-slate-800 font-medium mb-1">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-rose-100 text-rose-700 text-xs font-bold mr-2">
+                            {w.key}
+                          </span>
+                          {w.text}
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed">{w.reason}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </AiCard>
+              )}
+
+              {/* 3. DMV 考试考点 */}
+              <AiCard tone="blue" icon="🎯" title="DMV 考试考点">
+                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap">{data.exam_point}</p>
+              </AiCard>
+
+              {/* 4. 考试技巧 */}
+              <AiCard tone="amber" icon="💡" title="考试技巧 & 记忆方法">
+                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap">{data.exam_tips}</p>
+              </AiCard>
+
+              {/* 5. 官方法规依据 */}
+              <AiCard tone="indigo" icon="⚖️" title="官方法规依据">
+                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap">{data.official_reference}</p>
+                <div className="mt-3 pt-3 border-t border-indigo-100 text-xs text-slate-600">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <BookOpen size={12} className="text-indigo-600" />
+                    <span className="font-medium text-slate-700">{manualName}</span>
+                  </div>
+                  {(chapter || page) && (
+                    <div className="text-slate-500 mb-1.5">
+                      {chapter}
+                      {chapter && page ? " · " : ""}
+                      {page}
                     </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => window.open(manualUrl, "_blank", "noopener,noreferrer")}
+                    className="inline-flex items-center gap-1 text-indigo-700 hover:underline"
+                  >
+                    打开官方手册 <ExternalLink size={11} />
+                  </button>
+                </div>
+              </AiCard>
 
-          <section className="rounded-lg border border-blue-200 bg-blue-50/60 p-3">
-            <div className="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1">
-              <BookOpen size={12} /> 官方手册章节
-            </div>
-            <div className="text-slate-800">{manualName}</div>
-            {(chapter || page) && (
-              <div className="text-xs text-slate-500 mt-0.5">
-                {chapter}
-                {chapter && page ? " · " : ""}
-                {page}
+              {/* 6. 相关知识点 */}
+              {data.related_knowledge?.length > 0 && (
+                <AiCard tone="violet" icon="📚" title="相关知识点">
+                  <ul className="space-y-1.5">
+                    {data.related_knowledge.map((k, i) => (
+                      <li key={i} className="flex gap-2 text-slate-800 leading-relaxed">
+                        <span className="text-violet-500 mt-1">•</span>
+                        <span>{k}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </AiCard>
+              )}
+
+              {/* 7. 相似考题推荐 */}
+              {data.similar_questions?.length > 0 && (
+                <AiCard tone="teal" icon="🔮" title="相似考题推荐">
+                  <ul className="space-y-3">
+                    {data.similar_questions.map((q, i) => (
+                      <li key={i} className="rounded-lg bg-white/70 border border-teal-100 p-3">
+                        <div className="text-slate-800 text-sm leading-relaxed mb-1.5">
+                          <b className="text-teal-700 mr-1">Q{i + 1}.</b>
+                          {q.question}
+                        </div>
+                        <div className="text-xs text-slate-600 leading-relaxed">
+                          <span className="font-medium text-teal-700">要点:</span> {q.hint}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </AiCard>
+              )}
+
+              <div className="pt-1 pb-4 text-center text-[11px] text-slate-400">
+                以上内容由 AI 生成,仅供学习参考,以官方 DMV 手册与 CVC 法规为准。
               </div>
-            )}
-            <a
-              href={manualUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                e.preventDefault();
-                window.open(manualUrl, "_blank", "noopener,noreferrer");
-              }}
-              className="mt-2 inline-flex items-center gap-1 text-xs text-blue-700 hover:underline"
-            >
-              打开官方手册 <ExternalLink size={11} />
-            </a>
-          </section>
-
-          <section className="rounded-lg border border-slate-200 bg-white p-3">
-            <div className="text-xs font-semibold text-slate-500 mb-1">⚖️ 官方法规引用</div>
-            <div className="text-slate-700 leading-relaxed">
-              {r.official_source?.trim()
-                ? r.official_source
-                : "California Vehicle Code (CVC) 及 California Driver Handbook 相关章节。"}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-slate-200 bg-white p-3">
-            <div className="text-xs font-semibold text-slate-500 mb-1">💡 相关知识点</div>
-            <div className="text-slate-700 leading-relaxed">
-              {"本题考察加州驾驶规则的基础知识,建议结合手册对应章节复习。"}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
-            <div className="text-xs font-semibold text-slate-500 mb-1">🔮 相似考题推荐</div>
-            <div className="text-xs text-slate-500 leading-relaxed">
-              AI 相似题推荐即将上线。届时可在此直接向 AI 提问,获取个性化讲解与更多同类练习题。
-            </div>
-          </section>
+            </>
+          ) : null}
         </div>
       </SheetContent>
     </Sheet>
   );
 }
+
+const TONE_STYLES: Record<string, { border: string; header: string; bg: string }> = {
+  slate: { border: "border-slate-200", header: "text-slate-600", bg: "bg-white" },
+  emerald: { border: "border-emerald-200", header: "text-emerald-700", bg: "bg-emerald-50/70" },
+  rose: { border: "border-rose-200", header: "text-rose-700", bg: "bg-rose-50/60" },
+  blue: { border: "border-blue-200", header: "text-blue-700", bg: "bg-blue-50/60" },
+  amber: { border: "border-amber-200", header: "text-amber-700", bg: "bg-amber-50/60" },
+  indigo: { border: "border-indigo-200", header: "text-indigo-700", bg: "bg-indigo-50/60" },
+  violet: { border: "border-violet-200", header: "text-violet-700", bg: "bg-violet-50/60" },
+  teal: { border: "border-teal-200", header: "text-teal-700", bg: "bg-teal-50/60" },
+};
+
+function AiCard({
+  tone,
+  icon,
+  title,
+  children,
+}: {
+  tone: keyof typeof TONE_STYLES;
+  icon: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  const s = TONE_STYLES[tone] ?? TONE_STYLES.slate;
+  return (
+    <section className={`rounded-xl border ${s.border} ${s.bg} p-4 shadow-sm`}>
+      <div className={`text-xs font-semibold ${s.header} mb-2 flex items-center gap-1.5`}>
+        <span className="text-sm">{icon}</span>
+        {title}
+      </div>
+      <div className="text-sm">{children}</div>
+    </section>
+  );
+}
+
 
