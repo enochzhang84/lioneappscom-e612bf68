@@ -205,6 +205,7 @@ export function QuizApp(props: QuizAppProps = {}) {
     setCorrectMap({});
     setPassStopShown(false);
     setShowPassStop(false);
+    setEarlyEnded(false);
     setCurrent(0);
     setGrade(null);
     setSecondsLeft(EXAM_SECONDS);
