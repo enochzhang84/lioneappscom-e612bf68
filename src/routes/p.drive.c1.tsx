@@ -381,6 +381,40 @@ export function QuizApp(props: QuizAppProps = {}) {
           </div>
         </div>
       )}
+
+      {showPassStop && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => (submit.isPending ? null : setShowPassStop(false))}
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-emerald-100 text-emerald-600 grid place-items-center">
+                <CheckCircle2 size={22} />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">恭喜！你已通过</h3>
+            </div>
+            <p className="text-sm text-slate-600">
+              你已答对 <b className="text-emerald-600">{correctCount}</b> 题，达到 DMV 小型车 C1 模拟考通过标准（{PASS} 题）。
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowPassStop(false)} disabled={submit.isPending}>
+                继续答完剩余题目
+              </Button>
+              <Button
+                onClick={async () => {
+                  setShowPassStop(false);
+                  await submitExam();
+                }}
+                disabled={submit.isPending}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                {submit.isPending ? "评分中…" : "查看成绩"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
