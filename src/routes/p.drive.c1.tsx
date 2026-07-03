@@ -127,6 +127,8 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, "A" | "B" | "C" | "D">>({});
   const [marked, setMarked] = useState<Record<string, boolean>>({});
+  const [skipped, setSkipped] = useState<Record<string, boolean>>({});
+  const [correctMap, setCorrectMap] = useState<Record<string, boolean>>({});
   const [current, setCurrent] = useState(0);
   const [grade, setGrade] = useState<GradeResult | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(EXAM_SECONDS);
@@ -134,7 +136,54 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [translations, setTranslations] = useState<Record<string, QuestionTranslation>>({});
   const [translating, setTranslating] = useState(false);
   const [confirmUnanswered, setConfirmUnanswered] = useState(false);
+  const [passStopShown, setPassStopShown] = useState(false);
+  const [showPassStop, setShowPassStop] = useState(false);
   const translateFn = useServerFn(translateTexts);
+  const checkFn = useServerFn(checkAnswer);
+
+  const correctCount = Object.values(correctMap).filter(Boolean).length;
+
+  // Pass-and-stop: only for correct-count-based exams (no maxWrong rule).
+  useEffect(() => {
+    if (phase !== "exam") return;
+    if (typeof MAX_WRONG === "number") return;
+    if (!passStopShown && correctCount >= PASS) {
+      setPassStopShown(true);
+      setShowPassStop(true);
+    }
+  }, [correctCount, phase, PASS, MAX_WRONG, passStopShown]);
+
+  async function handlePick(qid: string, key: "A" | "B" | "C" | "D") {
+    setAnswers((prev) => ({ ...prev, [qid]: key }));
+    setSkipped((prev) => {
+      if (!prev[qid]) return prev;
+      const { [qid]: _, ...rest } = prev;
+      return rest;
+    });
+    try {
+      const res = await checkFn({ data: { id: qid, answer: key } });
+      setCorrectMap((prev) => ({ ...prev, [qid]: res.is_correct }));
+    } catch (e) {
+      console.error("checkAnswer error", e);
+    }
+  }
+
+  function handleSkip() {
+    const q = questions[current];
+    if (!q) return;
+    setSkipped((prev) => ({ ...prev, [q.id]: true }));
+    setAnswers((prev) => {
+      if (!(q.id in prev)) return prev;
+      const { [q.id]: _, ...rest } = prev;
+      return rest;
+    });
+    setCorrectMap((prev) => {
+      if (!(q.id in prev)) return prev;
+      const { [q.id]: _, ...rest } = prev;
+      return rest;
+    });
+    setCurrent((i) => Math.min(questions.length - 1, i + 1));
+  }
 
   function requestSubmitFromLast() {
     const unanswered = questions.filter((q) => !answers[q.id]).length;
