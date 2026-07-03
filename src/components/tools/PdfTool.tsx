@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ToolShell, type FaqItem } from "./ToolShell";
 import { FileDrop } from "./FileDrop";
 import { Loader2, Download } from "lucide-react";
-import { pdfjs } from "@/lib/tools/pdfjs";
+import { getPdfjs } from "@/lib/tools/pdfjs";
 
 export type PdfKind =
   | "merge" | "split" | "compress" | "to-jpg" | "from-jpg" | "delete-pages" | "rotate";
@@ -256,6 +256,7 @@ async function runCompress(file: File, level: "low" | "medium" | "high") {
 
 async function runToJpg(file: File) {
   const buf = await file.arrayBuffer();
+  const pdfjs = await getPdfjs();
   const doc = await pdfjs.getDocument({ data: new Uint8Array(buf) }).promise;
   const zip = new JSZip();
   const scale = 2;
