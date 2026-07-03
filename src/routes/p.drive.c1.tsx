@@ -1255,6 +1255,10 @@ function LearningCenter({
               href={manualUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open(manualUrl, "_blank", "noopener,noreferrer");
+              }}
               className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm transition-colors"
             >
               <BookOpen size={14} /> 📘 查看官方手册
