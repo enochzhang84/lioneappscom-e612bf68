@@ -425,8 +425,8 @@ export const adminBulkGenerateDmv = createServerFn({ method: "POST" })
 
     // 取题目 ID 列表（复用 quiz_questions）
     let qq = sb.from("quiz_questions").select("id, question_type").limit(2000);
-    if (data.kind === "written") qq = qq.eq("question_type", "text");
-    if (data.kind === "signs") qq = qq.eq("question_type", "sign");
+    if (data.kind === "written") qq = qq.eq("question_type", "single_choice");
+    if (data.kind === "signs") qq = qq.in("question_type", ["sign_recognition", "image_choice"]);
     const { data: qs, error: qErr } = await qq;
     if (qErr) throw new Error(qErr.message);
     const allIds = (qs ?? []).map((q) => q.id as string);
