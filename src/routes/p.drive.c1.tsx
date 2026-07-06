@@ -624,7 +624,13 @@ function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => numb
 
 function Intro({
   total, pass, maxWrong, examSeconds, onStart, loading, error,
-}: { total: number; pass: number; maxWrong?: number; examSeconds: number; onStart: () => void; loading: boolean; error?: string }) {
+  showHistoryReset = false, onResetHistory,
+}: {
+  total: number; pass: number; maxWrong?: number; examSeconds: number;
+  onStart: () => void; loading: boolean; error?: string;
+  showHistoryReset?: boolean; onResetHistory?: () => void;
+}) {
+  const [confirmReset, setConfirmReset] = useState(false);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
       <Card className="border-slate-200 shadow-sm rounded-2xl">
@@ -643,11 +649,33 @@ function Intro({
             <li>答对 <b>{pass}</b> 题及以上为通过。</li>
             <li>考试时长 <b>{Math.round(examSeconds / 60)}</b> 分钟。</li>
             <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+            {showHistoryReset && (
+              <li className="text-muted-foreground">
+                已出过的题目下次会自动排除；每个题库刷完一轮后重新开始。
+              </li>
+            )}
           </ul>
           {error && <div className="text-sm text-destructive">{error}</div>}
-          <Button size="lg" onClick={onStart} disabled={loading} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
-            {loading ? "抽题中…" : "开始考试"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button size="lg" onClick={onStart} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+              {loading ? "抽题中…" : "开始考试"}
+            </Button>
+            {showHistoryReset && onResetHistory && (
+              confirmReset ? (
+                <>
+                  <span className="text-sm text-muted-foreground">确定要清空出题历史？</span>
+                  <Button size="sm" variant="destructive" onClick={() => { onResetHistory(); setConfirmReset(false); }}>
+                    确认重置
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setConfirmReset(false)}>取消</Button>
+                </>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setConfirmReset(true)}>
+                  <RotateCcw size={14} className="mr-1" />重置我的出题历史
+                </Button>
+              )
+            )}
+          </div>
         </CardContent>
       </Card>
       <div className="space-y-6">
