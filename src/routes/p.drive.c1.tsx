@@ -1465,6 +1465,16 @@ function AiAnalysisSheet({
   chapter?: string;
   page?: string;
 }) {
+  const { user } = useAuth();
+  const getQuotaFn = useServerFn(getAiQuota);
+  const consumeQuotaFn = useServerFn(consumeAiQuota);
+  const runAi = useServerFn(runAiTool);
+
+  const [quota, setQuota] = useState<{ checked: boolean; remaining: number }>({
+    checked: false,
+    remaining: 0,
+  });
+
   const correct = r.correct_answer;
   const opts = (["A", "B", "C", "D"] as const)
     .map((k) => ({
@@ -1474,12 +1484,45 @@ function AiAnalysisSheet({
     .filter((o) => o.text && o.text.trim() !== "");
   const correctText = opts.find((o) => o.key === correct)?.text ?? "";
 
-  const runAi = useServerFn(runAiTool);
+  // 打开抽屉时检查当日剩余额度
+  useEffect(() => {
+    if (!open) {
+      setQuota({ checked: false, remaining: 0 });
+      return;
+    }
+    let active = true;
+    async function check() {
+      if (user) {
+        try {
+          const res = await getQuotaFn({ data: { featureKey: AI_FEATURE_KEY } });
+          if (active) setQuota({ checked: true, remaining: res.remaining });
+        } catch (e) {
+          console.error("AI quota check failed", e);
+          if (active) setQuota({ checked: true, remaining: 0 });
+        }
+      } else {
+        if (active) setQuota({ checked: true, remaining: getLocalQuotaRemaining(AI_FEATURE_KEY) });
+      }
+    }
+    void check();
+    return () => {
+      active = false;
+    };
+  }, [open, user, getQuotaFn]);
+
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["ai-analysis", r.id],
+    queryKey: ["ai-analysis", r.id, AI_FEATURE_KEY],
     queryFn: async () => {
-      const { system, user } = buildAiPrompt(r, manualName);
-      const res = await runAi({ data: { toolKey: "dmv-analysis", system, user, temperature: 0.4 } });
+      // 先扣额度，再调 AI
+      if (user) {
+        const res = await consumeQuotaFn({ data: { featureKey: AI_FEATURE_KEY, questionId: r.id } });
+        setQuota({ checked: true, remaining: res.remaining });
+      } else {
+        const remaining = consumeLocalQuota(AI_FEATURE_KEY);
+        setQuota({ checked: true, remaining });
+      }
+      const { system, user: promptUser } = buildAiPrompt(r, manualName);
+      const res = await runAi({ data: { toolKey: "dmv-analysis", system, user: promptUser, temperature: 0.4 } });
       let raw = (res.output || "").trim();
       raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
       const s = raw.indexOf("{");
@@ -1487,10 +1530,12 @@ function AiAnalysisSheet({
       if (s !== -1 && e !== -1) raw = raw.slice(s, e + 1);
       return JSON.parse(raw) as AiAnalysis;
     },
-    enabled: open,
+    enabled: open && quota.checked && quota.remaining > 0,
     staleTime: 1000 * 60 * 60,
     retry: 1,
   });
+
+  const showPaywall = quota.checked && quota.remaining <= 0 && !isLoading && !isFetching;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -1502,6 +1547,11 @@ function AiAnalysisSheet({
                 <Sparkles size={14} />
               </span>
               AI 智能学习助手
+              {quota.checked && (
+                <span className="ml-2 text-[11px] font-normal px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                  今日剩余 {quota.remaining} 次
+                </span>
+              )}
             </SheetTitle>
             <SheetDescription className="text-xs text-slate-500">
               基于 California Driver Handbook 与 CVC 法规的结构化讲解
@@ -1518,7 +1568,9 @@ function AiAnalysisSheet({
             </div>
           </AiCard>
 
-          {isLoading || isFetching ? (
+          {showPaywall ? (
+            <AiPaywall user={user} />
+          ) : isLoading || isFetching ? (
             <div className="rounded-xl border border-slate-200 bg-white p-6 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
               <Loader2 className="animate-spin" size={20} />
               AI 正在为你生成深度解析…
@@ -1635,6 +1687,37 @@ function AiAnalysisSheet({
     </Sheet>
   );
 }
+
+function AiPaywall({ user }: { user?: User }) {
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center space-y-4">
+      <div className="mx-auto h-12 w-12 rounded-full bg-amber-100 text-amber-600 grid place-items-center">
+        <Lock size={22} />
+      </div>
+      <div>
+        <h3 className="font-semibold text-amber-900">今日免费额度已用完</h3>
+        <p className="mt-1 text-sm text-amber-800">
+          每位用户每天可免费使用 <b>{DEFAULT_FREE_QUOTA}</b> 次 AI 智能解析。额度每日自动重置。
+        </p>
+      </div>
+      <div className="flex flex-col gap-2">
+        {!user ? (
+          <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Link to="/auth">登录 / 注册以继续使用</Link>
+          </Button>
+        ) : (
+          <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Link to="/products">查看订阅方案</Link>
+          </Button>
+        )}
+        <Button asChild variant="outline">
+          <Link to="/products">了解更多会员权益</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 
 const TONE_STYLES: Record<string, { border: string; header: string; bg: string }> = {
   slate: { border: "border-slate-200", header: "text-slate-600", bg: "bg-white" },
