@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { runAiTool } from "@/lib/ai.functions";
+import { getAiContent, generateAiContent, DMV_PROMPT_VERSION } from "@/lib/ai-knowledge.functions";
 import { getAiQuota, consumeAiQuota, DEFAULT_FREE_QUOTA } from "@/lib/ai-quota.functions";
 import { useAuth } from "@/hooks/use-auth";
 import type { User } from "@supabase/supabase-js";
