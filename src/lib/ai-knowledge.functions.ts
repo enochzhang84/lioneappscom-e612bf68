@@ -197,12 +197,12 @@ async function callAiGateway(p: PromptResult): Promise<{
   };
 }
 
-function tryParseJson(raw: string): unknown {
+function tryParseJson(raw: string): Json {
   let s = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   const l = s.indexOf("{");
   const r = s.lastIndexOf("}");
   if (l !== -1 && r !== -1) s = s.slice(l, r + 1);
-  return JSON.parse(s);
+  return JSON.parse(s) as Json;
 }
 
 // ---------- 生成并落库（公开）----------
