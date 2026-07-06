@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { runAiTool } from "@/lib/ai.functions";
+import { getAiQuota, consumeAiQuota, DEFAULT_FREE_QUOTA } from "@/lib/ai-quota.functions";
+import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
@@ -38,6 +40,7 @@ import {
   ChevronDown,
   GraduationCap,
   Sparkles,
+  Lock,
 } from "lucide-react";
 import {
   Sheet,
@@ -46,6 +49,36 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+
+const AI_FEATURE_KEY = "dmv-c1-analysis";
+const LOCAL_AI_QUOTA_KEY = "lione:ai-quota:";
+
+function localQuotaKey(featureKey: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  return `${LOCAL_AI_QUOTA_KEY}${featureKey}:${today}`;
+}
+function getLocalQuotaRemaining(featureKey: string): number {
+  if (typeof window === "undefined") return DEFAULT_FREE_QUOTA;
+  try {
+    const used = parseInt(window.localStorage.getItem(localQuotaKey(featureKey)) || "0", 10);
+    return Math.max(0, DEFAULT_FREE_QUOTA - used);
+  } catch {
+    return DEFAULT_FREE_QUOTA;
+  }
+}
+function consumeLocalQuota(featureKey: string): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const key = localQuotaKey(featureKey);
+    const used = parseInt(window.localStorage.getItem(key) || "0", 10);
+    const next = used + 1;
+    window.localStorage.setItem(key, String(next));
+    return Math.max(0, DEFAULT_FREE_QUOTA - next);
+  } catch {
+    return 0;
+  }
+}
+
 
 const DEFAULT_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/california-driver-handbook/";
 const CDL_HANDBOOK_URL = "https://www.dmv.ca.gov/portal/handbook/commercial-driver-handbook/";
