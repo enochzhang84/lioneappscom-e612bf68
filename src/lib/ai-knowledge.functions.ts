@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 /**
  * ================================================================
@@ -47,7 +47,7 @@ export type AiCacheRow = {
   prompt_version: string;
   provider: string | null;
   model: string | null;
-  ai_content: unknown;
+  ai_content: Json | null;
   status: string;
   error: string | null;
   tokens_in: number;
