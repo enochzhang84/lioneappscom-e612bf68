@@ -98,6 +98,10 @@ export type QuizAppProps = {
   backLabel?: string;
   /** Optional wrong-based passing rule (e.g. maxWrong=6 for C1 mock). */
   maxWrong?: number;
+  /** When true, exclude previously-seen questions per pool via localStorage. */
+  useHistory?: boolean;
+  /** Stable key used to namespace history in localStorage. */
+  historyKey?: string;
 };
 
 const DEFAULT_TOTAL = 36;
