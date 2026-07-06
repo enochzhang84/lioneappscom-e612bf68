@@ -98,6 +98,69 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_cache: {
+        Row: {
+          ai_content: Json | null
+          cost_credits: number
+          created_at: string
+          created_by: string | null
+          error: string | null
+          id: string
+          language: string
+          model: string | null
+          module: string
+          prompt_version: string
+          provider: string | null
+          record_id: string
+          record_type: string
+          request_hash: string | null
+          status: string
+          tokens_in: number
+          tokens_out: number
+          updated_at: string
+        }
+        Insert: {
+          ai_content?: Json | null
+          cost_credits?: number
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          id?: string
+          language?: string
+          model?: string | null
+          module: string
+          prompt_version?: string
+          provider?: string | null
+          record_id: string
+          record_type: string
+          request_hash?: string | null
+          status?: string
+          tokens_in?: number
+          tokens_out?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_content?: Json | null
+          cost_credits?: number
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          id?: string
+          language?: string
+          model?: string | null
+          module?: string
+          prompt_version?: string
+          provider?: string | null
+          record_id?: string
+          record_type?: string
+          request_hash?: string | null
+          status?: string
+          tokens_in?: number
+          tokens_out?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_usage_daily: {
         Row: {
           count: number

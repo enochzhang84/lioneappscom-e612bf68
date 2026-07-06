@@ -26,6 +26,7 @@ import {
   Info,
   Mail,
   PencilLine,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,7 @@ export const ADMIN_NAV: NavItem[] = [
 
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3, group: "Analytics" },
   { to: "/admin/seo", label: "SEO", icon: Search, group: "Analytics" },
+  { to: "/admin/ai", label: "AI 知识引擎", icon: Sparkles, group: "Analytics" },
 
   { to: "/admin/users", label: "Users", icon: Users, group: "System" },
   { to: "/admin/files", label: "Files", icon: FolderOpen, group: "System" },

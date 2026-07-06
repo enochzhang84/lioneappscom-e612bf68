@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { runAiTool } from "@/lib/ai.functions";
+import { getAiContent, generateAiContent, DMV_PROMPT_VERSION } from "@/lib/ai-knowledge.functions";
 import { getAiQuota, consumeAiQuota, DEFAULT_FREE_QUOTA } from "@/lib/ai-quota.functions";
 import { useAuth } from "@/hooks/use-auth";
 import type { User } from "@supabase/supabase-js";
@@ -1467,12 +1467,14 @@ function AiAnalysisSheet({
   const { user } = useAuth();
   const getQuotaFn = useServerFn(getAiQuota);
   const consumeQuotaFn = useServerFn(consumeAiQuota);
-  const runAi = useServerFn(runAiTool);
+  const getCacheFn = useServerFn(getAiContent);
+  const generateFn = useServerFn(generateAiContent);
 
   const [quota, setQuota] = useState<{ checked: boolean; remaining: number }>({
     checked: false,
     remaining: 0,
   });
+  const [cacheHit, setCacheHit] = useState<boolean | null>(null);
 
   const correct = r.correct_answer;
   const opts = (["A", "B", "C", "D"] as const)
@@ -1483,10 +1485,11 @@ function AiAnalysisSheet({
     .filter((o) => o.text && o.text.trim() !== "");
   const correctText = opts.find((o) => o.key === correct)?.text ?? "";
 
-  // 打开抽屉时检查当日剩余额度
+  // 打开抽屉时预取额度（仅用于展示；缓存命中时不扣）
   useEffect(() => {
     if (!open) {
       setQuota({ checked: false, remaining: 0 });
+      setCacheHit(null);
       return;
     }
     let active = true;
@@ -1509,32 +1512,45 @@ function AiAnalysisSheet({
     };
   }, [open, user, getQuotaFn]);
 
+  const cacheKey = {
+    module: "dmv",
+    record_type: "question",
+    record_id: r.id,
+    language: "zh",
+    prompt_version: DMV_PROMPT_VERSION,
+  } as const;
+
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["ai-analysis", r.id, AI_FEATURE_KEY],
+    queryKey: ["ai-analysis-engine", r.id, cacheKey.prompt_version, cacheKey.language],
     queryFn: async () => {
-      // 先扣额度，再调 AI
+      // 1) 先查平台 AI 缓存（免费、瞬时）
+      const hit = await getCacheFn({ data: cacheKey });
+      if (hit.cached && hit.row?.ai_content) {
+        setCacheHit(true);
+        return hit.row.ai_content as AiAnalysis;
+      }
+      // 2) 未命中 → 走额度 → 调 AI → 落库
       if (user) {
         const res = await consumeQuotaFn({ data: { featureKey: AI_FEATURE_KEY, questionId: r.id } });
         setQuota({ checked: true, remaining: res.remaining });
+        if (res.remaining < 0 || (res.remaining === 0 && res.usedToday > DEFAULT_FREE_QUOTA)) {
+          throw new Error("今日 AI 解析额度已用完");
+        }
       } else {
         const remaining = consumeLocalQuota(AI_FEATURE_KEY);
         setQuota({ checked: true, remaining });
       }
-      const { system, user: promptUser } = buildAiPrompt(r, manualName);
-      const res = await runAi({ data: { toolKey: "dmv-analysis", system, user: promptUser, temperature: 0.4 } });
-      let raw = (res.output || "").trim();
-      raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-      const s = raw.indexOf("{");
-      const e = raw.lastIndexOf("}");
-      if (s !== -1 && e !== -1) raw = raw.slice(s, e + 1);
-      return JSON.parse(raw) as AiAnalysis;
+      const gen = await generateFn({ data: cacheKey });
+      setCacheHit(false);
+      return gen.ai_content as AiAnalysis;
     },
-    enabled: open && quota.checked && quota.remaining > 0,
+    enabled: open && quota.checked,
     staleTime: 1000 * 60 * 60,
     retry: 1,
   });
 
-  const showPaywall = quota.checked && quota.remaining <= 0 && !isLoading && !isFetching;
+  const showPaywall =
+    quota.checked && quota.remaining <= 0 && cacheHit === false && !isLoading && !isFetching && !data;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -1546,7 +1562,12 @@ function AiAnalysisSheet({
                 <Sparkles size={14} />
               </span>
               AI 智能学习助手
-              {quota.checked && (
+              {cacheHit === true && (
+                <span className="ml-2 text-[11px] font-normal px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                  ✨ 已缓存 · 免费查看
+                </span>
+              )}
+              {quota.checked && cacheHit !== true && (
                 <span className="ml-2 text-[11px] font-normal px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                   今日剩余 {quota.remaining} 次
                 </span>
