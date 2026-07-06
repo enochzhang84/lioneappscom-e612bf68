@@ -36,6 +36,7 @@ import {
   Lightbulb,
   ScrollText,
   BookOpen,
+  ExternalLink,
   ChevronDown,
   GraduationCap,
   Sparkles,
