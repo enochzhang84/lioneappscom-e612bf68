@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { runAiTool } from "@/lib/ai.functions";
 import { getAiQuota, consumeAiQuota, DEFAULT_FREE_QUOTA } from "@/lib/ai-quota.functions";
 import { useAuth } from "@/hooks/use-auth";
+import type { User } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
