@@ -151,6 +151,97 @@ export const getMixedRandomQuestions = createServerFn({ method: "GET" })
     return combined;
   });
 
+// History-aware mixed draw: excludes questions the user has already seen
+// per pool. If a pool's remaining unseen count is less than requested, we
+// take all remaining and top up from already-seen (a new round starts for
+// that pool). Returns per-pool metadata so the client can maintain history.
+export type PoolDrawResult = {
+  category: string;
+  exhausted: boolean;
+  pickedIds: string[];
+  totalAvailable: number;
+  freshRemainingBefore: number;
+};
+
+export const getMixedRandomQuestionsWithHistory = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: { pools: { category: string; count: number; excludeIds?: string[] }[] }) =>
+      z.object({
+        pools: z
+          .array(
+            z.object({
+              category: z.string().min(1).max(40),
+              count: z.number().int().min(1).max(200),
+              excludeIds: z.array(z.string().uuid()).max(5000).default([]),
+            }),
+          )
+          .min(1)
+          .max(6),
+      }).parse(d),
+  )
+  .handler(async ({ data }): Promise<{ questions: QuizQuestion[]; pools: PoolDrawResult[] }> => {
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: excludedBanks } = await supabasePublic
+      .from("question_bank_nodes")
+      .select("id")
+      .eq("node_type", "bank")
+      .or("is_active.eq.false,include_in_exam.eq.false");
+    const excludedBankIds = new Set(
+      ((excludedBanks ?? []) as Array<{ id: string }>).map((b) => b.id),
+    );
+
+    const combined: QuizQuestion[] = [];
+    const poolResults: PoolDrawResult[] = [];
+
+    for (const pool of data.pools) {
+      const { data: rows, error } = await supabasePublic
+        .from("quiz_questions")
+        .select("id, question_type, question, option_a, option_b, option_c, option_d, category, image_url, question_en, option_a_en, option_b_en, option_c_en, option_d_en, question_bank_id")
+        .eq("category", pool.category)
+        .eq("is_active", true);
+      if (error) throw new Error(error.message);
+      const all = ((rows ?? []) as Array<QuizQuestion & { question_bank_id: string | null }>)
+        .filter((q) => !q.question_bank_id || !excludedBankIds.has(q.question_bank_id))
+        .map(({ question_bank_id: _bank, ...rest }) => rest as QuizQuestion);
+
+      const excludeSet = new Set(pool.excludeIds ?? []);
+      const fresh: QuizQuestion[] = [];
+      const seen: QuizQuestion[] = [];
+      for (const q of all) (excludeSet.has(q.id) ? seen : fresh).push(q);
+
+      const shuffle = <T,>(arr: T[]) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+      };
+      shuffle(fresh);
+      shuffle(seen);
+
+      const need = Math.min(pool.count, all.length);
+      const takeFresh = fresh.slice(0, Math.min(need, fresh.length));
+      const remainingNeed = need - takeFresh.length;
+      const takeSeen = remainingNeed > 0 ? seen.slice(0, remainingNeed) : [];
+      const picked = [...takeFresh, ...takeSeen];
+
+      combined.push(...picked);
+      poolResults.push({
+        category: pool.category,
+        exhausted: remainingNeed > 0,
+        pickedIds: picked.map((q) => q.id),
+        totalAvailable: all.length,
+        freshRemainingBefore: fresh.length,
+      });
+    }
+
+    // Final shuffle so pools interleave.
+    for (let i = combined.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [combined[i], combined[j]] = [combined[j], combined[i]];
+    }
+    return { questions: combined, pools: poolResults };
+  });
+
 const answerEnum = z.enum(["A", "B", "C", "D"]);
 
 // Lightweight single-question grader. Returns only is_correct so we can
