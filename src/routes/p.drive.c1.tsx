@@ -121,21 +121,86 @@ export function QuizApp(props: QuizAppProps = {}) {
     subtitle = "模拟考试与加州 DMV 正式考试一致,帮助考生熟悉考试流程。",
     backHref = "/p/drive",
     backLabel = "← 返回驾考工具",
+    useHistory = false,
+    historyKey,
   } = props;
 
   const fetchFn = useServerFn(getRandomQuizQuestions);
   const fetchMixedFn = useServerFn(getMixedRandomQuestions);
+  const fetchMixedHistFn = useServerFn(getMixedRandomQuestionsWithHistory);
   const gradeFn = useServerFn(gradeQuiz);
+
+  const HISTORY_STORAGE_KEY = useMemo(() => {
+    if (!useHistory) return null;
+    const key = historyKey || (pools ? pools.map((p) => `${p.category}:${p.count}`).join("|") : category);
+    return `lione:quiz-history:v1:${key}`;
+  }, [useHistory, historyKey, pools, category]);
+
+  const readHistory = (): Record<string, string[]> => {
+    if (!HISTORY_STORAGE_KEY || typeof window === "undefined") return {};
+    try {
+      const raw = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
+    } catch {
+      return {};
+    }
+  };
+  const writeHistory = (h: Record<string, string[]>) => {
+    if (!HISTORY_STORAGE_KEY || typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(h));
+    } catch {
+      /* quota / private mode — ignore */
+    }
+  };
+
   const load = useMutation({
-    mutationFn: () =>
-      pools && pools.length > 0
+    mutationFn: async () => {
+      if (useHistory && pools && pools.length > 0) {
+        const history = readHistory();
+        const res = await fetchMixedHistFn({
+          data: {
+            pools: pools.map((p) => ({
+              category: p.category,
+              count: p.count,
+              excludeIds: history[p.category] ?? [],
+            })),
+          },
+        });
+        // Update history per pool. If exhausted, this round starts fresh —
+        // reset that pool's history to only the newly picked ids so the
+        // next exam again excludes what was just seen.
+        const next: Record<string, string[]> = { ...history };
+        for (const p of res.pools) {
+          if (p.exhausted) {
+            next[p.category] = [...p.pickedIds];
+          } else {
+            const prev = new Set(next[p.category] ?? []);
+            for (const id of p.pickedIds) prev.add(id);
+            next[p.category] = [...prev];
+          }
+        }
+        writeHistory(next);
+        return res.questions;
+      }
+      return pools && pools.length > 0
         ? fetchMixedFn({ data: { pools } })
-        : fetchFn({ data: { category, count: TOTAL } }),
+        : fetchFn({ data: { category, count: TOTAL } });
+    },
   });
   const submit = useMutation({
     mutationFn: (vars: { ids: string[]; answers: Record<string, "A" | "B" | "C" | "D"> }) =>
       gradeFn({ data: vars }),
   });
+
+  function resetHistory() {
+    if (!HISTORY_STORAGE_KEY || typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(HISTORY_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
