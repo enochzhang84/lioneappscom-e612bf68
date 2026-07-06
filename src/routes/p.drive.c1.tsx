@@ -1562,7 +1562,12 @@ function AiAnalysisSheet({
                 <Sparkles size={14} />
               </span>
               AI 智能学习助手
-              {quota.checked && (
+              {cacheHit === true && (
+                <span className="ml-2 text-[11px] font-normal px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                  ✨ 已缓存 · 免费查看
+                </span>
+              )}
+              {quota.checked && cacheHit !== true && (
                 <span className="ml-2 text-[11px] font-normal px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                   今日剩余 {quota.remaining} 次
                 </span>
