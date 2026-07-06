@@ -387,6 +387,8 @@ export function QuizApp(props: QuizAppProps = {}) {
               onStart={startExam}
               loading={load.isPending}
               error={load.error?.message}
+              showHistoryReset={useHistory}
+              onResetHistory={resetHistory}
             />
           </div>
         )}
