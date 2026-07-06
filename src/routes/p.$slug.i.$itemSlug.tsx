@@ -74,6 +74,8 @@ const C1_MOCK_PROPS = {
   subtitle: "48 题（36 笔试 + 12 交通标志）· 60 分钟 · 答对 30 题即通过",
   backHref: "/p/drive",
   backLabel: "← 返回驾考工具",
+  useHistory: true,
+  historyKey: "drive-c1-mock",
 };
 
 const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath?: string }> = {

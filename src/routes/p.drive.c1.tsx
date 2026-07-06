@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   getRandomQuizQuestions,
   getMixedRandomQuestions,
+  getMixedRandomQuestionsWithHistory,
   gradeQuiz,
   checkAnswer,
   type QuizQuestion,
@@ -97,6 +98,10 @@ export type QuizAppProps = {
   backLabel?: string;
   /** Optional wrong-based passing rule (e.g. maxWrong=6 for C1 mock). */
   maxWrong?: number;
+  /** When true, exclude previously-seen questions per pool via localStorage. */
+  useHistory?: boolean;
+  /** Stable key used to namespace history in localStorage. */
+  historyKey?: string;
 };
 
 const DEFAULT_TOTAL = 36;
@@ -116,21 +121,86 @@ export function QuizApp(props: QuizAppProps = {}) {
     subtitle = "模拟考试与加州 DMV 正式考试一致,帮助考生熟悉考试流程。",
     backHref = "/p/drive",
     backLabel = "← 返回驾考工具",
+    useHistory = false,
+    historyKey,
   } = props;
 
   const fetchFn = useServerFn(getRandomQuizQuestions);
   const fetchMixedFn = useServerFn(getMixedRandomQuestions);
+  const fetchMixedHistFn = useServerFn(getMixedRandomQuestionsWithHistory);
   const gradeFn = useServerFn(gradeQuiz);
+
+  const HISTORY_STORAGE_KEY = useMemo(() => {
+    if (!useHistory) return null;
+    const key = historyKey || (pools ? pools.map((p) => `${p.category}:${p.count}`).join("|") : category);
+    return `lione:quiz-history:v1:${key}`;
+  }, [useHistory, historyKey, pools, category]);
+
+  const readHistory = (): Record<string, string[]> => {
+    if (!HISTORY_STORAGE_KEY || typeof window === "undefined") return {};
+    try {
+      const raw = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
+    } catch {
+      return {};
+    }
+  };
+  const writeHistory = (h: Record<string, string[]>) => {
+    if (!HISTORY_STORAGE_KEY || typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(h));
+    } catch {
+      /* quota / private mode — ignore */
+    }
+  };
+
   const load = useMutation({
-    mutationFn: () =>
-      pools && pools.length > 0
+    mutationFn: async () => {
+      if (useHistory && pools && pools.length > 0) {
+        const history = readHistory();
+        const res = await fetchMixedHistFn({
+          data: {
+            pools: pools.map((p) => ({
+              category: p.category,
+              count: p.count,
+              excludeIds: history[p.category] ?? [],
+            })),
+          },
+        });
+        // Update history per pool. If exhausted, this round starts fresh —
+        // reset that pool's history to only the newly picked ids so the
+        // next exam again excludes what was just seen.
+        const next: Record<string, string[]> = { ...history };
+        for (const p of res.pools) {
+          if (p.exhausted) {
+            next[p.category] = [...p.pickedIds];
+          } else {
+            const prev = new Set(next[p.category] ?? []);
+            for (const id of p.pickedIds) prev.add(id);
+            next[p.category] = [...prev];
+          }
+        }
+        writeHistory(next);
+        return res.questions;
+      }
+      return pools && pools.length > 0
         ? fetchMixedFn({ data: { pools } })
-        : fetchFn({ data: { category, count: TOTAL } }),
+        : fetchFn({ data: { category, count: TOTAL } });
+    },
   });
   const submit = useMutation({
     mutationFn: (vars: { ids: string[]; answers: Record<string, "A" | "B" | "C" | "D"> }) =>
       gradeFn({ data: vars }),
   });
+
+  function resetHistory() {
+    if (!HISTORY_STORAGE_KEY || typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(HISTORY_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -317,6 +387,8 @@ export function QuizApp(props: QuizAppProps = {}) {
               onStart={startExam}
               loading={load.isPending}
               error={load.error?.message}
+              showHistoryReset={useHistory}
+              onResetHistory={resetHistory}
             />
           </div>
         )}
@@ -552,7 +624,13 @@ function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => numb
 
 function Intro({
   total, pass, maxWrong, examSeconds, onStart, loading, error,
-}: { total: number; pass: number; maxWrong?: number; examSeconds: number; onStart: () => void; loading: boolean; error?: string }) {
+  showHistoryReset = false, onResetHistory,
+}: {
+  total: number; pass: number; maxWrong?: number; examSeconds: number;
+  onStart: () => void; loading: boolean; error?: string;
+  showHistoryReset?: boolean; onResetHistory?: () => void;
+}) {
+  const [confirmReset, setConfirmReset] = useState(false);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
       <Card className="border-slate-200 shadow-sm rounded-2xl">
@@ -571,11 +649,33 @@ function Intro({
             <li>答对 <b>{pass}</b> 题及以上为通过。</li>
             <li>考试时长 <b>{Math.round(examSeconds / 60)}</b> 分钟。</li>
             <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+            {showHistoryReset && (
+              <li className="text-muted-foreground">
+                已出过的题目下次会自动排除；每个题库刷完一轮后重新开始。
+              </li>
+            )}
           </ul>
           {error && <div className="text-sm text-destructive">{error}</div>}
-          <Button size="lg" onClick={onStart} disabled={loading} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
-            {loading ? "抽题中…" : "开始考试"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button size="lg" onClick={onStart} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+              {loading ? "抽题中…" : "开始考试"}
+            </Button>
+            {showHistoryReset && onResetHistory && (
+              confirmReset ? (
+                <>
+                  <span className="text-sm text-muted-foreground">确定要清空出题历史？</span>
+                  <Button size="sm" variant="destructive" onClick={() => { onResetHistory(); setConfirmReset(false); }}>
+                    确认重置
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setConfirmReset(false)}>取消</Button>
+                </>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setConfirmReset(true)}>
+                  <RotateCcw size={14} className="mr-1" />重置我的出题历史
+                </Button>
+              )
+            )}
+          </div>
         </CardContent>
       </Card>
       <div className="space-y-6">
