@@ -98,6 +98,69 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_usage_daily: {
+        Row: {
+          count: number
+          created_at: string
+          feature_key: string
+          id: string
+          updated_at: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          feature_key: string
+          id?: string
+          updated_at?: string
+          usage_date: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          feature_key?: string
+          id?: string
+          updated_at?: string
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage_logs: {
+        Row: {
+          feature_key: string
+          id: string
+          ip: unknown
+          metadata: Json | null
+          question_id: string | null
+          used_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          feature_key: string
+          id?: string
+          ip?: unknown
+          metadata?: Json | null
+          question_id?: string | null
+          used_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          feature_key?: string
+          id?: string
+          ip?: unknown
+          metadata?: Json | null
+          question_id?: string | null
+          used_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null
