@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   getRandomQuizQuestions,
   getMixedRandomQuestions,
+  getMixedRandomQuestionsWithHistory,
   gradeQuiz,
   checkAnswer,
   type QuizQuestion,
