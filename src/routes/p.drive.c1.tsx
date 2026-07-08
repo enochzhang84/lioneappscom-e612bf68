@@ -1745,7 +1745,7 @@ function Stat({ label, value, tone }: { label: string; value: number | string; t
   );
 }
 
-function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
+function ReviewItem({ r, idx, minimalMode = false }: { r: GradedQuestion; idx: number; minimalMode?: boolean }) {
   const correct = r.correct_answer;
   const pick = r.picked;
   const isRight = r.is_correct;
