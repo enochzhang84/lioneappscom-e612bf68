@@ -288,6 +288,7 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [marked, setMarked] = useState<Record<string, boolean>>({});
   const [skipped, setSkipped] = useState<Record<string, boolean>>({});
   const [correctMap, setCorrectMap] = useState<Record<string, boolean>>({});
+  const [revealedCorrect, setRevealedCorrect] = useState<Record<string, "A" | "B" | "C" | "D">>({});
   const [current, setCurrent] = useState(0);
   const [grade, setGrade] = useState<GradeResult | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(EXAM_SECONDS);
