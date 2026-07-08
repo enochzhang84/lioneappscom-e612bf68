@@ -179,7 +179,10 @@ export function QuizApp(props: QuizAppProps = {}) {
     theme = "blue",
     instantFeedback = false,
     simplifiedRules = false,
+    minimalMode = false,
   } = props;
+
+
 
   // ---- Attempts (theory-only style rule: 3 tries then reset) ----
   const readAttempts = (): number => {
