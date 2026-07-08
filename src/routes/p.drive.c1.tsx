@@ -109,7 +109,7 @@ export const Route = createFileRoute("/p/drive/c1")({
   component: QuizPage,
 });
 
-type Phase = "intro" | "exam" | "result";
+type Phase = "intro" | "exam" | "result" | "cancelled";
 
 type QuestionTranslation = {
   question?: string;
@@ -307,6 +307,8 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
   const [skipLimitOpen, setSkipLimitOpen] = useState(false);
   const [finalFailOpen, setFinalFailOpen] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [attempts, setAttempts] = useState<number>(0);
   const translateFn = useServerFn(translateTexts);
   const checkFn = useServerFn(checkAnswer);
@@ -512,6 +514,35 @@ export function QuizApp(props: QuizAppProps = {}) {
     }
   }
 
+  async function confirmCancelExam() {
+    setCancelConfirmOpen(false);
+    const submittedCount = Object.keys(correctMap).length;
+    // No submissions yet → silent exit, no record.
+    if (submittedCount === 0) {
+      resetToIntro();
+      onExit?.();
+      return;
+    }
+    // Record a failed attempt via the normal grade path, then show cancelled screen.
+    setCancelling(true);
+    try {
+      const ids = questions.map((q) => q.id);
+      const res = await submit.mutateAsync({ ids, answers });
+      setGrade(res);
+      if (typeof MAX_ATTEMPTS === "number") {
+        const next = readAttempts() + 1;
+        writeAttempts(next);
+        setAttempts(next);
+      }
+    } catch (e) {
+      console.error("cancelExam submit error", e);
+    } finally {
+      setCancelling(false);
+      setPhase("cancelled");
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    }
+  }
+
 
   async function ensureTranslation(q: QuizQuestion) {
     if (translations[q.id]) return;
@@ -623,7 +654,7 @@ export function QuizApp(props: QuizAppProps = {}) {
               minimalMode
               onSubmitAnswer={submitCurrentAnswer}
               submittingAnswer={submittingAnswer}
-              onCancelAnswer={(qid) => setAnswers((prev) => { const { [qid]: _drop, ...rest } = prev; return rest; })}
+              onCancelExam={() => setCancelConfirmOpen(true)}
 
             />
           </div>
@@ -694,6 +725,32 @@ export function QuizApp(props: QuizAppProps = {}) {
             />
           </div>
         )}
+
+        {phase === "cancelled" && (
+          <div className="mt-6 mx-auto max-w-md">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center space-y-4">
+              <div className="text-4xl">❌</div>
+              <h2 className="text-xl font-semibold text-slate-900">本次考试已结束</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                您已主动放弃本次考试。
+                <br />
+                本次考试已判定为失败。
+              </p>
+              <div className="pt-2">
+                <Button
+                  size="lg"
+                  className="min-w-[160px] rounded-full bg-slate-900 hover:bg-slate-800"
+                  onClick={() => {
+                    resetToIntro();
+                    onExit?.();
+                  }}
+                >
+                  完成
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
 
@@ -722,6 +779,34 @@ export function QuizApp(props: QuizAppProps = {}) {
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 {submit.isPending ? "评分中…" : "确认提交"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelConfirmOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => (cancelling ? null : setCancelConfirmOpen(false))}
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">确认退出考试</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              您确定要放弃本次考试吗？
+              <br />
+              放弃后，本次考试将立即结束，并判定为考试失败。
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setCancelConfirmOpen(false)} disabled={cancelling}>
+                否
+              </Button>
+              <Button
+                onClick={() => { void confirmCancelExam(); }}
+                disabled={cancelling}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {cancelling ? "处理中…" : "是"}
               </Button>
             </div>
           </div>
@@ -1066,7 +1151,7 @@ function Exam({
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
   instantFeedback = false, correctMap = {}, revealedCorrect = {},
-  minimalMode = false, onSubmitAnswer, submittingAnswer = false, onCancelAnswer,
+  minimalMode = false, onSubmitAnswer, submittingAnswer = false, onCancelExam,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1087,7 +1172,7 @@ function Exam({
   minimalMode?: boolean;
   onSubmitAnswer?: () => void;
   submittingAnswer?: boolean;
-  onCancelAnswer?: (qid: string) => void;
+  onCancelExam?: () => void;
 
 }) {
 
@@ -1255,8 +1340,8 @@ function Exam({
                 <Button
                   size="lg"
                   variant="ghost"
-                  onClick={() => onCancelAnswer?.(q.id)}
-                  disabled={!answers[q.id] || submittingAnswer || submitting}
+                  onClick={() => onCancelExam?.()}
+                  disabled={submittingAnswer || submitting}
                   className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
                 >
                   取消
