@@ -1064,7 +1064,7 @@ function Exam({
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
   instantFeedback = false, correctMap = {}, revealedCorrect = {},
-  minimalMode = false, onSubmitAnswer, submittingAnswer = false,
+  minimalMode = false, onSubmitAnswer, submittingAnswer = false, onCancelAnswer,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
