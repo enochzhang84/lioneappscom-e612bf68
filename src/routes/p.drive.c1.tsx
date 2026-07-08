@@ -725,6 +725,32 @@ export function QuizApp(props: QuizAppProps = {}) {
             />
           </div>
         )}
+
+        {phase === "cancelled" && (
+          <div className="mt-6 mx-auto max-w-md">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center space-y-4">
+              <div className="text-4xl">❌</div>
+              <h2 className="text-xl font-semibold text-slate-900">本次考试已结束</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                您已主动放弃本次考试。
+                <br />
+                本次考试已判定为失败。
+              </p>
+              <div className="pt-2">
+                <Button
+                  size="lg"
+                  className="min-w-[160px] rounded-full bg-slate-900 hover:bg-slate-800"
+                  onClick={() => {
+                    resetToIntro();
+                    onExit?.();
+                  }}
+                >
+                  完成
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
 
