@@ -898,7 +898,7 @@ function Intro({
   const attemptsLeft =
     typeof maxAttempts === "number" ? Math.max(0, maxAttempts - attempts) : undefined;
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
+    <div className={cn("grid grid-cols-1 gap-6", !simplifiedRules && "lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]")}>
       <Card className="border-slate-200 shadow-sm rounded-2xl">
         <CardContent className="p-8 md:p-10 space-y-6">
           <div className="flex items-center gap-3">
