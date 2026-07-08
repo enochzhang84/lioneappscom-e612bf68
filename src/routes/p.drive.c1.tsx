@@ -379,14 +379,14 @@ export function QuizApp(props: QuizAppProps = {}) {
         setRevealedCorrect((prev) => ({ ...prev, [q.id]: res.correct_answer! }));
       }
       const isLast = current >= questions.length - 1;
-      const delay = res.is_correct ? 1000 : 2000;
-      window.setTimeout(() => {
+      // Correct: advance immediately. Wrong: stay on page so user can click 下一题.
+      if (res.is_correct) {
         if (isLast) {
           void submitExam();
         } else {
           setCurrent((i) => Math.min(questions.length - 1, i + 1));
         }
-      }, delay);
+      }
     } catch (e) {
       console.error("submitCurrentAnswer error", e);
     } finally {
@@ -655,7 +655,10 @@ export function QuizApp(props: QuizAppProps = {}) {
               onSubmitAnswer={submitCurrentAnswer}
               submittingAnswer={submittingAnswer}
               onCancelExam={() => setCancelConfirmOpen(true)}
-
+              rulesTotal={TOTAL}
+              rulesExamSeconds={EXAM_SECONDS}
+              rulesMaxWrong={MAX_WRONG}
+              rulesMaxSkip={MAX_SKIP}
             />
           </div>
         )}
@@ -1152,6 +1155,7 @@ function Exam({
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
   instantFeedback = false, correctMap = {}, revealedCorrect = {},
   minimalMode = false, onSubmitAnswer, submittingAnswer = false, onCancelExam,
+  rulesTotal, rulesExamSeconds, rulesMaxWrong, rulesMaxSkip,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1173,8 +1177,12 @@ function Exam({
   onSubmitAnswer?: () => void;
   submittingAnswer?: boolean;
   onCancelExam?: () => void;
-
+  rulesTotal?: number;
+  rulesExamSeconds?: number;
+  rulesMaxWrong?: number;
+  rulesMaxSkip?: number;
 }) {
+  const [rulesOpen, setRulesOpen] = useState(false);
 
 
   const q = questions[current];
@@ -1273,24 +1281,6 @@ function Exam({
                 readOnly={readOnly}
                 stateFor={stateFor}
               />
-              {feedbackReady && minimalMode && (
-                <div className="mt-6 space-y-2">
-                  {isCorrect ? (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 text-base font-medium">
-                      ✔ 回答正确
-                    </div>
-                  ) : (
-                    <>
-                      <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700 text-base">
-                        您的答案：<b className="font-semibold">{picked ?? "未作答"}</b>
-                      </div>
-                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-base">
-                        正确答案：<b className="font-semibold">{correctLetter ?? "?"}</b>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
               {feedbackReady && !minimalMode && (
                 <div
                   className={cn(
@@ -1314,40 +1304,82 @@ function Exam({
         })()}
 
         {minimalMode ? (
-          <div className="pt-4 flex justify-center items-center gap-3">
-            {!(q.id in correctMap) && (
-              <>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={onSkip}
-                  disabled={submittingAnswer || submitting}
-                  className="min-w-[110px] rounded-full border-amber-300 text-amber-700 hover:bg-amber-50"
-                >
-                  跳过
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={() => onSubmitAnswer?.()}
-                  disabled={!answers[q.id] || submittingAnswer || submitting}
-                  className={cn(
-                    "min-w-[140px] rounded-full",
-                    theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
-                  )}
-                >
-                  {submittingAnswer ? "判定中…" : submitting ? "评分中…" : "提交"}
-                </Button>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  onClick={() => onCancelExam?.()}
-                  disabled={submittingAnswer || submitting}
-                  className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
-                >
-                  取消
-                </Button>
-              </>
-            )}
+          <div className="pt-4 flex flex-wrap justify-center items-center gap-3">
+            {(() => {
+              const judged = q.id in correctMap;
+              const isWrongJudged = judged && correctMap[q.id] === false;
+              const isLast = current >= questions.length - 1;
+              const primaryBtn = cn(
+                "min-w-[120px] rounded-full",
+                theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
+              );
+              if (isWrongJudged) {
+                return (
+                  <>
+                    <Button
+                      size="lg"
+                      onClick={() => {
+                        if (isLast) onSubmit?.();
+                        else setCurrent((i) => Math.min(questions.length - 1, i + 1));
+                      }}
+                      disabled={submitting}
+                      className={primaryBtn}
+                    >
+                      {isLast ? "查看结果" : "下一题"}
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="ghost"
+                      onClick={() => onCancelExam?.()}
+                      disabled={submitting}
+                      className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
+                    >
+                      取消
+                    </Button>
+                  </>
+                );
+              }
+              if (judged) return null;
+              return (
+                <>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => setRulesOpen(true)}
+                    disabled={submittingAnswer || submitting}
+                    className="min-w-[110px] rounded-full border-slate-300 text-slate-700 hover:bg-slate-50"
+                  >
+                    答题说明
+                  </Button>
+                  <Button
+                    size="lg"
+                    onClick={() => onSubmitAnswer?.()}
+                    disabled={!answers[q.id] || submittingAnswer || submitting}
+                    className={primaryBtn}
+                  >
+                    提交
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={onSkip}
+                    disabled={submittingAnswer || submitting}
+                    className="min-w-[110px] rounded-full border-amber-300 text-amber-700 hover:bg-amber-50"
+                  >
+                    跳过
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={() => onCancelExam?.()}
+                    disabled={submittingAnswer || submitting}
+                    className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
+                  >
+                    取消
+                  </Button>
+                </>
+              );
+            })()}
           </div>
         ) : (
 
@@ -1390,6 +1422,40 @@ function Exam({
           </div>
         )}
       </CardContent>
+      {minimalMode && rulesOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setRulesOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-slate-900">答题说明</h3>
+            <ul className="mt-4 space-y-2 text-sm text-slate-700 list-disc pl-5">
+              {typeof rulesTotal === "number" && (
+                <li>共 <b>{rulesTotal}</b> 道题，随机从题库抽取。</li>
+              )}
+              <li>请认真审题。</li>
+              {typeof rulesExamSeconds === "number" && (
+                <li>考试时长 <b>{Math.round(rulesExamSeconds / 60)}</b> 分钟。</li>
+              )}
+              <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+              {typeof rulesMaxWrong === "number" && (
+                <li>最多允许错 <b>{rulesMaxWrong}</b> 题。</li>
+              )}
+              {typeof rulesMaxSkip === "number" && (
+                <li>最多允许跳过 <b>{rulesMaxSkip}</b> 题。</li>
+              )}
+            </ul>
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setRulesOpen(false)} className="rounded-full">
+                我知道了
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
