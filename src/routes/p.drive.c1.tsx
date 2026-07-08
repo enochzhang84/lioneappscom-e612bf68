@@ -419,6 +419,7 @@ export function QuizApp(props: QuizAppProps = {}) {
     setMarked({});
     setSkipped({});
     setCorrectMap({});
+    setRevealedCorrect({});
     setPassStopShown(false);
     setShowPassStop(false);
     setEarlyEnded(false);
