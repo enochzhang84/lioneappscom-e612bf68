@@ -1155,6 +1155,7 @@ function Exam({
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
   instantFeedback = false, correctMap = {}, revealedCorrect = {},
   minimalMode = false, onSubmitAnswer, submittingAnswer = false, onCancelExam,
+  rulesTotal, rulesExamSeconds, rulesMaxWrong, rulesMaxSkip,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1176,8 +1177,12 @@ function Exam({
   onSubmitAnswer?: () => void;
   submittingAnswer?: boolean;
   onCancelExam?: () => void;
-
+  rulesTotal?: number;
+  rulesExamSeconds?: number;
+  rulesMaxWrong?: number;
+  rulesMaxSkip?: number;
 }) {
+  const [rulesOpen, setRulesOpen] = useState(false);
 
 
   const q = questions[current];
