@@ -1150,14 +1150,15 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 /* -------------------- Info cards -------------------- */
 
-function RulesTips({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
+function RulesTips({ total, pass, maxWrong, examSeconds, maxSkip }: { total: number; pass: number; maxWrong?: number; examSeconds: number; maxSkip?: number }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
+      <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
       <TipsCard />
     </div>
   );
 }
+
 
 function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
   return (
