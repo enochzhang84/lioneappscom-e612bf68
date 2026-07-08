@@ -1058,16 +1058,55 @@ function Exam({
           </div>
         )}
 
-        <ExamOptionList
-          options={options.map((o) => ({
-            key: o.key,
-            text: o.text,
-            textEn: o.textEn || (showTranslation ? tr?.options?.[o.key] : null),
-          }))}
-          selected={answers[q.id] ?? null}
-          onSelect={pick}
-          showTranslation={showTranslation}
-        />
+        {(() => {
+          const picked = answers[q.id] ?? null;
+          const answered = q.id in answers;
+          const isCorrect = correctMap[q.id];
+          const correctLetter = revealedCorrect[q.id];
+          const feedbackReady = instantFeedback && answered && typeof isCorrect === "boolean";
+          const stateFor = feedbackReady
+            ? (k: "A" | "B" | "C" | "D") => {
+                if (isCorrect) return k === picked ? "correct" : "neutral";
+                if (k === correctLetter) return "correct";
+                if (k === picked) return "wrong";
+                return "neutral";
+              }
+            : undefined;
+          return (
+            <>
+              <ExamOptionList
+                options={options.map((o) => ({
+                  key: o.key,
+                  text: o.text,
+                  textEn: o.textEn || (showTranslation ? tr?.options?.[o.key] : null),
+                }))}
+                selected={picked}
+                onSelect={pick}
+                showTranslation={showTranslation}
+                readOnly={instantFeedback && answered}
+                stateFor={stateFor}
+              />
+              {feedbackReady && (
+                <div
+                  className={cn(
+                    "mt-4 rounded-xl border px-4 py-3 text-sm",
+                    isCorrect
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-rose-200 bg-rose-50 text-rose-800",
+                  )}
+                >
+                  {isCorrect ? (
+                    <span>✅ 回答正确</span>
+                  ) : (
+                    <span>
+                      ❌ 回答错误 · 正确答案是 <b className="font-semibold">{correctLetter ?? "?"}</b>
+                    </span>
+                  )}
+                </div>
+              )}
+            </>
+          );
+        })()}
 
 
 
