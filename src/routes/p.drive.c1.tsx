@@ -687,6 +687,8 @@ export function QuizApp(props: QuizAppProps = {}) {
               attempts={attempts}
               maxAttempts={MAX_ATTEMPTS}
               homeLabel={onExit ? "返回首页" : "返回"}
+              minimalMode={minimalMode}
+
             />
           </div>
         )}
