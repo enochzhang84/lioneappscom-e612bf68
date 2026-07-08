@@ -14,8 +14,8 @@ const THEORY_PROPS = {
   maxWrong: 6,
   maxSkip: 3,
   examSeconds: 60 * 60,
-  title: "驾驶员理论考试 · Theory Test",
-  subtitle: "加州 DMV 小型车 C1 · 36 题 · 60 分钟 · 答对 30 题通过 · 3 次考试机会",
+  title: "California DMV 驾照模拟考试",
+  subtitle: "共 36 道题 · 60 分钟 · 随机抽题",
   backHref: "/p/drive",
   backLabel: "← 返回考试选择",
   useHistory: true,
@@ -23,6 +23,8 @@ const THEORY_PROPS = {
   attemptsKey: "lione:c1-theory-attempts",
   maxAttempts: 3,
   theme: "blue" as const,
+  instantFeedback: true,
+  simplifiedRules: true,
 };
 
 const SIGNS_PROPS = {
@@ -32,13 +34,15 @@ const SIGNS_PROPS = {
   pass: 10,
   maxWrong: 2,
   examSeconds: 20 * 60,
-  title: "驾驶员图标考试 · Road Sign Test",
-  subtitle: "加州交通标志识别 · 12 题 · 答对 10 题通过 · 无限跳过",
+  title: "小型车 C1 · 图标模拟考试",
+  subtitle: "共 12 道题 · 20 分钟 · 随机抽题",
   backHref: "/p/drive",
   backLabel: "← 返回考试选择",
   useHistory: true,
   historyKey: "drive-c1-signs",
   theme: "orange" as const,
+  instantFeedback: true,
+  simplifiedRules: true,
 };
 
 export function C1MockExamHub() {
@@ -71,28 +75,23 @@ export function C1MockExamHub() {
                 <ClipboardCheck size={22} />
               </div>
               <div>
-                <div className="text-lg font-bold">① 驾驶员理论考试</div>
+                <div className="text-lg font-bold">① California DMV 驾照模拟考试</div>
                 <div className="text-xs text-white/80">Theory Test</div>
               </div>
             </div>
             <CardContent className="p-6 md:p-8 space-y-5">
-              <p className="text-sm text-slate-600">
-                加州 DMV 小型车 C1 理论考试模块
-              </p>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-700">
-                <li>· 36 道选择题</li>
-                <li>· 60 分钟</li>
-                <li>· 答对 30 题即可通过</li>
-                <li>· 最多答错 6 题</li>
-                <li>· 最多允许跳过 3 题</li>
-                <li>· 3 次考试机会</li>
+              <ul className="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+                <li>共 36 道题，随机从题库抽取。</li>
+                <li>请认真审题。</li>
+                <li>考试时长 60 分钟。</li>
+                <li>交卷后将显示成绩、正确答案与错题回顾。</li>
               </ul>
               <Button
                 size="lg"
                 onClick={() => setMode("theory")}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                开始理论考试 <ArrowRight size={16} className="ml-1" />
+                开始考试 <ArrowRight size={16} className="ml-1" />
               </Button>
             </CardContent>
           </Card>
@@ -104,24 +103,23 @@ export function C1MockExamHub() {
                 <TrafficCone size={22} />
               </div>
               <div>
-                <div className="text-lg font-bold">② 驾驶员图标考试</div>
+                <div className="text-lg font-bold">② 小型车 C1 · 图标模拟考试</div>
                 <div className="text-xs text-white/80">Road Sign Test</div>
               </div>
             </div>
             <CardContent className="p-6 md:p-8 space-y-5">
-              <p className="text-sm text-slate-600">交通标志识别考试模块</p>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-700">
-                <li>· 12 道图标题</li>
-                <li>· 答对 10 题即可通过</li>
-                <li>· 最多答错 2 题</li>
-                <li>· 允许无限跳过</li>
+              <ul className="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+                <li>共 12 道题，随机从题库抽取。</li>
+                <li>请认真审题。</li>
+                <li>考试时长 20 分钟。</li>
+                <li>交卷后将显示成绩、正确答案与错题回顾。</li>
               </ul>
               <Button
                 size="lg"
                 onClick={() => setMode("signs")}
                 className="bg-orange-600 hover:bg-orange-700"
               >
-                开始图标考试 <ArrowRight size={16} className="ml-1" />
+                开始考试 <ArrowRight size={16} className="ml-1" />
               </Button>
             </CardContent>
           </Card>

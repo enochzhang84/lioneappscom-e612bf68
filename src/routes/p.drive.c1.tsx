@@ -145,6 +145,10 @@ export type QuizAppProps = {
   onExit?: () => void;
   /** Visual theme accent. */
   theme?: "blue" | "orange";
+  /** When true, reveal correct answer immediately after a wrong pick and color the answer sheet. */
+  instantFeedback?: boolean;
+  /** When true, render the simplified intro rule list and hide the side rules/tips cards. */
+  simplifiedRules?: boolean;
 };
 
 const DEFAULT_TOTAL = 36;
@@ -171,6 +175,8 @@ export function QuizApp(props: QuizAppProps = {}) {
     attemptsKey,
     onExit,
     theme = "blue",
+    instantFeedback = false,
+    simplifiedRules = false,
   } = props;
 
   // ---- Attempts (theory-only style rule: 3 tries then reset) ----
@@ -282,6 +288,7 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [marked, setMarked] = useState<Record<string, boolean>>({});
   const [skipped, setSkipped] = useState<Record<string, boolean>>({});
   const [correctMap, setCorrectMap] = useState<Record<string, boolean>>({});
+  const [revealedCorrect, setRevealedCorrect] = useState<Record<string, "A" | "B" | "C" | "D">>({});
   const [current, setCurrent] = useState(0);
   const [grade, setGrade] = useState<GradeResult | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(EXAM_SECONDS);
@@ -320,6 +327,8 @@ export function QuizApp(props: QuizAppProps = {}) {
   }, [correctCount, phase, PASS, MAX_WRONG, passStopShown]);
 
   async function handlePick(qid: string, key: "A" | "B" | "C" | "D") {
+    // In instant-feedback mode, once a question is answered, ignore further picks.
+    if (instantFeedback && qid in answers) return;
     setAnswers((prev) => ({ ...prev, [qid]: key }));
     setSkipped((prev) => {
       if (!prev[qid]) return prev;
@@ -329,6 +338,9 @@ export function QuizApp(props: QuizAppProps = {}) {
     try {
       const res = await checkFn({ data: { id: qid, answer: key } });
       setCorrectMap((prev) => ({ ...prev, [qid]: res.is_correct }));
+      if (!res.is_correct && res.correct_answer) {
+        setRevealedCorrect((prev) => ({ ...prev, [qid]: res.correct_answer! }));
+      }
     } catch (e) {
       console.error("checkAnswer error", e);
     }
@@ -389,6 +401,7 @@ export function QuizApp(props: QuizAppProps = {}) {
     setMarked({});
     setSkipped({});
     setCorrectMap({});
+    setRevealedCorrect({});
     setPassStopShown(false);
     setShowPassStop(false);
     setEarlyEnded(false);
@@ -406,6 +419,7 @@ export function QuizApp(props: QuizAppProps = {}) {
     setMarked({});
     setSkipped({});
     setCorrectMap({});
+    setRevealedCorrect({});
     setPassStopShown(false);
     setShowPassStop(false);
     setEarlyEnded(false);
@@ -533,6 +547,7 @@ export function QuizApp(props: QuizAppProps = {}) {
               maxAttempts={MAX_ATTEMPTS}
               theme={theme}
               onExit={onExit}
+              simplifiedRules={simplifiedRules}
             />
           </div>
         )}
@@ -554,8 +569,13 @@ export function QuizApp(props: QuizAppProps = {}) {
                 submitting={submit.isPending}
                 skipsRemaining={skipsRemaining}
                 theme={theme}
+                instantFeedback={instantFeedback}
+                correctMap={correctMap}
+                revealedCorrect={revealedCorrect}
               />
-              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} maxSkip={MAX_SKIP} />
+              {!simplifiedRules && (
+                <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} maxSkip={MAX_SKIP} />
+              )}
             </div>
             <aside className="lg:sticky lg:top-6 self-start">
               <AnswerSheet
@@ -569,6 +589,8 @@ export function QuizApp(props: QuizAppProps = {}) {
                 onSubmit={submitExam}
                 submitting={submit.isPending}
                 submitError={submit.error?.message}
+                instantFeedback={instantFeedback}
+                correctMap={correctMap}
               />
             </aside>
           </div>
@@ -860,12 +882,14 @@ function Intro({
   total, pass, maxWrong, maxSkip, examSeconds, onStart, loading, error,
   showHistoryReset = false, onResetHistory,
   attempts = 0, maxAttempts, theme = "blue", onExit,
+  simplifiedRules = false,
 }: {
   total: number; pass: number; maxWrong?: number; maxSkip?: number; examSeconds: number;
   onStart: () => void; loading: boolean; error?: string;
   showHistoryReset?: boolean; onResetHistory?: () => void;
   attempts?: number; maxAttempts?: number;
   theme?: "blue" | "orange"; onExit?: () => void;
+  simplifiedRules?: boolean;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
   const accent =
@@ -875,7 +899,7 @@ function Intro({
   const attemptsLeft =
     typeof maxAttempts === "number" ? Math.max(0, maxAttempts - attempts) : undefined;
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
+    <div className={cn("grid grid-cols-1 gap-6", !simplifiedRules && "lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]")}>
       <Card className="border-slate-200 shadow-sm rounded-2xl">
         <CardContent className="p-8 md:p-10 space-y-6">
           <div className="flex items-center gap-3">
@@ -889,19 +913,19 @@ function Intro({
           </div>
           <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
             <li>共 <b>{total}</b> 道题，随机从题库抽取。</li>
-            {typeof maxWrong === "number" ? (
-              <li>最多允许错 <b>{maxWrong}</b> 题；答对 <b>{pass}</b> 题即可通过。</li>
-            ) : (
-              <li>答对 <b>{pass}</b> 题及以上为通过。</li>
-            )}
+            <li>请认真审题。</li>
             <li>考试时长 <b>{Math.round(examSeconds / 60)}</b> 分钟。</li>
-            {typeof maxSkip === "number" ? (
+            <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+            {!simplifiedRules && typeof maxWrong === "number" && (
+              <li>最多允许错 <b>{maxWrong}</b> 题。</li>
+            )}
+            {!simplifiedRules && typeof maxSkip === "number" ? (
               <li>最多允许跳过 <b>{maxSkip}</b> 题。</li>
-            ) : (
+            ) : null}
+            {!simplifiedRules && typeof maxSkip !== "number" && (
               <li>允许无限次跳过。</li>
             )}
-            <li>交卷后将显示成绩、正确答案与错题回顾。</li>
-            {typeof maxAttempts === "number" && (
+            {!simplifiedRules && typeof maxAttempts === "number" && (
               <li className="text-slate-700">
                 本轮总共 <b>{maxAttempts}</b> 次考试机会，当前第 <b>{Math.min(attempts + 1, maxAttempts)}</b> / {maxAttempts} 次。
                 {attemptsLeft !== undefined && attemptsLeft < maxAttempts && (
@@ -909,7 +933,7 @@ function Intro({
                 )}
               </li>
             )}
-            {showHistoryReset && (
+            {!simplifiedRules && showHistoryReset && (
               <li className="text-muted-foreground">
                 已出过的题目下次会自动排除；每个题库刷完一轮后重新开始。
               </li>
@@ -943,10 +967,12 @@ function Intro({
           </div>
         </CardContent>
       </Card>
-      <div className="space-y-6">
-        <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
-        <TipsCard />
-      </div>
+      {!simplifiedRules && (
+        <div className="space-y-6">
+          <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
+          <TipsCard />
+        </div>
+      )}
     </div>
   );
 }
@@ -958,6 +984,7 @@ function Exam({
   questions, answers, onPick, onSkip, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
+  instantFeedback = false, correctMap = {}, revealedCorrect = {},
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -972,6 +999,9 @@ function Exam({
   submitting?: boolean;
   skipsRemaining?: number;
   theme?: "blue" | "orange";
+  instantFeedback?: boolean;
+  correctMap?: Record<string, boolean>;
+  revealedCorrect?: Record<string, "A" | "B" | "C" | "D">;
 }) {
 
   const q = questions[current];
@@ -1033,16 +1063,55 @@ function Exam({
           </div>
         )}
 
-        <ExamOptionList
-          options={options.map((o) => ({
-            key: o.key,
-            text: o.text,
-            textEn: o.textEn || (showTranslation ? tr?.options?.[o.key] : null),
-          }))}
-          selected={answers[q.id] ?? null}
-          onSelect={pick}
-          showTranslation={showTranslation}
-        />
+        {(() => {
+          const picked = answers[q.id] ?? null;
+          const answered = q.id in answers;
+          const isCorrect = correctMap[q.id];
+          const correctLetter = revealedCorrect[q.id];
+          const feedbackReady = instantFeedback && answered && typeof isCorrect === "boolean";
+          const stateFor = feedbackReady
+            ? (k: "A" | "B" | "C" | "D") => {
+                if (isCorrect) return k === picked ? "correct" : "neutral";
+                if (k === correctLetter) return "correct";
+                if (k === picked) return "wrong";
+                return "neutral";
+              }
+            : undefined;
+          return (
+            <>
+              <ExamOptionList
+                options={options.map((o) => ({
+                  key: o.key,
+                  text: o.text,
+                  textEn: o.textEn || (showTranslation ? tr?.options?.[o.key] : null),
+                }))}
+                selected={picked}
+                onSelect={pick}
+                showTranslation={showTranslation}
+                readOnly={instantFeedback && answered}
+                stateFor={stateFor}
+              />
+              {feedbackReady && (
+                <div
+                  className={cn(
+                    "mt-4 rounded-xl border px-4 py-3 text-sm",
+                    isCorrect
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-rose-200 bg-rose-50 text-rose-800",
+                  )}
+                >
+                  {isCorrect ? (
+                    <span>✅ 回答正确</span>
+                  ) : (
+                    <span>
+                      ❌ 回答错误 · 正确答案是 <b className="font-semibold">{correctLetter ?? "?"}</b>
+                    </span>
+                  )}
+                </div>
+              )}
+            </>
+          );
+        })()}
 
 
 
@@ -1098,6 +1167,7 @@ function Exam({
 
 function AnswerSheet({
   questions, answers, marked, setMarked, skipped, current, setCurrent, onSubmit, submitting, submitError,
+  instantFeedback = false, correctMap = {},
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1109,6 +1179,8 @@ function AnswerSheet({
   onSubmit: () => void;
   submitting: boolean;
   submitError?: string;
+  instantFeedback?: boolean;
+  correctMap?: Record<string, boolean>;
 }) {
   const [confirming, setConfirming] = useState(false);
   const answered = Object.keys(answers).length;
@@ -1140,12 +1212,32 @@ function AnswerSheet({
         </div>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
-          <LegendDot color="bg-white border border-slate-300" label={`未答 ${Math.max(0, unanswered)}`} />
-          <LegendDot color="bg-blue-500" label={`已答 ${answered}`} />
-          <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
-          <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
-          <LegendDot color="bg-emerald-500" label="答对" />
-          <LegendDot color="bg-red-500" label="答错" />
+          {instantFeedback ? (
+            <>
+              <LegendDot
+                color="bg-emerald-500"
+                label={`已答对 ${Object.values(correctMap).filter(Boolean).length}`}
+              />
+              <LegendDot
+                color="bg-red-500"
+                label={`答错 ${
+                  Object.entries(correctMap).filter(([, v]) => v === false).length
+                }`}
+              />
+              <LegendDot color="bg-white border border-slate-300" label={`未作答 ${Math.max(0, unanswered)}`} />
+              <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
+              <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
+            </>
+          ) : (
+            <>
+              <LegendDot color="bg-white border border-slate-300" label={`未答 ${Math.max(0, unanswered)}`} />
+              <LegendDot color="bg-blue-500" label={`已答 ${answered}`} />
+              <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
+              <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
+              <LegendDot color="bg-emerald-500" label="答对" />
+              <LegendDot color="bg-red-500" label="答错" />
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-6 gap-2">
@@ -1154,6 +1246,12 @@ function AnswerSheet({
             const flagged = !!marked[qq.id];
             const wasSkipped = !!skipped[qq.id];
             const active = i === current;
+            const feedbackState =
+              instantFeedback && qq.id in correctMap
+                ? correctMap[qq.id]
+                  ? "correct"
+                  : "wrong"
+                : null;
             return (
               <button
                 key={qq.id}
@@ -1163,13 +1261,17 @@ function AnswerSheet({
                   "h-9 rounded-md text-sm font-medium border transition-colors tabular-nums",
                   active
                     ? "bg-blue-600 border-blue-600 text-white shadow ring-2 ring-blue-300"
-                    : flagged
-                      ? "bg-amber-100 border-amber-300 text-amber-800"
-                      : wasSkipped
-                        ? "bg-orange-100 border-orange-300 text-orange-800"
-                        : done
-                          ? "bg-blue-100 border-blue-300 text-blue-800"
-                          : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                    : feedbackState === "correct"
+                      ? "bg-emerald-100 border-emerald-400 text-emerald-800"
+                      : feedbackState === "wrong"
+                        ? "bg-red-100 border-red-400 text-red-800"
+                        : flagged
+                          ? "bg-amber-100 border-amber-300 text-amber-800"
+                          : wasSkipped
+                            ? "bg-orange-100 border-orange-300 text-orange-800"
+                            : done
+                              ? "bg-blue-100 border-blue-300 text-blue-800"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
                 )}
               >
                 {i + 1}
