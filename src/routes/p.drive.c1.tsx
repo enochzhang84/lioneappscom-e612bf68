@@ -135,6 +135,16 @@ export type QuizAppProps = {
   useHistory?: boolean;
   /** Stable key used to namespace history in localStorage. */
   historyKey?: string;
+  /** Max number of skips allowed during the exam (default: unlimited). */
+  maxSkip?: number;
+  /** Enable attempts tracking (e.g. 3 tries before forced reset). */
+  maxAttempts?: number;
+  /** Stable localStorage key for attempts counter. */
+  attemptsKey?: string;
+  /** Called when the user leaves this exam (back to hub / after final fail reset). */
+  onExit?: () => void;
+  /** Visual theme accent. */
+  theme?: "blue" | "orange";
 };
 
 const DEFAULT_TOTAL = 36;
@@ -156,7 +166,38 @@ export function QuizApp(props: QuizAppProps = {}) {
     backLabel = "← 返回驾考工具",
     useHistory = false,
     historyKey,
+    maxSkip: MAX_SKIP,
+    maxAttempts: MAX_ATTEMPTS,
+    attemptsKey,
+    onExit,
+    theme = "blue",
   } = props;
+
+  // ---- Attempts (theory-only style rule: 3 tries then reset) ----
+  const readAttempts = (): number => {
+    if (!attemptsKey || typeof window === "undefined") return 0;
+    try {
+      return parseInt(window.localStorage.getItem(attemptsKey) || "0", 10) || 0;
+    } catch {
+      return 0;
+    }
+  };
+  const writeAttempts = (n: number) => {
+    if (!attemptsKey || typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(attemptsKey, String(n));
+    } catch {
+      /* ignore */
+    }
+  };
+  const clearAttempts = () => {
+    if (!attemptsKey || typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(attemptsKey);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const fetchFn = useServerFn(getRandomQuizQuestions);
   const fetchMixedFn = useServerFn(getMixedRandomQuestions);
@@ -251,10 +292,22 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [passStopShown, setPassStopShown] = useState(false);
   const [showPassStop, setShowPassStop] = useState(false);
   const [earlyEnded, setEarlyEnded] = useState(false);
+  const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
+  const [skipLimitOpen, setSkipLimitOpen] = useState(false);
+  const [finalFailOpen, setFinalFailOpen] = useState(false);
+  const [attempts, setAttempts] = useState<number>(0);
   const translateFn = useServerFn(translateTexts);
   const checkFn = useServerFn(checkAnswer);
 
+  useEffect(() => {
+    setAttempts(readAttempts());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attemptsKey]);
+
   const correctCount = Object.values(correctMap).filter(Boolean).length;
+  const skippedCount = Object.values(skipped).filter(Boolean).length;
+  const skipsRemaining =
+    typeof MAX_SKIP === "number" ? Math.max(0, MAX_SKIP - skippedCount) : Infinity;
 
   // Pass-and-stop: only for correct-count-based exams (no maxWrong rule).
   useEffect(() => {
@@ -281,7 +334,7 @@ export function QuizApp(props: QuizAppProps = {}) {
     }
   }
 
-  function handleSkip() {
+  function performSkip() {
     const q = questions[current];
     if (!q) return;
     setSkipped((prev) => ({ ...prev, [q.id]: true }));
@@ -298,6 +351,22 @@ export function QuizApp(props: QuizAppProps = {}) {
     setCurrent((i) => Math.min(questions.length - 1, i + 1));
   }
 
+  function handleSkip() {
+    const q = questions[current];
+    if (!q) return;
+    if (typeof MAX_SKIP === "number") {
+      // If this question is already marked as skipped, moving forward doesn't consume another.
+      const alreadySkipped = !!skipped[q.id];
+      if (!alreadySkipped && skippedCount >= MAX_SKIP) {
+        setSkipLimitOpen(true);
+        return;
+      }
+      setSkipConfirmOpen(true);
+      return;
+    }
+    performSkip();
+  }
+
   function requestSubmitFromLast() {
     const unanswered = questions.filter((q) => !answers[q.id]).length;
     if (unanswered > 0) {
@@ -308,6 +377,11 @@ export function QuizApp(props: QuizAppProps = {}) {
   }
 
   async function startExam() {
+    // Guard: if attempts already exhausted, force reset flow.
+    if (typeof MAX_ATTEMPTS === "number" && readAttempts() >= MAX_ATTEMPTS) {
+      setFinalFailOpen(true);
+      return;
+    }
     const rows = await load.mutateAsync();
     if (!rows.length) return;
     setQuestions(rows);
@@ -339,13 +413,44 @@ export function QuizApp(props: QuizAppProps = {}) {
     setGrade(null);
   }
 
+  function fullResetRound() {
+    // Clear attempts + history + local exam state, then exit to parent (hub).
+    clearAttempts();
+    setAttempts(0);
+    resetHistory();
+    resetToIntro();
+    setFinalFailOpen(false);
+    onExit?.();
+  }
+
   async function submitExam() {
     const ids = questions.map((q) => q.id);
     const res = await submit.mutateAsync({ ids, answers });
     setGrade(res);
     setPhase("result");
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+
+    // Attempts tracking (theory-style: 3 tries then force reset).
+    if (typeof MAX_ATTEMPTS === "number") {
+      const passed =
+        typeof MAX_WRONG === "number"
+          ? res.wrong <= MAX_WRONG
+          : res.correct >= PASS;
+      if (passed) {
+        clearAttempts();
+        setAttempts(0);
+      } else {
+        const next = readAttempts() + 1;
+        writeAttempts(next);
+        setAttempts(next);
+        if (next >= MAX_ATTEMPTS) {
+          // Slight delay so the result renders first.
+          setTimeout(() => setFinalFailOpen(true), 200);
+        }
+      }
+    }
   }
+
 
   async function ensureTranslation(q: QuizQuestion) {
     if (translations[q.id]) return;
@@ -407,6 +512,7 @@ export function QuizApp(props: QuizAppProps = {}) {
           showTranslation={showTranslation}
           onToggleTranslation={toggleTranslation}
           translating={translating}
+          theme={theme}
         />
 
 
@@ -416,12 +522,17 @@ export function QuizApp(props: QuizAppProps = {}) {
               total={TOTAL}
               pass={PASS}
               maxWrong={MAX_WRONG}
+              maxSkip={MAX_SKIP}
               examSeconds={EXAM_SECONDS}
               onStart={startExam}
               loading={load.isPending}
               error={load.error?.message}
               showHistoryReset={useHistory}
               onResetHistory={resetHistory}
+              attempts={attempts}
+              maxAttempts={MAX_ATTEMPTS}
+              theme={theme}
+              onExit={onExit}
             />
           </div>
         )}
@@ -441,8 +552,10 @@ export function QuizApp(props: QuizAppProps = {}) {
                 translating={translating}
                 onSubmit={requestSubmitFromLast}
                 submitting={submit.isPending}
+                skipsRemaining={skipsRemaining}
+                theme={theme}
               />
-              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} />
+              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} maxSkip={MAX_SKIP} />
             </div>
             <aside className="lg:sticky lg:top-6 self-start">
               <AnswerSheet
@@ -463,10 +576,23 @@ export function QuizApp(props: QuizAppProps = {}) {
 
         {phase === "result" && grade && (
           <div className="mt-6">
-            <Result grade={grade} pass={PASS} maxWrong={MAX_WRONG} skippedCount={Object.values(skipped).filter(Boolean).length} earlyEnded={earlyEnded} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+            <Result
+              grade={grade}
+              pass={PASS}
+              maxWrong={MAX_WRONG}
+              skippedCount={Object.values(skipped).filter(Boolean).length}
+              earlyEnded={earlyEnded}
+              onRetake={startExam}
+              onHome={onExit ?? resetToIntro}
+              retaking={load.isPending}
+              attempts={attempts}
+              maxAttempts={MAX_ATTEMPTS}
+              homeLabel={onExit ? "返回首页" : "返回"}
+            />
           </div>
         )}
       </div>
+
 
       {phase === "exam" && <CountdownTicker onTick={setSecondsLeft} />}
 
@@ -533,8 +659,75 @@ export function QuizApp(props: QuizAppProps = {}) {
           </div>
         </div>
       )}
+
+      {skipConfirmOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSkipConfirmOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">确认跳过此题？</h3>
+            <p className="text-sm text-slate-600">
+              您最多只能跳过 <b>{MAX_SKIP}</b> 道题。是否确定跳过当前题目？
+              {typeof MAX_SKIP === "number" && (
+                <span className="block mt-1 text-xs text-slate-500">
+                  已跳过 {skippedCount} 题，剩余 {Math.max(0, MAX_SKIP - skippedCount)} 次。
+                </span>
+              )}
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setSkipConfirmOpen(false)}>否</Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={() => {
+                  setSkipConfirmOpen(false);
+                  performSkip();
+                }}
+              >
+                是，跳过
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {skipLimitOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSkipLimitOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">已达最大跳过次数</h3>
+            <p className="text-sm text-slate-600">
+              您已经达到最大跳过次数（{MAX_SKIP} 次）。请继续完成当前题目。
+            </p>
+            <div className="flex justify-end pt-2">
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setSkipLimitOpen(false)}>
+                我知道了
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {finalFailOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-red-100 text-red-600 grid place-items-center">
+                <XCircle size={22} />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">❌ 本次考试未通过</h3>
+            </div>
+            <p className="text-sm text-slate-600">
+              很遗憾！您已使用完本轮全部 <b>{MAX_ATTEMPTS}</b> 次考试机会。
+              系统将重新开始新的模拟考试，并重新随机生成新的试卷。
+            </p>
+            <div className="flex justify-end pt-2">
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={fullResetRound}>
+                重新开始模拟考试
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+
 
   return embedded ? body : <SiteLayout>{body}</SiteLayout>;
 }
@@ -547,7 +740,7 @@ function QuizPage() {
 
 function BlueBanner({
   embedded, phase, secondsLeft, current, total, title, subtitle, backHref, backLabel, onReset,
-  showTranslation, onToggleTranslation, translating,
+  showTranslation, onToggleTranslation, translating, theme = "blue",
 }: {
   embedded: boolean;
   phase: Phase;
@@ -562,13 +755,20 @@ function BlueBanner({
   showTranslation?: boolean;
   onToggleTranslation?: () => void;
   translating?: boolean;
+  theme?: "blue" | "orange";
 }) {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
+  const gradient =
+    theme === "orange"
+      ? "bg-gradient-to-r from-[#9a3412] via-[#c2410c] to-[#ea580c]"
+      : "bg-gradient-to-r from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb]";
+  const borderClass = theme === "orange" ? "border-orange-900/10" : "border-blue-900/10";
+  const openTextClass = theme === "orange" ? "text-orange-700" : "text-blue-700";
 
   return (
-    <div className="rounded-2xl overflow-hidden shadow-sm border border-blue-900/10">
-      <div className="bg-gradient-to-r from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb] text-white">
+    <div className={cn("rounded-2xl overflow-hidden shadow-sm border", borderClass)}>
+      <div className={cn(gradient, "text-white")}>
         <div className="px-5 md:px-8 py-5 md:py-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] items-center gap-5">
           <div className="flex items-center gap-4 min-w-0">
             <div className="h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-2xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/20">
@@ -602,7 +802,7 @@ function BlueBanner({
                 onClick={onToggleTranslation}
                 className={cn(
                   "border border-white/20 text-white",
-                  showTranslation ? "bg-white text-blue-700 hover:bg-white/90" : "bg-white/15 hover:bg-white/25",
+                  showTranslation ? cn("bg-white hover:bg-white/90", openTextClass) : "bg-white/15 hover:bg-white/25",
                 )}
                 title="在线中英对照翻译"
               >
@@ -625,6 +825,7 @@ function BlueBanner({
     </div>
   );
 }
+
 
 
 function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
@@ -656,20 +857,29 @@ function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => numb
 /* -------------------- Intro -------------------- */
 
 function Intro({
-  total, pass, maxWrong, examSeconds, onStart, loading, error,
+  total, pass, maxWrong, maxSkip, examSeconds, onStart, loading, error,
   showHistoryReset = false, onResetHistory,
+  attempts = 0, maxAttempts, theme = "blue", onExit,
 }: {
-  total: number; pass: number; maxWrong?: number; examSeconds: number;
+  total: number; pass: number; maxWrong?: number; maxSkip?: number; examSeconds: number;
   onStart: () => void; loading: boolean; error?: string;
   showHistoryReset?: boolean; onResetHistory?: () => void;
+  attempts?: number; maxAttempts?: number;
+  theme?: "blue" | "orange"; onExit?: () => void;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
+  const accent =
+    theme === "orange"
+      ? { icon: "bg-orange-50 text-orange-600", btn: "bg-orange-600 hover:bg-orange-700" }
+      : { icon: "bg-blue-50 text-blue-600", btn: "bg-blue-600 hover:bg-blue-700" };
+  const attemptsLeft =
+    typeof maxAttempts === "number" ? Math.max(0, maxAttempts - attempts) : undefined;
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
       <Card className="border-slate-200 shadow-sm rounded-2xl">
         <CardContent className="p-8 md:p-10 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 grid place-items-center">
+            <div className={cn("h-12 w-12 rounded-2xl grid place-items-center", accent.icon)}>
               <ClipboardCheck size={24} />
             </div>
             <div>
@@ -679,9 +889,26 @@ function Intro({
           </div>
           <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
             <li>共 <b>{total}</b> 道题，随机从题库抽取。</li>
-            <li>答对 <b>{pass}</b> 题及以上为通过。</li>
+            {typeof maxWrong === "number" ? (
+              <li>最多允许错 <b>{maxWrong}</b> 题；答对 <b>{pass}</b> 题即可通过。</li>
+            ) : (
+              <li>答对 <b>{pass}</b> 题及以上为通过。</li>
+            )}
             <li>考试时长 <b>{Math.round(examSeconds / 60)}</b> 分钟。</li>
+            {typeof maxSkip === "number" ? (
+              <li>最多允许跳过 <b>{maxSkip}</b> 题。</li>
+            ) : (
+              <li>允许无限次跳过。</li>
+            )}
             <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+            {typeof maxAttempts === "number" && (
+              <li className="text-slate-700">
+                本轮总共 <b>{maxAttempts}</b> 次考试机会，当前第 <b>{Math.min(attempts + 1, maxAttempts)}</b> / {maxAttempts} 次。
+                {attemptsLeft !== undefined && attemptsLeft < maxAttempts && (
+                  <span className="ml-1 text-amber-700">剩余 {attemptsLeft} 次</span>
+                )}
+              </li>
+            )}
             {showHistoryReset && (
               <li className="text-muted-foreground">
                 已出过的题目下次会自动排除；每个题库刷完一轮后重新开始。
@@ -690,9 +917,14 @@ function Intro({
           </ul>
           {error && <div className="text-sm text-destructive">{error}</div>}
           <div className="flex flex-wrap items-center gap-3">
-            <Button size="lg" onClick={onStart} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+            <Button size="lg" onClick={onStart} disabled={loading} className={accent.btn}>
               {loading ? "抽题中…" : "开始考试"}
             </Button>
+            {onExit && (
+              <Button size="lg" variant="outline" onClick={onExit}>
+                返回考试选择
+              </Button>
+            )}
             {showHistoryReset && onResetHistory && (
               confirmReset ? (
                 <>
@@ -712,19 +944,20 @@ function Intro({
         </CardContent>
       </Card>
       <div className="space-y-6">
-        <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
+        <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
         <TipsCard />
       </div>
     </div>
   );
 }
 
+
 /* -------------------- Exam -------------------- */
 
 function Exam({
   questions, answers, onPick, onSkip, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
-  onSubmit, submitting = false,
+  onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -737,7 +970,10 @@ function Exam({
   translating?: boolean;
   onSubmit?: () => void;
   submitting?: boolean;
+  skipsRemaining?: number;
+  theme?: "blue" | "orange";
 }) {
+
   const q = questions[current];
   const tr = translations[q?.id ?? ""];
   const options = useMemo(
@@ -827,25 +1063,31 @@ function Exam({
                 className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
               >
                 跳过
+                {Number.isFinite(skipsRemaining) && (
+                  <span className="ml-1 text-[10px] text-amber-600">
+                    (剩 {skipsRemaining})
+                  </span>
+                )}
               </Button>
             )}
             {current >= questions.length - 1 ? (
               <Button
                 onClick={() => onSubmit?.()}
                 disabled={submitting || !onSubmit}
-                className="mt-4 bg-blue-600 hover:bg-blue-700"
+                className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
               >
                 {submitting ? "评分中…" : "提交答案"}
               </Button>
             ) : (
               <Button
                 onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
-                className="mt-4 bg-blue-600 hover:bg-blue-700"
+                className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
               >
                 下一题 <ArrowRight size={16} className="ml-1" />
               </Button>
             )}
           </div>
+
         </div>
       </CardContent>
     </Card>
@@ -981,16 +1223,17 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 /* -------------------- Info cards -------------------- */
 
-function RulesTips({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
+function RulesTips({ total, pass, maxWrong, examSeconds, maxSkip }: { total: number; pass: number; maxWrong?: number; examSeconds: number; maxSkip?: number }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
+      <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
       <TipsCard />
     </div>
   );
 }
 
-function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
+
+function RulesCard({ total, pass, maxWrong, maxSkip, examSeconds }: { total: number; pass: number; maxWrong?: number; maxSkip?: number; examSeconds: number }) {
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 space-y-3">
@@ -1001,7 +1244,7 @@ function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass
         <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
           {typeof maxWrong === "number" ? (
             <li>
-              本测试共 <b>{total}</b> 道题，最多允许错 <b>{maxWrong}</b> 题即可通过。
+              本测试共 <b>{total}</b> 道题，答对 <b>{pass}</b> 题即通过；最多允许错 <b>{maxWrong}</b> 题。
             </li>
           ) : (
             <li>
@@ -1010,12 +1253,18 @@ function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass
           )}
           <li>每题有多个选项，请选择最正确的答案。</li>
           <li>测试时间为 {Math.round(examSeconds / 60)} 分钟，开始后计时。</li>
+          {typeof maxSkip === "number" ? (
+            <li>最多允许跳过 <b>{maxSkip}</b> 题。</li>
+          ) : (
+            <li>允许无限次跳过。</li>
+          )}
           <li>您可以随时标记题目，方便之后查看。</li>
         </ul>
       </CardContent>
     </Card>
   );
 }
+
 
 function TipsCard() {
   return (
@@ -1039,6 +1288,7 @@ function TipsCard() {
 
 function Result({
   grade, pass, maxWrong, skippedCount = 0, earlyEnded = false, onRetake, onHome, retaking,
+  attempts = 0, maxAttempts, homeLabel = "返回",
 }: {
   grade: GradeResult;
   pass: number;
@@ -1048,6 +1298,9 @@ function Result({
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
+  attempts?: number;
+  maxAttempts?: number;
+  homeLabel?: string;
 }) {
   const { total, correct: correctCount, wrong: wrongCount, results } = grade;
   const wrongs = results.filter((r) => !r.is_correct);
@@ -1057,6 +1310,22 @@ function Result({
   const signsCount = results.filter((r) => r.category === "c1_signs").length;
   const actualWrong = Math.max(0, wrongCount - skippedCount);
   const rateAll = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const attemptsLeft =
+    typeof maxAttempts === "number" ? Math.max(0, maxAttempts - attempts) : undefined;
+  const outOfAttempts = attemptsLeft === 0;
+
+  const attemptsHint =
+    typeof maxAttempts === "number" && !passed ? (
+      outOfAttempts ? (
+        <div className="mt-2 rounded-lg bg-red-100 text-red-800 text-sm px-3 py-2">
+          您已使用完本轮全部 {maxAttempts} 次考试机会，系统将重新开始新的模拟考试。
+        </div>
+      ) : (
+        <div className="mt-2 text-sm text-amber-700">
+          剩余考试次数：<b>{attemptsLeft}</b> / {maxAttempts} 次
+        </div>
+      )
+    ) : null;
 
   if (isWrongBased) {
     return (
@@ -1072,13 +1341,14 @@ function Result({
                     {passed ? "PASS 通过" : "FAIL 未通过"}
                   </div>
                   <div className="mt-3 text-2xl md:text-3xl font-bold">
-                    {passed ? "恭喜！你已通过本次 DMV 小型车 C1 模拟考试。" : "继续努力，再来一次！"}
+                    {passed ? "🎉 恭喜您！您已通过本次考试。" : "很遗憾，本次考试未通过。"}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
                     {passed
                       ? `本次考试最多允许错 ${maxWrong} 题，你的错题数在允许范围内。`
                       : `本次考试最多允许错 ${maxWrong} 题，你的错题数超过通过标准，建议先复习错题再重新测试。`}
                   </div>
+                  {attemptsHint}
                 </div>
               </div>
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6 text-center">
@@ -1091,10 +1361,12 @@ function Result({
                 <Stat label="正确率" value={`${rateAll}%`} />
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
-                  {retaking ? "抽题中…" : "再考一次"}
-                </Button>
-                <Button variant="outline" onClick={onHome}>返回</Button>
+                {!outOfAttempts && (
+                  <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
+                    {retaking ? "抽题中…" : "重新考试"}
+                  </Button>
+                )}
+                <Button variant="outline" onClick={onHome}>{homeLabel}</Button>
               </div>
             </div>
           </CardContent>
@@ -1112,7 +1384,7 @@ function Result({
     <div className="space-y-8">
       {earlyEnded && passed && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 px-5 py-3 text-sm">
-          您已达到 DMV 小型车 C1 模拟考试通过标准，并选择提前结束考试。
+          您已达到本次考试通过标准，并选择提前结束考试。
         </div>
       )}
       <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
@@ -1130,6 +1402,7 @@ function Result({
               <div className="text-sm text-muted-foreground mt-1">
                 通过条件：答对 ≥ {pass} 题
               </div>
+              {attemptsHint}
             </div>
             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6 text-center">
               <Stat label="总题数" value={total} />
@@ -1142,10 +1415,12 @@ function Result({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
-            <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
-              {retaking ? "抽题中…" : "再考一次"}
-            </Button>
-            <Button variant="outline" onClick={onHome}>返回</Button>
+            {!outOfAttempts && (
+              <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
+                {retaking ? "抽题中…" : "重新考试"}
+              </Button>
+            )}
+            <Button variant="outline" onClick={onHome}>{homeLabel}</Button>
           </div>
         </CardContent>
       </Card>
@@ -1155,6 +1430,7 @@ function Result({
     </div>
   );
 }
+
 
 export function ExamResultReview({
   results, wrongs,
