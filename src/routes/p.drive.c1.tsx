@@ -327,6 +327,8 @@ export function QuizApp(props: QuizAppProps = {}) {
   }, [correctCount, phase, PASS, MAX_WRONG, passStopShown]);
 
   async function handlePick(qid: string, key: "A" | "B" | "C" | "D") {
+    // In instant-feedback mode, once a question is answered, ignore further picks.
+    if (instantFeedback && qid in answers) return;
     setAnswers((prev) => ({ ...prev, [qid]: key }));
     setSkipped((prev) => {
       if (!prev[qid]) return prev;
@@ -336,6 +338,9 @@ export function QuizApp(props: QuizAppProps = {}) {
     try {
       const res = await checkFn({ data: { id: qid, answer: key } });
       setCorrectMap((prev) => ({ ...prev, [qid]: res.is_correct }));
+      if (!res.is_correct && res.correct_answer) {
+        setRevealedCorrect((prev) => ({ ...prev, [qid]: res.correct_answer! }));
+      }
     } catch (e) {
       console.error("checkAnswer error", e);
     }
