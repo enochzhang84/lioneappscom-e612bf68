@@ -1283,11 +1283,6 @@ function Exam({
                   className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
                 >
                   跳过
-                  {Number.isFinite(skipsRemaining) && (
-                    <span className="ml-1 text-[10px] text-amber-600">
-                      (剩 {skipsRemaining})
-                    </span>
-                  )}
                 </Button>
               )}
               {current >= questions.length - 1 ? (
