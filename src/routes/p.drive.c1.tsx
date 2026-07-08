@@ -514,6 +514,35 @@ export function QuizApp(props: QuizAppProps = {}) {
     }
   }
 
+  async function confirmCancelExam() {
+    setCancelConfirmOpen(false);
+    const submittedCount = Object.keys(correctMap).length;
+    // No submissions yet → silent exit, no record.
+    if (submittedCount === 0) {
+      resetToIntro();
+      onExit?.();
+      return;
+    }
+    // Record a failed attempt via the normal grade path, then show cancelled screen.
+    setCancelling(true);
+    try {
+      const ids = questions.map((q) => q.id);
+      const res = await submit.mutateAsync({ ids, answers });
+      setGrade(res);
+      if (typeof MAX_ATTEMPTS === "number") {
+        const next = readAttempts() + 1;
+        writeAttempts(next);
+        setAttempts(next);
+      }
+    } catch (e) {
+      console.error("cancelExam submit error", e);
+    } finally {
+      setCancelling(false);
+      setPhase("cancelled");
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    }
+  }
+
 
   async function ensureTranslation(q: QuizQuestion) {
     if (translations[q.id]) return;
