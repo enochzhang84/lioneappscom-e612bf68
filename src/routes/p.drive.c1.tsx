@@ -1517,7 +1517,7 @@ function TipsCard() {
 
 function Result({
   grade, pass, maxWrong, skippedCount = 0, earlyEnded = false, onRetake, onHome, retaking,
-  attempts = 0, maxAttempts, homeLabel = "返回",
+  attempts = 0, maxAttempts, homeLabel = "返回", minimalMode = false,
 }: {
   grade: GradeResult;
   pass: number;
@@ -1530,7 +1530,9 @@ function Result({
   attempts?: number;
   maxAttempts?: number;
   homeLabel?: string;
+  minimalMode?: boolean;
 }) {
+
   const { total, correct: correctCount, wrong: wrongCount, results } = grade;
   const wrongs = results.filter((r) => !r.is_correct);
   const isWrongBased = typeof maxWrong === "number";
