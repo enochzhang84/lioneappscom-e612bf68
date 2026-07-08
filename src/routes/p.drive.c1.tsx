@@ -392,7 +392,9 @@ export function QuizApp(props: QuizAppProps = {}) {
     }
   }
 
+  function performSkip() {
     const q = questions[current];
+
     if (!q) return;
     setSkipped((prev) => ({ ...prev, [q.id]: true }));
     setAnswers((prev) => {
