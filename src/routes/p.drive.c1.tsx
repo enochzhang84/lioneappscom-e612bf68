@@ -109,7 +109,7 @@ export const Route = createFileRoute("/p/drive/c1")({
   component: QuizPage,
 });
 
-type Phase = "intro" | "exam" | "result";
+type Phase = "intro" | "exam" | "result" | "cancelled";
 
 type QuestionTranslation = {
   question?: string;
