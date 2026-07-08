@@ -881,12 +881,14 @@ function Intro({
   total, pass, maxWrong, maxSkip, examSeconds, onStart, loading, error,
   showHistoryReset = false, onResetHistory,
   attempts = 0, maxAttempts, theme = "blue", onExit,
+  simplifiedRules = false,
 }: {
   total: number; pass: number; maxWrong?: number; maxSkip?: number; examSeconds: number;
   onStart: () => void; loading: boolean; error?: string;
   showHistoryReset?: boolean; onResetHistory?: () => void;
   attempts?: number; maxAttempts?: number;
   theme?: "blue" | "orange"; onExit?: () => void;
+  simplifiedRules?: boolean;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
   const accent =
