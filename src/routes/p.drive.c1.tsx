@@ -568,8 +568,13 @@ export function QuizApp(props: QuizAppProps = {}) {
                 submitting={submit.isPending}
                 skipsRemaining={skipsRemaining}
                 theme={theme}
+                instantFeedback={instantFeedback}
+                correctMap={correctMap}
+                revealedCorrect={revealedCorrect}
               />
-              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} maxSkip={MAX_SKIP} />
+              {!simplifiedRules && (
+                <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} maxSkip={MAX_SKIP} />
+              )}
             </div>
             <aside className="lg:sticky lg:top-6 self-start">
               <AnswerSheet
@@ -583,6 +588,8 @@ export function QuizApp(props: QuizAppProps = {}) {
                 onSubmit={submitExam}
                 submitting={submit.isPending}
                 submitError={submit.error?.message}
+                instantFeedback={instantFeedback}
+                correctMap={correctMap}
               />
             </aside>
           </div>
