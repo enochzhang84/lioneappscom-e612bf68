@@ -1241,6 +1241,12 @@ function AnswerSheet({
             const flagged = !!marked[qq.id];
             const wasSkipped = !!skipped[qq.id];
             const active = i === current;
+            const feedbackState =
+              instantFeedback && qq.id in correctMap
+                ? correctMap[qq.id]
+                  ? "correct"
+                  : "wrong"
+                : null;
             return (
               <button
                 key={qq.id}
@@ -1250,13 +1256,17 @@ function AnswerSheet({
                   "h-9 rounded-md text-sm font-medium border transition-colors tabular-nums",
                   active
                     ? "bg-blue-600 border-blue-600 text-white shadow ring-2 ring-blue-300"
-                    : flagged
-                      ? "bg-amber-100 border-amber-300 text-amber-800"
-                      : wasSkipped
-                        ? "bg-orange-100 border-orange-300 text-orange-800"
-                        : done
-                          ? "bg-blue-100 border-blue-300 text-blue-800"
-                          : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
+                    : feedbackState === "correct"
+                      ? "bg-emerald-100 border-emerald-400 text-emerald-800"
+                      : feedbackState === "wrong"
+                        ? "bg-red-100 border-red-400 text-red-800"
+                        : flagged
+                          ? "bg-amber-100 border-amber-300 text-amber-800"
+                          : wasSkipped
+                            ? "bg-orange-100 border-orange-300 text-orange-800"
+                            : done
+                              ? "bg-blue-100 border-blue-300 text-blue-800"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-blue-300",
                 )}
               >
                 {i + 1}
