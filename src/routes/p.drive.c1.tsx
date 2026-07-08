@@ -379,14 +379,14 @@ export function QuizApp(props: QuizAppProps = {}) {
         setRevealedCorrect((prev) => ({ ...prev, [q.id]: res.correct_answer! }));
       }
       const isLast = current >= questions.length - 1;
-      const delay = res.is_correct ? 1000 : 2000;
-      window.setTimeout(() => {
+      // Correct: advance immediately. Wrong: stay on page so user can click 下一题.
+      if (res.is_correct) {
         if (isLast) {
           void submitExam();
         } else {
           setCurrent((i) => Math.min(questions.length - 1, i + 1));
         }
-      }, delay);
+      }
     } catch (e) {
       console.error("submitCurrentAnswer error", e);
     } finally {
