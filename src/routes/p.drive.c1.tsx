@@ -1603,7 +1603,7 @@ function Result({
           </CardContent>
         </Card>
 
-        <ExamResultReview results={results} wrongs={wrongs} />
+        <ExamResultReview results={results} wrongs={wrongs} minimalMode={minimalMode} />
       </div>
     );
   }
@@ -1657,7 +1657,7 @@ function Result({
       </Card>
 
 
-      <ExamResultReview results={results} wrongs={wrongs} />
+      <ExamResultReview results={results} wrongs={wrongs} minimalMode={minimalMode} />
     </div>
   );
 }
