@@ -890,7 +890,7 @@ function Intro({
 function Exam({
   questions, answers, onPick, onSkip, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
-  onSubmit, submitting = false,
+  onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -903,7 +903,10 @@ function Exam({
   translating?: boolean;
   onSubmit?: () => void;
   submitting?: boolean;
+  skipsRemaining?: number;
+  theme?: "blue" | "orange";
 }) {
+
   const q = questions[current];
   const tr = translations[q?.id ?? ""];
   const options = useMemo(
