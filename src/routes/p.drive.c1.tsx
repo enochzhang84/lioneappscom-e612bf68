@@ -1821,7 +1821,7 @@ function ReviewItem({ r, idx, minimalMode = false }: { r: GradedQuestion; idx: n
           <div>我的选择：<b className={cn(isRight ? "text-emerald-700" : "text-red-700")}>{pick ?? "未作答"}</b></div>
           <div>正确答案：<b className="text-emerald-700">{correct}</b></div>
         </div>
-        {r.explanation && (
+        {!minimalMode && r.explanation && (
           <div className="text-sm rounded-lg bg-emerald-50 border border-emerald-200 p-3 leading-relaxed">
             <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1">
               <CheckCircle2 size={12} /> 答案解析
@@ -1833,7 +1833,10 @@ function ReviewItem({ r, idx, minimalMode = false }: { r: GradedQuestion; idx: n
           </div>
         )}
 
-        <LearningCenter r={r} open={showLearn} onToggle={() => setShowLearn((v) => !v)} />
+        {!minimalMode && (
+          <LearningCenter r={r} open={showLearn} onToggle={() => setShowLearn((v) => !v)} />
+        )}
+
       </CardContent>
     </Card>
   );
