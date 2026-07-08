@@ -292,10 +292,22 @@ export function QuizApp(props: QuizAppProps = {}) {
   const [passStopShown, setPassStopShown] = useState(false);
   const [showPassStop, setShowPassStop] = useState(false);
   const [earlyEnded, setEarlyEnded] = useState(false);
+  const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
+  const [skipLimitOpen, setSkipLimitOpen] = useState(false);
+  const [finalFailOpen, setFinalFailOpen] = useState(false);
+  const [attempts, setAttempts] = useState<number>(0);
   const translateFn = useServerFn(translateTexts);
   const checkFn = useServerFn(checkAnswer);
 
+  useEffect(() => {
+    setAttempts(readAttempts());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attemptsKey]);
+
   const correctCount = Object.values(correctMap).filter(Boolean).length;
+  const skippedCount = Object.values(skipped).filter(Boolean).length;
+  const skipsRemaining =
+    typeof MAX_SKIP === "number" ? Math.max(0, MAX_SKIP - skippedCount) : Infinity;
 
   // Pass-and-stop: only for correct-count-based exams (no maxWrong rule).
   useEffect(() => {
@@ -322,7 +334,7 @@ export function QuizApp(props: QuizAppProps = {}) {
     }
   }
 
-  function handleSkip() {
+  function performSkip() {
     const q = questions[current];
     if (!q) return;
     setSkipped((prev) => ({ ...prev, [q.id]: true }));
@@ -339,6 +351,22 @@ export function QuizApp(props: QuizAppProps = {}) {
     setCurrent((i) => Math.min(questions.length - 1, i + 1));
   }
 
+  function handleSkip() {
+    const q = questions[current];
+    if (!q) return;
+    if (typeof MAX_SKIP === "number") {
+      // If this question is already marked as skipped, moving forward doesn't consume another.
+      const alreadySkipped = !!skipped[q.id];
+      if (!alreadySkipped && skippedCount >= MAX_SKIP) {
+        setSkipLimitOpen(true);
+        return;
+      }
+      setSkipConfirmOpen(true);
+      return;
+    }
+    performSkip();
+  }
+
   function requestSubmitFromLast() {
     const unanswered = questions.filter((q) => !answers[q.id]).length;
     if (unanswered > 0) {
@@ -349,6 +377,11 @@ export function QuizApp(props: QuizAppProps = {}) {
   }
 
   async function startExam() {
+    // Guard: if attempts already exhausted, force reset flow.
+    if (typeof MAX_ATTEMPTS === "number" && readAttempts() >= MAX_ATTEMPTS) {
+      setFinalFailOpen(true);
+      return;
+    }
     const rows = await load.mutateAsync();
     if (!rows.length) return;
     setQuestions(rows);
@@ -380,13 +413,44 @@ export function QuizApp(props: QuizAppProps = {}) {
     setGrade(null);
   }
 
+  function fullResetRound() {
+    // Clear attempts + history + local exam state, then exit to parent (hub).
+    clearAttempts();
+    setAttempts(0);
+    resetHistory();
+    resetToIntro();
+    setFinalFailOpen(false);
+    onExit?.();
+  }
+
   async function submitExam() {
     const ids = questions.map((q) => q.id);
     const res = await submit.mutateAsync({ ids, answers });
     setGrade(res);
     setPhase("result");
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+
+    // Attempts tracking (theory-style: 3 tries then force reset).
+    if (typeof MAX_ATTEMPTS === "number") {
+      const passed =
+        typeof MAX_WRONG === "number"
+          ? res.wrong <= MAX_WRONG
+          : res.correct >= PASS;
+      if (passed) {
+        clearAttempts();
+        setAttempts(0);
+      } else {
+        const next = readAttempts() + 1;
+        writeAttempts(next);
+        setAttempts(next);
+        if (next >= MAX_ATTEMPTS) {
+          // Slight delay so the result renders first.
+          setTimeout(() => setFinalFailOpen(true), 200);
+        }
+      }
+    }
   }
+
 
   async function ensureTranslation(q: QuizQuestion) {
     if (translations[q.id]) return;
