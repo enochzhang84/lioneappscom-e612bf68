@@ -149,6 +149,8 @@ export type QuizAppProps = {
   instantFeedback?: boolean;
   /** When true, render the simplified intro rule list and hide the side rules/tips cards. */
   simplifiedRules?: boolean;
+  /** Apple-minimal exam UI: no header/answer-sheet/skip/prev; submit-per-question; no AI in review. */
+  minimalMode?: boolean;
 };
 
 const DEFAULT_TOTAL = 36;
@@ -177,7 +179,10 @@ export function QuizApp(props: QuizAppProps = {}) {
     theme = "blue",
     instantFeedback = false,
     simplifiedRules = false,
+    minimalMode = false,
   } = props;
+
+
 
   // ---- Attempts (theory-only style rule: 3 tries then reset) ----
   const readAttempts = (): number => {
@@ -327,6 +332,17 @@ export function QuizApp(props: QuizAppProps = {}) {
   }, [correctCount, phase, PASS, MAX_WRONG, passStopShown]);
 
   async function handlePick(qid: string, key: "A" | "B" | "C" | "D") {
+    // In minimal mode, the user submits explicitly — don't auto-grade on pick.
+    if (minimalMode) {
+      if (qid in correctMap) return; // already judged; locked
+      setAnswers((prev) => ({ ...prev, [qid]: key }));
+      setSkipped((prev) => {
+        if (!prev[qid]) return prev;
+        const { [qid]: _, ...rest } = prev;
+        return rest;
+      });
+      return;
+    }
     // In instant-feedback mode, once a question is answered, ignore further picks.
     if (instantFeedback && qid in answers) return;
     setAnswers((prev) => ({ ...prev, [qid]: key }));
@@ -346,8 +362,39 @@ export function QuizApp(props: QuizAppProps = {}) {
     }
   }
 
+  const [submittingAnswer, setSubmittingAnswer] = useState(false);
+  async function submitCurrentAnswer() {
+    const q = questions[current];
+    if (!q) return;
+    const picked = answers[q.id];
+    if (!picked) return;
+    if (q.id in correctMap) return;
+    setSubmittingAnswer(true);
+    try {
+      const res = await checkFn({ data: { id: q.id, answer: picked } });
+      setCorrectMap((prev) => ({ ...prev, [q.id]: res.is_correct }));
+      if (!res.is_correct && res.correct_answer) {
+        setRevealedCorrect((prev) => ({ ...prev, [q.id]: res.correct_answer! }));
+      }
+      const isLast = current >= questions.length - 1;
+      const delay = res.is_correct ? 1000 : 2000;
+      window.setTimeout(() => {
+        if (isLast) {
+          void submitExam();
+        } else {
+          setCurrent((i) => Math.min(questions.length - 1, i + 1));
+        }
+      }, delay);
+    } catch (e) {
+      console.error("submitCurrentAnswer error", e);
+    } finally {
+      setSubmittingAnswer(false);
+    }
+  }
+
   function performSkip() {
     const q = questions[current];
+
     if (!q) return;
     setSkipped((prev) => ({ ...prev, [q.id]: true }));
     setAnswers((prev) => {
@@ -510,24 +557,26 @@ export function QuizApp(props: QuizAppProps = {}) {
   }, [current, showTranslation, phase]);
 
   const body = (
-    <div className="bg-[#F8FAFC] min-h-screen">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-6 md:py-8">
-        <BlueBanner
-          embedded={embedded}
-          phase={phase}
-          secondsLeft={secondsLeft}
-          current={current}
-          total={questions.length || TOTAL}
-          title={title}
-          subtitle={subtitle}
-          backHref={backHref}
-          backLabel={backLabel}
-          onReset={phase !== "intro" ? resetToIntro : undefined}
-          showTranslation={showTranslation}
-          onToggleTranslation={toggleTranslation}
-          translating={translating}
-          theme={theme}
-        />
+    <div className={cn("min-h-screen", minimalMode ? "bg-white" : "bg-[#F8FAFC]")}>
+      <div className={cn("mx-auto px-4 md:px-8 py-6 md:py-8", minimalMode ? "max-w-[760px]" : "max-w-[1400px]")}>
+        {!(minimalMode && phase === "exam") && (
+          <BlueBanner
+            embedded={embedded}
+            phase={phase}
+            secondsLeft={secondsLeft}
+            current={current}
+            total={questions.length || TOTAL}
+            title={title}
+            subtitle={subtitle}
+            backHref={backHref}
+            backLabel={backLabel}
+            onReset={phase !== "intro" ? resetToIntro : undefined}
+            showTranslation={showTranslation}
+            onToggleTranslation={toggleTranslation}
+            translating={translating}
+            theme={theme}
+          />
+        )}
 
 
         {phase === "intro" && (
@@ -552,7 +601,33 @@ export function QuizApp(props: QuizAppProps = {}) {
           </div>
         )}
 
-        {phase === "exam" && (
+        {phase === "exam" && minimalMode && (
+          <div className="mt-2">
+            <Exam
+              questions={questions}
+              answers={answers}
+              onPick={handlePick}
+              onSkip={handleSkip}
+              current={current}
+              setCurrent={setCurrent}
+              showTranslation={showTranslation}
+              translations={translations}
+              translating={translating}
+              onSubmit={requestSubmitFromLast}
+              submitting={submit.isPending}
+              skipsRemaining={skipsRemaining}
+              theme={theme}
+              instantFeedback={instantFeedback}
+              correctMap={correctMap}
+              revealedCorrect={revealedCorrect}
+              minimalMode
+              onSubmitAnswer={submitCurrentAnswer}
+              submittingAnswer={submittingAnswer}
+            />
+          </div>
+        )}
+
+        {phase === "exam" && !minimalMode && (
           <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
             <div className="min-w-0 space-y-6">
               <Exam
@@ -596,6 +671,8 @@ export function QuizApp(props: QuizAppProps = {}) {
           </div>
         )}
 
+
+
         {phase === "result" && grade && (
           <div className="mt-6">
             <Result
@@ -610,6 +687,8 @@ export function QuizApp(props: QuizAppProps = {}) {
               attempts={attempts}
               maxAttempts={MAX_ATTEMPTS}
               homeLabel={onExit ? "返回首页" : "返回"}
+              minimalMode={minimalMode}
+
             />
           </div>
         )}
@@ -985,6 +1064,7 @@ function Exam({
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
   instantFeedback = false, correctMap = {}, revealedCorrect = {},
+  minimalMode = false, onSubmitAnswer, submittingAnswer = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1002,7 +1082,11 @@ function Exam({
   instantFeedback?: boolean;
   correctMap?: Record<string, boolean>;
   revealedCorrect?: Record<string, "A" | "B" | "C" | "D">;
+  minimalMode?: boolean;
+  onSubmitAnswer?: () => void;
+  submittingAnswer?: boolean;
 }) {
+
 
   const q = questions[current];
   const tr = translations[q?.id ?? ""];
@@ -1028,12 +1112,17 @@ function Exam({
   const isSignRecognition = q.question_type === "sign_recognition";
 
   return (
-    <Card className="border-slate-200 shadow-sm rounded-2xl">
-      <CardContent className="p-6 md:p-8 space-y-6">
-        <div className="flex items-baseline gap-3">
-          <span className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">{current + 1}.</span>
+    <Card className={cn("rounded-2xl", minimalMode ? "border-transparent shadow-none bg-white" : "border-slate-200 shadow-sm")}>
+      <CardContent className={cn(minimalMode ? "p-4 md:p-6 space-y-8" : "p-6 md:p-8 space-y-6")}>
+        <div className={cn("flex gap-3", minimalMode ? "items-start" : "items-baseline")}>
+          {!minimalMode && (
+            <span className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">{current + 1}.</span>
+          )}
           <div className="min-w-0">
-            <h2 className="text-base md:text-lg font-semibold leading-relaxed whitespace-pre-wrap text-slate-900">
+            <h2 className={cn(
+              "leading-relaxed whitespace-pre-wrap text-slate-900",
+              minimalMode ? "text-xl md:text-2xl font-semibold tracking-tight" : "text-base md:text-lg font-semibold",
+            )}>
               {q.question}
             </h2>
             {(showTranslation || q.question_en) && questionEn && (
@@ -1066,9 +1155,12 @@ function Exam({
         {(() => {
           const picked = answers[q.id] ?? null;
           const answered = q.id in answers;
+          const judged = q.id in correctMap;
           const isCorrect = correctMap[q.id];
           const correctLetter = revealedCorrect[q.id];
-          const feedbackReady = instantFeedback && answered && typeof isCorrect === "boolean";
+          const feedbackReady = minimalMode
+            ? judged
+            : instantFeedback && answered && typeof isCorrect === "boolean";
           const stateFor = feedbackReady
             ? (k: "A" | "B" | "C" | "D") => {
                 if (isCorrect) return k === picked ? "correct" : "neutral";
@@ -1077,6 +1169,7 @@ function Exam({
                 return "neutral";
               }
             : undefined;
+          const readOnly = minimalMode ? judged : (instantFeedback && answered);
           return (
             <>
               <ExamOptionList
@@ -1088,10 +1181,28 @@ function Exam({
                 selected={picked}
                 onSelect={pick}
                 showTranslation={showTranslation}
-                readOnly={instantFeedback && answered}
+                readOnly={readOnly}
                 stateFor={stateFor}
               />
-              {feedbackReady && (
+              {feedbackReady && minimalMode && (
+                <div className="mt-6 space-y-2">
+                  {isCorrect ? (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 text-base font-medium">
+                      ✔ 回答正确
+                    </div>
+                  ) : (
+                    <>
+                      <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700 text-base">
+                        您的答案：<b className="font-semibold">{picked ?? "未作答"}</b>
+                      </div>
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-base">
+                        正确答案：<b className="font-semibold">{correctLetter ?? "?"}</b>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              {feedbackReady && !minimalMode && (
                 <div
                   className={cn(
                     "mt-4 rounded-xl border px-4 py-3 text-sm",
@@ -1113,55 +1224,71 @@ function Exam({
           );
         })()}
 
-
-
-        <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
-          <Button
-            variant="outline"
-            onClick={() => setCurrent((i) => Math.max(0, i - 1))}
-            disabled={current === 0}
-            className="mt-4"
-          >
-            <ArrowLeft size={16} className="mr-1" /> 上一题
-          </Button>
-          <div className="flex items-center gap-2">
-            {current < questions.length - 1 && (
+        {minimalMode ? (
+          <div className="pt-4 flex justify-center">
+            {!(q.id in correctMap) && (
               <Button
-                variant="outline"
-                onClick={onSkip}
-                className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
-              >
-                跳过
-                {Number.isFinite(skipsRemaining) && (
-                  <span className="ml-1 text-[10px] text-amber-600">
-                    (剩 {skipsRemaining})
-                  </span>
+                size="lg"
+                onClick={() => onSubmitAnswer?.()}
+                disabled={!answers[q.id] || submittingAnswer || submitting}
+                className={cn(
+                  "min-w-[160px] rounded-full",
+                  theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
                 )}
-              </Button>
-            )}
-            {current >= questions.length - 1 ? (
-              <Button
-                onClick={() => onSubmit?.()}
-                disabled={submitting || !onSubmit}
-                className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
               >
-                {submitting ? "评分中…" : "提交答案"}
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
-                className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
-              >
-                下一题 <ArrowRight size={16} className="ml-1" />
+                {submittingAnswer ? "判定中…" : submitting ? "评分中…" : "提交"}
               </Button>
             )}
           </div>
-
-        </div>
+        ) : (
+          <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrent((i) => Math.max(0, i - 1))}
+              disabled={current === 0}
+              className="mt-4"
+            >
+              <ArrowLeft size={16} className="mr-1" /> 上一题
+            </Button>
+            <div className="flex items-center gap-2">
+              {current < questions.length - 1 && (
+                <Button
+                  variant="outline"
+                  onClick={onSkip}
+                  className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
+                >
+                  跳过
+                  {Number.isFinite(skipsRemaining) && (
+                    <span className="ml-1 text-[10px] text-amber-600">
+                      (剩 {skipsRemaining})
+                    </span>
+                  )}
+                </Button>
+              )}
+              {current >= questions.length - 1 ? (
+                <Button
+                  onClick={() => onSubmit?.()}
+                  disabled={submitting || !onSubmit}
+                  className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
+                >
+                  {submitting ? "评分中…" : "提交答案"}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
+                  className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
+                >
+                  下一题 <ArrowRight size={16} className="ml-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
+
 
 /* -------------------- Answer sheet -------------------- */
 
@@ -1390,7 +1517,7 @@ function TipsCard() {
 
 function Result({
   grade, pass, maxWrong, skippedCount = 0, earlyEnded = false, onRetake, onHome, retaking,
-  attempts = 0, maxAttempts, homeLabel = "返回",
+  attempts = 0, maxAttempts, homeLabel = "返回", minimalMode = false,
 }: {
   grade: GradeResult;
   pass: number;
@@ -1403,7 +1530,9 @@ function Result({
   attempts?: number;
   maxAttempts?: number;
   homeLabel?: string;
+  minimalMode?: boolean;
 }) {
+
   const { total, correct: correctCount, wrong: wrongCount, results } = grade;
   const wrongs = results.filter((r) => !r.is_correct);
   const isWrongBased = typeof maxWrong === "number";
@@ -1474,7 +1603,7 @@ function Result({
           </CardContent>
         </Card>
 
-        <ExamResultReview results={results} wrongs={wrongs} />
+        <ExamResultReview results={results} wrongs={wrongs} minimalMode={minimalMode} />
       </div>
     );
   }
@@ -1528,15 +1657,15 @@ function Result({
       </Card>
 
 
-      <ExamResultReview results={results} wrongs={wrongs} />
+      <ExamResultReview results={results} wrongs={wrongs} minimalMode={minimalMode} />
     </div>
   );
 }
 
 
 export function ExamResultReview({
-  results, wrongs,
-}: { results: GradedQuestion[]; wrongs: GradedQuestion[] }) {
+  results, wrongs, minimalMode = false,
+}: { results: GradedQuestion[]; wrongs: GradedQuestion[]; minimalMode?: boolean }) {
   const [showAll, setShowAll] = useState(false);
   const hasWrong = wrongs.length > 0;
 
@@ -1552,7 +1681,7 @@ export function ExamResultReview({
           </div>
           <div className="space-y-4">
             {wrongs.map((r, i) => (
-              <ReviewItem key={r.id} r={r} idx={i + 1} />
+              <ReviewItem key={r.id} r={r} idx={i + 1} minimalMode={minimalMode} />
             ))}
           </div>
         </section>
@@ -1564,42 +1693,45 @@ export function ExamResultReview({
             </div>
             <div>
               <div className="text-lg font-semibold text-emerald-800">恭喜！本次没有错题。</div>
-              <div className="text-sm text-emerald-700/80 mt-0.5">全部作答正确，可继续查看完整解析巩固知识点。</div>
+              <div className="text-sm text-emerald-700/80 mt-0.5">全部作答正确，本次考试圆满完成。</div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <section className="space-y-4 mt-8">
-        {!showAll ? (
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={() => setShowAll(true)}
-              className="border-blue-300 text-blue-700 hover:bg-blue-50"
-            >
-              <BookOpen size={16} className="mr-1.5" /> 查看全部题目解析（{results.length}）
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">全部题目解析（{results.length}）</h2>
-              <Button variant="ghost" size="sm" onClick={() => setShowAll(false)}>
-                收起
+      {!minimalMode && (
+        <section className="space-y-4 mt-8">
+          {!showAll ? (
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowAll(true)}
+                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                <BookOpen size={16} className="mr-1.5" /> 查看全部题目解析（{results.length}）
               </Button>
             </div>
-            <div className="space-y-4">
-              {results.map((r, i) => (
-                <ReviewItem key={r.id} r={r} idx={i + 1} />
-              ))}
-            </div>
-          </>
-        )}
-      </section>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">全部题目解析（{results.length}）</h2>
+                <Button variant="ghost" size="sm" onClick={() => setShowAll(false)}>
+                  收起
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {results.map((r, i) => (
+                  <ReviewItem key={r.id} r={r} idx={i + 1} minimalMode={minimalMode} />
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+      )}
     </>
   );
 }
+
 
 function Stat({ label, value, tone }: { label: string; value: number | string; tone?: "pos" | "neg" }) {
   return (
@@ -1613,7 +1745,7 @@ function Stat({ label, value, tone }: { label: string; value: number | string; t
   );
 }
 
-function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
+function ReviewItem({ r, idx, minimalMode = false }: { r: GradedQuestion; idx: number; minimalMode?: boolean }) {
   const correct = r.correct_answer;
   const pick = r.picked;
   const isRight = r.is_correct;
@@ -1689,7 +1821,7 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
           <div>我的选择：<b className={cn(isRight ? "text-emerald-700" : "text-red-700")}>{pick ?? "未作答"}</b></div>
           <div>正确答案：<b className="text-emerald-700">{correct}</b></div>
         </div>
-        {r.explanation && (
+        {!minimalMode && r.explanation && (
           <div className="text-sm rounded-lg bg-emerald-50 border border-emerald-200 p-3 leading-relaxed">
             <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1">
               <CheckCircle2 size={12} /> 答案解析
@@ -1701,7 +1833,10 @@ function ReviewItem({ r, idx }: { r: GradedQuestion; idx: number }) {
           </div>
         )}
 
-        <LearningCenter r={r} open={showLearn} onToggle={() => setShowLearn((v) => !v)} />
+        {!minimalMode && (
+          <LearningCenter r={r} open={showLearn} onToggle={() => setShowLearn((v) => !v)} />
+        )}
+
       </CardContent>
     </Card>
   );

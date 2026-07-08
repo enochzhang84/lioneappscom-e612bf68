@@ -25,6 +25,7 @@ const THEORY_PROPS = {
   theme: "blue" as const,
   instantFeedback: true,
   simplifiedRules: true,
+  minimalMode: true,
 };
 
 const SIGNS_PROPS = {
@@ -43,6 +44,7 @@ const SIGNS_PROPS = {
   theme: "orange" as const,
   instantFeedback: true,
   simplifiedRules: true,
+  minimalMode: true,
 };
 
 export function C1MockExamHub() {
