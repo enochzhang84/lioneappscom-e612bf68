@@ -1225,22 +1225,48 @@ function Exam({
         })()}
 
         {minimalMode ? (
-          <div className="pt-4 flex justify-center">
+          <div className="pt-4 flex justify-center items-center gap-3">
             {!(q.id in correctMap) && (
-              <Button
-                size="lg"
-                onClick={() => onSubmitAnswer?.()}
-                disabled={!answers[q.id] || submittingAnswer || submitting}
-                className={cn(
-                  "min-w-[160px] rounded-full",
-                  theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
-                )}
-              >
-                {submittingAnswer ? "判定中…" : submitting ? "评分中…" : "提交"}
-              </Button>
+              <>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={onSkip}
+                  disabled={submittingAnswer || submitting}
+                  className="min-w-[110px] rounded-full border-amber-300 text-amber-700 hover:bg-amber-50"
+                >
+                  跳过
+                  {Number.isFinite(skipsRemaining) && (
+                    <span className="ml-1 text-[10px] text-amber-600">
+                      (剩 {skipsRemaining})
+                    </span>
+                  )}
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={() => onSubmitAnswer?.()}
+                  disabled={!answers[q.id] || submittingAnswer || submitting}
+                  className={cn(
+                    "min-w-[140px] rounded-full",
+                    theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
+                  )}
+                >
+                  {submittingAnswer ? "判定中…" : submitting ? "评分中…" : "提交"}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  onClick={() => onCancelAnswer?.(q.id)}
+                  disabled={!answers[q.id] || submittingAnswer || submitting}
+                  className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
+                >
+                  取消
+                </Button>
+              </>
             )}
           </div>
         ) : (
+
           <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
             <Button
               variant="outline"
