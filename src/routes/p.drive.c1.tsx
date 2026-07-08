@@ -1215,6 +1215,7 @@ function TipsCard() {
 
 function Result({
   grade, pass, maxWrong, skippedCount = 0, earlyEnded = false, onRetake, onHome, retaking,
+  attempts = 0, maxAttempts, homeLabel = "返回",
 }: {
   grade: GradeResult;
   pass: number;
@@ -1224,6 +1225,9 @@ function Result({
   onRetake: () => void;
   onHome: () => void;
   retaking: boolean;
+  attempts?: number;
+  maxAttempts?: number;
+  homeLabel?: string;
 }) {
   const { total, correct: correctCount, wrong: wrongCount, results } = grade;
   const wrongs = results.filter((r) => !r.is_correct);
@@ -1233,6 +1237,22 @@ function Result({
   const signsCount = results.filter((r) => r.category === "c1_signs").length;
   const actualWrong = Math.max(0, wrongCount - skippedCount);
   const rateAll = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const attemptsLeft =
+    typeof maxAttempts === "number" ? Math.max(0, maxAttempts - attempts) : undefined;
+  const outOfAttempts = attemptsLeft === 0;
+
+  const attemptsHint =
+    typeof maxAttempts === "number" && !passed ? (
+      outOfAttempts ? (
+        <div className="mt-2 rounded-lg bg-red-100 text-red-800 text-sm px-3 py-2">
+          您已使用完本轮全部 {maxAttempts} 次考试机会，系统将重新开始新的模拟考试。
+        </div>
+      ) : (
+        <div className="mt-2 text-sm text-amber-700">
+          剩余考试次数：<b>{attemptsLeft}</b> / {maxAttempts} 次
+        </div>
+      )
+    ) : null;
 
   if (isWrongBased) {
     return (
@@ -1248,13 +1268,14 @@ function Result({
                     {passed ? "PASS 通过" : "FAIL 未通过"}
                   </div>
                   <div className="mt-3 text-2xl md:text-3xl font-bold">
-                    {passed ? "恭喜！你已通过本次 DMV 小型车 C1 模拟考试。" : "继续努力，再来一次！"}
+                    {passed ? "🎉 恭喜您！您已通过本次考试。" : "很遗憾，本次考试未通过。"}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
                     {passed
                       ? `本次考试最多允许错 ${maxWrong} 题，你的错题数在允许范围内。`
                       : `本次考试最多允许错 ${maxWrong} 题，你的错题数超过通过标准，建议先复习错题再重新测试。`}
                   </div>
+                  {attemptsHint}
                 </div>
               </div>
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6 text-center">
@@ -1267,10 +1288,12 @@ function Result({
                 <Stat label="正确率" value={`${rateAll}%`} />
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
-                  {retaking ? "抽题中…" : "再考一次"}
-                </Button>
-                <Button variant="outline" onClick={onHome}>返回</Button>
+                {!outOfAttempts && (
+                  <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
+                    {retaking ? "抽题中…" : "重新考试"}
+                  </Button>
+                )}
+                <Button variant="outline" onClick={onHome}>{homeLabel}</Button>
               </div>
             </div>
           </CardContent>
@@ -1288,7 +1311,7 @@ function Result({
     <div className="space-y-8">
       {earlyEnded && passed && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 px-5 py-3 text-sm">
-          您已达到 DMV 小型车 C1 模拟考试通过标准，并选择提前结束考试。
+          您已达到本次考试通过标准，并选择提前结束考试。
         </div>
       )}
       <Card className={cn("border-slate-200 shadow-sm rounded-2xl", passed ? "bg-emerald-50/60" : "bg-red-50/60")}>
@@ -1306,6 +1329,7 @@ function Result({
               <div className="text-sm text-muted-foreground mt-1">
                 通过条件：答对 ≥ {pass} 题
               </div>
+              {attemptsHint}
             </div>
             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6 text-center">
               <Stat label="总题数" value={total} />
@@ -1318,10 +1342,12 @@ function Result({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
-            <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
-              {retaking ? "抽题中…" : "再考一次"}
-            </Button>
-            <Button variant="outline" onClick={onHome}>返回</Button>
+            {!outOfAttempts && (
+              <Button onClick={onRetake} disabled={retaking} className="bg-blue-600 hover:bg-blue-700">
+                {retaking ? "抽题中…" : "重新考试"}
+              </Button>
+            )}
+            <Button variant="outline" onClick={onHome}>{homeLabel}</Button>
           </div>
         </CardContent>
       </Card>
@@ -1331,6 +1357,7 @@ function Result({
     </div>
   );
 }
+
 
 export function ExamResultReview({
   results, wrongs,
