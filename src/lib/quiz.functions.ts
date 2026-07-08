@@ -250,7 +250,7 @@ export const checkAnswer = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; answer: "A" | "B" | "C" | "D" }) =>
     z.object({ id: z.string().uuid(), answer: answerEnum }).parse(d),
   )
-  .handler(async ({ data }): Promise<{ is_correct: boolean }> => {
+  .handler(async ({ data }): Promise<{ is_correct: boolean; correct_answer?: "A" | "B" | "C" | "D" }> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("quiz_questions")
@@ -258,7 +258,13 @@ export const checkAnswer = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { is_correct: !!row && row.correct_answer === data.answer };
+    const correct = (row?.correct_answer ?? null) as "A" | "B" | "C" | "D" | null;
+    const is_correct = !!correct && correct === data.answer;
+    // Only reveal the correct letter after a wrong pick — this powers instant
+    // feedback UX. Never leaks the key before the user attempts the question.
+    return is_correct || !correct
+      ? { is_correct }
+      : { is_correct, correct_answer: correct };
   });
 
 export const gradeQuiz = createServerFn({ method: "POST" })
