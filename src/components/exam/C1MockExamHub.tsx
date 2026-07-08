@@ -25,6 +25,7 @@ const THEORY_PROPS = {
   theme: "blue" as const,
   instantFeedback: true,
   simplifiedRules: true,
+  minimalMode: true,
 };
 
 const SIGNS_PROPS = {
