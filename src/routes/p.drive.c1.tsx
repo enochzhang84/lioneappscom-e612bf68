@@ -1085,6 +1085,8 @@ function Exam({
   minimalMode?: boolean;
   onSubmitAnswer?: () => void;
   submittingAnswer?: boolean;
+  onCancelAnswer?: (qid: string) => void;
+
 }) {
 
 
