@@ -659,8 +659,75 @@ export function QuizApp(props: QuizAppProps = {}) {
           </div>
         </div>
       )}
+
+      {skipConfirmOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSkipConfirmOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">确认跳过此题？</h3>
+            <p className="text-sm text-slate-600">
+              您最多只能跳过 <b>{MAX_SKIP}</b> 道题。是否确定跳过当前题目？
+              {typeof MAX_SKIP === "number" && (
+                <span className="block mt-1 text-xs text-slate-500">
+                  已跳过 {skippedCount} 题，剩余 {Math.max(0, MAX_SKIP - skippedCount)} 次。
+                </span>
+              )}
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setSkipConfirmOpen(false)}>否</Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={() => {
+                  setSkipConfirmOpen(false);
+                  performSkip();
+                }}
+              >
+                是，跳过
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {skipLimitOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSkipLimitOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">已达最大跳过次数</h3>
+            <p className="text-sm text-slate-600">
+              您已经达到最大跳过次数（{MAX_SKIP} 次）。请继续完成当前题目。
+            </p>
+            <div className="flex justify-end pt-2">
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setSkipLimitOpen(false)}>
+                我知道了
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {finalFailOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-red-100 text-red-600 grid place-items-center">
+                <XCircle size={22} />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">❌ 本次考试未通过</h3>
+            </div>
+            <p className="text-sm text-slate-600">
+              很遗憾！您已使用完本轮全部 <b>{MAX_ATTEMPTS}</b> 次考试机会。
+              系统将重新开始新的模拟考试，并重新随机生成新的试卷。
+            </p>
+            <div className="flex justify-end pt-2">
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={fullResetRound}>
+                重新开始模拟考试
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+
 
   return embedded ? body : <SiteLayout>{body}</SiteLayout>;
 }
