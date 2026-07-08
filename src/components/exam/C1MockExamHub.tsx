@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ClipboardCheck, TrafficCone, ArrowRight } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { QuizApp } from "@/routes/p.drive.c1";
 
 type Mode = "hub" | "theory" | "signs";
@@ -58,78 +56,58 @@ export function C1MockExamHub() {
   }
 
   return (
-    <div className="bg-[#F8FAFC] min-h-screen">
-      <div className="mx-auto max-w-[1100px] px-4 md:px-8 py-8 md:py-12">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-xl px-6 py-16 md:py-24">
+        <div className="mb-12 text-center md:mb-16">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
             DMV 小型车 C1 模拟考试
           </h1>
-          <p className="mt-2 text-sm md:text-base text-slate-600">
-            按真实 DMV 考试方式拆分为两个独立考试，选择要进行的考试模块
+          <p className="mt-3 text-base text-slate-500">
+            请选择要进行的考试类型
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
-          {/* Theory */}
-          <Card className="border-blue-200 shadow-sm rounded-2xl overflow-hidden">
-            <div className="bg-gradient-to-r from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb] text-white px-6 py-4 flex items-center gap-3">
-              <div className="h-11 w-11 rounded-xl bg-white/15 grid place-items-center ring-1 ring-white/20">
-                <ClipboardCheck size={22} />
+        <div className="flex flex-col gap-5">
+          <Card
+            role="button"
+            tabIndex={0}
+            onClick={() => setMode("theory")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") setMode("theory");
+            }}
+            className="group flex cursor-pointer items-center gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:border-blue-500 hover:shadow-md md:p-7"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-2xl transition-colors group-hover:bg-blue-50 md:h-14 md:w-14">
+              🚗
+            </span>
+            <div className="min-w-0">
+              <div className="text-lg font-semibold text-slate-900 md:text-xl">
+                驾驶员理论考试
               </div>
-              <div>
-                <div className="text-lg font-bold">① California DMV 驾照模拟考试</div>
-                <div className="text-xs text-white/80">Theory Test</div>
-              </div>
+              <div className="mt-0.5 text-sm text-slate-500">Theory Test</div>
             </div>
-            <CardContent className="p-6 md:p-8 space-y-5">
-              <ul className="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
-                <li>共 36 道题，随机从题库抽取。</li>
-                <li>请认真审题。</li>
-                <li>考试时长 60 分钟。</li>
-                <li>交卷后将显示成绩、正确答案与错题回顾。</li>
-              </ul>
-              <Button
-                size="lg"
-                onClick={() => setMode("theory")}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                开始考试 <ArrowRight size={16} className="ml-1" />
-              </Button>
-            </CardContent>
           </Card>
 
-          {/* Signs */}
-          <Card className="border-orange-200 shadow-sm rounded-2xl overflow-hidden">
-            <div className="bg-gradient-to-r from-[#9a3412] via-[#c2410c] to-[#ea580c] text-white px-6 py-4 flex items-center gap-3">
-              <div className="h-11 w-11 rounded-xl bg-white/15 grid place-items-center ring-1 ring-white/20">
-                <TrafficCone size={22} />
+          <Card
+            role="button"
+            tabIndex={0}
+            onClick={() => setMode("signs")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") setMode("signs");
+            }}
+            className="group flex cursor-pointer items-center gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:border-orange-500 hover:shadow-md md:p-7"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-2xl transition-colors group-hover:bg-orange-50 md:h-14 md:w-14">
+              🚸
+            </span>
+            <div className="min-w-0">
+              <div className="text-lg font-semibold text-slate-900 md:text-xl">
+                驾驶员图标考试
               </div>
-              <div>
-                <div className="text-lg font-bold">② 小型车 C1 · 图标模拟考试</div>
-                <div className="text-xs text-white/80">Road Sign Test</div>
-              </div>
+              <div className="mt-0.5 text-sm text-slate-500">Road Sign Test</div>
             </div>
-            <CardContent className="p-6 md:p-8 space-y-5">
-              <ul className="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
-                <li>共 12 道题，随机从题库抽取。</li>
-                <li>请认真审题。</li>
-                <li>考试时长 20 分钟。</li>
-                <li>交卷后将显示成绩、正确答案与错题回顾。</li>
-              </ul>
-              <Button
-                size="lg"
-                onClick={() => setMode("signs")}
-                className="bg-orange-600 hover:bg-orange-700"
-              >
-                开始考试 <ArrowRight size={16} className="ml-1" />
-              </Button>
-            </CardContent>
           </Card>
         </div>
-
-        <p className="mt-8 text-center text-xs text-slate-400">
-          本模拟考试参考加州 DMV 真实考试流程 · 仅用于备考练习
-        </p>
       </div>
     </div>
   );
