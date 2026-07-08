@@ -1286,8 +1286,8 @@ function Exam({
                 <Button
                   size="lg"
                   variant="ghost"
-                  onClick={() => onCancelAnswer?.(q.id)}
-                  disabled={!answers[q.id] || submittingAnswer || submitting}
+                  onClick={() => onCancelExam?.()}
+                  disabled={submittingAnswer || submitting}
                   className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
                 >
                   取消
