@@ -912,19 +912,19 @@ function Intro({
           </div>
           <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
             <li>共 <b>{total}</b> 道题，随机从题库抽取。</li>
-            {typeof maxWrong === "number" ? (
-              <li>最多允许错 <b>{maxWrong}</b> 题；答对 <b>{pass}</b> 题即可通过。</li>
-            ) : (
-              <li>答对 <b>{pass}</b> 题及以上为通过。</li>
-            )}
+            <li>请认真审题。</li>
             <li>考试时长 <b>{Math.round(examSeconds / 60)}</b> 分钟。</li>
-            {typeof maxSkip === "number" ? (
+            <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+            {!simplifiedRules && typeof maxWrong === "number" && (
+              <li>最多允许错 <b>{maxWrong}</b> 题。</li>
+            )}
+            {!simplifiedRules && typeof maxSkip === "number" ? (
               <li>最多允许跳过 <b>{maxSkip}</b> 题。</li>
-            ) : (
+            ) : null}
+            {!simplifiedRules && typeof maxSkip !== "number" && (
               <li>允许无限次跳过。</li>
             )}
-            <li>交卷后将显示成绩、正确答案与错题回顾。</li>
-            {typeof maxAttempts === "number" && (
+            {!simplifiedRules && typeof maxAttempts === "number" && (
               <li className="text-slate-700">
                 本轮总共 <b>{maxAttempts}</b> 次考试机会，当前第 <b>{Math.min(attempts + 1, maxAttempts)}</b> / {maxAttempts} 次。
                 {attemptsLeft !== undefined && attemptsLeft < maxAttempts && (
@@ -932,7 +932,7 @@ function Intro({
                 )}
               </li>
             )}
-            {showHistoryReset && (
+            {!simplifiedRules && showHistoryReset && (
               <li className="text-muted-foreground">
                 已出过的题目下次会自动排除；每个题库刷完一轮后重新开始。
               </li>
