@@ -1062,6 +1062,7 @@ function Exam({
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
   instantFeedback = false, correctMap = {}, revealedCorrect = {},
+  minimalMode = false, onSubmitAnswer, submittingAnswer = false,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1079,7 +1080,11 @@ function Exam({
   instantFeedback?: boolean;
   correctMap?: Record<string, boolean>;
   revealedCorrect?: Record<string, "A" | "B" | "C" | "D">;
+  minimalMode?: boolean;
+  onSubmitAnswer?: () => void;
+  submittingAnswer?: boolean;
 }) {
+
 
   const q = questions[current];
   const tr = translations[q?.id ?? ""];
