@@ -332,6 +332,17 @@ export function QuizApp(props: QuizAppProps = {}) {
   }, [correctCount, phase, PASS, MAX_WRONG, passStopShown]);
 
   async function handlePick(qid: string, key: "A" | "B" | "C" | "D") {
+    // In minimal mode, the user submits explicitly — don't auto-grade on pick.
+    if (minimalMode) {
+      if (qid in correctMap) return; // already judged; locked
+      setAnswers((prev) => ({ ...prev, [qid]: key }));
+      setSkipped((prev) => {
+        if (!prev[qid]) return prev;
+        const { [qid]: _, ...rest } = prev;
+        return rest;
+      });
+      return;
+    }
     // In instant-feedback mode, once a question is answered, ignore further picks.
     if (instantFeedback && qid in answers) return;
     setAnswers((prev) => ({ ...prev, [qid]: key }));
@@ -351,7 +362,36 @@ export function QuizApp(props: QuizAppProps = {}) {
     }
   }
 
-  function performSkip() {
+  const [submittingAnswer, setSubmittingAnswer] = useState(false);
+  async function submitCurrentAnswer() {
+    const q = questions[current];
+    if (!q) return;
+    const picked = answers[q.id];
+    if (!picked) return;
+    if (q.id in correctMap) return;
+    setSubmittingAnswer(true);
+    try {
+      const res = await checkFn({ data: { id: q.id, answer: picked } });
+      setCorrectMap((prev) => ({ ...prev, [q.id]: res.is_correct }));
+      if (!res.is_correct && res.correct_answer) {
+        setRevealedCorrect((prev) => ({ ...prev, [q.id]: res.correct_answer! }));
+      }
+      const isLast = current >= questions.length - 1;
+      const delay = res.is_correct ? 1000 : 2000;
+      window.setTimeout(() => {
+        if (isLast) {
+          void submitExam();
+        } else {
+          setCurrent((i) => Math.min(questions.length - 1, i + 1));
+        }
+      }, delay);
+    } catch (e) {
+      console.error("submitCurrentAnswer error", e);
+    } finally {
+      setSubmittingAnswer(false);
+    }
+  }
+
     const q = questions[current];
     if (!q) return;
     setSkipped((prev) => ({ ...prev, [q.id]: true }));
