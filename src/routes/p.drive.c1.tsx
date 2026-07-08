@@ -1664,8 +1664,8 @@ function Result({
 
 
 export function ExamResultReview({
-  results, wrongs,
-}: { results: GradedQuestion[]; wrongs: GradedQuestion[] }) {
+  results, wrongs, minimalMode = false,
+}: { results: GradedQuestion[]; wrongs: GradedQuestion[]; minimalMode?: boolean }) {
   const [showAll, setShowAll] = useState(false);
   const hasWrong = wrongs.length > 0;
 
@@ -1681,7 +1681,7 @@ export function ExamResultReview({
           </div>
           <div className="space-y-4">
             {wrongs.map((r, i) => (
-              <ReviewItem key={r.id} r={r} idx={i + 1} />
+              <ReviewItem key={r.id} r={r} idx={i + 1} minimalMode={minimalMode} />
             ))}
           </div>
         </section>
@@ -1693,42 +1693,45 @@ export function ExamResultReview({
             </div>
             <div>
               <div className="text-lg font-semibold text-emerald-800">恭喜！本次没有错题。</div>
-              <div className="text-sm text-emerald-700/80 mt-0.5">全部作答正确，可继续查看完整解析巩固知识点。</div>
+              <div className="text-sm text-emerald-700/80 mt-0.5">全部作答正确，本次考试圆满完成。</div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <section className="space-y-4 mt-8">
-        {!showAll ? (
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={() => setShowAll(true)}
-              className="border-blue-300 text-blue-700 hover:bg-blue-50"
-            >
-              <BookOpen size={16} className="mr-1.5" /> 查看全部题目解析（{results.length}）
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">全部题目解析（{results.length}）</h2>
-              <Button variant="ghost" size="sm" onClick={() => setShowAll(false)}>
-                收起
+      {!minimalMode && (
+        <section className="space-y-4 mt-8">
+          {!showAll ? (
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowAll(true)}
+                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                <BookOpen size={16} className="mr-1.5" /> 查看全部题目解析（{results.length}）
               </Button>
             </div>
-            <div className="space-y-4">
-              {results.map((r, i) => (
-                <ReviewItem key={r.id} r={r} idx={i + 1} />
-              ))}
-            </div>
-          </>
-        )}
-      </section>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">全部题目解析（{results.length}）</h2>
+                <Button variant="ghost" size="sm" onClick={() => setShowAll(false)}>
+                  收起
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {results.map((r, i) => (
+                  <ReviewItem key={r.id} r={r} idx={i + 1} minimalMode={minimalMode} />
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+      )}
     </>
   );
 }
+
 
 function Stat({ label, value, tone }: { label: string; value: number | string; tone?: "pos" | "neg" }) {
   return (
