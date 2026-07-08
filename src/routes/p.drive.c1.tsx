@@ -673,7 +673,7 @@ function QuizPage() {
 
 function BlueBanner({
   embedded, phase, secondsLeft, current, total, title, subtitle, backHref, backLabel, onReset,
-  showTranslation, onToggleTranslation, translating,
+  showTranslation, onToggleTranslation, translating, theme = "blue",
 }: {
   embedded: boolean;
   phase: Phase;
@@ -688,13 +688,20 @@ function BlueBanner({
   showTranslation?: boolean;
   onToggleTranslation?: () => void;
   translating?: boolean;
+  theme?: "blue" | "orange";
 }) {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
+  const gradient =
+    theme === "orange"
+      ? "bg-gradient-to-r from-[#9a3412] via-[#c2410c] to-[#ea580c]"
+      : "bg-gradient-to-r from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb]";
+  const borderClass = theme === "orange" ? "border-orange-900/10" : "border-blue-900/10";
+  const openTextClass = theme === "orange" ? "text-orange-700" : "text-blue-700";
 
   return (
-    <div className="rounded-2xl overflow-hidden shadow-sm border border-blue-900/10">
-      <div className="bg-gradient-to-r from-[#1e3a8a] via-[#1d4ed8] to-[#2563eb] text-white">
+    <div className={cn("rounded-2xl overflow-hidden shadow-sm border", borderClass)}>
+      <div className={cn(gradient, "text-white")}>
         <div className="px-5 md:px-8 py-5 md:py-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] items-center gap-5">
           <div className="flex items-center gap-4 min-w-0">
             <div className="h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-2xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/20">
@@ -728,7 +735,7 @@ function BlueBanner({
                 onClick={onToggleTranslation}
                 className={cn(
                   "border border-white/20 text-white",
-                  showTranslation ? "bg-white text-blue-700 hover:bg-white/90" : "bg-white/15 hover:bg-white/25",
+                  showTranslation ? cn("bg-white hover:bg-white/90", openTextClass) : "bg-white/15 hover:bg-white/25",
                 )}
                 title="在线中英对照翻译"
               >
@@ -751,6 +758,7 @@ function BlueBanner({
     </div>
   );
 }
+
 
 
 function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
