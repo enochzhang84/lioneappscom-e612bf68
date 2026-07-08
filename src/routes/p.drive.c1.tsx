@@ -1160,7 +1160,7 @@ function RulesTips({ total, pass, maxWrong, examSeconds, maxSkip }: { total: num
 }
 
 
-function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass: number; maxWrong?: number; examSeconds: number }) {
+function RulesCard({ total, pass, maxWrong, maxSkip, examSeconds }: { total: number; pass: number; maxWrong?: number; maxSkip?: number; examSeconds: number }) {
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 space-y-3">
@@ -1171,7 +1171,7 @@ function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass
         <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
           {typeof maxWrong === "number" ? (
             <li>
-              本测试共 <b>{total}</b> 道题，最多允许错 <b>{maxWrong}</b> 题即可通过。
+              本测试共 <b>{total}</b> 道题，答对 <b>{pass}</b> 题即通过；最多允许错 <b>{maxWrong}</b> 题。
             </li>
           ) : (
             <li>
@@ -1180,12 +1180,18 @@ function RulesCard({ total, pass, maxWrong, examSeconds }: { total: number; pass
           )}
           <li>每题有多个选项，请选择最正确的答案。</li>
           <li>测试时间为 {Math.round(examSeconds / 60)} 分钟，开始后计时。</li>
+          {typeof maxSkip === "number" ? (
+            <li>最多允许跳过 <b>{maxSkip}</b> 题。</li>
+          ) : (
+            <li>允许无限次跳过。</li>
+          )}
           <li>您可以随时标记题目，方便之后查看。</li>
         </ul>
       </CardContent>
     </Card>
   );
 }
+
 
 function TipsCard() {
   return (
