@@ -547,6 +547,7 @@ export function QuizApp(props: QuizAppProps = {}) {
               maxAttempts={MAX_ATTEMPTS}
               theme={theme}
               onExit={onExit}
+              simplifiedRules={simplifiedRules}
             />
           </div>
         )}
