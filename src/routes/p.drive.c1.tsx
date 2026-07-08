@@ -1207,12 +1207,32 @@ function AnswerSheet({
         </div>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
-          <LegendDot color="bg-white border border-slate-300" label={`未答 ${Math.max(0, unanswered)}`} />
-          <LegendDot color="bg-blue-500" label={`已答 ${answered}`} />
-          <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
-          <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
-          <LegendDot color="bg-emerald-500" label="答对" />
-          <LegendDot color="bg-red-500" label="答错" />
+          {instantFeedback ? (
+            <>
+              <LegendDot
+                color="bg-emerald-500"
+                label={`已答对 ${Object.values(correctMap).filter(Boolean).length}`}
+              />
+              <LegendDot
+                color="bg-red-500"
+                label={`答错 ${
+                  Object.entries(correctMap).filter(([, v]) => v === false).length
+                }`}
+              />
+              <LegendDot color="bg-white border border-slate-300" label={`未作答 ${Math.max(0, unanswered)}`} />
+              <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
+              <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
+            </>
+          ) : (
+            <>
+              <LegendDot color="bg-white border border-slate-300" label={`未答 ${Math.max(0, unanswered)}`} />
+              <LegendDot color="bg-blue-500" label={`已答 ${answered}`} />
+              <LegendDot color="bg-orange-500" label={`跳过 ${skippedCount}`} />
+              <LegendDot color="bg-amber-400" label={`标记 ${markedCount}`} />
+              <LegendDot color="bg-emerald-500" label="答对" />
+              <LegendDot color="bg-red-500" label="答错" />
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-6 gap-2">
