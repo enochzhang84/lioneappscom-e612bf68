@@ -75,7 +75,7 @@ async function adminClient() {
 export const getAiContent = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => KeySchema.parse(d))
   .handler(async ({ data }) => {
-    const sb = publicClient();
+    const sb = await adminClient();
     const { data: row, error } = await sb
       .from("ai_cache")
       .select("id, module, record_type, record_id, language, prompt_version, provider, model, ai_content, status, error, tokens_in, tokens_out, updated_at, created_at")
