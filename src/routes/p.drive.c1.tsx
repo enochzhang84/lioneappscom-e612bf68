@@ -512,6 +512,7 @@ export function QuizApp(props: QuizAppProps = {}) {
           showTranslation={showTranslation}
           onToggleTranslation={toggleTranslation}
           translating={translating}
+          theme={theme}
         />
 
 
@@ -521,12 +522,17 @@ export function QuizApp(props: QuizAppProps = {}) {
               total={TOTAL}
               pass={PASS}
               maxWrong={MAX_WRONG}
+              maxSkip={MAX_SKIP}
               examSeconds={EXAM_SECONDS}
               onStart={startExam}
               loading={load.isPending}
               error={load.error?.message}
               showHistoryReset={useHistory}
               onResetHistory={resetHistory}
+              attempts={attempts}
+              maxAttempts={MAX_ATTEMPTS}
+              theme={theme}
+              onExit={onExit}
             />
           </div>
         )}
@@ -546,8 +552,10 @@ export function QuizApp(props: QuizAppProps = {}) {
                 translating={translating}
                 onSubmit={requestSubmitFromLast}
                 submitting={submit.isPending}
+                skipsRemaining={skipsRemaining}
+                theme={theme}
               />
-              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} />
+              <RulesTips total={TOTAL} pass={PASS} maxWrong={MAX_WRONG} examSeconds={EXAM_SECONDS} maxSkip={MAX_SKIP} />
             </div>
             <aside className="lg:sticky lg:top-6 self-start">
               <AnswerSheet
@@ -568,10 +576,23 @@ export function QuizApp(props: QuizAppProps = {}) {
 
         {phase === "result" && grade && (
           <div className="mt-6">
-            <Result grade={grade} pass={PASS} maxWrong={MAX_WRONG} skippedCount={Object.values(skipped).filter(Boolean).length} earlyEnded={earlyEnded} onRetake={startExam} onHome={resetToIntro} retaking={load.isPending} />
+            <Result
+              grade={grade}
+              pass={PASS}
+              maxWrong={MAX_WRONG}
+              skippedCount={Object.values(skipped).filter(Boolean).length}
+              earlyEnded={earlyEnded}
+              onRetake={startExam}
+              onHome={onExit ?? resetToIntro}
+              retaking={load.isPending}
+              attempts={attempts}
+              maxAttempts={MAX_ATTEMPTS}
+              homeLabel={onExit ? "返回首页" : "返回"}
+            />
           </div>
         )}
       </div>
+
 
       {phase === "exam" && <CountdownTicker onTick={setSecondsLeft} />}
 
