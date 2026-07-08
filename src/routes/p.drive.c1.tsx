@@ -655,7 +655,10 @@ export function QuizApp(props: QuizAppProps = {}) {
               onSubmitAnswer={submitCurrentAnswer}
               submittingAnswer={submittingAnswer}
               onCancelExam={() => setCancelConfirmOpen(true)}
-
+              rulesTotal={TOTAL}
+              rulesExamSeconds={EXAM_SECONDS}
+              rulesMaxWrong={MAX_WRONG}
+              rulesMaxSkip={MAX_SKIP}
             />
           </div>
         )}
