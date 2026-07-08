@@ -785,6 +785,34 @@ export function QuizApp(props: QuizAppProps = {}) {
         </div>
       )}
 
+      {cancelConfirmOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => (cancelling ? null : setCancelConfirmOpen(false))}
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">确认退出考试</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              您确定要放弃本次考试吗？
+              <br />
+              放弃后，本次考试将立即结束，并判定为考试失败。
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setCancelConfirmOpen(false)} disabled={cancelling}>
+                否
+              </Button>
+              <Button
+                onClick={() => { void confirmCancelExam(); }}
+                disabled={cancelling}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {cancelling ? "处理中…" : "是"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showPassStop && (
         <div
           className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
