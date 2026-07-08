@@ -44,6 +44,7 @@ const SIGNS_PROPS = {
   theme: "orange" as const,
   instantFeedback: true,
   simplifiedRules: true,
+  minimalMode: true,
 };
 
 export function C1MockExamHub() {
