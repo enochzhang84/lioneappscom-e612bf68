@@ -175,6 +175,8 @@ export function QuizApp(props: QuizAppProps = {}) {
     attemptsKey,
     onExit,
     theme = "blue",
+    instantFeedback = false,
+    simplifiedRules = false,
   } = props;
 
   // ---- Attempts (theory-only style rule: 3 tries then reset) ----
