@@ -1422,6 +1422,40 @@ function Exam({
           </div>
         )}
       </CardContent>
+      {minimalMode && rulesOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setRulesOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-slate-900">答题说明</h3>
+            <ul className="mt-4 space-y-2 text-sm text-slate-700 list-disc pl-5">
+              {typeof rulesTotal === "number" && (
+                <li>共 <b>{rulesTotal}</b> 道题，随机从题库抽取。</li>
+              )}
+              <li>请认真审题。</li>
+              {typeof rulesExamSeconds === "number" && (
+                <li>考试时长 <b>{Math.round(rulesExamSeconds / 60)}</b> 分钟。</li>
+              )}
+              <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+              {typeof rulesMaxWrong === "number" && (
+                <li>最多允许错 <b>{rulesMaxWrong}</b> 题。</li>
+              )}
+              {typeof rulesMaxSkip === "number" && (
+                <li>最多允许跳过 <b>{rulesMaxSkip}</b> 题。</li>
+              )}
+            </ul>
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setRulesOpen(false)} className="rounded-full">
+                我知道了
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
