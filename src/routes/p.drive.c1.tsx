@@ -1281,24 +1281,6 @@ function Exam({
                 readOnly={readOnly}
                 stateFor={stateFor}
               />
-              {feedbackReady && minimalMode && (
-                <div className="mt-6 space-y-2">
-                  {isCorrect ? (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 text-base font-medium">
-                      ✔ 回答正确
-                    </div>
-                  ) : (
-                    <>
-                      <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700 text-base">
-                        您的答案：<b className="font-semibold">{picked ?? "未作答"}</b>
-                      </div>
-                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-base">
-                        正确答案：<b className="font-semibold">{correctLetter ?? "?"}</b>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
               {feedbackReady && !minimalMode && (
                 <div
                   className={cn(
@@ -1322,40 +1304,82 @@ function Exam({
         })()}
 
         {minimalMode ? (
-          <div className="pt-4 flex justify-center items-center gap-3">
-            {!(q.id in correctMap) && (
-              <>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={onSkip}
-                  disabled={submittingAnswer || submitting}
-                  className="min-w-[110px] rounded-full border-amber-300 text-amber-700 hover:bg-amber-50"
-                >
-                  跳过
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={() => onSubmitAnswer?.()}
-                  disabled={!answers[q.id] || submittingAnswer || submitting}
-                  className={cn(
-                    "min-w-[140px] rounded-full",
-                    theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
-                  )}
-                >
-                  {submittingAnswer ? "判定中…" : submitting ? "评分中…" : "提交"}
-                </Button>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  onClick={() => onCancelExam?.()}
-                  disabled={submittingAnswer || submitting}
-                  className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
-                >
-                  取消
-                </Button>
-              </>
-            )}
+          <div className="pt-4 flex flex-wrap justify-center items-center gap-3">
+            {(() => {
+              const judged = q.id in correctMap;
+              const isWrongJudged = judged && correctMap[q.id] === false;
+              const isLast = current >= questions.length - 1;
+              const primaryBtn = cn(
+                "min-w-[120px] rounded-full",
+                theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
+              );
+              if (isWrongJudged) {
+                return (
+                  <>
+                    <Button
+                      size="lg"
+                      onClick={() => {
+                        if (isLast) onSubmit?.();
+                        else setCurrent((i) => Math.min(questions.length - 1, i + 1));
+                      }}
+                      disabled={submitting}
+                      className={primaryBtn}
+                    >
+                      {isLast ? "查看结果" : "下一题"}
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="ghost"
+                      onClick={() => onCancelExam?.()}
+                      disabled={submitting}
+                      className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
+                    >
+                      取消
+                    </Button>
+                  </>
+                );
+              }
+              if (judged) return null;
+              return (
+                <>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => setRulesOpen(true)}
+                    disabled={submittingAnswer || submitting}
+                    className="min-w-[110px] rounded-full border-slate-300 text-slate-700 hover:bg-slate-50"
+                  >
+                    答题说明
+                  </Button>
+                  <Button
+                    size="lg"
+                    onClick={() => onSubmitAnswer?.()}
+                    disabled={!answers[q.id] || submittingAnswer || submitting}
+                    className={primaryBtn}
+                  >
+                    提交
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={onSkip}
+                    disabled={submittingAnswer || submitting}
+                    className="min-w-[110px] rounded-full border-amber-300 text-amber-700 hover:bg-amber-50"
+                  >
+                    跳过
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={() => onCancelExam?.()}
+                    disabled={submittingAnswer || submitting}
+                    className="min-w-[110px] rounded-full text-slate-600 hover:bg-slate-100"
+                  >
+                    取消
+                  </Button>
+                </>
+              );
+            })()}
           </div>
         ) : (
 
