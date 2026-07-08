@@ -979,6 +979,7 @@ function Exam({
   questions, answers, onPick, onSkip, current, setCurrent,
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
+  instantFeedback = false, correctMap = {}, revealedCorrect = {},
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -993,6 +994,9 @@ function Exam({
   submitting?: boolean;
   skipsRemaining?: number;
   theme?: "blue" | "orange";
+  instantFeedback?: boolean;
+  correctMap?: Record<string, boolean>;
+  revealedCorrect?: Record<string, "A" | "B" | "C" | "D">;
 }) {
 
   const q = questions[current];
