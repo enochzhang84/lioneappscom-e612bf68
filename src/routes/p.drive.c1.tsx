@@ -1110,12 +1110,17 @@ function Exam({
   const isSignRecognition = q.question_type === "sign_recognition";
 
   return (
-    <Card className="border-slate-200 shadow-sm rounded-2xl">
-      <CardContent className="p-6 md:p-8 space-y-6">
-        <div className="flex items-baseline gap-3">
-          <span className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">{current + 1}.</span>
+    <Card className={cn("rounded-2xl", minimalMode ? "border-transparent shadow-none bg-white" : "border-slate-200 shadow-sm")}>
+      <CardContent className={cn(minimalMode ? "p-4 md:p-6 space-y-8" : "p-6 md:p-8 space-y-6")}>
+        <div className={cn("flex gap-3", minimalMode ? "items-start" : "items-baseline")}>
+          {!minimalMode && (
+            <span className="text-2xl md:text-3xl font-bold text-blue-600 tabular-nums">{current + 1}.</span>
+          )}
           <div className="min-w-0">
-            <h2 className="text-base md:text-lg font-semibold leading-relaxed whitespace-pre-wrap text-slate-900">
+            <h2 className={cn(
+              "leading-relaxed whitespace-pre-wrap text-slate-900",
+              minimalMode ? "text-xl md:text-2xl font-semibold tracking-tight" : "text-base md:text-lg font-semibold",
+            )}>
               {q.question}
             </h2>
             {(showTranslation || q.question_en) && questionEn && (
@@ -1148,9 +1153,12 @@ function Exam({
         {(() => {
           const picked = answers[q.id] ?? null;
           const answered = q.id in answers;
+          const judged = q.id in correctMap;
           const isCorrect = correctMap[q.id];
           const correctLetter = revealedCorrect[q.id];
-          const feedbackReady = instantFeedback && answered && typeof isCorrect === "boolean";
+          const feedbackReady = minimalMode
+            ? judged
+            : instantFeedback && answered && typeof isCorrect === "boolean";
           const stateFor = feedbackReady
             ? (k: "A" | "B" | "C" | "D") => {
                 if (isCorrect) return k === picked ? "correct" : "neutral";
@@ -1159,6 +1167,7 @@ function Exam({
                 return "neutral";
               }
             : undefined;
+          const readOnly = minimalMode ? judged : (instantFeedback && answered);
           return (
             <>
               <ExamOptionList
@@ -1170,10 +1179,28 @@ function Exam({
                 selected={picked}
                 onSelect={pick}
                 showTranslation={showTranslation}
-                readOnly={instantFeedback && answered}
+                readOnly={readOnly}
                 stateFor={stateFor}
               />
-              {feedbackReady && (
+              {feedbackReady && minimalMode && (
+                <div className="mt-6 space-y-2">
+                  {isCorrect ? (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 text-base font-medium">
+                      ✔ 回答正确
+                    </div>
+                  ) : (
+                    <>
+                      <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700 text-base">
+                        您的答案：<b className="font-semibold">{picked ?? "未作答"}</b>
+                      </div>
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-base">
+                        正确答案：<b className="font-semibold">{correctLetter ?? "?"}</b>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              {feedbackReady && !minimalMode && (
                 <div
                   className={cn(
                     "mt-4 rounded-xl border px-4 py-3 text-sm",
@@ -1195,55 +1222,71 @@ function Exam({
           );
         })()}
 
-
-
-        <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
-          <Button
-            variant="outline"
-            onClick={() => setCurrent((i) => Math.max(0, i - 1))}
-            disabled={current === 0}
-            className="mt-4"
-          >
-            <ArrowLeft size={16} className="mr-1" /> 上一题
-          </Button>
-          <div className="flex items-center gap-2">
-            {current < questions.length - 1 && (
+        {minimalMode ? (
+          <div className="pt-4 flex justify-center">
+            {!(q.id in correctMap) && (
               <Button
-                variant="outline"
-                onClick={onSkip}
-                className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
-              >
-                跳过
-                {Number.isFinite(skipsRemaining) && (
-                  <span className="ml-1 text-[10px] text-amber-600">
-                    (剩 {skipsRemaining})
-                  </span>
+                size="lg"
+                onClick={() => onSubmitAnswer?.()}
+                disabled={!answers[q.id] || submittingAnswer || submitting}
+                className={cn(
+                  "min-w-[160px] rounded-full",
+                  theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700",
                 )}
-              </Button>
-            )}
-            {current >= questions.length - 1 ? (
-              <Button
-                onClick={() => onSubmit?.()}
-                disabled={submitting || !onSubmit}
-                className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
               >
-                {submitting ? "评分中…" : "提交答案"}
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
-                className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
-              >
-                下一题 <ArrowRight size={16} className="ml-1" />
+                {submittingAnswer ? "判定中…" : submitting ? "评分中…" : "提交"}
               </Button>
             )}
           </div>
-
-        </div>
+        ) : (
+          <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-4 -mx-2 px-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrent((i) => Math.max(0, i - 1))}
+              disabled={current === 0}
+              className="mt-4"
+            >
+              <ArrowLeft size={16} className="mr-1" /> 上一题
+            </Button>
+            <div className="flex items-center gap-2">
+              {current < questions.length - 1 && (
+                <Button
+                  variant="outline"
+                  onClick={onSkip}
+                  className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
+                >
+                  跳过
+                  {Number.isFinite(skipsRemaining) && (
+                    <span className="ml-1 text-[10px] text-amber-600">
+                      (剩 {skipsRemaining})
+                    </span>
+                  )}
+                </Button>
+              )}
+              {current >= questions.length - 1 ? (
+                <Button
+                  onClick={() => onSubmit?.()}
+                  disabled={submitting || !onSubmit}
+                  className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
+                >
+                  {submitting ? "评分中…" : "提交答案"}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setCurrent((i) => Math.min(questions.length - 1, i + 1))}
+                  className={cn("mt-4", theme === "orange" ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700")}
+                >
+                  下一题 <ArrowRight size={16} className="ml-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
+
 
 /* -------------------- Answer sheet -------------------- */
 
