@@ -1162,6 +1162,7 @@ function Exam({
 
 function AnswerSheet({
   questions, answers, marked, setMarked, skipped, current, setCurrent, onSubmit, submitting, submitError,
+  instantFeedback = false, correctMap = {},
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1173,6 +1174,8 @@ function AnswerSheet({
   onSubmit: () => void;
   submitting: boolean;
   submitError?: string;
+  instantFeedback?: boolean;
+  correctMap?: Record<string, boolean>;
 }) {
   const [confirming, setConfirming] = useState(false);
   const answered = Object.keys(answers).length;
