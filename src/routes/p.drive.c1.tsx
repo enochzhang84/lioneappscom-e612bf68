@@ -557,24 +557,26 @@ export function QuizApp(props: QuizAppProps = {}) {
   }, [current, showTranslation, phase]);
 
   const body = (
-    <div className="bg-[#F8FAFC] min-h-screen">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-6 md:py-8">
-        <BlueBanner
-          embedded={embedded}
-          phase={phase}
-          secondsLeft={secondsLeft}
-          current={current}
-          total={questions.length || TOTAL}
-          title={title}
-          subtitle={subtitle}
-          backHref={backHref}
-          backLabel={backLabel}
-          onReset={phase !== "intro" ? resetToIntro : undefined}
-          showTranslation={showTranslation}
-          onToggleTranslation={toggleTranslation}
-          translating={translating}
-          theme={theme}
-        />
+    <div className={cn("min-h-screen", minimalMode ? "bg-white" : "bg-[#F8FAFC]")}>
+      <div className={cn("mx-auto px-4 md:px-8 py-6 md:py-8", minimalMode ? "max-w-[760px]" : "max-w-[1400px]")}>
+        {!(minimalMode && phase === "exam") && (
+          <BlueBanner
+            embedded={embedded}
+            phase={phase}
+            secondsLeft={secondsLeft}
+            current={current}
+            total={questions.length || TOTAL}
+            title={title}
+            subtitle={subtitle}
+            backHref={backHref}
+            backLabel={backLabel}
+            onReset={phase !== "intro" ? resetToIntro : undefined}
+            showTranslation={showTranslation}
+            onToggleTranslation={toggleTranslation}
+            translating={translating}
+            theme={theme}
+          />
+        )}
 
 
         {phase === "intro" && (
@@ -599,7 +601,33 @@ export function QuizApp(props: QuizAppProps = {}) {
           </div>
         )}
 
-        {phase === "exam" && (
+        {phase === "exam" && minimalMode && (
+          <div className="mt-2">
+            <Exam
+              questions={questions}
+              answers={answers}
+              onPick={handlePick}
+              onSkip={handleSkip}
+              current={current}
+              setCurrent={setCurrent}
+              showTranslation={showTranslation}
+              translations={translations}
+              translating={translating}
+              onSubmit={requestSubmitFromLast}
+              submitting={submit.isPending}
+              skipsRemaining={skipsRemaining}
+              theme={theme}
+              instantFeedback={instantFeedback}
+              correctMap={correctMap}
+              revealedCorrect={revealedCorrect}
+              minimalMode
+              onSubmitAnswer={submitCurrentAnswer}
+              submittingAnswer={submittingAnswer}
+            />
+          </div>
+        )}
+
+        {phase === "exam" && !minimalMode && (
           <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
             <div className="min-w-0 space-y-6">
               <Exam
@@ -642,6 +670,8 @@ export function QuizApp(props: QuizAppProps = {}) {
             </aside>
           </div>
         )}
+
+
 
         {phase === "result" && grade && (
           <div className="mt-6">
