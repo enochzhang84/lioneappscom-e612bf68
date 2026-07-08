@@ -623,6 +623,8 @@ export function QuizApp(props: QuizAppProps = {}) {
               minimalMode
               onSubmitAnswer={submitCurrentAnswer}
               submittingAnswer={submittingAnswer}
+              onCancelAnswer={(qid) => setAnswers((prev) => { const { [qid]: _drop, ...rest } = prev; return rest; })}
+
             />
           </div>
         )}
