@@ -135,6 +135,16 @@ export type QuizAppProps = {
   useHistory?: boolean;
   /** Stable key used to namespace history in localStorage. */
   historyKey?: string;
+  /** Max number of skips allowed during the exam (default: unlimited). */
+  maxSkip?: number;
+  /** Enable attempts tracking (e.g. 3 tries before forced reset). */
+  maxAttempts?: number;
+  /** Stable localStorage key for attempts counter. */
+  attemptsKey?: string;
+  /** Called when the user leaves this exam (back to hub / after final fail reset). */
+  onExit?: () => void;
+  /** Visual theme accent. */
+  theme?: "blue" | "orange";
 };
 
 const DEFAULT_TOTAL = 36;
@@ -156,7 +166,38 @@ export function QuizApp(props: QuizAppProps = {}) {
     backLabel = "← 返回驾考工具",
     useHistory = false,
     historyKey,
+    maxSkip: MAX_SKIP,
+    maxAttempts: MAX_ATTEMPTS,
+    attemptsKey,
+    onExit,
+    theme = "blue",
   } = props;
+
+  // ---- Attempts (theory-only style rule: 3 tries then reset) ----
+  const readAttempts = (): number => {
+    if (!attemptsKey || typeof window === "undefined") return 0;
+    try {
+      return parseInt(window.localStorage.getItem(attemptsKey) || "0", 10) || 0;
+    } catch {
+      return 0;
+    }
+  };
+  const writeAttempts = (n: number) => {
+    if (!attemptsKey || typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(attemptsKey, String(n));
+    } catch {
+      /* ignore */
+    }
+  };
+  const clearAttempts = () => {
+    if (!attemptsKey || typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(attemptsKey);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const fetchFn = useServerFn(getRandomQuizQuestions);
   const fetchMixedFn = useServerFn(getMixedRandomQuestions);
