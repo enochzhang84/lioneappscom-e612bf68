@@ -149,6 +149,8 @@ export type QuizAppProps = {
   instantFeedback?: boolean;
   /** When true, render the simplified intro rule list and hide the side rules/tips cards. */
   simplifiedRules?: boolean;
+  /** Apple-minimal exam UI: no header/answer-sheet/skip/prev; submit-per-question; no AI in review. */
+  minimalMode?: boolean;
 };
 
 const DEFAULT_TOTAL = 36;
