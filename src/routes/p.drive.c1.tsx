@@ -145,6 +145,10 @@ export type QuizAppProps = {
   onExit?: () => void;
   /** Visual theme accent. */
   theme?: "blue" | "orange";
+  /** When true, reveal correct answer immediately after a wrong pick and color the answer sheet. */
+  instantFeedback?: boolean;
+  /** When true, render the simplified intro rule list and hide the side rules/tips cards. */
+  simplifiedRules?: boolean;
 };
 
 const DEFAULT_TOTAL = 36;
