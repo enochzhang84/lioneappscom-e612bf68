@@ -790,20 +790,29 @@ function CountdownTicker({ onTick }: { onTick: (v: number | ((v: number) => numb
 /* -------------------- Intro -------------------- */
 
 function Intro({
-  total, pass, maxWrong, examSeconds, onStart, loading, error,
+  total, pass, maxWrong, maxSkip, examSeconds, onStart, loading, error,
   showHistoryReset = false, onResetHistory,
+  attempts = 0, maxAttempts, theme = "blue", onExit,
 }: {
-  total: number; pass: number; maxWrong?: number; examSeconds: number;
+  total: number; pass: number; maxWrong?: number; maxSkip?: number; examSeconds: number;
   onStart: () => void; loading: boolean; error?: string;
   showHistoryReset?: boolean; onResetHistory?: () => void;
+  attempts?: number; maxAttempts?: number;
+  theme?: "blue" | "orange"; onExit?: () => void;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
+  const accent =
+    theme === "orange"
+      ? { icon: "bg-orange-50 text-orange-600", btn: "bg-orange-600 hover:bg-orange-700" }
+      : { icon: "bg-blue-50 text-blue-600", btn: "bg-blue-600 hover:bg-blue-700" };
+  const attemptsLeft =
+    typeof maxAttempts === "number" ? Math.max(0, maxAttempts - attempts) : undefined;
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] gap-6">
       <Card className="border-slate-200 shadow-sm rounded-2xl">
         <CardContent className="p-8 md:p-10 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 grid place-items-center">
+            <div className={cn("h-12 w-12 rounded-2xl grid place-items-center", accent.icon)}>
               <ClipboardCheck size={24} />
             </div>
             <div>
@@ -813,9 +822,26 @@ function Intro({
           </div>
           <ul className="text-sm text-foreground/80 space-y-2 list-disc pl-5">
             <li>共 <b>{total}</b> 道题，随机从题库抽取。</li>
-            <li>答对 <b>{pass}</b> 题及以上为通过。</li>
+            {typeof maxWrong === "number" ? (
+              <li>最多允许错 <b>{maxWrong}</b> 题；答对 <b>{pass}</b> 题即可通过。</li>
+            ) : (
+              <li>答对 <b>{pass}</b> 题及以上为通过。</li>
+            )}
             <li>考试时长 <b>{Math.round(examSeconds / 60)}</b> 分钟。</li>
+            {typeof maxSkip === "number" ? (
+              <li>最多允许跳过 <b>{maxSkip}</b> 题。</li>
+            ) : (
+              <li>允许无限次跳过。</li>
+            )}
             <li>交卷后将显示成绩、正确答案与错题回顾。</li>
+            {typeof maxAttempts === "number" && (
+              <li className="text-slate-700">
+                本轮总共 <b>{maxAttempts}</b> 次考试机会，当前第 <b>{Math.min(attempts + 1, maxAttempts)}</b> / {maxAttempts} 次。
+                {attemptsLeft !== undefined && attemptsLeft < maxAttempts && (
+                  <span className="ml-1 text-amber-700">剩余 {attemptsLeft} 次</span>
+                )}
+              </li>
+            )}
             {showHistoryReset && (
               <li className="text-muted-foreground">
                 已出过的题目下次会自动排除；每个题库刷完一轮后重新开始。
@@ -824,9 +850,14 @@ function Intro({
           </ul>
           {error && <div className="text-sm text-destructive">{error}</div>}
           <div className="flex flex-wrap items-center gap-3">
-            <Button size="lg" onClick={onStart} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+            <Button size="lg" onClick={onStart} disabled={loading} className={accent.btn}>
               {loading ? "抽题中…" : "开始考试"}
             </Button>
+            {onExit && (
+              <Button size="lg" variant="outline" onClick={onExit}>
+                返回考试选择
+              </Button>
+            )}
             {showHistoryReset && onResetHistory && (
               confirmReset ? (
                 <>
@@ -846,12 +877,13 @@ function Intro({
         </CardContent>
       </Card>
       <div className="space-y-6">
-        <RulesCard total={total} pass={pass} maxWrong={maxWrong} examSeconds={examSeconds} />
+        <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
         <TipsCard />
       </div>
     </div>
   );
 }
+
 
 /* -------------------- Exam -------------------- */
 
