@@ -966,10 +966,12 @@ function Intro({
           </div>
         </CardContent>
       </Card>
-      <div className="space-y-6">
-        <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
-        <TipsCard />
-      </div>
+      {!simplifiedRules && (
+        <div className="space-y-6">
+          <RulesCard total={total} pass={pass} maxWrong={maxWrong} maxSkip={maxSkip} examSeconds={examSeconds} />
+          <TipsCard />
+        </div>
+      )}
     </div>
   );
 }
