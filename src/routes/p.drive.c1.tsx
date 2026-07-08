@@ -1097,7 +1097,7 @@ function Exam({
   showTranslation = false, translations = {}, translating = false,
   onSubmit, submitting = false, skipsRemaining = Infinity, theme = "blue",
   instantFeedback = false, correctMap = {}, revealedCorrect = {},
-  minimalMode = false, onSubmitAnswer, submittingAnswer = false, onCancelAnswer,
+  minimalMode = false, onSubmitAnswer, submittingAnswer = false, onCancelExam,
 }: {
   questions: QuizQuestion[];
   answers: Record<string, "A" | "B" | "C" | "D">;
@@ -1118,7 +1118,7 @@ function Exam({
   minimalMode?: boolean;
   onSubmitAnswer?: () => void;
   submittingAnswer?: boolean;
-  onCancelAnswer?: (qid: string) => void;
+  onCancelExam?: () => void;
 
 }) {
 
