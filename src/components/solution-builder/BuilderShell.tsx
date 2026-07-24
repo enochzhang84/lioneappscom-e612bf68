@@ -6,14 +6,15 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { ArrowLeft, Download, Save, Share2, Printer, Send, ChevronRight, AlertTriangle, Check, Info, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Save, Share2, Printer, Send, ChevronRight, AlertTriangle, Check, Info, Loader2, BookOpen, CircleDot } from "lucide-react";
 import { SB_STRINGS, bi, type Lang } from "@/lib/solution-builder/i18n";
 import { formatMoney, computeTotals } from "@/lib/solution-builder/calc";
-import type { LineItem, CompatWarning, SolutionState, ToolKey, SbSettings } from "@/lib/solution-builder/types";
+import type { LineItem, CompatWarning, SolutionState, ToolKey, SbSettings, CompatRule } from "@/lib/solution-builder/types";
 import { sbGetSettings, sbSaveMine, sbSubmitPublic, sbShareMine } from "@/lib/solution-builder.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SubmitDialog } from "./SubmitDialog";
 import { exportSolutionPdf } from "./pdf";
+import { useCompatRules } from "./builderHelpers";
 import { useLang } from "@/lib/i18n";
 
 type Props = {
@@ -247,7 +248,7 @@ export function BuilderShell(props: Props) {
 
         {/* Right summary */}
         <aside className="hidden lg:block">
-          <SummaryCard L={L} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
+          <SummaryCard L={L} tool={props.tool} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
         </aside>
       </div>
 
@@ -262,7 +263,7 @@ export function BuilderShell(props: Props) {
           <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
             <SheetTitle>{bi(SB_STRINGS.summary_title, L)}</SheetTitle>
             <div className="mt-3">
-              <SummaryCard L={L} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
+              <SummaryCard L={L} tool={props.tool} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <Button variant="outline" size="sm" onClick={handleSave} disabled={saving}>{bi(SB_STRINGS.save, L)}</Button>
                 <Button variant="outline" size="sm" onClick={handleExport} disabled={exportBusy}>{bi(SB_STRINGS.export_pdf, L)}</Button>
@@ -281,9 +282,10 @@ export function BuilderShell(props: Props) {
 }
 
 function SummaryCard({
-  L, totals, items, compat, settings,
+  L, tool, totals, items, compat, settings,
 }: {
   L: Lang;
+  tool: ToolKey;
   totals: ReturnType<typeof computeTotals>;
   items: LineItem[];
   compat: CompatWarning[];
@@ -299,7 +301,10 @@ function SummaryCard({
   const HeadIcon = hasErrors ? AlertTriangle : hasWarnings ? AlertTriangle : hasInfo ? Info : Check;
   return (
     <div className="lg:sticky lg:top-20 bg-white rounded-2xl border p-4">
-      <div className="text-sm font-semibold text-slate-900 mb-3">{bi(SB_STRINGS.summary_title, L)}</div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-sm font-semibold text-slate-900">{bi(SB_STRINGS.summary_title, L)}</div>
+        <RulesDrawer L={L} tool={tool} compat={compat} />
+      </div>
       {items.length === 0 ? (
         <div className="text-sm text-slate-400 py-6 text-center">{bi(SB_STRINGS.no_items, L)}</div>
       ) : (
@@ -350,6 +355,83 @@ function SummaryCard({
         </div>
       </div>
     </div>
+  );
+}
+
+function RulesDrawer({ L, tool, compat }: { L: Lang; tool: ToolKey; compat: CompatWarning[] }) {
+  const rulesQ = useCompatRules();
+  const all = (rulesQ.data ?? []) as CompatRule[];
+  // Filter rules that relate to this tool by rule_type prefix
+  const prefix = tool === "pc" ? ["pc."] : tool === "nas" ? ["nas.", "net."] : tool === "home-network" ? ["net."] : ["pc.", "nas.", "net."];
+  const scoped = all.filter((r) => prefix.some((p) => r.rule_type.startsWith(p)));
+  const hitCodes = new Set(compat.map((c) => c.rule_code).filter(Boolean) as string[]);
+  const hitCount = scoped.filter((r) => hitCodes.has(r.rule_code)).length;
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-slate-500 hover:text-slate-900">
+          <BookOpen size={12} className="mr-1" />
+          {L === "zh" ? `规则 ${hitCount}/${scoped.length}` : `Rules ${hitCount}/${scoped.length}`}
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+        <SheetTitle>{L === "zh" ? "兼容性规则详情" : "Compatibility Rules"}</SheetTitle>
+        <div className="mt-2 text-xs text-slate-500">
+          {L === "zh"
+            ? `本方案关联 ${scoped.length} 条规则，其中 ${hitCount} 条触发提醒。`
+            : `${scoped.length} rules apply to this builder; ${hitCount} triggered.`}
+        </div>
+        <div className="mt-4 space-y-2">
+          {scoped.length === 0 && (
+            <div className="text-sm text-slate-400 py-6 text-center">
+              {L === "zh" ? "暂无规则" : "No rules"}
+            </div>
+          )}
+          {scoped.map((r) => {
+            const hit = hitCodes.has(r.rule_code);
+            const sev = r.severity;
+            const badge = sev === "error" ? "bg-red-100 text-red-700"
+              : sev === "warning" ? "bg-amber-100 text-amber-800"
+              : "bg-blue-100 text-blue-700";
+            const statusCls = hit
+              ? (sev === "error" ? "border-red-200 bg-red-50/60" : sev === "warning" ? "border-amber-200 bg-amber-50/60" : "border-blue-200 bg-blue-50/60")
+              : "border-slate-200 bg-white";
+            const StatusIcon = hit ? AlertTriangle : Check;
+            const statusColor = hit
+              ? (sev === "error" ? "text-red-600" : sev === "warning" ? "text-amber-600" : "text-blue-600")
+              : "text-emerald-600";
+            const msg = hit
+              ? (L === "zh" ? (compat.find((c) => c.rule_code === r.rule_code)?.message_zh ?? r.message_zh) : (compat.find((c) => c.rule_code === r.rule_code)?.message_en ?? r.message_en))
+              : (L === "zh" ? r.message_zh : r.message_en);
+            return (
+              <div key={r.id} className={`rounded-xl border p-3 ${statusCls}`}>
+                <div className="flex items-start gap-2">
+                  <StatusIcon size={14} className={`mt-0.5 shrink-0 ${statusColor}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-slate-800">{r.rule_code}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${badge}`}>{sev.toUpperCase()}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{r.rule_type}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${hit ? "bg-slate-900 text-white" : "bg-emerald-100 text-emerald-700"}`}>
+                        {hit ? (L === "zh" ? "已命中" : "HIT") : (L === "zh" ? "通过" : "PASS")}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-600 mt-1 leading-relaxed">
+                      {msg || <span className="text-slate-400 inline-flex items-center gap-1"><CircleDot size={10} /> {L === "zh" ? "无说明" : "No description"}</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4 text-[11px] text-slate-400 leading-relaxed">
+          {L === "zh"
+            ? "命中的规则会显示在配置摘要中；未命中的规则表示当前配置已满足该项检查。"
+            : "Triggered rules appear in the summary. Passed rules mean your current configuration meets that check."}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
