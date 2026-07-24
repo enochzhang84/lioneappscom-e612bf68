@@ -116,35 +116,36 @@ function SolutionsPanel() {
       {rows.length === 0 ? (
         <EmptyState title="暂无方案" description="客户提交或您保存的方案都会显示在这里。" />
       ) : (
-        <DataTable
+        <DataTable<SbSolutionRow>
           columns={[
-            { key: "number", header: "编号", render: (r: SbSolutionRow) => <span className="font-mono text-xs">{r.solution_number}</span> },
-            { key: "title", header: "标题", render: (r: SbSolutionRow) => <span className="font-medium">{r.title}</span> },
-            { key: "type", header: "类型" },
-            { key: "customer", header: "客户", render: (r: SbSolutionRow) => (
+            { key: "number", header: "编号", cell: (r) => <span className="font-mono text-xs">{r.solution_number}</span> },
+            { key: "title", header: "标题", cell: (r) => <span className="font-medium">{r.title}</span> },
+            { key: "type", header: "类型", cell: (r) => <span className="text-xs">{r.solution_type}</span> },
+            { key: "customer", header: "客户", cell: (r) => (
               <div className="text-xs">
                 <div>{r.customer_name || "-"}</div>
                 <div className="text-slate-400">{r.customer_email || ""}</div>
               </div>
             ) },
-            { key: "total", header: "一次性", render: (r: SbSolutionRow) => formatMoney(Number(r.one_time_total), r.currency) },
-            { key: "status", header: "状态", render: (r: SbSolutionRow) => (
+            { key: "total", header: "一次性", cell: (r) => formatMoney(Number(r.one_time_total), r.currency) },
+            { key: "status", header: "状态", cell: (r) => (
               <select value={r.status} className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs"
                 onChange={(e) => upd.mutate({ id: r.id, patch: { status: e.target.value as never } })}>
                 {SOLUTION_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             ) },
-            { key: "created", header: "提交时间", render: (r: SbSolutionRow) => <span className="text-xs text-slate-500">{new Date(r.created_at).toLocaleString()}</span> },
-            { key: "actions", header: "操作", render: (r: SbSolutionRow) => (
+            { key: "created", header: "提交时间", cell: (r) => <span className="text-xs text-slate-500">{new Date(r.created_at).toLocaleString()}</span> },
+            { key: "actions", header: "操作", cell: (r) => (
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => setViewId(r.id)}>查看</Button>
                 <Button size="sm" variant="ghost" className="text-red-600" onClick={() => setPending(r.id)}>删除</Button>
               </div>
             ) },
           ]}
-          data={rows.map((r) => ({ ...r, type: r.solution_type }))}
+          rows={rows}
           rowKey={(r) => r.id}
         />
+
       )}
 
       <Dialog open={!!viewId} onOpenChange={(o) => !o && setViewId(null)}>
