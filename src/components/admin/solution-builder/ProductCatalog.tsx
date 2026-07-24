@@ -221,6 +221,30 @@ function ProductsSection() {
             {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
         </FieldSm>
+        <FieldSm label="世代">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[120px]" value={generation} onChange={(e) => setGeneration(e.target.value)}>
+            <option value="">全部</option>
+            {facets.generations.map((g) => <option key={g} value={g}>{g}</option>)}
+          </select>
+        </FieldSm>
+        <FieldSm label="Socket">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[110px]" value={socket} onChange={(e) => setSocket(e.target.value)}>
+            <option value="">全部</option>
+            {facets.sockets.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </FieldSm>
+        <FieldSm label="内存">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[90px]" value={ddr} onChange={(e) => setDdr(e.target.value)}>
+            <option value="">全部</option>
+            {facets.memory_types.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </FieldSm>
+        <FieldSm label="完整度">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[100px]" value={completeness} onChange={(e) => setCompleteness(e.target.value)}>
+            <option value="">全部</option>
+            {facets.completeness.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </FieldSm>
         <FieldSm label="搜索"><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="名称 / 型号 / 编码" className="h-9 min-w-[200px]" /></FieldSm>
         <label className="inline-flex items-center gap-2 text-xs text-slate-600 h-9"><input type="checkbox" checked={includeDeleted} onChange={(e) => setIncludeDeleted(e.target.checked)} /> 显示已删除</label>
         <div className="ml-auto flex gap-2">
