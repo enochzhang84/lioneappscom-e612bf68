@@ -625,5 +625,58 @@ export const sbAdminSaveSettings = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ======== Compatibility Rules (Admin) ========
+const CompatRulePayload = z.object({
+  id: z.string().uuid().optional().nullable(),
+  rule_code: z.string().min(1).max(100).regex(/^[a-z0-9_.-]+$/i, "字母、数字、_ . -"),
+  rule_type: z.string().min(1).max(100),
+  params: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).default({}),
+  severity: z.enum(["info", "warning", "error"]).default("warning"),
+  message_zh: z.string().max(500).nullable().optional(),
+  message_en: z.string().max(500).nullable().optional(),
+  is_active: z.boolean().default(true),
+  sort_order: z.number().int().default(0),
+});
+
+export const sbAdminListCompatRules = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const { data, error } = await context.supabase
+      .from("solution_compatibility_rules")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("rule_code", { ascending: true });
+    if (error) throw new Error(error.message);
+    return { rows: (data ?? []) as unknown as Array<Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>> };
+  });
+
+export const sbAdminSaveCompatRule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CompatRulePayload.parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    if (data.id) {
+      const { id, ...rest } = data;
+      const { error } = await context.supabase.from("solution_compatibility_rules").update(rest as never).eq("id", id!);
+      if (error) throw new Error(error.message);
+      return { id };
+    }
+    const { id: _i, ...ins } = data;
+    const { data: row, error } = await context.supabase.from("solution_compatibility_rules").insert(ins as never).select("id").single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const sbAdminDeleteCompatRule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { error } = await context.supabase.from("solution_compatibility_rules").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 // Placeholder helper for future compat checks (unused but exported for typing)
 export type { LineItem, CompatWarning, ToolKey };
