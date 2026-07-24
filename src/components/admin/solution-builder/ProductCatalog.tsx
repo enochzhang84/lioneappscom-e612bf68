@@ -89,6 +89,8 @@ function ProductsSection() {
   const [editing, setEditing] = useState<Partial<SbProduct> | null>(null);
   const [pending, setPending] = useState<SbProduct | null>(null);
   const [historyOf, setHistoryOf] = useState<SbProduct | null>(null);
+  const [importPreview, setImportPreview] = useState<{ result: Awaited<ReturnType<typeof previewFn>>; rows: unknown[] } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const brandsQ = useQuery({ queryKey: ["admin-sb-brands"], queryFn: () => brandsFn() });
