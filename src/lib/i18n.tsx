@@ -189,6 +189,14 @@ export const dict: Dict = {
     zh: "为个人、家庭和小型企业提供家庭网络、NAS 私有云、智能家居、企业网站、定制软件和办公平台服务。",
     en: "Home network, NAS private cloud, smart home, business website, custom software and office platform services for homes and small businesses.",
   },
+  "seo.services.title": {
+    zh: "Lione Apps 服务 — 家庭网络、NAS、智能家居与企业软件",
+    en: "Lione Apps Services — Home Network, NAS, Smart Home & Business Software",
+  },
+  "seo.services.desc": {
+    zh: "为家庭提供 Wi-Fi、NAS 私有云、智能家居和家庭影音服务,并为小型企业提供网站、定制软件、办公平台和云服务器部署。",
+    en: "Home Wi-Fi, NAS private cloud, smart home and media services, plus business websites, custom software, office platforms and cloud deployment for small businesses.",
+  },
 };
 
 type Ctx = {

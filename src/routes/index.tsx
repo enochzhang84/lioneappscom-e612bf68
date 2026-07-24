@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Mail, MessageCircle, Wifi, HardDrive, Home, Globe, Code2, Cloud, Users, Building2, Church, Search, PenTool, Wrench, LifeBuoy, Check } from "lucide-react";
+import { ArrowRight, Mail, MessageCircle, Users, Building2, Church, Search, PenTool, Wrench, LifeBuoy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteLayout } from "@/components/SiteLayout";
 import { listProducts, listCases, type ProductCard, type CaseCard } from "@/lib/cms.functions";
 import { mediaUrl } from "@/lib/media";
 import { useLang, dict } from "@/lib/i18n";
+import { services } from "@/lib/services-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,9 +26,8 @@ export const Route = createFileRoute("/")({
 
 function Home_() {
   const { products, cases } = Route.useLoaderData();
-  const { t } = useLang();
+  const { lang, t } = useLang();
 
-  // Prefer real CMS cases; fall back to product cards if the cases table is empty.
   const featuredCases = (cases as CaseCard[]).slice(0, 3);
   const featuredProducts = (products as ProductCard[]).slice(0, 3);
 
@@ -46,7 +46,7 @@ function Home_() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
-              <a href="#services">{t("hero.cta1")} <ArrowRight className="ml-1 h-4 w-4" /></a>
+              <Link to="/services">{t("hero.cta1")} <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/contact">{t("hero.cta2")}</Link>
@@ -56,34 +56,42 @@ function Home_() {
         </div>
       </section>
 
-      {/* Services */}
+      {/* Services — shared data with /services page */}
       <section id="services" className="mx-auto max-w-6xl px-6 py-16">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold">{t("services.title")}</h2>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">{t("services.desc")}</p>
         </div>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {[
-            { i: Wifi, t: "services.s1.t", d: "services.s1.d" },
-            { i: HardDrive, t: "services.s2.t", d: "services.s2.d" },
-            { i: Home, t: "services.s3.t", d: "services.s3.d" },
-            { i: Globe, t: "services.s4.t", d: "services.s4.d" },
-            { i: Code2, t: "services.s5.t", d: "services.s5.d" },
-            { i: Cloud, t: "services.s6.t", d: "services.s6.d" },
-          ].map(({ i: Icon, t: tk, d: dk }) => (
-            <div
-              key={tk}
-              className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition-all hover:-translate-y-1 hover:border-primary/30"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Icon className="h-5 w-5" />
-              </div>
-              <h3 className="mt-4 text-lg font-semibold">{t(tk as keyof typeof dict)}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{t(dk as keyof typeof dict)}</p>
-            </div>
-          ))}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((s) => {
+            const Icon = s.icon;
+            return (
+              <Link
+                key={s.id}
+                to="/services"
+                hash={s.anchor}
+                className="group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition-all hover:-translate-y-1 hover:border-primary/30"
+              >
+                <div
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-sm"
+                  style={{ background: s.gradient }}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-lg font-semibold">{s.title[lang]}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                  {s.short[lang]}
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary opacity-80 group-hover:opacity-100">
+                  {lang === "zh" ? "了解更多" : "Learn more"}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
+
 
       {/* Who we help */}
       <section className="bg-card/40 border-y border-border/60">
