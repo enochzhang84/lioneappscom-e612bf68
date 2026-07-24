@@ -100,8 +100,8 @@ export const sbListCompatRules = createServerFn({ method: "GET" }).handler(async
     .select("id, rule_code, rule_type, params, severity, message_zh, message_en, is_active, sort_order")
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
-  if (error) return { rules: [] as unknown[], error: error.message };
-  return { rules: data ?? [] };
+  if (error) return { rules: [] as Array<Record<string, unknown>>, error: error.message };
+  return { rules: (data ?? []) as unknown as Array<Record<string, unknown>>, error: null as string | null };
 });
 
 
