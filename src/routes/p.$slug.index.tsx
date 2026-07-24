@@ -128,12 +128,17 @@ function ToolsPageView({ page, categories, items }: {
 
   return (
     <SiteLayout>
-      {/* Title section (full width) */}
+      {/* Title section (compact, left-aligned) */}
       <section data-tools-layout="true" className="border-b border-border">
-        <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-10 md:py-14">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{page.title}</h1>
-          <p className="mt-2 text-muted-foreground">
-            {(page.content && (page.content as { subtitle?: string }).subtitle) || "这里可以放副标题/说明文字"}
+        <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-6 md:py-8">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{page.title}</h1>
+          <p className="mt-1.5 text-sm md:text-base text-muted-foreground">
+            {(page.content && (page.content as { subtitle?: string }).subtitle) || (
+              <>
+                <span className="lang-zh">集中使用各类配置、计算、查询与效率工具</span>
+                <span className="lang-en hidden">Access configuration, calculation, reference and productivity tools in one place.</span>
+              </>
+            )}
           </p>
         </div>
       </section>
@@ -142,6 +147,7 @@ function ToolsPageView({ page, categories, items }: {
       <SolutionBuilderFeatured />
 
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
+
 
         {/* Mobile category chips */}
         <div className="md:hidden -mx-4 px-4 py-3 border-b border-border overflow-x-auto">
