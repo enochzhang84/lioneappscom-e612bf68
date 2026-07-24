@@ -223,11 +223,13 @@ function ServiceBlock({
     >
       <div className={flip ? "md:order-2" : ""}>
         <ServiceIllustration
+          image={service.image}
           gradient={service.gradient}
           Icon={Icon}
           alt={service.imageAlt[lang]}
         />
       </div>
+
       <div>
         <h3 className="text-2xl md:text-3xl font-bold tracking-tight">
           {service.title[lang]}
@@ -271,22 +273,41 @@ function ServiceBlock({
 }
 
 function ServiceIllustration({
+  image,
   gradient,
   Icon,
   alt,
 }: {
+  image?: string;
   gradient: string;
   Icon: ServiceItem["icon"];
   alt: string;
 }) {
+  if (image) {
+    return (
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-card)] bg-muted">
+        <img
+          src={image}
+          alt={alt}
+          width={1280}
+          height={800}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 backdrop-blur ring-1 ring-black/5 shadow-sm">
+          <Icon className="h-4.5 w-4.5 text-primary" strokeWidth={1.8} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       role="img"
       aria-label={alt}
-      className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-card)]"
+      className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-card)]"
       style={{ background: gradient }}
     >
-      {/* subtle grid overlay */}
       <div
         className="absolute inset-0 opacity-20"
         style={{
@@ -295,8 +316,6 @@ function ServiceIllustration({
           backgroundSize: "32px 32px",
         }}
       />
-      <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/15 blur-2xl" />
-      <div className="absolute -left-10 -bottom-10 h-52 w-52 rounded-full bg-black/10 blur-2xl" />
       <div className="relative z-10 flex h-full w-full items-center justify-center">
         <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/25 backdrop-blur-md ring-1 ring-white/40 shadow-xl">
           <Icon className="h-12 w-12 text-white" strokeWidth={1.6} />
@@ -305,6 +324,7 @@ function ServiceIllustration({
     </div>
   );
 }
+
 
 function HeroIllustration() {
   const { lang } = useLang();
