@@ -5,14 +5,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { sbListProducts } from "@/lib/solution-builder.functions";
 import type { LineItem, SbProduct } from "@/lib/solution-builder/types";
 
-export function useProducts(categories: string[]) {
+export function useProducts(categories: string[], builderType?: string) {
   const listFn = useServerFn(sbListProducts);
   return useQuery({
-    queryKey: ["sb-products", categories.join(",")],
-    queryFn: () => listFn({ data: { categories } }),
+    queryKey: ["sb-products", categories.join(","), builderType ?? ""],
+    queryFn: () => listFn({ data: { categories, builder_type: builderType } }),
     staleTime: 60_000,
   });
 }
+
 
 export function productToLineItem(p: SbProduct, qty = 1, category?: string): LineItem {
   return {
