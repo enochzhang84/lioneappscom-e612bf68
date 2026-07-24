@@ -261,7 +261,9 @@ function ProductsSection() {
         <label className="inline-flex items-center gap-2 text-xs text-slate-600 h-9"><input type="checkbox" checked={includeDeleted} onChange={(e) => setIncludeDeleted(e.target.checked)} /> 显示已删除</label>
         <div className="ml-auto flex gap-2">
           <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importCsv(f); e.target.value = ""; }} />
-          <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4 mr-1" />导入 CSV</Button>
+          <Button variant="outline" size="sm" disabled={previewLoading} onClick={() => fileRef.current?.click()}>
+            <Upload className="h-4 w-4 mr-1" />{previewLoading ? "校验中…" : "导入 CSV"}
+          </Button>
           <Button variant="outline" size="sm" onClick={exportCsv}><Download className="h-4 w-4 mr-1" />导出 CSV</Button>
           <Button size="sm" onClick={() => setEditing({
             category: filteredCats[0]?.code ?? "pc-cpu", is_visible: true, currency: "USD",
