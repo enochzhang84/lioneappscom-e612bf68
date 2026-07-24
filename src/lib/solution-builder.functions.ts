@@ -269,6 +269,38 @@ export const sbAdminDeleteSolution = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Admin: manage share link (regenerate / revoke / update expiry only)
+export const sbAdminUpdateShare = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; action: "regenerate" | "revoke" | "set_expiry"; days?: number | null }) =>
+    z.object({
+      id: z.string().uuid(),
+      action: z.enum(["regenerate", "revoke", "set_expiry"]),
+      days: z.number().int().min(1).max(3650).nullable().optional(),
+    }).parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const patch: { share_token?: string | null; share_expires_at?: string | null } = {};
+    if (data.action === "revoke") {
+      patch.share_token = null;
+      patch.share_expires_at = null;
+    } else if (data.action === "regenerate") {
+      patch.share_token = crypto.randomUUID().replace(/-/g, "");
+      patch.share_expires_at = data.days ? new Date(Date.now() + data.days * 86400_000).toISOString() : null;
+    } else {
+      patch.share_expires_at = data.days ? new Date(Date.now() + data.days * 86400_000).toISOString() : null;
+    }
+    const { data: row, error } = await context.supabase
+      .from("sb_solutions")
+      .update(patch as never)
+      .eq("id", data.id)
+      .select("share_token, share_expires_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return { token: row.share_token, expires: row.share_expires_at };
+  });
+
 // Products
 export const sbAdminListProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
