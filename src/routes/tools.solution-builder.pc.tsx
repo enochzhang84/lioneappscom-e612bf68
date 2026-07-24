@@ -78,7 +78,7 @@ function PcBuilder() {
   const warnings = useMemo<CompatWarning[]>(() => {
     const w: CompatWarning[] = [];
     const cpu = pickById(products, selections["pc-cpu"].id);
-    const mb = pickById(products, selections["pc-motherboard"].id);
+    const mb = pickById(products, selections["pc-mb"].id);
     const psu = pickById(products, selections["pc-psu"].id);
     if (cpu && mb) {
       const cpuSocket = (cpu.specs as any).socket;
@@ -176,7 +176,7 @@ function PcBuilder() {
 
 const CAT_LABEL: Record<string, { zh: string; en: string }> = {
   "pc-cpu": { zh: "CPU 处理器", en: "CPU" },
-  "pc-motherboard": { zh: "主板", en: "Motherboard" },
+  "pc-mb": { zh: "主板", en: "Motherboard" },
   "pc-gpu": { zh: "显卡", en: "GPU" },
   "pc-ram": { zh: "内存", en: "RAM" },
   "pc-ssd": { zh: "SSD 固态硬盘", en: "SSD" },
