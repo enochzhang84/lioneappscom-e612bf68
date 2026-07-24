@@ -310,43 +310,31 @@ function ServiceIllustration({
 }
 
 function HeroIllustration() {
+  const { lang } = useLang();
+  const alt =
+    lang === "zh"
+      ? "家庭与小型企业数字生态:Wi-Fi、NAS、智能家居、网站、Dashboard 与云服务连接示意图"
+      : "Home and small business digital ecosystem: Wi-Fi, NAS, smart home, website, dashboard and cloud services";
   return (
-    <div
-      className="relative aspect-[5/4] w-full overflow-hidden rounded-3xl border border-border shadow-[var(--shadow-card)]"
-      style={{
-        background:
-          "linear-gradient(135deg,#2563EB 0%,#7C3AED 55%,#0EA5E9 100%)",
-      }}
-      role="img"
-      aria-label="Home and small business digital ecosystem"
-    >
+    <div className="relative w-full">
       <div
-        className="absolute inset-0 opacity-20"
+        className="pointer-events-none absolute -inset-8 -z-10 opacity-70"
         style={{
-          backgroundImage:
-            "linear-gradient(to right, rgba(255,255,255,0.25) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.25) 1px, transparent 1px)",
-          backgroundSize: "36px 36px",
+          background:
+            "radial-gradient(60% 55% at 50% 50%, oklch(0.75 0.14 264 / 0.35), transparent 70%)",
         }}
       />
-      <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/15 blur-2xl" />
-      <div className="absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-black/15 blur-2xl" />
-      <div className="relative z-10 grid h-full w-full grid-cols-3 gap-3 p-6">
-        {[
-          ["Wi-Fi", "M"],
-          ["NAS", "P"],
-          ["Smart", "H"],
-          ["Web", "S"],
-          ["CRM", "D"],
-          ["Cloud", "K"],
-        ].map(([label]) => (
-          <div
-            key={label}
-            className="flex items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm ring-1 ring-white/30 text-white text-xs font-semibold"
-          >
-            {label}
-          </div>
-        ))}
-      </div>
+      <img
+        src={heroEcosystem}
+        alt={alt}
+        width={1280}
+        height={1024}
+        fetchPriority="high"
+        decoding="async"
+        className="w-full h-auto rounded-3xl shadow-[var(--shadow-card)] ring-1 ring-border/60 motion-safe:animate-[float_8s_ease-in-out_infinite]"
+      />
+      <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}`}</style>
     </div>
   );
 }
+
