@@ -19,11 +19,11 @@ export const Route = createFileRoute("/tools/solution-builder/home-network")({
   component: NetworkBuilder,
 });
 
-const CATS = ["net-router", "net-mesh", "net-ap", "net-switch", "net-cable", "net-ups", "service-install"];
+const CATS = ["net-router", "net-mesh", "net-ap", "net-switch", "net-cable", "ups", "service-install"];
 
 function NetworkBuilder() {
   const { lang } = useLang(); const L = lang === "en" ? "en" : "zh";
-  const productsQ = useProducts(CATS);
+  const productsQ = useProducts(CATS, "home-network");
   const products = productsQ.data?.products;
 
   const [title, setTitle] = useState(L === "zh" ? "我的家庭网络方案" : "My Home Network Plan");
@@ -41,7 +41,7 @@ function NetworkBuilder() {
     "net-ap": { id: null, qty: 0 },
     "net-switch": { id: null, qty: 1 },
     "net-cable": { id: null, qty: 1 },
-    "net-ups": { id: null, qty: 1 },
+    "ups": { id: null, qty: 1 },
     "service-install": { id: null, qty: 1 },
   });
 
@@ -138,8 +138,8 @@ function NetworkBuilder() {
               onChange={(id, qty) => setSelections(s => ({ ...s, "net-switch": { id, qty } }))} loading={productsQ.isLoading} />
             <PartRow L={L} label={L === "zh" ? "网线套装" : "Cable Kit"} products={pickerOptions(products, "net-cable")} selectedId={selections["net-cable"].id} qty={selections["net-cable"].qty}
               onChange={(id, qty) => setSelections(s => ({ ...s, "net-cable": { id, qty } }))} loading={productsQ.isLoading} />
-            <PartRow L={L} label={L === "zh" ? "UPS 不间断电源" : "UPS"} products={pickerOptions(products, "net-ups")} selectedId={selections["net-ups"].id} qty={selections["net-ups"].qty}
-              onChange={(id, qty) => setSelections(s => ({ ...s, "net-ups": { id, qty } }))} loading={productsQ.isLoading} />
+            <PartRow L={L} label={L === "zh" ? "UPS 不间断电源" : "UPS"} products={pickerOptions(products, "ups")} selectedId={selections["ups"].id} qty={selections["ups"].qty}
+              onChange={(id, qty) => setSelections(s => ({ ...s, "ups": { id, qty } }))} loading={productsQ.isLoading} />
             <PartRow L={L} label={L === "zh" ? "安装与布线服务" : "Installation & Cabling"} products={pickerOptions(products, "service-install")} selectedId={selections["service-install"].id} qty={selections["service-install"].qty}
               onChange={(id, qty) => setSelections(s => ({ ...s, "service-install": { id, qty } }))} loading={productsQ.isLoading} />
           </div>
