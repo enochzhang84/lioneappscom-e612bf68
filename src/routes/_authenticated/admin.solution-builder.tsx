@@ -13,6 +13,7 @@ import {
   sbAdminGetSolution,
   sbAdminUpdateSolution,
   sbAdminDeleteSolution,
+  sbAdminUpdateShare,
   sbAdminListProducts,
   sbAdminSaveProduct,
   sbAdminDeleteProduct,
@@ -21,6 +22,7 @@ import {
 } from "@/lib/solution-builder.functions";
 import { SOLUTION_STATUSES, type SbProduct, type SbSolutionRow } from "@/lib/solution-builder/types";
 import { formatMoney } from "@/lib/solution-builder/calc";
+import { Link2, Copy, RefreshCw, Ban } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/solution-builder")({
   component: SolutionBuilderAdmin,
