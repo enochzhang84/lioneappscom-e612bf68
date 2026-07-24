@@ -26,6 +26,7 @@ import { Link2, Copy, RefreshCw, Ban } from "lucide-react";
 import { ProductCatalog } from "@/components/admin/solution-builder/ProductCatalog";
 import { CompatRules } from "@/components/admin/solution-builder/CompatRules";
 import { CompatSimulator } from "@/components/admin/solution-builder/CompatSimulator";
+import { SolutionCompatPanel } from "@/components/admin/solution-builder/SolutionCompatPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/solution-builder")({
   component: SolutionBuilderAdmin,
@@ -350,6 +351,8 @@ function SolutionDetail({ row, onPatch }: { row: SbSolutionRow; onPatch: (patch:
         <Sum k="税费" v={formatMoney(Number(row.tax_amount), row.currency)} />
         <Sum k="一次性总价" v={formatMoney(Number(row.one_time_total), row.currency)} highlight />
       </div>
+
+      <SolutionCompatPanel row={row} autoRun />
 
       <div>
         <Label>管理员备注</Label>
