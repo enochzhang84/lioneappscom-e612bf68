@@ -138,7 +138,7 @@ function ProductsSection() {
   });
   const bulk = useMutation({
     mutationFn: (v: { rows: unknown[] }) => bulkFn({ data: v }),
-    onSuccess: (r) => { toast.success(`已导入 ${r.count} 条`); refresh(); },
+    onSuccess: (r) => { toast.success(`已导入 ${r.count} 条`); refresh(); setImportPreview(null); },
     onError: (e: Error) => toast.error(e.message),
   });
 
