@@ -201,7 +201,15 @@ function ProductsSection() {
       row.builder_types = row.builder_types ?? [];
       parsed.push(row);
     }
-    bulk.mutate({ rows: parsed });
+    setPreviewLoading(true);
+    try {
+      const result = await previewFn({ data: { rows: parsed } });
+      setImportPreview({ result, rows: parsed });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setPreviewLoading(false);
+    }
   }
 
   return (
