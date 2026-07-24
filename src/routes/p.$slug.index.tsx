@@ -138,7 +138,11 @@ function ToolsPageView({ page, categories, items }: {
         </div>
       </section>
 
+      {/* Featured: Solution Builder */}
+      <SolutionBuilderFeatured />
+
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
+
         {/* Mobile category chips */}
         <div className="md:hidden -mx-4 px-4 py-3 border-b border-border overflow-x-auto">
           <div className="flex gap-2 min-w-max">
