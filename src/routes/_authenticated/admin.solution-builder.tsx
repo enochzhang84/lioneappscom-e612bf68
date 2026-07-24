@@ -179,7 +179,18 @@ function SolutionsPanel() {
         onConfirm={() => { if (pending) del.mutate(pending); }}
 
       />
-    </div>
+
+      <Dialog open={!!shareRow} onOpenChange={(o) => !o && setShareRow(null)}>
+        <DialogContent className="max-w-lg">
+          {shareRow && (
+            <ShareManager
+              row={shareRow}
+              busy={share.isPending}
+              onAction={(action, days) => share.mutate({ id: shareRow.id, action, days })}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
   );
 }
 
