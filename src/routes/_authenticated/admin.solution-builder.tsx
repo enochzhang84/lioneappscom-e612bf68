@@ -191,6 +191,107 @@ function SolutionsPanel() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function ShareBadge({ row, onManage }: { row: SbSolutionRow; onManage: () => void }) {
+  const has = !!row.share_token;
+  const expired = has && row.share_expires_at && new Date(row.share_expires_at).getTime() < Date.now();
+  const label = !has ? "未生成" : expired ? "已过期" : row.share_expires_at ? "有效" : "永久";
+  const color = !has
+    ? "bg-slate-100 text-slate-500"
+    : expired
+      ? "bg-red-50 text-red-600"
+      : "bg-emerald-50 text-emerald-700";
+  return (
+    <button onClick={onManage} className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs ${color} hover:opacity-80`}>
+      <Link2 className="h-3 w-3" />
+      {label}
+    </button>
+  );
+}
+
+function ShareManager({
+  row,
+  busy,
+  onAction,
+}: {
+  row: SbSolutionRow;
+  busy: boolean;
+  onAction: (action: "regenerate" | "revoke" | "set_expiry", days: number | null) => void;
+}) {
+  const [days, setDays] = useState<number | "">(30);
+  const url = typeof window !== "undefined" && row.share_token
+    ? `${window.location.origin}/tools/solution-builder/s/${row.share_token}`
+    : "";
+  const has = !!row.share_token;
+  const expired = has && !!row.share_expires_at && new Date(row.share_expires_at).getTime() < Date.now();
+  const expiryDays = days === "" ? null : Number(days);
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>分享链接管理</DialogTitle>
+        <DialogDescription>#{row.solution_number} · {row.title}</DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-4 text-sm">
+        <div className="rounded-lg border bg-slate-50 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-slate-500">状态</span>
+            <span className={`text-xs font-medium ${!has ? "text-slate-500" : expired ? "text-red-600" : "text-emerald-700"}`}>
+              {!has ? "未生成" : expired ? "已过期" : "有效"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-slate-500">过期时间</span>
+            <span className="text-xs">{row.share_expires_at ? new Date(row.share_expires_at).toLocaleString() : has ? "永久有效" : "—"}</span>
+          </div>
+          {has && (
+            <div className="flex items-center gap-2 pt-1">
+              <Input readOnly value={url} className="h-8 text-xs font-mono bg-white" onFocus={(e) => e.currentTarget.select()} />
+              <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(url); toast.success("已复制"); }}>
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs">有效期（天，留空为永久）</Label>
+          <Input
+            type="number"
+            min={1}
+            max={3650}
+            value={days}
+            onChange={(e) => setDays(e.target.value === "" ? "" : Math.max(1, Number(e.target.value) || 1))}
+            placeholder="30"
+            className="w-32"
+          />
+        </div>
+      </div>
+
+      <DialogFooter className="gap-2 sm:justify-between">
+        <div>
+          {has && (
+            <Button variant="ghost" className="text-red-600" disabled={busy} onClick={() => onAction("revoke", null)}>
+              <Ban className="h-4 w-4 mr-1" /> 停用链接
+            </Button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          {has && !expired && (
+            <Button variant="outline" disabled={busy} onClick={() => onAction("set_expiry", expiryDays)}>
+              更新有效期
+            </Button>
+          )}
+          <Button disabled={busy} onClick={() => onAction("regenerate", expiryDays)}>
+            <RefreshCw className="h-4 w-4 mr-1" /> {has ? "重新生成" : "生成链接"}
+          </Button>
+        </div>
+      </DialogFooter>
+    </>
   );
 }
 
