@@ -76,9 +76,9 @@ type NormalizedSolution = z.infer<typeof SolutionPayload>;
 
 // ======== Public: list products, settings ========
 
-// Public product columns — MUST NOT include cost_price
+// Public product columns — MUST NOT include cost_price or internal_notes
 const PUBLIC_PRODUCT_COLS =
-  "id, category, subcategory, slug, name_zh, name_en, brand, brand_id, model, description_zh, description_en, short_description_zh, short_description_en, image_url, manufacturer_url, usage_tags, builder_types, specs, list_price, install_fee, monthly_fee, annual_fee, stock_status, stock_quantity, lead_time_days, warranty_months, is_visible, is_sample, sort_order, currency, price_updated_at, product_code, sku";
+  "id, category, category_id, subcategory, slug, name_zh, name_en, brand, brand_id, model, description_zh, description_en, short_description_zh, short_description_en, image_url, gallery_urls, manufacturer_url, specification_pdf_url, usage_tags, builder_types, specs, performance_scores, series, generation, codename, architecture, launch_year, launch_date, data_completeness, list_price, install_fee, monthly_fee, annual_fee, stock_status, stock_quantity, lead_time_days, warranty_months, is_visible, is_sample, sort_order, currency, price_updated_at, product_code, sku";
 
 export const sbListProducts = createServerFn({ method: "POST" })
   .inputValidator((d: { categories?: string[]; builder_type?: string }) => d)
