@@ -73,10 +73,15 @@ function ProductsSection() {
   const bulkFn = useServerFn(sbAdminBulkUpsertProducts);
   const brandsFn = useServerFn(sbAdminListBrands);
   const catsFn = useServerFn(sbAdminListCategories);
+  const facetsFn = useServerFn(sbAdminProductFacets);
 
   const [builderType, setBuilderType] = useState("");
   const [category, setCategory] = useState("");
   const [brandId, setBrandId] = useState("");
+  const [generation, setGeneration] = useState("");
+  const [socket, setSocket] = useState("");
+  const [ddr, setDdr] = useState("");
+  const [completeness, setCompleteness] = useState("");
   const [search, setSearch] = useState("");
   const [includeDeleted, setIncludeDeleted] = useState(false);
   const [editing, setEditing] = useState<Partial<SbProduct> | null>(null);
@@ -86,12 +91,17 @@ function ProductsSection() {
 
   const brandsQ = useQuery({ queryKey: ["admin-sb-brands"], queryFn: () => brandsFn() });
   const catsQ = useQuery({ queryKey: ["admin-sb-categories"], queryFn: () => catsFn() });
+  const facetsQ = useQuery({ queryKey: ["admin-sb-facets"], queryFn: () => facetsFn() });
   const listQ = useQuery({
-    queryKey: ["admin-sb-products", builderType, category, brandId, search, includeDeleted],
+    queryKey: ["admin-sb-products", builderType, category, brandId, generation, socket, ddr, completeness, search, includeDeleted],
     queryFn: () => listFn({ data: {
       builder_type: builderType || undefined,
       category: category || undefined,
       brand_id: brandId || undefined,
+      generation: generation || undefined,
+      socket: socket || undefined,
+      ddr: ddr || undefined,
+      completeness: completeness || undefined,
       search: search || undefined,
       include_deleted: includeDeleted,
     } }),
