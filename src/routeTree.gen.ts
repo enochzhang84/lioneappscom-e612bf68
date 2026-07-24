@@ -39,6 +39,7 @@ import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/t
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
+import { Route as AuthenticatedAdminSolutionBuilderRouteImport } from './routes/_authenticated/admin.solution-builder'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
 import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authenticated/admin.quiz'
@@ -225,6 +226,12 @@ const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
   path: '/tools',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminSolutionBuilderRoute =
+  AuthenticatedAdminSolutionBuilderRouteImport.update({
+    id: '/solution-builder',
+    path: '/solution-builder',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -446,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
+  '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
@@ -502,6 +510,7 @@ export interface FileRoutesByTo {
   '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
+  '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
@@ -567,6 +576,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/quiz': typeof AuthenticatedAdminQuizRouteWithChildren
   '/_authenticated/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
+  '/_authenticated/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
@@ -633,6 +643,7 @@ export interface FileRouteTypes {
     | '/admin/quiz'
     | '/admin/seo'
     | '/admin/settings'
+    | '/admin/solution-builder'
     | '/admin/tools'
     | '/admin/users'
     | '/p/drive/c1'
@@ -689,6 +700,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/notifications'
     | '/admin/seo'
+    | '/admin/solution-builder'
     | '/admin/users'
     | '/p/drive/c1'
     | '/tools/solution-builder/full-solution'
@@ -753,6 +765,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/quiz'
     | '/_authenticated/admin/seo'
     | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/solution-builder'
     | '/_authenticated/admin/tools'
     | '/_authenticated/admin/users'
     | '/p/drive/c1'
@@ -1020,6 +1033,13 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/admin/tools'
       preLoaderRoute: typeof AuthenticatedAdminToolsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/solution-builder': {
+      id: '/_authenticated/admin/solution-builder'
+      path: '/solution-builder'
+      fullPath: '/admin/solution-builder'
+      preLoaderRoute: typeof AuthenticatedAdminSolutionBuilderRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/settings': {
@@ -1377,6 +1397,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminQuizRoute: typeof AuthenticatedAdminQuizRouteWithChildren
   AuthenticatedAdminSeoRoute: typeof AuthenticatedAdminSeoRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
+  AuthenticatedAdminSolutionBuilderRoute: typeof AuthenticatedAdminSolutionBuilderRoute
   AuthenticatedAdminToolsRoute: typeof AuthenticatedAdminToolsRouteWithChildren
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1401,6 +1422,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminQuizRoute: AuthenticatedAdminQuizRouteWithChildren,
   AuthenticatedAdminSeoRoute: AuthenticatedAdminSeoRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
+  AuthenticatedAdminSolutionBuilderRoute:
+    AuthenticatedAdminSolutionBuilderRoute,
   AuthenticatedAdminToolsRoute: AuthenticatedAdminToolsRouteWithChildren,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
