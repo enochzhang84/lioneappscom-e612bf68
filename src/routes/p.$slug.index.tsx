@@ -136,13 +136,12 @@ function ToolsPageView({ page, categories, items }: {
         <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-6 md:py-8">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{page.title}</h1>
           <p className="mt-1.5 text-sm md:text-base text-muted-foreground">
-            {(page.content && (page.content as { subtitle?: string }).subtitle) || (
-              <>
-                <span className="lang-zh">集中使用各类配置、计算、查询与效率工具</span>
-                <span className="lang-en hidden">Access configuration, calculation, reference and productivity tools in one place.</span>
-              </>
-            )}
+            {(page.content && (page.content as { subtitle?: string }).subtitle) ||
+              (isZh
+                ? "集中使用各类配置、计算、查询与效率工具"
+                : "Access configuration, calculation, reference and productivity tools in one place.")}
           </p>
+
         </div>
       </section>
 
