@@ -91,7 +91,8 @@ function ServicesPage() {
       </section>
 
       {/* Home services */}
-      <section id="home-services" className="scroll-mt-32 pt-16 md:pt-24">
+      <section id="home-services" className="scroll-mt-32">
+
 
         <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
           <SectionHeader
