@@ -2,8 +2,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { sbListProducts } from "@/lib/solution-builder.functions";
-import type { LineItem, SbProduct } from "@/lib/solution-builder/types";
+import { sbListProducts, sbListCompatRules } from "@/lib/solution-builder.functions";
+import type { CompatRule, LineItem, SbProduct } from "@/lib/solution-builder/types";
 
 export function useProducts(categories: string[], builderType?: string) {
   const listFn = useServerFn(sbListProducts);
@@ -11,6 +11,18 @@ export function useProducts(categories: string[], builderType?: string) {
     queryKey: ["sb-products", categories.join(","), builderType ?? ""],
     queryFn: () => listFn({ data: { categories, builder_type: builderType } }),
     staleTime: 60_000,
+  });
+}
+
+export function useCompatRules() {
+  const fn = useServerFn(sbListCompatRules);
+  return useQuery({
+    queryKey: ["sb-compat-rules"],
+    queryFn: async () => {
+      const r = await fn();
+      return (r.rules ?? []) as CompatRule[];
+    },
+    staleTime: 5 * 60_000,
   });
 }
 

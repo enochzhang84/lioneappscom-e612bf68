@@ -38,9 +38,10 @@ const LineItemSchema = z.object({
 });
 
 const CompatSchema = z.object({
-  level: z.enum(["ok", "notice", "error"]),
+  level: z.enum(["ok", "info", "notice", "warning", "error"]),
   message_zh: z.string(),
   message_en: z.string(),
+  rule_code: z.string().optional(),
 });
 
 const SolutionPayload = z.object({
@@ -91,6 +92,29 @@ export const sbListProducts = createServerFn({ method: "POST" })
     if (error) return { products: [] as SbProduct[], error: error.message };
     return { products: (rows ?? []) as unknown as SbProduct[] };
   });
+
+type CompatRuleDTO = {
+  id: string;
+  rule_code: string;
+  rule_type: string;
+  params: Record<string, string | number | boolean | null>;
+  severity: string;
+  message_zh: string | null;
+  message_en: string | null;
+  is_active: boolean;
+  sort_order: number;
+};
+
+export const sbListCompatRules = createServerFn({ method: "GET" }).handler(async () => {
+  const c = publicClient();
+  const { data, error } = await c
+    .from("solution_compatibility_rules")
+    .select("id, rule_code, rule_type, params, severity, message_zh, message_en, is_active, sort_order")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+  if (error) return { rules: [] as CompatRuleDTO[], error: error.message as string | null };
+  return { rules: (data ?? []) as unknown as CompatRuleDTO[], error: null as string | null };
+});
 
 
 export const sbGetSettings = createServerFn({ method: "GET" }).handler(async () => {

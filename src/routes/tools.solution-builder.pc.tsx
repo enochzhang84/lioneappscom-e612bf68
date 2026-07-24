@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { BuilderShell } from "@/components/solution-builder/BuilderShell";
-import { useProducts, productToLineItem, pickerOptions, pickById } from "@/components/solution-builder/builderHelpers";
+import { useProducts, useCompatRules, productToLineItem, pickerOptions, pickById } from "@/components/solution-builder/builderHelpers";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLang } from "@/lib/i18n";
 import type { CompatWarning, LineItem } from "@/lib/solution-builder/types";
 import { suggestPsu } from "@/lib/solution-builder/calc";
+import { evaluateCompat, buildProductMap } from "@/lib/solution-builder/compat";
 
 export const Route = createFileRoute("/tools/solution-builder/pc")({
   head: () => ({ meta: [
@@ -75,30 +76,24 @@ function PcBuilder() {
     return { totalPower: power, suggestedPsu: suggestPsu(power), ramTotal: ram, storageTotal: storage };
   }, [selections, products]);
 
+  const rulesQ = useCompatRules();
   const warnings = useMemo<CompatWarning[]>(() => {
-    const w: CompatWarning[] = [];
+    const productMap = buildProductMap(products);
+    const engine = evaluateCompat(rulesQ.data ?? [], {
+      tool: "pc",
+      items,
+      productsById: productMap,
+      computed: { totalPowerW: totalPower },
+    });
+    const extra: CompatWarning[] = [];
     const cpu = pickById(products, selections["pc-cpu"].id);
     const mb = pickById(products, selections["pc-mb"].id);
     const psu = pickById(products, selections["pc-psu"].id);
-    if (cpu && mb) {
-      const cpuSocket = (cpu.specs as any).socket;
-      const mbSocket = (mb.specs as any).socket;
-      if (cpuSocket && mbSocket && cpuSocket !== mbSocket) {
-        w.push({ level: "error", message_zh: `CPU 接口 ${cpuSocket} 与主板 ${mbSocket} 不兼容`, message_en: `CPU socket ${cpuSocket} does not match motherboard ${mbSocket}` });
-      }
-    }
-    if (psu) {
-      const w1 = Number((psu.specs as any).wattage) || 0;
-      if (w1 && w1 < suggestedPsu) {
-        w.push({ level: "notice", message_zh: `建议电源 ≥ ${suggestedPsu}W，当前 ${w1}W`, message_en: `Recommended PSU ≥ ${suggestedPsu}W, current ${w1}W` });
-      }
-    }
     if (!cpu || !mb || !psu) {
-      w.push({ level: "notice", message_zh: "信息不足，需要采购前再次确认。", message_en: "Insufficient information. Final compatibility must be confirmed before purchase." });
+      extra.push({ level: "info", message_zh: "信息不足，需要采购前再次确认。", message_en: "Insufficient information. Final compatibility must be confirmed before purchase." });
     }
-
-    return w;
-  }, [selections, products, suggestedPsu]);
+    return [...engine, ...extra];
+  }, [rulesQ.data, products, items, totalPower, selections]);
 
   const computed = {
     ...(L === "zh"

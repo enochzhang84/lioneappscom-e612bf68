@@ -25,9 +25,22 @@ export type SolutionState = {
 };
 
 export type CompatWarning = {
-  level: "ok" | "notice" | "error";
+  level: "ok" | "info" | "notice" | "warning" | "error";
   message_zh: string;
   message_en: string;
+  rule_code?: string;
+};
+
+export type CompatRule = {
+  id: string;
+  rule_code: string;
+  rule_type: string;
+  params: Record<string, unknown>;
+  severity: "info" | "warning" | "error";
+  message_zh: string | null;
+  message_en: string | null;
+  is_active: boolean;
+  sort_order: number;
 };
 
 export type Totals = {
