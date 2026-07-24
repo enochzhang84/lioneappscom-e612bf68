@@ -90,45 +90,9 @@ function ServicesPage() {
         </div>
       </section>
 
-      {/* Quick nav */}
-      <div className="sticky top-16 z-30 border-b border-border/60 bg-background/90 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex gap-6 overflow-x-auto py-3 text-sm">
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {lang === "zh" ? "家庭" : "Home"}
-              </span>
-              {homeServices.map((s) => (
-                <a
-                  key={s.id}
-                  href={`#${s.anchor}`}
-                  className="shrink-0 rounded-full border border-border px-3 py-1 text-muted-foreground hover:text-foreground hover:border-primary/40"
-                >
-                  {s.title[lang]}
-                </a>
-              ))}
-            </div>
-            <div className="mx-1 h-6 w-px shrink-0 bg-border" />
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {lang === "zh" ? "企业" : "Business"}
-              </span>
-              {businessServices.map((s) => (
-                <a
-                  key={s.id}
-                  href={`#${s.anchor}`}
-                  className="shrink-0 rounded-full border border-border px-3 py-1 text-muted-foreground hover:text-foreground hover:border-primary/40"
-                >
-                  {s.title[lang]}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Home services */}
-      <section id="home-services" className="scroll-mt-32 border-b border-border/60">
+      <section id="home-services" className="scroll-mt-32 pt-16 md:pt-24">
+
         <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
           <SectionHeader
             eyebrow={lang === "zh" ? "家庭服务" : "Home"}
