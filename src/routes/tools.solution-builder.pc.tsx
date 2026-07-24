@@ -18,7 +18,7 @@ export const Route = createFileRoute("/tools/solution-builder/pc")({
   component: PcBuilder,
 });
 
-const CATS = ["pc-cpu","pc-motherboard","pc-gpu","pc-ram","pc-ssd","pc-hdd","pc-psu","pc-case","pc-cooler","pc-os","service-install"];
+const CATS = ["pc-cpu","pc-mb","pc-gpu","pc-ram","pc-ssd","pc-hdd","pc-psu","pc-case","pc-cooler","pc-os","service-install"];
 
 const USE_CASES = [
   { key: "office", zh: "家庭 / 普通办公", en: "Home / Office" },
@@ -30,14 +30,14 @@ const USE_CASES = [
 
 function PcBuilder() {
   const { lang } = useLang(); const L = lang === "en" ? "en" : "zh";
-  const productsQ = useProducts(CATS);
+  const productsQ = useProducts(CATS, "pc");
   const products = productsQ.data?.products;
 
   const [useCase, setUseCase] = useState("office");
   const [title, setTitle] = useState(L === "zh" ? "我的电脑方案" : "My PC Build");
   const [selections, setSelections] = useState<Record<string, { id: string | null; qty: number }>>({
     "pc-cpu": { id: null, qty: 1 },
-    "pc-motherboard": { id: null, qty: 1 },
+    "pc-mb": { id: null, qty: 1 },
     "pc-gpu": { id: null, qty: 1 },
     "pc-ram": { id: null, qty: 1 },
     "pc-ssd": { id: null, qty: 1 },
@@ -48,6 +48,7 @@ function PcBuilder() {
     "pc-os": { id: null, qty: 1 },
     "service-install": { id: null, qty: 1 },
   });
+
 
   const items = useMemo<LineItem[]>(() => {
     const out: LineItem[] = [];
@@ -77,7 +78,7 @@ function PcBuilder() {
   const warnings = useMemo<CompatWarning[]>(() => {
     const w: CompatWarning[] = [];
     const cpu = pickById(products, selections["pc-cpu"].id);
-    const mb = pickById(products, selections["pc-motherboard"].id);
+    const mb = pickById(products, selections["pc-mb"].id);
     const psu = pickById(products, selections["pc-psu"].id);
     if (cpu && mb) {
       const cpuSocket = (cpu.specs as any).socket;
@@ -175,7 +176,7 @@ function PcBuilder() {
 
 const CAT_LABEL: Record<string, { zh: string; en: string }> = {
   "pc-cpu": { zh: "CPU 处理器", en: "CPU" },
-  "pc-motherboard": { zh: "主板", en: "Motherboard" },
+  "pc-mb": { zh: "主板", en: "Motherboard" },
   "pc-gpu": { zh: "显卡", en: "GPU" },
   "pc-ram": { zh: "内存", en: "RAM" },
   "pc-ssd": { zh: "SSD 固态硬盘", en: "SSD" },

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/tools/solution-builder/nas")({
   component: NasBuilder,
 });
 
-const CATS = ["nas-chassis", "nas-drive", "nas-ssd-cache", "nas-ups", "net-switch", "service-install", "service-config"];
+const CATS = ["nas-host", "nas-hdd", "nas-ssd", "ups", "net-switch", "service-install", "service-config"];
 
 const RAID_OPTS: { v: RaidLevel; zh: string; en: string }[] = [
   { v: "single", zh: "单盘 / JBOD", en: "Single / JBOD" },
@@ -38,23 +38,23 @@ function NasBuilder() {
   const [diskCount, setDiskCount] = useState(4);
   const [level, setLevel] = useState<RaidLevel>("5");
   const [selections, setSelections] = useState<Record<string, { id: string | null; qty: number }>>({
-    "nas-chassis": { id: null, qty: 1 },
-    "nas-drive": { id: null, qty: diskCount },
-    "nas-ssd-cache": { id: null, qty: 0 },
-    "nas-ups": { id: null, qty: 1 },
+    "nas-host": { id: null, qty: 1 },
+    "nas-hdd": { id: null, qty: diskCount },
+    "nas-ssd": { id: null, qty: 0 },
+    "ups": { id: null, qty: 1 },
     "net-switch": { id: null, qty: 0 },
     "service-install": { id: null, qty: 1 },
     "service-config": { id: null, qty: 1 },
   });
 
-  const drive = pickById(products, selections["nas-drive"].id);
+  const drive = pickById(products, selections["nas-hdd"].id);
   const driveSize = Number((drive?.specs as any)?.capacity_tb) || 4;
   const raid = useMemo(() => raidCapacity(diskCount, driveSize, level), [diskCount, driveSize, level]);
 
   const items = useMemo<LineItem[]>(() => {
     const out: LineItem[] = [];
     for (const [cat, s] of Object.entries(selections)) {
-      const qty = cat === "nas-drive" ? diskCount : s.qty;
+      const qty = cat === "nas-hdd" ? diskCount : s.qty;
       if (!s.id || qty <= 0) continue;
       const p = pickById(products, s.id);
       if (p) out.push(productToLineItem(p, qty, cat));
@@ -101,17 +101,17 @@ function NasBuilder() {
           <SectionTitle L={L} zh="2. NAS 硬件" en="2. NAS Hardware" />
           <div className="space-y-3">
             <PartRow L={L} label={L === "zh" ? "NAS 主机 / 机箱" : "NAS Host / Chassis"}
-              products={pickerOptions(products, "nas-chassis")} selectedId={selections["nas-chassis"].id} qty={selections["nas-chassis"].qty}
-              onChange={(id, qty) => setSelections(s => ({ ...s, "nas-chassis": { id, qty } }))} loading={productsQ.isLoading} />
+              products={pickerOptions(products, "nas-host")} selectedId={selections["nas-host"].id} qty={selections["nas-host"].qty}
+              onChange={(id, qty) => setSelections(s => ({ ...s, "nas-host": { id, qty } }))} loading={productsQ.isLoading} />
             <PartRow L={L} label={L === "zh" ? "机械硬盘 (单盘)" : "HDD (per disk)"}
-              products={pickerOptions(products, "nas-drive")} selectedId={selections["nas-drive"].id} qty={diskCount}
-              onChange={(id, qty) => { setSelections(s => ({ ...s, "nas-drive": { id, qty } })); setDiskCount(Math.max(1, qty)); }} loading={productsQ.isLoading} />
+              products={pickerOptions(products, "nas-hdd")} selectedId={selections["nas-hdd"].id} qty={diskCount}
+              onChange={(id, qty) => { setSelections(s => ({ ...s, "nas-hdd": { id, qty } })); setDiskCount(Math.max(1, qty)); }} loading={productsQ.isLoading} />
             <PartRow L={L} label={L === "zh" ? "SSD 缓存 (可选)" : "SSD Cache (optional)"}
-              products={pickerOptions(products, "nas-ssd-cache")} selectedId={selections["nas-ssd-cache"].id} qty={selections["nas-ssd-cache"].qty}
-              onChange={(id, qty) => setSelections(s => ({ ...s, "nas-ssd-cache": { id, qty } }))} loading={productsQ.isLoading} />
+              products={pickerOptions(products, "nas-ssd")} selectedId={selections["nas-ssd"].id} qty={selections["nas-ssd"].qty}
+              onChange={(id, qty) => setSelections(s => ({ ...s, "nas-ssd": { id, qty } }))} loading={productsQ.isLoading} />
             <PartRow L={L} label={L === "zh" ? "UPS 不间断电源" : "UPS"}
-              products={pickerOptions(products, "nas-ups")} selectedId={selections["nas-ups"].id} qty={selections["nas-ups"].qty}
-              onChange={(id, qty) => setSelections(s => ({ ...s, "nas-ups": { id, qty } }))} loading={productsQ.isLoading} />
+              products={pickerOptions(products, "ups")} selectedId={selections["ups"].id} qty={selections["ups"].qty}
+              onChange={(id, qty) => setSelections(s => ({ ...s, "ups": { id, qty } }))} loading={productsQ.isLoading} />
             <PartRow L={L} label={L === "zh" ? "配套交换机 (可选)" : "Switch (optional)"}
               products={pickerOptions(products, "net-switch")} selectedId={selections["net-switch"].id} qty={selections["net-switch"].qty}
               onChange={(id, qty) => setSelections(s => ({ ...s, "net-switch": { id, qty } }))} loading={productsQ.isLoading} />
