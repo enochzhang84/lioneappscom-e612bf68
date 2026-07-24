@@ -69,9 +69,11 @@ function SolutionsPanel() {
   const getFn = useServerFn(sbAdminGetSolution);
   const updFn = useServerFn(sbAdminUpdateSolution);
   const delFn = useServerFn(sbAdminDeleteSolution);
+  const shareFn = useServerFn(sbAdminUpdateShare);
   const [status, setStatus] = useState<string>("");
   const [search, setSearch] = useState("");
   const [viewId, setViewId] = useState<string | null>(null);
+  const [shareRow, setShareRow] = useState<SbSolutionRow | null>(null);
   const [pending, setPending] = useState<string | null>(null);
 
   const listQ = useQuery({
