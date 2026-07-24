@@ -351,34 +351,40 @@ const FH_MODULES: {
   },
 ];
 
-const FH_ADVANTAGES: { icon: React.ComponentType<{ className?: string }>; title: Bi; desc: Bi }[] = [
+const FH_ADVANTAGES: { img: string; alt: Bi; title: Bi; desc: Bi }[] = [
   {
-    icon: Lock,
+    img: advOwn,
+    alt: { zh: "数据归属自己 3D 插画", en: "Own your data 3D illustration" },
     title: { zh: "数据属于自己", en: "Own Your Data" },
     desc: { zh: "减少对单一公共云平台的依赖，让重要照片、文件和家庭资料掌握在自己手中。", en: "Reduce reliance on a single public cloud platform and keep important photos, files and family records in your own hands." },
   },
   {
-    icon: RefreshCw,
+    img: advBackup,
+    alt: { zh: "手机与电脑自动备份到 NAS 3D 插画", en: "Automatic backup from phone and laptop to NAS 3D illustration" },
     title: { zh: "自动备份", en: "Automatic Backup" },
     desc: { zh: "手机、电脑和家庭设备的数据可以自动集中备份，降低误删、损坏和设备遗失风险。", en: "Data from phones, computers and home devices can be automatically centralized to reduce the risk of accidental loss, damage or misplaced devices." },
   },
   {
-    icon: Shield,
+    img: advPrivacy,
+    alt: { zh: "隐私盾牌与权限管理 3D 插画", en: "Privacy shield and permission control 3D illustration" },
     title: { zh: "更好的隐私", en: "Better Privacy" },
     desc: { zh: "通过本地存储、权限管理和安全远程访问，减少个人数据长期暴露在不同平台中的风险。", en: "Local storage, permission controls and secure remote access reduce long-term exposure of personal data across many platforms." },
   },
   {
-    icon: Layers,
+    img: advUnified,
+    alt: { zh: "统一控制家庭设备 3D 插画", en: "Unified home device management 3D illustration" },
     title: { zh: "统一管理设备", en: "Unified Device Management" },
     desc: { zh: "将网络、存储、智能设备和影音系统统一规划，减少设备之间彼此独立和控制混乱的问题。", en: "Plan networking, storage, smart devices and media systems together so devices no longer live in isolation." },
   },
   {
-    icon: TrendingUp,
+    img: advScale,
+    alt: { zh: "NAS 容量与设备扩展 3D 插画", en: "Scalable NAS storage and expansion 3D illustration" },
     title: { zh: "支持家庭未来扩展", en: "Ready for Future Growth" },
     desc: { zh: "家庭中的智能设备、高清视频和数据容量会持续增长，提前建立基础架构可以降低未来升级成本。", en: "Smart devices, high-resolution video and data storage will keep growing; building the foundation early lowers future upgrade cost." },
   },
   {
-    icon: Check,
+    img: advValue,
+    alt: { zh: "长期节省成本 3D 插画", en: "Long-term cost savings 3D illustration" },
     title: { zh: "长期节省成本", en: "Long-Term Value" },
     desc: { zh: "合理规划网络、存储和智能设备，可以减少重复购买、云存储订阅和临时维修费用。", en: "Thoughtful planning across networking, storage and smart devices reduces duplicate purchases, cloud subscription fees and one-off repairs." },
   },
