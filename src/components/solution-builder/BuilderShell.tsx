@@ -14,7 +14,7 @@ import { sbGetSettings, sbSaveMine, sbSubmitPublic, sbShareMine } from "@/lib/so
 import { supabase } from "@/integrations/supabase/client";
 import { SubmitDialog } from "./SubmitDialog";
 import { exportSolutionPdf } from "./pdf";
-import { useI18n } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n";
 
 type Props = {
   tool: ToolKey;
@@ -30,7 +30,7 @@ type Props = {
 };
 
 export function BuilderShell(props: Props) {
-  const { lang } = useI18n();
+  const { lang } = useLang();
   const L: Lang = lang === "en" ? "en" : "zh";
   const settingsQ = useQuery({ queryKey: ["sb-settings"], queryFn: () => sbGetSettings() });
   const settings = (settingsQ.data ?? {
