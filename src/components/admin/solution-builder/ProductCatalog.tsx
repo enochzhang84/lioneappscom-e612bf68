@@ -72,6 +72,7 @@ function ProductsSection() {
   const restoreFn = useServerFn(sbAdminRestoreProduct);
   const historyFn = useServerFn(sbAdminPriceHistory);
   const bulkFn = useServerFn(sbAdminBulkUpsertProducts);
+  const previewFn = useServerFn(sbAdminBulkPreviewProducts);
   const brandsFn = useServerFn(sbAdminListBrands);
   const catsFn = useServerFn(sbAdminListCategories);
   const facetsFn = useServerFn(sbAdminProductFacets);
