@@ -42,8 +42,9 @@ function ServicesPage() {
   return (
     <SiteLayout>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border/60">
+      <section className="relative overflow-hidden">
         <div
+
           className="absolute inset-0 -z-10 opacity-60"
           style={{
             background:
