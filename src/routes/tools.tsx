@@ -1,8 +1,7 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-// 短路由：/tools → /p/tools
+// /tools 作为布局路由，仅渲染子路由。
+// /tools 的裸访问由 tools.index.tsx 重定向到 /p/tools。
 export const Route = createFileRoute("/tools")({
-  beforeLoad: () => {
-    throw redirect({ to: "/p/$slug", params: { slug: "tools" }, search: {} });
-  },
+  component: () => <Outlet />,
 });
