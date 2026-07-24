@@ -102,14 +102,8 @@ function Home_() {
                     height={800}
                     className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   />
-                  {/* Subtle icon chip overlay */}
-                  <div
-                    className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-md ring-1 ring-white/30 backdrop-blur-sm"
-                    style={{ background: s.gradient }}
-                    aria-hidden
-                  >
-                    <Icon className="h-4 w-4" />
-                  </div>
+
+
                   {/* Soft top-to-bottom fade into card body */}
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-card/80" />
                 </div>
