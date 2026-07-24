@@ -9,6 +9,12 @@ import {
   Cloud,
   type LucideIcon,
 } from "lucide-react";
+import imgHomeNetwork from "@/assets/service-home-network.jpg";
+import imgNas from "@/assets/service-nas.jpg";
+import imgSmartHome from "@/assets/service-smart-home.jpg";
+import imgWebsites from "@/assets/service-websites.jpg";
+import imgCustomSoftware from "@/assets/service-custom-software.jpg";
+import imgBusinessPlatforms from "@/assets/service-business-platforms.jpg";
 
 export type ServiceCategory = "home" | "business";
 
@@ -19,6 +25,8 @@ export type ServiceItem = {
   icon: LucideIcon;
   // Illustration gradient (used in lieu of stock photos — clean, modern, brand-consistent)
   gradient: string;
+  /** Optional hero image URL. Homepage service grid shows only items that have this. */
+  image?: string;
   title: { zh: string; en: string };
   short: { zh: string; en: string };
   full: { zh: string; en: string };
