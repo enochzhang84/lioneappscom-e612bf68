@@ -251,8 +251,8 @@ export const sbAdminUpdateSolution = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const allowed = ["status", "admin_notes", "assigned_to", "title", "customer_name", "customer_email", "customer_phone", "organization_name", "customer_city", "customer_notes"];
-    const patch: Record<string, unknown> = {};
-    for (const k of allowed) if (k in data.patch) patch[k] = (data.patch as Record<string, unknown>)[k];
+    const patch: Record<string, any> = {};
+    for (const k of allowed) if (k in data.patch) patch[k] = (data.patch as Record<string, any>)[k];
     const { error } = await context.supabase.from("sb_solutions").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

@@ -18,9 +18,9 @@ export type LineItem = {
 export type SolutionState = {
   tool: ToolKey;
   title: string;
-  config: Record<string, unknown>;     // raw user selections
+  config: Record<string, any>;     // raw user selections
   items: LineItem[];
-  computed: Record<string, unknown>;   // derived outputs (power, raid, etc.)
+  computed: Record<string, any>;   // derived outputs (power, raid, etc.)
   compat_warnings: CompatWarning[];
 };
 
@@ -66,7 +66,7 @@ export type SbProduct = {
   description_zh: string | null;
   description_en: string | null;
   image_url: string | null;
-  specs: Record<string, unknown>;
+  specs: Record<string, any>;
   list_price: number;
   install_fee: number;
   stock_status: "in_stock" | "special_order" | "out_of_stock" | "discontinued";
@@ -100,8 +100,8 @@ export type SbSolutionRow = {
   monthly_total: number;
   annual_total: number;
   items: LineItem[];
-  config: Record<string, unknown>;
-  computed: Record<string, unknown>;
+  config: Record<string, any>;
+  computed: Record<string, any>;
   compat_warnings: CompatWarning[];
   status: "draft" | "submitted" | "contacted" | "quoted" | "accepted" | "rejected" | "completed" | "archived";
   source: string;
