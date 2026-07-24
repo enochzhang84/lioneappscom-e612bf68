@@ -637,9 +637,9 @@ function SolutionBuilderFeatured() {
 
         <div className="grid gap-4 md:gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SB_CARDS.map((c) => (
-            <a
+            <Link
               key={c.key}
-              href={c.href}
+              to={c.href}
               className="group flex flex-col h-full rounded-2xl border border-border bg-card overflow-hidden transition
                 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5"
             >
