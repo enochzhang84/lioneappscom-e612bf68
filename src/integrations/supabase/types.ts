@@ -1003,12 +1003,16 @@ export type Database = {
       }
       sb_products: {
         Row: {
+          annual_fee: number
           brand: string | null
+          brand_id: string | null
+          builder_types: string[]
           category: string
           compat: Json
           cost_price: number | null
           created_at: string
           currency: string
+          deleted_at: string | null
           description_en: string | null
           description_zh: string | null
           id: string
@@ -1016,25 +1020,39 @@ export type Database = {
           install_fee: number
           is_sample: boolean
           is_visible: boolean
+          lead_time_days: number | null
           list_price: number
+          manufacturer_url: string | null
           model: string | null
+          monthly_fee: number
           name_en: string
           name_zh: string
           price_updated_at: string
+          product_code: string | null
+          short_description_en: string | null
+          short_description_zh: string | null
+          sku: string | null
           slug: string
           sort_order: number
           specs: Json
+          stock_quantity: number | null
           stock_status: string
           subcategory: string | null
           updated_at: string
+          usage_tags: string[]
+          warranty_months: number | null
         }
         Insert: {
+          annual_fee?: number
           brand?: string | null
+          brand_id?: string | null
+          builder_types?: string[]
           category: string
           compat?: Json
           cost_price?: number | null
           created_at?: string
           currency?: string
+          deleted_at?: string | null
           description_en?: string | null
           description_zh?: string | null
           id?: string
@@ -1042,25 +1060,39 @@ export type Database = {
           install_fee?: number
           is_sample?: boolean
           is_visible?: boolean
+          lead_time_days?: number | null
           list_price?: number
+          manufacturer_url?: string | null
           model?: string | null
+          monthly_fee?: number
           name_en: string
           name_zh: string
           price_updated_at?: string
+          product_code?: string | null
+          short_description_en?: string | null
+          short_description_zh?: string | null
+          sku?: string | null
           slug: string
           sort_order?: number
           specs?: Json
+          stock_quantity?: number | null
           stock_status?: string
           subcategory?: string | null
           updated_at?: string
+          usage_tags?: string[]
+          warranty_months?: number | null
         }
         Update: {
+          annual_fee?: number
           brand?: string | null
+          brand_id?: string | null
+          builder_types?: string[]
           category?: string
           compat?: Json
           cost_price?: number | null
           created_at?: string
           currency?: string
+          deleted_at?: string | null
           description_en?: string | null
           description_zh?: string | null
           id?: string
@@ -1068,19 +1100,37 @@ export type Database = {
           install_fee?: number
           is_sample?: boolean
           is_visible?: boolean
+          lead_time_days?: number | null
           list_price?: number
+          manufacturer_url?: string | null
           model?: string | null
+          monthly_fee?: number
           name_en?: string
           name_zh?: string
           price_updated_at?: string
+          product_code?: string | null
+          short_description_en?: string | null
+          short_description_zh?: string | null
+          sku?: string | null
           slug?: string
           sort_order?: number
           specs?: Json
+          stock_quantity?: number | null
           stock_status?: string
           subcategory?: string | null
           updated_at?: string
+          usage_tags?: string[]
+          warranty_months?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sb_products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "solution_product_brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sb_settings: {
         Row: {
@@ -1298,6 +1348,140 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      solution_price_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          currency: string
+          field: string
+          id: string
+          new_value: number | null
+          old_value: number | null
+          product_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          currency?: string
+          field: string
+          id?: string
+          new_value?: number | null
+          old_value?: number | null
+          product_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          currency?: string
+          field?: string
+          id?: string
+          new_value?: number | null
+          old_value?: number | null
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solution_price_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "sb_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solution_product_brands: {
+        Row: {
+          brand_code: string
+          country: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          name_en: string | null
+          name_zh: string | null
+          sort_order: number
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          brand_code: string
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          name_en?: string | null
+          name_zh?: string | null
+          sort_order?: number
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          brand_code?: string
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          name_en?: string | null
+          name_zh?: string | null
+          sort_order?: number
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      solution_product_categories: {
+        Row: {
+          builder_type: string
+          code: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name_en: string
+          name_zh: string
+          parent_code: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          builder_type: string
+          code: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_en: string
+          name_zh: string
+          parent_code?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          builder_type?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_en?: string
+          name_zh?: string
+          parent_code?: string | null
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }

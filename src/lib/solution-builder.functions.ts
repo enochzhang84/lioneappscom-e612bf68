@@ -76,11 +76,15 @@ type NormalizedSolution = z.infer<typeof SolutionPayload>;
 
 // ======== Public: list products, settings ========
 
+// Public product columns — MUST NOT include cost_price
+const PUBLIC_PRODUCT_COLS =
+  "id, category, subcategory, slug, name_zh, name_en, brand, brand_id, model, description_zh, description_en, short_description_zh, short_description_en, image_url, manufacturer_url, usage_tags, builder_types, specs, list_price, install_fee, monthly_fee, annual_fee, stock_status, stock_quantity, lead_time_days, warranty_months, is_visible, is_sample, sort_order, currency, price_updated_at, product_code, sku";
+
 export const sbListProducts = createServerFn({ method: "POST" })
   .inputValidator((d: { categories?: string[] }) => d)
   .handler(async ({ data }) => {
     const c = publicClient();
-    let q = c.from("sb_products").select("*").eq("is_visible", true).order("sort_order", { ascending: true });
+    let q = c.from("sb_products").select(PUBLIC_PRODUCT_COLS).eq("is_visible", true).is("deleted_at", null).order("sort_order", { ascending: true });
     if (data.categories && data.categories.length) q = q.in("category", data.categories);
     const { data: rows, error } = await q;
     if (error) return { products: [] as SbProduct[], error: error.message };
@@ -304,15 +308,20 @@ export const sbAdminUpdateShare = createServerFn({ method: "POST" })
 // Products
 export const sbAdminListProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { category?: string } | undefined) => d ?? {})
+  .inputValidator((d: { category?: string; builder_type?: string; search?: string; brand_id?: string; include_deleted?: boolean } | undefined) => d ?? {})
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     let q = context.supabase.from("sb_products").select("*").order("category").order("sort_order");
+    if (!data?.include_deleted) q = q.is("deleted_at", null);
     if (data?.category) q = q.eq("category", data.category);
+    if (data?.brand_id) q = q.eq("brand_id", data.brand_id);
+    if (data?.builder_type) q = q.contains("builder_types", [data.builder_type]);
+    if (data?.search) q = q.or(`name_zh.ilike.%${data.search}%,name_en.ilike.%${data.search}%,brand.ilike.%${data.search}%,model.ilike.%${data.search}%,product_code.ilike.%${data.search}%,sku.ilike.%${data.search}%,slug.ilike.%${data.search}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return { rows: (rows ?? []) as unknown as SbProduct[] };
   });
+
 
 const ProductPayload = z.object({
   id: z.string().uuid().optional().nullable(),
@@ -322,14 +331,28 @@ const ProductPayload = z.object({
   name_zh: z.string().min(1).max(200),
   name_en: z.string().min(1).max(200),
   brand: z.string().max(120).nullable().optional(),
+  brand_id: z.string().uuid().nullable().optional(),
   model: z.string().max(120).nullable().optional(),
+  product_code: z.string().max(120).nullable().optional(),
+  sku: z.string().max(120).nullable().optional(),
   description_zh: z.string().max(2000).nullable().optional(),
   description_en: z.string().max(2000).nullable().optional(),
+  short_description_zh: z.string().max(500).nullable().optional(),
+  short_description_en: z.string().max(500).nullable().optional(),
   image_url: z.string().max(1000).nullable().optional(),
+  manufacturer_url: z.string().max(1000).nullable().optional(),
+  builder_types: z.array(z.string().max(30)).max(10).default([]),
+  usage_tags: z.array(z.string().max(60)).max(30).default([]),
   specs: z.record(z.string(), z.any()).default({}),
   list_price: z.number().min(0),
+  cost_price: z.number().min(0).default(0),
   install_fee: z.number().min(0).default(0),
+  monthly_fee: z.number().min(0).default(0),
+  annual_fee: z.number().min(0).default(0),
   stock_status: z.enum(["in_stock", "special_order", "out_of_stock", "discontinued"]).default("in_stock"),
+  stock_quantity: z.number().int().nullable().optional(),
+  lead_time_days: z.number().int().min(0).nullable().optional(),
+  warranty_months: z.number().int().min(0).nullable().optional(),
   is_visible: z.boolean().default(true),
   is_sample: z.boolean().default(false),
   sort_order: z.number().int().default(0),
@@ -341,7 +364,7 @@ export const sbAdminSaveProduct = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ProductPayload.parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const payload = { ...data, price_updated_at: new Date().toISOString() };
+    const payload = { ...data };
     if (data.id) {
       const { id, ...rest } = payload;
       const { error } = await context.supabase.from("sb_products").update(rest as never).eq("id", id!);
@@ -349,22 +372,164 @@ export const sbAdminSaveProduct = createServerFn({ method: "POST" })
       return { id };
     }
     const { id: _ignored, ...insertPayload } = payload;
-    const { data: row, error } = await context.supabase.from("sb_products").insert(insertPayload as never).select("id").single();
+    const { data: row, error } = await context.supabase.from("sb_products").insert({ ...insertPayload, price_updated_at: new Date().toISOString() } as never).select("id").single();
     if (error) throw new Error(error.message);
     return { id: row.id };
   });
 
 export const sbAdminDeleteProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; hard?: boolean }) => z.object({ id: z.string().uuid(), hard: z.boolean().optional() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    if (data.hard) {
+      const { error } = await context.supabase.from("sb_products").delete().eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase.from("sb_products").update({ deleted_at: new Date().toISOString(), is_visible: false } as never).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const sbAdminRestoreProduct = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const { error } = await context.supabase.from("sb_products").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("sb_products").update({ deleted_at: null } as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
-// Settings
+// ======== Brands ========
+const BrandPayload = z.object({
+  id: z.string().uuid().optional().nullable(),
+  brand_code: z.string().min(1).max(60).regex(/^[a-z0-9_-]+$/, "小写字母、数字、_、-"),
+  name: z.string().min(1).max(200),
+  name_zh: z.string().max(200).nullable().optional(),
+  name_en: z.string().max(200).nullable().optional(),
+  logo_url: z.string().max(1000).nullable().optional(),
+  website_url: z.string().max(1000).nullable().optional(),
+  country: z.string().max(60).nullable().optional(),
+  description: z.string().max(2000).nullable().optional(),
+  is_active: z.boolean().default(true),
+  sort_order: z.number().int().default(0),
+});
+
+export const sbAdminListBrands = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const { data, error } = await context.supabase.from("solution_product_brands").select("*").order("sort_order").order("name");
+    if (error) throw new Error(error.message);
+    return { rows: data ?? [] };
+  });
+
+export const sbAdminSaveBrand = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => BrandPayload.parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    if (data.id) {
+      const { id, ...rest } = data;
+      const { error } = await context.supabase.from("solution_product_brands").update(rest as never).eq("id", id!);
+      if (error) throw new Error(error.message);
+      return { id };
+    }
+    const { id: _i, ...ins } = data;
+    const { data: row, error } = await context.supabase.from("solution_product_brands").insert(ins as never).select("id").single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const sbAdminDeleteBrand = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { error } = await context.supabase.from("solution_product_brands").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ======== Categories ========
+const CategoryPayload = z.object({
+  id: z.string().uuid().optional().nullable(),
+  builder_type: z.enum(["pc", "nas", "home-network", "shared", "service"]),
+  code: z.string().min(1).max(60).regex(/^[a-z0-9_-]+$/, "小写字母、数字、_、-"),
+  name_zh: z.string().min(1).max(120),
+  name_en: z.string().min(1).max(120),
+  parent_code: z.string().max(60).nullable().optional(),
+  icon: z.string().max(60).nullable().optional(),
+  description: z.string().max(1000).nullable().optional(),
+  is_active: z.boolean().default(true),
+  sort_order: z.number().int().default(0),
+});
+
+export const sbAdminListCategories = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const { data, error } = await context.supabase.from("solution_product_categories").select("*").order("builder_type").order("sort_order");
+    if (error) throw new Error(error.message);
+    return { rows: data ?? [] };
+  });
+
+export const sbAdminSaveCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CategoryPayload.parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    if (data.id) {
+      const { id, ...rest } = data;
+      const { error } = await context.supabase.from("solution_product_categories").update(rest as never).eq("id", id!);
+      if (error) throw new Error(error.message);
+      return { id };
+    }
+    const { id: _i, ...ins } = data;
+    const { data: row, error } = await context.supabase.from("solution_product_categories").insert(ins as never).select("id").single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const sbAdminDeleteCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { error } = await context.supabase.from("solution_product_categories").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ======== Price history ========
+export const sbAdminPriceHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { product_id: string }) => z.object({ product_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { data: rows, error } = await context.supabase
+      .from("solution_price_history").select("*").eq("product_id", data.product_id)
+      .order("changed_at", { ascending: false }).limit(200);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+// ======== Bulk import (CSV / JSON rows) ========
+const BulkRow = ProductPayload.omit({ id: true });
+export const sbAdminBulkUpsertProducts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { rows: unknown[] }) => z.object({ rows: z.array(BulkRow).max(500) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { error, count } = await context.supabase
+      .from("sb_products")
+      .upsert(data.rows.map((r) => ({ ...r, price_updated_at: new Date().toISOString() })) as never, { onConflict: "slug", count: "exact" });
+    if (error) throw new Error(error.message);
+    return { count: count ?? data.rows.length };
+  });
+
 const SettingsPayload = z.object({
   currency: z.string().min(1).max(10),
   tax_rate: z.number().min(0).max(1),
