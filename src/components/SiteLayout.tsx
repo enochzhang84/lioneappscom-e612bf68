@@ -200,18 +200,18 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               </SheetTrigger>
               <SheetContent side="right" className="w-72 p-0">
                 <nav className="flex flex-col gap-1 p-6 pt-10 text-base">
-                  <MobileLink to="/" exact onNavigate={() => setMobileOpen(false)}>{t("nav.home")}</MobileLink>
-                  <MobileLink to="/services" onNavigate={() => setMobileOpen(false)}>{t("nav.services")}</MobileLink>
-                  <MobileLink to="/cases" onNavigate={() => setMobileOpen(false)}>{t("nav.projects")}</MobileLink>
-                  <MobileLink to="/p/$slug" params={{ slug: "tools" }} onNavigate={() => setMobileOpen(false)}>{t("nav.tools")}</MobileLink>
-                  <MobileLink to="/p/$slug" params={{ slug: "ai" }} onNavigate={() => setMobileOpen(false)}>{t("nav.ai")}</MobileLink>
-                  <MobileLink to="/blog" onNavigate={() => setMobileOpen(false)}>{t("nav.blog")}</MobileLink>
-                  <MobileLink to="/about" onNavigate={() => setMobileOpen(false)}>{t("nav.about")}</MobileLink>
-                  <MobileLink to="/contact" onNavigate={() => setMobileOpen(false)}>{t("nav.contact")}</MobileLink>
+                  <Link to="/" onClick={() => setMobileOpen(false)} activeOptions={{ exact: true }} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.home")}</Link>
+                  <Link to="/services" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.services")}</Link>
+                  <Link to="/cases" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.projects")}</Link>
+                  <Link to="/p/$slug" params={{ slug: "tools" }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.tools")}</Link>
+                  <Link to="/p/$slug" params={{ slug: "ai" }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.ai")}</Link>
+                  <Link to="/blog" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.blog")}</Link>
+                  <Link to="/about" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.about")}</Link>
+                  <Link to="/contact" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.contact")}</Link>
                   {navPages?.filter((p) => p.slug !== "tools" && p.slug !== "ai").map((p) => (
-                    <MobileLink key={p.id} to="/p/$slug" params={{ slug: p.slug }} onNavigate={() => setMobileOpen(false)}>
+                    <Link key={p.id} to="/p/$slug" params={{ slug: p.slug }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">
                       {p.nav_label}
-                    </MobileLink>
+                    </Link>
                   ))}
                   <Button asChild size="sm" className="mt-4">
                     <Link to="/contact" onClick={() => setMobileOpen(false)}>{t("nav.cta")}</Link>
