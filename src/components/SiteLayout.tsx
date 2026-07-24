@@ -197,10 +197,14 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           <div>
             <div className="font-semibold mb-3">{t("footer.services")}</div>
             <ul className="space-y-2 text-muted-foreground">
-              {footerServices.map((k) => (
-                <li key={k}>
-                  <Link to="/contact" className="hover:text-foreground">
-                    {t(k)}
+              {services.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    to="/services"
+                    hash={s.anchor}
+                    className="hover:text-foreground"
+                  >
+                    {s.title[lang]}
                   </Link>
                 </li>
               ))}
