@@ -149,21 +149,22 @@ export function CompatRules() {
       {rows.length === 0 ? (
         <EmptyState title="暂无规则" description="点击右上角“新建规则”创建第一条兼容性规则。" />
       ) : (
-        <DataTable
+        <DataTable<Row>
+          rowKey={(r) => r.id}
           columns={[
-            { key: "sort_order", header: "序", width: "60px", cell: (r: Row) => <span className="text-slate-500">{r.sort_order}</span> },
-            { key: "rule_code", header: "Code", cell: (r: Row) => <code className="text-xs">{r.rule_code}</code> },
-            { key: "rule_type", header: "类型", cell: (r: Row) => <span className="text-xs text-slate-600">{r.rule_type}</span> },
+            { key: "sort_order", header: "序", width: "60px", cell: (r) => <span className="text-slate-500">{r.sort_order}</span> },
+            { key: "rule_code", header: "Code", cell: (r) => <code className="text-xs">{r.rule_code}</code> },
+            { key: "rule_type", header: "类型", cell: (r) => <span className="text-xs text-slate-600">{r.rule_type}</span> },
             {
               key: "severity",
               header: "级别",
               width: "90px",
-              cell: (r: Row) => <Badge className={SEV_COLOR[r.severity]}>{r.severity}</Badge>,
+              cell: (r) => <Badge className={SEV_COLOR[r.severity]}>{r.severity}</Badge>,
             },
             {
               key: "message",
               header: "消息",
-              cell: (r: Row) => (
+              cell: (r) => (
                 <div className="text-xs text-slate-700 space-y-0.5">
                   <div>{r.message_zh || <span className="text-slate-400">— zh 未填 —</span>}</div>
                   <div className="text-slate-500">{r.message_en || <span className="text-slate-400">— en missing —</span>}</div>
@@ -174,7 +175,7 @@ export function CompatRules() {
               key: "is_active",
               header: "启用",
               width: "80px",
-              cell: (r: Row) => (
+              cell: (r) => (
                 <Switch
                   checked={r.is_active}
                   onCheckedChange={(v) => saveM.mutate({ ...r, is_active: v })}
@@ -185,7 +186,7 @@ export function CompatRules() {
               key: "actions",
               header: "",
               width: "120px",
-              cell: (r: Row) => (
+              cell: (r) => (
                 <div className="flex gap-1 justify-end">
                   <Button size="sm" variant="ghost" onClick={() => setEditing({ ...r, params: r.params ?? {} })}>
                     <Pencil className="h-4 w-4" />
@@ -197,7 +198,7 @@ export function CompatRules() {
               ),
             },
           ]}
-          data={rows}
+          rows={rows}
         />
       )}
 
@@ -212,11 +213,11 @@ export function CompatRules() {
 
       <ConfirmDialog
         open={!!pendingDel}
-        onOpenChange={(v) => !v && setPendingDel(null)}
+        onOpenChange={(v) => { if (!v) setPendingDel(null); }}
         title="删除规则？"
         description={pendingDel ? `将永久删除 ${pendingDel.rule_code}。` : ""}
-        confirmText="删除"
-        variant="destructive"
+        confirmLabel="删除"
+        destructive
         onConfirm={() => { if (pendingDel) delM.mutate(pendingDel.id); }}
       />
     </div>
