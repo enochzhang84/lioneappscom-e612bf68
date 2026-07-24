@@ -22,15 +22,21 @@ type Args = {
   compat: CompatWarning[];
   computed: Record<string, any>;
   solutionNumber?: string | null;
+  paper?: "a4" | "letter";
 };
 
 export async function exportSolutionPdf(args: Args): Promise<void> {
+  // Guarantee CJK glyphs before rasterizing. Errors bubble up so callers
+  // can show the friendly font-load-failed toast and abort.
+  await loadPdfFonts();
+
   const isZh = args.lang === "zh";
   const dateStr = new Date().toLocaleDateString(isZh ? "zh-CN" : "en-US", { year: "numeric", month: "2-digit", day: "2-digit" });
   const solutionNo = args.solutionNumber || `LA-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-DRAFT`;
 
   const doc = document.createElement("div");
-  doc.style.cssText = "position:fixed;left:-99999px;top:0;width:794px;padding:40px;background:#ffffff;color:#111827;font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC','Noto Sans CJK SC',-apple-system,Helvetica,Arial,sans-serif;line-height:1.55;font-size:12px";
+  doc.style.cssText = `position:fixed;left:-99999px;top:0;width:794px;padding:40px;background:#ffffff;color:#111827;font-family:'${PDF_FONT_FAMILY}','PingFang SC','Microsoft YaHei','Noto Sans SC','Noto Sans CJK SC',-apple-system,Helvetica,Arial,sans-serif;line-height:1.55;font-size:12px`;
+
 
   const cur = args.settings.currency;
   const rows = args.items.map((i) => `
