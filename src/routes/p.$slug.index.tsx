@@ -91,6 +91,8 @@ function isToolsPage(page: Pick<PageFull, "page_type" | "slug">) {
 function ToolsPageView({ page, categories, items }: {
   page: PageFull; categories: ToolCategory[]; items: ToolItem[];
 }) {
+  const { lang } = useLang();
+  const isZh = lang === "zh";
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [query, setQuery] = useState("");
@@ -98,6 +100,7 @@ function ToolsPageView({ page, categories, items }: {
   const [activeId, setActiveId] = useState<string | null>(initialCat);
 
   const activeCat = categories.find(c => c.id === activeId) ?? categories[0] ?? null;
+
 
   const q = query.trim().toLowerCase();
   const matches = (it: ToolItem) =>
