@@ -17,6 +17,10 @@ import futureNetwork from "@/assets/future-home-network.jpg";
 import futureNas from "@/assets/future-home-nas.jpg";
 import futureSmart from "@/assets/future-home-smart.jpg";
 import futureMedia from "@/assets/future-home-media.jpg";
+import trendStorage from "@/assets/future-home-trend-1.png";
+import trendNetwork from "@/assets/future-home-trend-2.png";
+import trendAi from "@/assets/future-home-trend-3.png";
+import trendSecurity from "@/assets/future-home-trend-4.png";
 
 
 export const Route = createFileRoute("/")({
