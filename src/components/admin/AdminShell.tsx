@@ -62,6 +62,7 @@ export const ADMIN_NAV: NavItem[] = [
 
   { to: "/admin/pages", label: "Content — 页面", icon: FileText, group: "Content" },
   { to: "/admin/blog", label: "Content — 文章", icon: Newspaper, group: "Content" },
+  { to: "/admin/blog/categories", label: "Content — 博客分类", icon: Newspaper, group: "Content" },
   { to: "/admin/cases", label: "Content — 案例", icon: Briefcase, group: "Content" },
 
   { to: "/admin/tools", label: "Tools — 工具", icon: Wrench, group: "Tools" },
