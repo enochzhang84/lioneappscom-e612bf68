@@ -124,6 +124,9 @@ export function BuilderShell(props: Props) {
 
   async function handleExport() {
     setExportBusy(true);
+    const loadingId = toast.loading(
+      L === "zh" ? "正在加载中文字体并准备 PDF…" : "Loading fonts and preparing PDF…"
+    );
     try {
       await exportSolutionPdf({
         lang: L,
@@ -136,12 +139,21 @@ export function BuilderShell(props: Props) {
         computed: props.state.computed,
         solutionNumber: null,
       });
+      toast.dismiss(loadingId);
     } catch (e) {
-      toast.error(String((e as Error).message || e));
+      toast.dismiss(loadingId);
+      const msg = String((e as Error).message || e);
+      const isFontFail = /font/i.test(msg);
+      toast.error(
+        isFontFail
+          ? (L === "zh" ? "PDF 字体加载失败，请稍后重试。" : "PDF font loading failed. Please try again later.")
+          : msg
+      );
     } finally {
       setExportBusy(false);
     }
   }
+
 
   async function handleSubmit(form: {
     customer_name: string; customer_email: string; customer_phone: string;

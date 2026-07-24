@@ -1,10 +1,13 @@
-// PDF export via html2canvas-pro rendering a hidden template with hex colors so
-// CJK renders reliably using system/web fonts. Multi-page split by canvas slice.
+// PDF export via html2canvas-pro rendering a hidden template. Chinese
+// glyphs are guaranteed by loading Noto Sans SC on demand before render;
+// see ./pdfFontLoader.ts for the caching + fetch logic.
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas-pro";
 import { formatMoney } from "@/lib/solution-builder/calc";
 import type { LineItem, CompatWarning, ToolKey, SbSettings } from "@/lib/solution-builder/types";
 import type { Lang } from "@/lib/solution-builder/i18n";
+import { loadPdfFonts, PDF_FONT_FAMILY } from "./pdfFontLoader";
+
 
 type Args = {
   lang: Lang;
@@ -19,15 +22,21 @@ type Args = {
   compat: CompatWarning[];
   computed: Record<string, any>;
   solutionNumber?: string | null;
+  paper?: "a4" | "letter";
 };
 
 export async function exportSolutionPdf(args: Args): Promise<void> {
+  // Guarantee CJK glyphs before rasterizing. Errors bubble up so callers
+  // can show the friendly font-load-failed toast and abort.
+  await loadPdfFonts();
+
   const isZh = args.lang === "zh";
   const dateStr = new Date().toLocaleDateString(isZh ? "zh-CN" : "en-US", { year: "numeric", month: "2-digit", day: "2-digit" });
   const solutionNo = args.solutionNumber || `LA-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-DRAFT`;
 
   const doc = document.createElement("div");
-  doc.style.cssText = "position:fixed;left:-99999px;top:0;width:794px;padding:40px;background:#ffffff;color:#111827;font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC','Noto Sans CJK SC',-apple-system,Helvetica,Arial,sans-serif;line-height:1.55;font-size:12px";
+  doc.style.cssText = `position:fixed;left:-99999px;top:0;width:794px;padding:40px;background:#ffffff;color:#111827;font-family:'${PDF_FONT_FAMILY}','PingFang SC','Microsoft YaHei','Noto Sans SC','Noto Sans CJK SC',-apple-system,Helvetica,Arial,sans-serif;line-height:1.55;font-size:12px`;
+
 
   const cur = args.settings.currency;
   const rows = args.items.map((i) => `
@@ -117,9 +126,10 @@ export async function exportSolutionPdf(args: Args): Promise<void> {
   `;
 
   document.body.appendChild(doc);
+  let canvas: HTMLCanvasElement | null = null;
   try {
-    const canvas = await html2canvas(doc, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    canvas = await html2canvas(doc, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+    const pdf = new jsPDF({ unit: "mm", format: args.paper === "letter" ? "letter" : "a4", orientation: "portrait" });
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
     const imgW = pageW;
@@ -140,9 +150,17 @@ export async function exportSolutionPdf(args: Args): Promise<void> {
     const stamp = new Date().toISOString().slice(0, 10);
     pdf.save(`${solutionNo}_${stamp}.pdf`);
   } finally {
+    // Explicit cleanup — helps GC across many consecutive exports and
+    // prevents the offscreen node from accumulating in the DOM.
     document.body.removeChild(doc);
+    if (canvas) {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
   }
 }
+
+
 
 function sumRow(label: string, value: string, bold = false): string {
   return `<tr>
