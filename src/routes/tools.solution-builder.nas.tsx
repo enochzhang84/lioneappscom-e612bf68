@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { BuilderShell } from "@/components/solution-builder/BuilderShell";
-import { useProducts, productToLineItem, pickerOptions, pickById } from "@/components/solution-builder/builderHelpers";
+import { useProducts, useCompatRules, productToLineItem, pickerOptions, pickById } from "@/components/solution-builder/builderHelpers";
 import { PartRow, SectionTitle } from "./tools.solution-builder.pc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLang } from "@/lib/i18n";
 import { raidCapacity, type RaidLevel } from "@/lib/solution-builder/calc";
 import type { CompatWarning, LineItem } from "@/lib/solution-builder/types";
+import { evaluateCompat, buildProductMap } from "@/lib/solution-builder/compat";
 
 export const Route = createFileRoute("/tools/solution-builder/nas")({
   head: () => ({ meta: [
@@ -62,12 +63,20 @@ function NasBuilder() {
     return out;
   }, [selections, products, diskCount]);
 
-  const warnings: CompatWarning[] = [];
-  if (level === "5" && diskCount < 3) warnings.push({ level: "error", message_zh: "RAID 5 至少需要 3 块硬盘", message_en: "RAID 5 requires at least 3 disks" });
-  if (level === "6" && diskCount < 4) warnings.push({ level: "error", message_zh: "RAID 6 至少需要 4 块硬盘", message_en: "RAID 6 requires at least 4 disks" });
-  if (level === "10" && diskCount % 2 !== 0) warnings.push({ level: "error", message_zh: "RAID 10 需要偶数硬盘", message_en: "RAID 10 requires an even number of disks" });
-  warnings.push({ level: "notice", message_zh: "RAID 不是备份，重要数据仍需建立独立备份。", message_en: "RAID is not a backup. Important data still requires an independent backup." });
-  warnings.push({ level: "notice", message_zh: "容量为估算值，实际可用容量因文件系统开销可能略有不同。", message_en: "Capacity is an estimate; actual usable capacity may vary due to filesystem overhead." });
+  const rulesQ = useCompatRules();
+  const warnings = useMemo<CompatWarning[]>(() => {
+    const engine = evaluateCompat(rulesQ.data ?? [], {
+      tool: "nas",
+      items,
+      productsById: buildProductMap(products),
+      computed: { diskCount, raidLevel: level },
+    });
+    return [
+      ...engine,
+      { level: "info", message_zh: "RAID 不是备份，重要数据仍需建立独立备份。", message_en: "RAID is not a backup. Important data still requires an independent backup." },
+      { level: "info", message_zh: "容量为估算值，实际可用容量因文件系统开销可能略有不同。", message_en: "Capacity is an estimate; actual usable capacity may vary due to filesystem overhead." },
+    ];
+  }, [rulesQ.data, products, items, diskCount, level]);
 
 
   const computed = L === "zh"

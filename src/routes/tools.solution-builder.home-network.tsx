@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { BuilderShell } from "@/components/solution-builder/BuilderShell";
-import { useProducts, productToLineItem, pickerOptions, pickById } from "@/components/solution-builder/builderHelpers";
+import { useProducts, useCompatRules, productToLineItem, pickerOptions, pickById } from "@/components/solution-builder/builderHelpers";
 import { PartRow, SectionTitle } from "./tools.solution-builder.pc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLang } from "@/lib/i18n";
 import { planNetwork } from "@/lib/solution-builder/calc";
 import type { CompatWarning, LineItem } from "@/lib/solution-builder/types";
+import { evaluateCompat, buildProductMap } from "@/lib/solution-builder/compat";
 
 export const Route = createFileRoute("/tools/solution-builder/home-network")({
   head: () => ({ meta: [
@@ -56,11 +57,22 @@ function NetworkBuilder() {
     return out;
   }, [selections, products, plan.mesh_nodes]);
 
-  const warnings: CompatWarning[] = [
-    { level: "notice", message_zh: `建议 Mesh/AP 覆盖 ${plan.mesh_nodes} 节点，交换机端口 ≥ ${plan.switch_ports}`, message_en: `Suggest ${plan.mesh_nodes} Mesh/AP node(s) and switch with ≥ ${plan.switch_ports} ports` },
-    { level: "notice", message_zh: plan.bandwidth_zh, message_en: plan.bandwidth_en },
-    { level: "notice", message_zh: "该结果是初步规划建议，不等同于现场无线勘测或专业布线设计。", message_en: "This is a preliminary planning suggestion and does not replace an on-site wireless survey or professional cabling design." },
-  ];
+  const rulesQ = useCompatRules();
+  const warnings = useMemo<CompatWarning[]>(() => {
+    const poeLoadW = plan.poe_watts;
+    const engine = evaluateCompat(rulesQ.data ?? [], {
+      tool: "home-network",
+      items,
+      productsById: buildProductMap(products),
+      computed: { poeLoadW },
+    });
+    return [
+      ...engine,
+      { level: "info", message_zh: `建议 Mesh/AP 覆盖 ${plan.mesh_nodes} 节点，交换机端口 ≥ ${plan.switch_ports}`, message_en: `Suggest ${plan.mesh_nodes} Mesh/AP node(s) and switch with ≥ ${plan.switch_ports} ports` },
+      { level: "info", message_zh: plan.bandwidth_zh, message_en: plan.bandwidth_en },
+      { level: "info", message_zh: "该结果是初步规划建议，不等同于现场无线勘测或专业布线设计。", message_en: "This is a preliminary planning suggestion and does not replace an on-site wireless survey or professional cabling design." },
+    ];
+  }, [rulesQ.data, products, items, plan]);
 
 
   const computed = L === "zh"
