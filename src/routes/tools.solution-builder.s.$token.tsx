@@ -1,17 +1,13 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { sbGetShared } from "@/lib/solution-builder.functions";
 import { formatMoney } from "@/lib/solution-builder/calc";
 import { SiteLayout } from "@/components/SiteLayout";
 
 export const Route = createFileRoute("/tools/solution-builder/s/$token")({
-  loader: async ({ params }) => {
-    const r = await sbGetShared({ data: { token: params.token } });
-    if (!r.row) throw notFound();
-    return { shared: r.row };
-  },
+  loader: async ({ params }) => sbGetShared({ data: { token: params.token } }),
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.shared.title ?? "Shared Solution"} · Lione Apps` },
+      { title: `${loaderData?.row?.title ?? "Shared Solution"} · Lione Apps` },
       { name: "description", content: "Lione Apps 方案分享 · IT 方案与预算参考" },
       { name: "robots", content: "noindex" },
     ],
@@ -20,7 +16,14 @@ export const Route = createFileRoute("/tools/solution-builder/s/$token")({
 });
 
 function SharedView() {
-  const { shared } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  if (!data.row) return <ShareUnavailable status={data.status} />;
+  const shared = data.row;
+  const L = (shared.language === "en" ? "en" : "zh") as "zh" | "en";
+  const items = (shared.items as unknown as import("@/lib/solution-builder/types").LineItem[]) ?? [];
+  const compat = (shared.compat_warnings as unknown as import("@/lib/solution-builder/types").CompatWarning[]) ?? [];
+  const cur = shared.currency;
+
   const L = (shared.language === "en" ? "en" : "zh") as "zh" | "en";
   const items = (shared.items as unknown as import("@/lib/solution-builder/types").LineItem[]) ?? [];
   const compat = (shared.compat_warnings as unknown as import("@/lib/solution-builder/types").CompatWarning[]) ?? [];
