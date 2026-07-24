@@ -603,6 +603,118 @@ export const sbAdminBulkUpsertProducts = createServerFn({ method: "POST" })
     return { count: count ?? data.rows.length };
   });
 
+// Dry-run: validate + classify create/update/error without writing
+export const sbAdminBulkPreviewProducts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { rows: unknown[] }) => z.object({ rows: z.array(z.any()).max(1000) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    type Err = { row: number; slug?: string; message: string };
+    const errors: Err[] = [];
+    const valid: Array<{ row: number; slug: string; data: z.infer<typeof BulkRow> }> = [];
+    data.rows.forEach((raw, i) => {
+      const parsed = BulkRow.safeParse(raw);
+      if (!parsed.success) {
+        const first = parsed.error.issues[0];
+        errors.push({ row: i + 2, slug: (raw as { slug?: string })?.slug, message: `${first.path.join(".")} · ${first.message}` });
+        return;
+      }
+      valid.push({ row: i + 2, slug: parsed.data.slug, data: parsed.data });
+    });
+    let existingSlugs = new Set<string>();
+    if (valid.length) {
+      const { data: rows } = await context.supabase
+        .from("sb_products").select("slug").in("slug", valid.map((v) => v.slug));
+      existingSlugs = new Set((rows ?? []).map((r) => (r as { slug: string }).slug));
+    }
+    const create = valid.filter((v) => !existingSlugs.has(v.slug));
+    const update = valid.filter((v) => existingSlugs.has(v.slug));
+    return {
+      total: data.rows.length,
+      create_count: create.length,
+      update_count: update.length,
+      error_count: errors.length,
+      errors: errors.slice(0, 50),
+      create_samples: create.slice(0, 5).map((v) => ({ slug: v.slug, name_zh: v.data.name_zh })),
+      update_samples: update.slice(0, 5).map((v) => ({ slug: v.slug, name_zh: v.data.name_zh })),
+    };
+  });
+
+// ======== Compatibility Simulator (Admin) ========
+const SimItemSchema = z.object({
+  id: z.string(),
+  category: z.string(),
+  qty: z.number().default(1),
+});
+export const sbAdminSimulateCompat = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      solution_type: z.enum(["pc", "nas", "home-network", "full-solution"]),
+      items: z.array(SimItemSchema).max(60),
+      computed: z.object({
+        totalPowerW: z.number().optional(),
+        diskCount: z.number().optional(),
+        raidLevel: z.string().optional(),
+        poeLoadW: z.number().optional(),
+      }).partial().optional(),
+      config: z.record(z.string(), z.any()).optional(),
+      rule_prefix: z.string().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { data: rulesRaw, error: rErr } = await context.supabase
+      .from("solution_compatibility_rules").select("*").order("sort_order");
+    if (rErr) throw new Error(rErr.message);
+    const ids = [...new Set(data.items.map((i) => i.id).filter((x) => /^[0-9a-f-]{36}$/i.test(x)))];
+    let products: Array<Record<string, unknown>> = [];
+    if (ids.length) {
+      const { data: rows, error } = await context.supabase
+        .from("sb_products").select("*").in("id", ids);
+      if (error) throw new Error(error.message);
+      products = (rows ?? []) as Array<Record<string, unknown>>;
+    }
+    const { evaluateCompatDetailed, buildProductMap } = await import("@/lib/solution-builder/compat");
+    const productsById = buildProductMap(products as never);
+    const items = data.items.map((i) => ({
+      id: i.id, kind: "product" as const, category: i.category,
+      name_zh: (productsById.get(i.id) as { name_zh?: string } | undefined)?.name_zh ?? i.id,
+      name_en: (productsById.get(i.id) as { name_en?: string } | undefined)?.name_en ?? i.id,
+      qty: i.qty, unit_price: 0,
+    }));
+    const rules = (rulesRaw ?? []) as never[];
+    const filtered = data.rule_prefix
+      ? rules.filter((r) => String((r as { rule_type: string }).rule_type).startsWith(data.rule_prefix!))
+      : rules;
+    const results = evaluateCompatDetailed(filtered as never, {
+      tool: data.solution_type as never,
+      items: items as never,
+      productsById,
+      computed: data.computed,
+      ...(data.config ? ({ config: data.config } as unknown as object) : {}),
+    } as never);
+    return {
+      results: results.map((r) => ({
+        rule_code: r.rule.rule_code,
+        rule_type: r.rule.rule_type,
+        severity: r.rule.severity,
+        status: r.status,
+        message_zh: r.warning?.message_zh ?? r.rule.message_zh,
+        message_en: r.warning?.message_en ?? r.rule.message_en,
+        is_active: r.rule.is_active,
+      })),
+      summary: {
+        total: results.length,
+        hit: results.filter((r) => r.status === "hit").length,
+        pass: results.filter((r) => r.status === "pass").length,
+        skipped: results.filter((r) => r.status === "skipped").length,
+        unsupported: results.filter((r) => r.status === "unsupported").length,
+      },
+      products_loaded: products.length,
+    };
+  });
+
 const SettingsPayload = z.object({
   currency: z.string().min(1).max(10),
   tax_rate: z.number().min(0).max(1),
