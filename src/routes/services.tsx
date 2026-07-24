@@ -229,9 +229,6 @@ function ServiceBlock({
         />
       </div>
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-          #{service.anchor}
-        </div>
         <h3 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight">
           {service.title[lang]}
         </h3>
