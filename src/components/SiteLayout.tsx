@@ -34,6 +34,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const { navPages } = usePlatform();
   const { lang, setLang, t } = useLang();
