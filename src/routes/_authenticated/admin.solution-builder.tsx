@@ -23,6 +23,7 @@ import {
 import { SOLUTION_STATUSES, type SbProduct, type SbSolutionRow } from "@/lib/solution-builder/types";
 import { formatMoney } from "@/lib/solution-builder/calc";
 import { Link2, Copy, RefreshCw, Ban } from "lucide-react";
+import { ProductCatalog } from "@/components/admin/solution-builder/ProductCatalog";
 
 export const Route = createFileRoute("/_authenticated/admin/solution-builder")({
   component: SolutionBuilderAdmin,
@@ -30,7 +31,8 @@ export const Route = createFileRoute("/_authenticated/admin/solution-builder")({
 
 const TABS = [
   { key: "solutions", label: "客户方案" },
-  { key: "products", label: "产品与价格" },
+  { key: "catalog", label: "产品资料库" },
+  { key: "products", label: "产品与价格（旧）" },
   { key: "settings", label: "参数设置" },
 ] as const;
 
