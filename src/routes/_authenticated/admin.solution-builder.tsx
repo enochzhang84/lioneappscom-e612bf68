@@ -58,6 +58,7 @@ function SolutionBuilderAdmin() {
         ))}
       </div>
       {tab === "solutions" && <SolutionsPanel />}
+      {tab === "catalog" && <ProductCatalog />}
       {tab === "products" && <ProductsPanel />}
       {tab === "settings" && <SettingsPanel />}
     </div>
