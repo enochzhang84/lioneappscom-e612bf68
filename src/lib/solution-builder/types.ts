@@ -72,6 +72,7 @@ export type SbProduct = {
   stock_status: "in_stock" | "special_order" | "out_of_stock" | "discontinued";
   is_visible: boolean;
   is_sample: boolean;
+  sort_order: number;
   currency: string;
   price_updated_at: string;
 };
