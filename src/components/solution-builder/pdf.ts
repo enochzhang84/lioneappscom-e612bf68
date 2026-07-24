@@ -1,10 +1,13 @@
-// PDF export via html2canvas-pro rendering a hidden template with hex colors so
-// CJK renders reliably using system/web fonts. Multi-page split by canvas slice.
+// PDF export via html2canvas-pro rendering a hidden template. Chinese
+// glyphs are guaranteed by loading Noto Sans SC on demand before render;
+// see ./pdfFontLoader.ts for the caching + fetch logic.
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas-pro";
 import { formatMoney } from "@/lib/solution-builder/calc";
 import type { LineItem, CompatWarning, ToolKey, SbSettings } from "@/lib/solution-builder/types";
 import type { Lang } from "@/lib/solution-builder/i18n";
+import { loadPdfFonts, PDF_FONT_FAMILY } from "./pdfFontLoader";
+
 
 type Args = {
   lang: Lang;
