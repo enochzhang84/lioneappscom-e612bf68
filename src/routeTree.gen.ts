@@ -32,6 +32,10 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as ToolsSolutionBuilderIndexRouteImport } from './routes/tools.solution-builder.index'
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ToolsSolutionBuilderPcRouteImport } from './routes/tools.solution-builder.pc'
+import { Route as ToolsSolutionBuilderNasRouteImport } from './routes/tools.solution-builder.nas'
+import { Route as ToolsSolutionBuilderHomeNetworkRouteImport } from './routes/tools.solution-builder.home-network'
+import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/tools.solution-builder.full-solution'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
@@ -55,6 +59,7 @@ import { Route as AuthenticatedAdminPagesIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminExamsIndexRouteImport } from './routes/_authenticated/admin.exams.index'
 import { Route as AuthenticatedAdminCasesIndexRouteImport } from './routes/_authenticated/admin.cases.index'
 import { Route as AuthenticatedAdminBlogIndexRouteImport } from './routes/_authenticated/admin.blog.index'
+import { Route as ToolsSolutionBuilderSTokenRouteImport } from './routes/tools.solution-builder.s.$token'
 import { Route as PSlugIItemSlugRouteImport } from './routes/p.$slug.i.$itemSlug'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
 import { Route as AuthenticatedAdminQuizIdRouteImport } from './routes/_authenticated/admin.quiz.$id'
@@ -183,6 +188,28 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const ToolsSolutionBuilderPcRoute = ToolsSolutionBuilderPcRouteImport.update({
+  id: '/pc',
+  path: '/pc',
+  getParentRoute: () => ToolsSolutionBuilderRoute,
+} as any)
+const ToolsSolutionBuilderNasRoute = ToolsSolutionBuilderNasRouteImport.update({
+  id: '/nas',
+  path: '/nas',
+  getParentRoute: () => ToolsSolutionBuilderRoute,
+} as any)
+const ToolsSolutionBuilderHomeNetworkRoute =
+  ToolsSolutionBuilderHomeNetworkRouteImport.update({
+    id: '/home-network',
+    path: '/home-network',
+    getParentRoute: () => ToolsSolutionBuilderRoute,
+  } as any)
+const ToolsSolutionBuilderFullSolutionRoute =
+  ToolsSolutionBuilderFullSolutionRouteImport.update({
+    id: '/full-solution',
+    path: '/full-solution',
+    getParentRoute: () => ToolsSolutionBuilderRoute,
+  } as any)
 const PDriveC1Route = PDriveC1RouteImport.update({
   id: '/p/drive/c1',
   path: '/p/drive/c1',
@@ -310,6 +337,12 @@ const AuthenticatedAdminBlogIndexRoute =
     path: '/blog/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ToolsSolutionBuilderSTokenRoute =
+  ToolsSolutionBuilderSTokenRouteImport.update({
+    id: '/s/$token',
+    path: '/s/$token',
+    getParentRoute: () => ToolsSolutionBuilderRoute,
+  } as any)
 const PSlugIItemSlugRoute = PSlugIItemSlugRouteImport.update({
   id: '/p/$slug/i/$itemSlug',
   path: '/p/$slug/i/$itemSlug',
@@ -416,6 +449,10 @@ export interface FileRoutesByFullPath {
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
+  '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
+  '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
+  '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
   '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
@@ -431,6 +468,7 @@ export interface FileRoutesByFullPath {
   '/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
+  '/tools/solution-builder/s/$token': typeof ToolsSolutionBuilderSTokenRoute
   '/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
   '/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
   '/admin/exams/': typeof AuthenticatedAdminExamsIndexRoute
@@ -466,6 +504,10 @@ export interface FileRoutesByTo {
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
+  '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
+  '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
+  '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
   '/tools/solution-builder': typeof ToolsSolutionBuilderIndexRoute
@@ -481,6 +523,7 @@ export interface FileRoutesByTo {
   '/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
+  '/tools/solution-builder/s/$token': typeof ToolsSolutionBuilderSTokenRoute
   '/admin/blog': typeof AuthenticatedAdminBlogIndexRoute
   '/admin/cases': typeof AuthenticatedAdminCasesIndexRoute
   '/admin/exams': typeof AuthenticatedAdminExamsIndexRoute
@@ -527,6 +570,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
+  '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
+  '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
+  '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
   '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
@@ -542,6 +589,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/quiz/$id': typeof AuthenticatedAdminQuizIdRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/p/$slug/i/$itemSlug': typeof PSlugIItemSlugRoute
+  '/tools/solution-builder/s/$token': typeof ToolsSolutionBuilderSTokenRoute
   '/_authenticated/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
   '/_authenticated/admin/cases/': typeof AuthenticatedAdminCasesIndexRoute
   '/_authenticated/admin/exams/': typeof AuthenticatedAdminExamsIndexRoute
@@ -588,6 +636,10 @@ export interface FileRouteTypes {
     | '/admin/tools'
     | '/admin/users'
     | '/p/drive/c1'
+    | '/tools/solution-builder/full-solution'
+    | '/tools/solution-builder/home-network'
+    | '/tools/solution-builder/nas'
+    | '/tools/solution-builder/pc'
     | '/admin/'
     | '/p/$slug/'
     | '/tools/solution-builder/'
@@ -603,6 +655,7 @@ export interface FileRouteTypes {
     | '/admin/quiz/$id'
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
+    | '/tools/solution-builder/s/$token'
     | '/admin/blog/'
     | '/admin/cases/'
     | '/admin/exams/'
@@ -638,6 +691,10 @@ export interface FileRouteTypes {
     | '/admin/seo'
     | '/admin/users'
     | '/p/drive/c1'
+    | '/tools/solution-builder/full-solution'
+    | '/tools/solution-builder/home-network'
+    | '/tools/solution-builder/nas'
+    | '/tools/solution-builder/pc'
     | '/admin'
     | '/p/$slug'
     | '/tools/solution-builder'
@@ -653,6 +710,7 @@ export interface FileRouteTypes {
     | '/admin/quiz/$id'
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
+    | '/tools/solution-builder/s/$token'
     | '/admin/blog'
     | '/admin/cases'
     | '/admin/exams'
@@ -698,6 +756,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tools'
     | '/_authenticated/admin/users'
     | '/p/drive/c1'
+    | '/tools/solution-builder/full-solution'
+    | '/tools/solution-builder/home-network'
+    | '/tools/solution-builder/nas'
+    | '/tools/solution-builder/pc'
     | '/_authenticated/admin/'
     | '/p/$slug/'
     | '/tools/solution-builder/'
@@ -713,6 +775,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/quiz/$id'
     | '/api/public/media/$'
     | '/p/$slug/i/$itemSlug'
+    | '/tools/solution-builder/s/$token'
     | '/_authenticated/admin/blog/'
     | '/_authenticated/admin/cases/'
     | '/_authenticated/admin/exams/'
@@ -910,6 +973,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/tools/solution-builder/pc': {
+      id: '/tools/solution-builder/pc'
+      path: '/pc'
+      fullPath: '/tools/solution-builder/pc'
+      preLoaderRoute: typeof ToolsSolutionBuilderPcRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/solution-builder/nas': {
+      id: '/tools/solution-builder/nas'
+      path: '/nas'
+      fullPath: '/tools/solution-builder/nas'
+      preLoaderRoute: typeof ToolsSolutionBuilderNasRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/solution-builder/home-network': {
+      id: '/tools/solution-builder/home-network'
+      path: '/home-network'
+      fullPath: '/tools/solution-builder/home-network'
+      preLoaderRoute: typeof ToolsSolutionBuilderHomeNetworkRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/solution-builder/full-solution': {
+      id: '/tools/solution-builder/full-solution'
+      path: '/full-solution'
+      fullPath: '/tools/solution-builder/full-solution'
+      preLoaderRoute: typeof ToolsSolutionBuilderFullSolutionRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
     '/p/drive/c1': {
       id: '/p/drive/c1'
       path: '/p/drive/c1'
@@ -1070,6 +1161,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/blog/'
       preLoaderRoute: typeof AuthenticatedAdminBlogIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/tools/solution-builder/s/$token': {
+      id: '/tools/solution-builder/s/$token'
+      path: '/s/$token'
+      fullPath: '/tools/solution-builder/s/$token'
+      preLoaderRoute: typeof ToolsSolutionBuilderSTokenRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
     }
     '/p/$slug/i/$itemSlug': {
       id: '/p/$slug/i/$itemSlug'
@@ -1343,11 +1441,21 @@ const CasesRouteChildren: CasesRouteChildren = {
 const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
 
 interface ToolsSolutionBuilderRouteChildren {
+  ToolsSolutionBuilderFullSolutionRoute: typeof ToolsSolutionBuilderFullSolutionRoute
+  ToolsSolutionBuilderHomeNetworkRoute: typeof ToolsSolutionBuilderHomeNetworkRoute
+  ToolsSolutionBuilderNasRoute: typeof ToolsSolutionBuilderNasRoute
+  ToolsSolutionBuilderPcRoute: typeof ToolsSolutionBuilderPcRoute
   ToolsSolutionBuilderIndexRoute: typeof ToolsSolutionBuilderIndexRoute
+  ToolsSolutionBuilderSTokenRoute: typeof ToolsSolutionBuilderSTokenRoute
 }
 
 const ToolsSolutionBuilderRouteChildren: ToolsSolutionBuilderRouteChildren = {
+  ToolsSolutionBuilderFullSolutionRoute: ToolsSolutionBuilderFullSolutionRoute,
+  ToolsSolutionBuilderHomeNetworkRoute: ToolsSolutionBuilderHomeNetworkRoute,
+  ToolsSolutionBuilderNasRoute: ToolsSolutionBuilderNasRoute,
+  ToolsSolutionBuilderPcRoute: ToolsSolutionBuilderPcRoute,
   ToolsSolutionBuilderIndexRoute: ToolsSolutionBuilderIndexRoute,
+  ToolsSolutionBuilderSTokenRoute: ToolsSolutionBuilderSTokenRoute,
 }
 
 const ToolsSolutionBuilderRouteWithChildren =
