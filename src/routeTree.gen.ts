@@ -23,6 +23,7 @@ import { Route as AiRouteImport } from './routes/ai'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as ToolsSolutionBuilderRouteImport } from './routes/tools.solution-builder'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
@@ -142,6 +143,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsRoute,
 } as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/blog/',
@@ -441,6 +447,7 @@ export interface FileRoutesByFullPath {
   '/products/$slug': typeof ProductsSlugRoute
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
+  '/tools/': typeof ToolsIndexRoute
   '/admin/ai': typeof AuthenticatedAdminAiRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
@@ -498,12 +505,12 @@ export interface FileRoutesByTo {
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
   '/success': typeof SuccessRoute
-  '/tools': typeof ToolsRouteWithChildren
   '/update-password': typeof UpdatePasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/blog': typeof BlogIndexRoute
+  '/tools': typeof ToolsIndexRoute
   '/admin/ai': typeof AuthenticatedAdminAiRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRoute
@@ -564,6 +571,7 @@ export interface FileRoutesById {
   '/products/$slug': typeof ProductsSlugRoute
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
+  '/tools/': typeof ToolsIndexRoute
   '/_authenticated/admin/ai': typeof AuthenticatedAdminAiRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/cases': typeof AuthenticatedAdminCasesRouteWithChildren
@@ -631,6 +639,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/tools/solution-builder'
     | '/blog/'
+    | '/tools/'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/cases'
@@ -688,12 +697,12 @@ export interface FileRouteTypes {
     | '/process'
     | '/services'
     | '/success'
-    | '/tools'
     | '/update-password'
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
     | '/blog'
+    | '/tools'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/files'
@@ -753,6 +762,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/tools/solution-builder'
     | '/blog/'
+    | '/tools/'
     | '/_authenticated/admin/ai'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/cases'
@@ -922,6 +932,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/tools/': {
+      id: '/tools/'
+      path: '/'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRoute
     }
     '/blog/': {
       id: '/blog/'
@@ -1486,10 +1503,12 @@ const ToolsSolutionBuilderRouteWithChildren =
 
 interface ToolsRouteChildren {
   ToolsSolutionBuilderRoute: typeof ToolsSolutionBuilderRouteWithChildren
+  ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
   ToolsSolutionBuilderRoute: ToolsSolutionBuilderRouteWithChildren,
+  ToolsIndexRoute: ToolsIndexRoute,
 }
 
 const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
@@ -1520,3 +1539,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
