@@ -185,6 +185,40 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             <Button asChild size="sm" className="hidden sm:inline-flex">
               <Link to="/contact">{t("nav.cta")}</Link>
             </Button>
+
+            {/* Mobile hamburger */}
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  aria-label="Open menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72 p-0">
+                <nav className="flex flex-col gap-1 p-6 pt-10 text-base">
+                  <MobileLink to="/" exact onNavigate={() => setMobileOpen(false)}>{t("nav.home")}</MobileLink>
+                  <MobileLink to="/services" onNavigate={() => setMobileOpen(false)}>{t("nav.services")}</MobileLink>
+                  <MobileLink to="/cases" onNavigate={() => setMobileOpen(false)}>{t("nav.projects")}</MobileLink>
+                  <MobileLink to="/p/$slug" params={{ slug: "tools" }} onNavigate={() => setMobileOpen(false)}>{t("nav.tools")}</MobileLink>
+                  <MobileLink to="/p/$slug" params={{ slug: "ai" }} onNavigate={() => setMobileOpen(false)}>{t("nav.ai")}</MobileLink>
+                  <MobileLink to="/blog" onNavigate={() => setMobileOpen(false)}>{t("nav.blog")}</MobileLink>
+                  <MobileLink to="/about" onNavigate={() => setMobileOpen(false)}>{t("nav.about")}</MobileLink>
+                  <MobileLink to="/contact" onNavigate={() => setMobileOpen(false)}>{t("nav.contact")}</MobileLink>
+                  {navPages?.filter((p) => p.slug !== "tools" && p.slug !== "ai").map((p) => (
+                    <MobileLink key={p.id} to="/p/$slug" params={{ slug: p.slug }} onNavigate={() => setMobileOpen(false)}>
+                      {p.nav_label}
+                    </MobileLink>
+                  ))}
+                  <Button asChild size="sm" className="mt-4">
+                    <Link to="/contact" onClick={() => setMobileOpen(false)}>{t("nav.cta")}</Link>
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
