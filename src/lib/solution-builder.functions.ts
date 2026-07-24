@@ -38,9 +38,10 @@ const LineItemSchema = z.object({
 });
 
 const CompatSchema = z.object({
-  level: z.enum(["ok", "notice", "error"]),
+  level: z.enum(["ok", "info", "notice", "warning", "error"]),
   message_zh: z.string(),
   message_en: z.string(),
+  rule_code: z.string().optional(),
 });
 
 const SolutionPayload = z.object({
@@ -91,6 +92,17 @@ export const sbListProducts = createServerFn({ method: "POST" })
     if (error) return { products: [] as SbProduct[], error: error.message };
     return { products: (rows ?? []) as unknown as SbProduct[] };
   });
+
+export const sbListCompatRules = createServerFn({ method: "GET" }).handler(async () => {
+  const c = publicClient();
+  const { data, error } = await c
+    .from("solution_compatibility_rules")
+    .select("id, rule_code, rule_type, params, severity, message_zh, message_en, is_active, sort_order")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+  if (error) return { rules: [] as unknown[], error: error.message };
+  return { rules: data ?? [] };
+});
 
 
 export const sbGetSettings = createServerFn({ method: "GET" }).handler(async () => {

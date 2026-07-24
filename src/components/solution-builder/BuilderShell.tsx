@@ -290,7 +290,13 @@ function SummaryCard({
   settings: SbSettings;
 }) {
   const hasErrors = compat.some((c) => c.level === "error");
-  const hasNotice = compat.some((c) => c.level === "notice");
+  const hasWarnings = compat.some((c) => c.level === "warning" || c.level === "notice");
+  const hasInfo = compat.some((c) => c.level === "info");
+  const boxCls = hasErrors ? "bg-red-50 text-red-700 border-red-200"
+    : hasWarnings ? "bg-amber-50 text-amber-800 border-amber-200"
+    : hasInfo ? "bg-blue-50 text-blue-700 border-blue-200"
+    : "bg-emerald-50 text-emerald-700 border-emerald-200";
+  const HeadIcon = hasErrors ? AlertTriangle : hasWarnings ? AlertTriangle : hasInfo ? Info : Check;
   return (
     <div className="lg:sticky lg:top-20 bg-white rounded-2xl border p-4">
       <div className="text-sm font-semibold text-slate-900 mb-3">{bi(SB_STRINGS.summary_title, L)}</div>
@@ -325,15 +331,22 @@ function SummaryCard({
         {totals.annual_total > 0 && <Row label={bi(SB_STRINGS.annual_total, L)} value={formatMoney(totals.annual_total, settings.currency, L) + "/yr"} />}
       </div>
 
-      <div className={`mt-3 rounded-lg px-3 py-2 text-xs flex items-start gap-2 ${
-        hasErrors ? "bg-red-50 text-red-700" : hasNotice ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
-      }`}>
-        {hasErrors ? <AlertTriangle size={14} className="mt-0.5" /> : hasNotice ? <Info size={14} className="mt-0.5" /> : <Check size={14} className="mt-0.5" />}
-        <div className="flex-1 space-y-0.5">
+      <div className={`mt-3 rounded-lg px-3 py-2 text-xs flex items-start gap-2 border ${boxCls}`}>
+        <HeadIcon size={14} className="mt-0.5 shrink-0" />
+        <div className="flex-1 space-y-1">
           {compat.length === 0 && <div>{bi(SB_STRINGS.compat_ok, L)}</div>}
-          {compat.map((c, i) => (
-            <div key={i}>{L === "zh" ? c.message_zh : c.message_en}</div>
-          ))}
+          {compat.map((c, i) => {
+            const dot = c.level === "error" ? "bg-red-500"
+              : c.level === "warning" || c.level === "notice" ? "bg-amber-500"
+              : c.level === "info" ? "bg-blue-500"
+              : "bg-emerald-500";
+            return (
+              <div key={i} className="flex items-start gap-1.5">
+                <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${dot}`} />
+                <span className="flex-1">{L === "zh" ? c.message_zh : c.message_en}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
