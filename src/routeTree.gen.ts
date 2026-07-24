@@ -24,10 +24,12 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as ToolsSolutionBuilderRouteImport } from './routes/tools.solution-builder'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ToolsSolutionBuilderIndexRouteImport } from './routes/tools.solution-builder.index'
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
@@ -140,6 +142,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsSolutionBuilderRoute = ToolsSolutionBuilderRouteImport.update({
+  id: '/solution-builder',
+  path: '/solution-builder',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/products/$slug',
   path: '/products/$slug',
@@ -160,6 +167,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ToolsSolutionBuilderIndexRoute =
+  ToolsSolutionBuilderIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ToolsSolutionBuilderRoute,
+  } as any)
 const PSlugIndexRoute = PSlugIndexRouteImport.update({
   id: '/p/$slug/',
   path: '/p/$slug/',
@@ -380,12 +393,13 @@ export interface FileRoutesByFullPath {
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
   '/success': typeof SuccessRoute
-  '/tools': typeof ToolsRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/update-password': typeof UpdatePasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/admin/ai': typeof AuthenticatedAdminAiRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -404,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/p/drive/c1': typeof PDriveC1Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
+  '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
@@ -437,7 +452,7 @@ export interface FileRoutesByTo {
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
   '/success': typeof SuccessRoute
-  '/tools': typeof ToolsRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/update-password': typeof UpdatePasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
@@ -453,6 +468,7 @@ export interface FileRoutesByTo {
   '/p/drive/c1': typeof PDriveC1Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
+  '/tools/solution-builder': typeof ToolsSolutionBuilderIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
   '/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
@@ -488,12 +504,13 @@ export interface FileRoutesById {
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
   '/success': typeof SuccessRoute
-  '/tools': typeof ToolsRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/update-password': typeof UpdatePasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/admin/ai': typeof AuthenticatedAdminAiRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -512,6 +529,7 @@ export interface FileRoutesById {
   '/p/drive/c1': typeof PDriveC1Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
+  '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
   '/_authenticated/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/_authenticated/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
   '/_authenticated/admin/cases/$id': typeof AuthenticatedAdminCasesIdRoute
@@ -553,6 +571,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/tools/solution-builder'
     | '/blog/'
     | '/admin/ai'
     | '/admin/analytics'
@@ -571,6 +590,7 @@ export interface FileRouteTypes {
     | '/p/drive/c1'
     | '/admin/'
     | '/p/$slug/'
+    | '/tools/solution-builder/'
     | '/admin/blog/$id'
     | '/admin/blog/categories'
     | '/admin/cases/$id'
@@ -620,6 +640,7 @@ export interface FileRouteTypes {
     | '/p/drive/c1'
     | '/admin'
     | '/p/$slug'
+    | '/tools/solution-builder'
     | '/admin/blog/$id'
     | '/admin/blog/categories'
     | '/admin/cases/$id'
@@ -660,6 +681,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/tools/solution-builder'
     | '/blog/'
     | '/_authenticated/admin/ai'
     | '/_authenticated/admin/analytics'
@@ -678,6 +700,7 @@ export interface FileRouteTypes {
     | '/p/drive/c1'
     | '/_authenticated/admin/'
     | '/p/$slug/'
+    | '/tools/solution-builder/'
     | '/_authenticated/admin/blog/$id'
     | '/_authenticated/admin/blog/categories'
     | '/_authenticated/admin/cases/$id'
@@ -713,7 +736,7 @@ export interface RootRouteChildren {
   ProcessRoute: typeof ProcessRoute
   ServicesRoute: typeof ServicesRoute
   SuccessRoute: typeof SuccessRoute
-  ToolsRoute: typeof ToolsRoute
+  ToolsRoute: typeof ToolsRouteWithChildren
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
@@ -831,6 +854,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/solution-builder': {
+      id: '/tools/solution-builder'
+      path: '/solution-builder'
+      fullPath: '/tools/solution-builder'
+      preLoaderRoute: typeof ToolsSolutionBuilderRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/products/$slug': {
       id: '/products/$slug'
       path: '/products/$slug'
@@ -858,6 +888,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/tools/solution-builder/': {
+      id: '/tools/solution-builder/'
+      path: '/'
+      fullPath: '/tools/solution-builder/'
+      preLoaderRoute: typeof ToolsSolutionBuilderIndexRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
     }
     '/p/$slug/': {
       id: '/p/$slug/'
@@ -1305,6 +1342,27 @@ const CasesRouteChildren: CasesRouteChildren = {
 
 const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
 
+interface ToolsSolutionBuilderRouteChildren {
+  ToolsSolutionBuilderIndexRoute: typeof ToolsSolutionBuilderIndexRoute
+}
+
+const ToolsSolutionBuilderRouteChildren: ToolsSolutionBuilderRouteChildren = {
+  ToolsSolutionBuilderIndexRoute: ToolsSolutionBuilderIndexRoute,
+}
+
+const ToolsSolutionBuilderRouteWithChildren =
+  ToolsSolutionBuilderRoute._addFileChildren(ToolsSolutionBuilderRouteChildren)
+
+interface ToolsRouteChildren {
+  ToolsSolutionBuilderRoute: typeof ToolsSolutionBuilderRouteWithChildren
+}
+
+const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsSolutionBuilderRoute: ToolsSolutionBuilderRouteWithChildren,
+}
+
+const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -1318,7 +1376,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProcessRoute: ProcessRoute,
   ServicesRoute: ServicesRoute,
   SuccessRoute: SuccessRoute,
-  ToolsRoute: ToolsRoute,
+  ToolsRoute: ToolsRouteWithChildren,
   UpdatePasswordRoute: UpdatePasswordRoute,
   BlogSlugRoute: BlogSlugRoute,
   ProductsSlugRoute: ProductsSlugRoute,
