@@ -1394,8 +1394,51 @@ export type Database = {
         }
         Relationships: []
       }
+      solution_compatibility_rules: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          message_en: string | null
+          message_zh: string | null
+          params: Json
+          rule_code: string
+          rule_type: string
+          severity: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          message_en?: string | null
+          message_zh?: string | null
+          params?: Json
+          rule_code: string
+          rule_type: string
+          severity?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          message_en?: string | null
+          message_zh?: string | null
+          params?: Json
+          rule_code?: string
+          rule_type?: string
+          severity?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       solution_price_history: {
         Row: {
+          availability: string | null
           changed_at: string
           changed_by: string | null
           currency: string
@@ -1403,9 +1446,15 @@ export type Database = {
           id: string
           new_value: number | null
           old_value: number | null
+          price: number | null
           product_id: string
+          recorded_at: string | null
+          shipping_price: number | null
+          source_url: string | null
+          vendor_id: string | null
         }
         Insert: {
+          availability?: string | null
           changed_at?: string
           changed_by?: string | null
           currency?: string
@@ -1413,9 +1462,15 @@ export type Database = {
           id?: string
           new_value?: number | null
           old_value?: number | null
+          price?: number | null
           product_id: string
+          recorded_at?: string | null
+          shipping_price?: number | null
+          source_url?: string | null
+          vendor_id?: string | null
         }
         Update: {
+          availability?: string | null
           changed_at?: string
           changed_by?: string | null
           currency?: string
@@ -1423,7 +1478,12 @@ export type Database = {
           id?: string
           new_value?: number | null
           old_value?: number | null
+          price?: number | null
           product_id?: string
+          recorded_at?: string | null
+          shipping_price?: number | null
+          source_url?: string | null
+          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -1431,6 +1491,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "sb_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solution_price_history_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "solution_product_vendors"
             referencedColumns: ["id"]
           },
         ]
@@ -1525,6 +1592,48 @@ export type Database = {
           parent_code?: string | null
           sort_order?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      solution_product_vendors: {
+        Row: {
+          country: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_zh: string | null
+          sort_order: number
+          updated_at: string
+          vendor_code: string
+          vendor_type: string | null
+          website_url: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_zh?: string | null
+          sort_order?: number
+          updated_at?: string
+          vendor_code: string
+          vendor_type?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_zh?: string | null
+          sort_order?: number
+          updated_at?: string
+          vendor_code?: string
+          vendor_type?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
