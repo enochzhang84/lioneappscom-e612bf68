@@ -90,6 +90,18 @@ export type SbProduct = {
   currency: string;
   price_updated_at: string;
   deleted_at?: string | null;
+  // M1 extended fields (public-safe; internal_notes intentionally excluded)
+  category_id?: string | null;
+  series?: string | null;
+  generation?: string | null;
+  codename?: string | null;
+  architecture?: string | null;
+  launch_year?: number | null;
+  launch_date?: string | null;
+  gallery_urls?: string[] | null;
+  specification_pdf_url?: string | null;
+  performance_scores?: Record<string, number> | null;
+  data_completeness?: "stub" | "partial" | "complete" | null;
 };
 
 export type SbBrand = {

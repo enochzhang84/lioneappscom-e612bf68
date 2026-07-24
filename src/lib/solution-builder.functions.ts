@@ -76,9 +76,9 @@ type NormalizedSolution = z.infer<typeof SolutionPayload>;
 
 // ======== Public: list products, settings ========
 
-// Public product columns — MUST NOT include cost_price
+// Public product columns — MUST NOT include cost_price or internal_notes
 const PUBLIC_PRODUCT_COLS =
-  "id, category, subcategory, slug, name_zh, name_en, brand, brand_id, model, description_zh, description_en, short_description_zh, short_description_en, image_url, manufacturer_url, usage_tags, builder_types, specs, list_price, install_fee, monthly_fee, annual_fee, stock_status, stock_quantity, lead_time_days, warranty_months, is_visible, is_sample, sort_order, currency, price_updated_at, product_code, sku";
+  "id, category, category_id, subcategory, slug, name_zh, name_en, brand, brand_id, model, description_zh, description_en, short_description_zh, short_description_en, image_url, gallery_urls, manufacturer_url, specification_pdf_url, usage_tags, builder_types, specs, performance_scores, series, generation, codename, architecture, launch_year, launch_date, data_completeness, list_price, install_fee, monthly_fee, annual_fee, stock_status, stock_quantity, lead_time_days, warranty_months, is_visible, is_sample, sort_order, currency, price_updated_at, product_code, sku";
 
 export const sbListProducts = createServerFn({ method: "POST" })
   .inputValidator((d: { categories?: string[]; builder_type?: string }) => d)
@@ -310,7 +310,7 @@ export const sbAdminUpdateShare = createServerFn({ method: "POST" })
 // Products
 export const sbAdminListProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { category?: string; builder_type?: string; search?: string; brand_id?: string; include_deleted?: boolean } | undefined) => d ?? {})
+  .inputValidator((d: { category?: string; builder_type?: string; search?: string; brand_id?: string; include_deleted?: boolean; generation?: string; socket?: string; ddr?: string; completeness?: string } | undefined) => d ?? {})
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     let q = context.supabase.from("sb_products").select("*").order("category").order("sort_order");
@@ -318,10 +318,44 @@ export const sbAdminListProducts = createServerFn({ method: "POST" })
     if (data?.category) q = q.eq("category", data.category);
     if (data?.brand_id) q = q.eq("brand_id", data.brand_id);
     if (data?.builder_type) q = q.contains("builder_types", [data.builder_type]);
+    if (data?.generation) q = q.eq("generation", data.generation);
+    if (data?.completeness) q = q.eq("data_completeness", data.completeness);
+    if (data?.socket) q = q.eq("specs->>socket", data.socket);
+    if (data?.ddr) q = q.eq("specs->>memory_type", data.ddr);
     if (data?.search) q = q.or(`name_zh.ilike.%${data.search}%,name_en.ilike.%${data.search}%,brand.ilike.%${data.search}%,model.ilike.%${data.search}%,product_code.ilike.%${data.search}%,sku.ilike.%${data.search}%,slug.ilike.%${data.search}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return { rows: (rows ?? []) as unknown as SbProduct[] };
+  });
+
+// Distinct facet values for admin filters (generation / socket / memory_type / completeness)
+export const sbAdminProductFacets = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const { data, error } = await context.supabase
+      .from("sb_products")
+      .select("generation, data_completeness, specs")
+      .is("deleted_at", null);
+    if (error) throw new Error(error.message);
+    const gens = new Set<string>();
+    const sockets = new Set<string>();
+    const ddrs = new Set<string>();
+    const completeness = new Set<string>();
+    for (const r of (data ?? []) as Array<{ generation: string | null; data_completeness: string | null; specs: Record<string, unknown> | null }>) {
+      if (r.generation) gens.add(r.generation);
+      if (r.data_completeness) completeness.add(r.data_completeness);
+      const s = (r.specs ?? {}) as Record<string, unknown>;
+      if (typeof s.socket === "string") sockets.add(s.socket);
+      if (typeof s.memory_type === "string") ddrs.add(s.memory_type);
+    }
+    const sortStr = (a: string, b: string) => a.localeCompare(b);
+    return {
+      generations: [...gens].sort(sortStr),
+      sockets: [...sockets].sort(sortStr),
+      memory_types: [...ddrs].sort(sortStr),
+      completeness: [...completeness].sort(sortStr),
+    };
   });
 
 
@@ -359,6 +393,19 @@ const ProductPayload = z.object({
   is_sample: z.boolean().default(false),
   sort_order: z.number().int().default(0),
   currency: z.string().default("USD"),
+  // M1 extended fields
+  category_id: z.string().uuid().nullable().optional(),
+  series: z.string().max(120).nullable().optional(),
+  generation: z.string().max(60).nullable().optional(),
+  codename: z.string().max(120).nullable().optional(),
+  architecture: z.string().max(120).nullable().optional(),
+  launch_year: z.number().int().min(1990).max(2100).nullable().optional(),
+  launch_date: z.string().max(40).nullable().optional(),
+  gallery_urls: z.array(z.string().max(1000)).max(20).nullable().optional(),
+  specification_pdf_url: z.string().max(1000).nullable().optional(),
+  performance_scores: z.record(z.string(), z.number()).nullable().optional(),
+  data_completeness: z.enum(["stub", "partial", "complete"]).nullable().optional(),
+  internal_notes: z.string().max(4000).nullable().optional(),
 });
 
 export const sbAdminSaveProduct = createServerFn({ method: "POST" })

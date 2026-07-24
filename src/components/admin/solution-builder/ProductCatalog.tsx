@@ -22,6 +22,7 @@ import {
   sbAdminDeleteCategory,
   sbAdminPriceHistory,
   sbAdminBulkUpsertProducts,
+  sbAdminProductFacets,
 } from "@/lib/solution-builder.functions";
 import type { SbProduct, SbBrand, SbCategory, SbPriceHistoryRow } from "@/lib/solution-builder/types";
 import { formatMoney } from "@/lib/solution-builder/calc";
@@ -72,10 +73,15 @@ function ProductsSection() {
   const bulkFn = useServerFn(sbAdminBulkUpsertProducts);
   const brandsFn = useServerFn(sbAdminListBrands);
   const catsFn = useServerFn(sbAdminListCategories);
+  const facetsFn = useServerFn(sbAdminProductFacets);
 
   const [builderType, setBuilderType] = useState("");
   const [category, setCategory] = useState("");
   const [brandId, setBrandId] = useState("");
+  const [generation, setGeneration] = useState("");
+  const [socket, setSocket] = useState("");
+  const [ddr, setDdr] = useState("");
+  const [completeness, setCompleteness] = useState("");
   const [search, setSearch] = useState("");
   const [includeDeleted, setIncludeDeleted] = useState(false);
   const [editing, setEditing] = useState<Partial<SbProduct> | null>(null);
@@ -85,12 +91,17 @@ function ProductsSection() {
 
   const brandsQ = useQuery({ queryKey: ["admin-sb-brands"], queryFn: () => brandsFn() });
   const catsQ = useQuery({ queryKey: ["admin-sb-categories"], queryFn: () => catsFn() });
+  const facetsQ = useQuery({ queryKey: ["admin-sb-facets"], queryFn: () => facetsFn() });
   const listQ = useQuery({
-    queryKey: ["admin-sb-products", builderType, category, brandId, search, includeDeleted],
+    queryKey: ["admin-sb-products", builderType, category, brandId, generation, socket, ddr, completeness, search, includeDeleted],
     queryFn: () => listFn({ data: {
       builder_type: builderType || undefined,
       category: category || undefined,
       brand_id: brandId || undefined,
+      generation: generation || undefined,
+      socket: socket || undefined,
+      ddr: ddr || undefined,
+      completeness: completeness || undefined,
       search: search || undefined,
       include_deleted: includeDeleted,
     } }),
@@ -99,6 +110,7 @@ function ProductsSection() {
   const brands: SbBrand[] = brandsQ.data?.rows ?? [];
   const cats: SbCategory[] = (catsQ.data?.rows ?? []) as unknown as SbCategory[];
   const rows: SbProduct[] = listQ.data?.rows ?? [];
+  const facets = facetsQ.data ?? { generations: [], sockets: [], memory_types: [], completeness: [] };
   const filteredCats = useMemo(
     () => builderType ? cats.filter((c) => c.builder_type === builderType) : cats,
     [cats, builderType]
@@ -209,6 +221,30 @@ function ProductsSection() {
             {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
         </FieldSm>
+        <FieldSm label="世代">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[120px]" value={generation} onChange={(e) => setGeneration(e.target.value)}>
+            <option value="">全部</option>
+            {facets.generations.map((g) => <option key={g} value={g}>{g}</option>)}
+          </select>
+        </FieldSm>
+        <FieldSm label="Socket">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[110px]" value={socket} onChange={(e) => setSocket(e.target.value)}>
+            <option value="">全部</option>
+            {facets.sockets.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </FieldSm>
+        <FieldSm label="内存">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[90px]" value={ddr} onChange={(e) => setDdr(e.target.value)}>
+            <option value="">全部</option>
+            {facets.memory_types.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </FieldSm>
+        <FieldSm label="完整度">
+          <select className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm min-w-[100px]" value={completeness} onChange={(e) => setCompleteness(e.target.value)}>
+            <option value="">全部</option>
+            {facets.completeness.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </FieldSm>
         <FieldSm label="搜索"><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="名称 / 型号 / 编码" className="h-9 min-w-[200px]" /></FieldSm>
         <label className="inline-flex items-center gap-2 text-xs text-slate-600 h-9"><input type="checkbox" checked={includeDeleted} onChange={(e) => setIncludeDeleted(e.target.checked)} /> 显示已删除</label>
         <div className="ml-auto flex gap-2">
@@ -238,6 +274,21 @@ function ProductsSection() {
               </div>
             ) },
             { key: "brand", header: "品牌/型号", cell: (p) => <span className="text-xs">{p.brand || "-"} {p.model || ""}</span> },
+            { key: "gen", header: "世代/Socket", cell: (p) => (
+              <div className="text-[11px] text-slate-500 leading-tight">
+                {p.generation && <div>{p.generation}{p.launch_year ? ` · ${p.launch_year}` : ""}</div>}
+                {(p.specs as Record<string, unknown> | null)?.socket ? <div className="font-mono">{String((p.specs as Record<string, unknown>).socket)}</div> : null}
+                {(p.specs as Record<string, unknown> | null)?.memory_type ? <div className="text-slate-400">{String((p.specs as Record<string, unknown>).memory_type)}</div> : null}
+                {!p.generation && !(p.specs as Record<string, unknown> | null)?.socket && <span>—</span>}
+              </div>
+            ) },
+            { key: "completeness", header: "完整度", cell: (p) => {
+              const c = p.data_completeness ?? "stub";
+              const color = c === "complete" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : c === "partial" ? "bg-amber-50 text-amber-700 border-amber-200"
+                : "bg-slate-100 text-slate-500 border-slate-200";
+              return <span className={`text-[10px] px-1.5 py-0.5 rounded border ${color}`}>{c}</span>;
+            } },
             { key: "code", header: "编码/SKU", cell: (p) => <span className="text-[11px] font-mono text-slate-500">{p.product_code || "-"}<br/>{p.sku || ""}</span> },
             { key: "price", header: "标价 / 成本", cell: (p) => (
               <div className="text-xs">
@@ -404,6 +455,19 @@ function ProductForm({ value, brands, categories, onCancel, onSave, saving }: {
         </F>
         <F label="中文简介"><Input value={f.short_description_zh ?? ""} onChange={(e) => set("short_description_zh", e.target.value)} /></F>
         <F label="英文简介"><Input value={f.short_description_en ?? ""} onChange={(e) => set("short_description_en", e.target.value)} /></F>
+        <F label="世代 (Generation)"><Input value={f.generation ?? ""} onChange={(e) => set("generation", e.target.value)} placeholder="Intel 12th Gen / Ryzen 5000…" /></F>
+        <F label="系列 (Series)"><Input value={f.series ?? ""} onChange={(e) => set("series", e.target.value)} placeholder="Core i5 / Ryzen 7…" /></F>
+        <F label="架构 (Architecture)"><Input value={f.architecture ?? ""} onChange={(e) => set("architecture", e.target.value)} placeholder="Alder Lake / Zen 3…" /></F>
+        <F label="代号 (Codename)"><Input value={f.codename ?? ""} onChange={(e) => set("codename", e.target.value)} /></F>
+        <F label="发布年份"><Input type="number" value={f.launch_year ?? ""} onChange={(e) => set("launch_year", e.target.value === "" ? null : Number(e.target.value))} /></F>
+        <F label="数据完整度">
+          <select className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm" value={f.data_completeness ?? "stub"} onChange={(e) => set("data_completeness", e.target.value as SbProduct["data_completeness"])}>
+            <option value="stub">stub（占位）</option>
+            <option value="partial">partial（部分）</option>
+            <option value="complete">complete（完整）</option>
+          </select>
+        </F>
+        <F label="规格 PDF URL" className="md:col-span-2"><Input value={f.specification_pdf_url ?? ""} onChange={(e) => set("specification_pdf_url", e.target.value)} /></F>
         <F label="可见">
           <label className="inline-flex items-center gap-2 text-sm mt-2"><input type="checkbox" checked={!!f.is_visible} onChange={(e) => set("is_visible", e.target.checked)} /> 前台显示</label>
         </F>
