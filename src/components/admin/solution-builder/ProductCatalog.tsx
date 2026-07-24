@@ -22,6 +22,7 @@ import {
   sbAdminDeleteCategory,
   sbAdminPriceHistory,
   sbAdminBulkUpsertProducts,
+  sbAdminBulkPreviewProducts,
   sbAdminProductFacets,
 } from "@/lib/solution-builder.functions";
 import type { SbProduct, SbBrand, SbCategory, SbPriceHistoryRow } from "@/lib/solution-builder/types";
@@ -71,6 +72,7 @@ function ProductsSection() {
   const restoreFn = useServerFn(sbAdminRestoreProduct);
   const historyFn = useServerFn(sbAdminPriceHistory);
   const bulkFn = useServerFn(sbAdminBulkUpsertProducts);
+  const previewFn = useServerFn(sbAdminBulkPreviewProducts);
   const brandsFn = useServerFn(sbAdminListBrands);
   const catsFn = useServerFn(sbAdminListCategories);
   const facetsFn = useServerFn(sbAdminProductFacets);
@@ -87,6 +89,8 @@ function ProductsSection() {
   const [editing, setEditing] = useState<Partial<SbProduct> | null>(null);
   const [pending, setPending] = useState<SbProduct | null>(null);
   const [historyOf, setHistoryOf] = useState<SbProduct | null>(null);
+  const [importPreview, setImportPreview] = useState<{ result: Awaited<ReturnType<typeof previewFn>>; rows: unknown[] } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const brandsQ = useQuery({ queryKey: ["admin-sb-brands"], queryFn: () => brandsFn() });
@@ -134,7 +138,7 @@ function ProductsSection() {
   });
   const bulk = useMutation({
     mutationFn: (v: { rows: unknown[] }) => bulkFn({ data: v }),
-    onSuccess: (r) => { toast.success(`已导入 ${r.count} 条`); refresh(); },
+    onSuccess: (r) => { toast.success(`已导入 ${r.count} 条`); refresh(); setImportPreview(null); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -197,7 +201,15 @@ function ProductsSection() {
       row.builder_types = row.builder_types ?? [];
       parsed.push(row);
     }
-    bulk.mutate({ rows: parsed });
+    setPreviewLoading(true);
+    try {
+      const result = await previewFn({ data: { rows: parsed } });
+      setImportPreview({ result, rows: parsed });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setPreviewLoading(false);
+    }
   }
 
   return (
@@ -249,7 +261,9 @@ function ProductsSection() {
         <label className="inline-flex items-center gap-2 text-xs text-slate-600 h-9"><input type="checkbox" checked={includeDeleted} onChange={(e) => setIncludeDeleted(e.target.checked)} /> 显示已删除</label>
         <div className="ml-auto flex gap-2">
           <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importCsv(f); e.target.value = ""; }} />
-          <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4 mr-1" />导入 CSV</Button>
+          <Button variant="outline" size="sm" disabled={previewLoading} onClick={() => fileRef.current?.click()}>
+            <Upload className="h-4 w-4 mr-1" />{previewLoading ? "校验中…" : "导入 CSV"}
+          </Button>
           <Button variant="outline" size="sm" onClick={exportCsv}><Download className="h-4 w-4 mr-1" />导出 CSV</Button>
           <Button size="sm" onClick={() => setEditing({
             category: filteredCats[0]?.code ?? "pc-cpu", is_visible: true, currency: "USD",
@@ -339,6 +353,65 @@ function ProductsSection() {
       <Dialog open={!!historyOf} onOpenChange={(o) => !o && setHistoryOf(null)}>
         <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           {historyOf && <PriceHistory product={historyOf} historyFn={historyFn} />}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!importPreview} onOpenChange={(o) => !o && setImportPreview(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {importPreview && (
+            <>
+              <DialogHeader>
+                <DialogTitle>CSV 导入预览</DialogTitle>
+                <DialogDescription>已解析 {importPreview.result.total} 行；确认后按 slug upsert。</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                <div className="rounded-md border border-emerald-200 bg-emerald-50 py-3">
+                  <div className="text-2xl font-semibold text-emerald-700">{importPreview.result.create_count}</div>
+                  <div className="text-emerald-700 text-xs">新增</div>
+                </div>
+                <div className="rounded-md border border-blue-200 bg-blue-50 py-3">
+                  <div className="text-2xl font-semibold text-blue-700">{importPreview.result.update_count}</div>
+                  <div className="text-blue-700 text-xs">更新</div>
+                </div>
+                <div className={`rounded-md border py-3 ${importPreview.result.error_count > 0 ? "border-red-200 bg-red-50" : "border-slate-200 bg-slate-50"}`}>
+                  <div className={`text-2xl font-semibold ${importPreview.result.error_count > 0 ? "text-red-700" : "text-slate-500"}`}>{importPreview.result.error_count}</div>
+                  <div className={`text-xs ${importPreview.result.error_count > 0 ? "text-red-700" : "text-slate-500"}`}>错误</div>
+                </div>
+              </div>
+              {importPreview.result.errors.length > 0 && (
+                <div className="mt-3 space-y-1 max-h-48 overflow-y-auto rounded-md border border-red-100 bg-red-50 p-2 text-xs">
+                  {importPreview.result.errors.map((e, i) => (
+                    <div key={i} className="text-red-800"><span className="font-mono">行 {e.row}</span>{e.slug ? ` · ${e.slug}` : ""} — {e.message}</div>
+                  ))}
+                </div>
+              )}
+              {(importPreview.result.create_samples.length > 0 || importPreview.result.update_samples.length > 0) && (
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                  {importPreview.result.create_samples.length > 0 && (
+                    <div className="rounded-md border p-2">
+                      <div className="font-medium text-slate-600 mb-1">新增示例</div>
+                      {importPreview.result.create_samples.map((s) => <div key={s.slug} className="text-slate-500"><span className="font-mono">{s.slug}</span> · {s.name_zh}</div>)}
+                    </div>
+                  )}
+                  {importPreview.result.update_samples.length > 0 && (
+                    <div className="rounded-md border p-2">
+                      <div className="font-medium text-slate-600 mb-1">更新示例</div>
+                      {importPreview.result.update_samples.map((s) => <div key={s.slug} className="text-slate-500"><span className="font-mono">{s.slug}</span> · {s.name_zh}</div>)}
+                    </div>
+                  )}
+                </div>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setImportPreview(null)}>取消</Button>
+                <Button
+                  disabled={bulk.isPending || importPreview.result.error_count === importPreview.result.total}
+                  onClick={() => bulk.mutate({ rows: importPreview.rows })}
+                >
+                  {bulk.isPending ? "导入中…" : `确认导入 ${importPreview.result.create_count + importPreview.result.update_count} 条`}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
