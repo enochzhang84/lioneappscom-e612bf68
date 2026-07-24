@@ -160,7 +160,8 @@ function SolutionsPanel() {
         title="删除方案？"
         description="此操作不可撤销。"
         destructive
-        onConfirm={() => pending && del.mutate(pending)}
+        onConfirm={() => { if (pending) del.mutate(pending); }}
+
       />
     </div>
   );
@@ -280,22 +281,22 @@ function ProductsPanel() {
       {rows.length === 0 ? (
         <EmptyState title="暂无产品" description="点击右上角新增，为不同分类维护价格与规格。" />
       ) : (
-        <DataTable
+        <DataTable<SbProduct>
           columns={[
-            { key: "category", header: "分类", render: (p: SbProduct) => <span className="font-mono text-xs">{p.category}</span> },
-            { key: "name", header: "名称", render: (p: SbProduct) => <div><div className="font-medium">{p.name_zh}</div><div className="text-xs text-slate-400">{p.name_en}</div></div> },
-            { key: "brand", header: "品牌", render: (p: SbProduct) => <span className="text-xs">{p.brand || "-"} {p.model || ""}</span> },
-            { key: "price", header: "价格", render: (p: SbProduct) => formatMoney(Number(p.list_price), p.currency) },
-            { key: "stock", header: "库存", render: (p: SbProduct) => <span className="text-xs">{p.stock_status}</span> },
-            { key: "visible", header: "可见", render: (p: SbProduct) => p.is_visible ? "✓" : "—" },
-            { key: "actions", header: "操作", render: (p: SbProduct) => (
+            { key: "category", header: "分类", cell: (p) => <span className="font-mono text-xs">{p.category}</span> },
+            { key: "name", header: "名称", cell: (p) => <div><div className="font-medium">{p.name_zh}</div><div className="text-xs text-slate-400">{p.name_en}</div></div> },
+            { key: "brand", header: "品牌", cell: (p) => <span className="text-xs">{p.brand || "-"} {p.model || ""}</span> },
+            { key: "price", header: "价格", cell: (p) => <>{formatMoney(Number(p.list_price), p.currency)}</> },
+            { key: "stock", header: "库存", cell: (p) => <span className="text-xs">{p.stock_status}</span> },
+            { key: "visible", header: "可见", cell: (p) => <>{p.is_visible ? "✓" : "—"}</> },
+            { key: "actions", header: "操作", cell: (p) => (
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => setEditing(p)}>编辑</Button>
                 <Button size="sm" variant="ghost" className="text-red-600" onClick={() => setPending(p.id)}>删除</Button>
               </div>
             ) },
           ]}
-          data={rows}
+          rows={rows}
           rowKey={(p) => p.id}
         />
       )}
@@ -313,7 +314,8 @@ function ProductsPanel() {
         onOpenChange={(o) => !o && setPending(null)}
         title="删除产品？"
         destructive
-        onConfirm={() => pending && del.mutate(pending)}
+        onConfirm={() => { if (pending) del.mutate(pending); }}
+
       />
     </div>
   );
