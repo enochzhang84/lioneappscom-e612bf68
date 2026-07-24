@@ -157,9 +157,8 @@ function Home_() {
                     height={800}
                     className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none"
                   />
-                  <div className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md ring-1 ring-white/30 backdrop-blur-sm" aria-hidden>
-                    <Icon className="h-4 w-4" />
-                  </div>
+                  {/* icon overlay removed per design */}
+
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-background/80" />
                 </div>
                 <div className="flex flex-1 flex-col p-6">
