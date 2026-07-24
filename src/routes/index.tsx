@@ -56,41 +56,62 @@ function Home_() {
         </div>
       </section>
 
-      {/* Services — shared data with /services page */}
-      <section id="services" className="mx-auto max-w-6xl px-6 py-16">
-        <div className="text-center mb-10">
+      {/* Services — shared data with /services page (shows only items with a hero image) */}
+      <section id="services" className="mx-auto max-w-6xl px-6 py-20 md:py-24">
+        <div className="text-center mb-12 md:mb-14">
           <h2 className="text-3xl md:text-4xl font-bold">{t("services.title")}</h2>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">{t("services.desc")}</p>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((s) => {
+        <div className="grid gap-6 md:gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {services.filter((s) => s.image).map((s) => {
             const Icon = s.icon;
             return (
               <Link
                 key={s.id}
                 to="/services"
                 hash={s.anchor}
-                className="group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition-all hover:-translate-y-1 hover:border-primary/30"
+                aria-label={s.title[lang]}
+                className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-transparent transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-[0_18px_40px_-20px_rgba(37,99,235,0.35)] hover:ring-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
               >
-                <div
-                  className="flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-sm"
-                  style={{ background: s.gradient }}
-                >
-                  <Icon className="h-5 w-5" />
+                {/* Image */}
+                <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/40">
+                  <img
+                    src={s.image}
+                    alt={s.imageAlt[lang]}
+                    loading="lazy"
+                    width={1280}
+                    height={800}
+                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  />
+                  {/* Subtle icon chip overlay */}
+                  <div
+                    className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-md ring-1 ring-white/30 backdrop-blur-sm"
+                    style={{ background: s.gradient }}
+                    aria-hidden
+                  >
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  {/* Soft top-to-bottom fade into card body */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-card/80" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">{s.title[lang]}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                  {s.short[lang]}
-                </p>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary opacity-80 group-hover:opacity-100">
-                  {lang === "zh" ? "了解更多" : "Learn more"}
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                </span>
+
+                {/* Body */}
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="text-lg font-semibold tracking-tight">{s.title[lang]}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-3">
+                    {s.short[lang]}
+                  </p>
+                  <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                    {lang === "zh" ? "了解更多" : "Learn More"}
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </span>
+                </div>
               </Link>
             );
           })}
         </div>
       </section>
+
 
 
       {/* Who we help */}
