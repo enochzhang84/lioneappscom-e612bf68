@@ -194,6 +194,108 @@ const HANDLERS: Record<string, Handler> = {
     if (bad.length) return warn(rule, { zh: `10GbE 建议使用 ${min} 及以上网线`, en: `Use ${min} or higher cabling for 10GbE` });
     return null;
   },
+  "nas.ram_ecc": (rule, ctx) => {
+    const rams = findAllByCatPrefix(ctx, "nas-ram");
+    if (rams.length === 0) return null;
+    const nonEcc = rams.filter((r) => !/ecc/i.test(String(specs(r).type ?? specs(r).memory_type ?? "")));
+    if (nonEcc.length > 0) {
+      return warn(rule, { zh: "NAS 建议使用 ECC 内存以提升数据完整性", en: "ECC memory is recommended for NAS reliability" });
+    }
+    return null;
+  },
+  "pc.case_form_factor": (rule, ctx) => {
+    const mb = findByCat(ctx, "pc-mb");
+    const cs = findByCat(ctx, "pc-case");
+    if (!mb || !cs) return null;
+    const mbFF = String(specs(mb).form_factor ?? "").toUpperCase();
+    const supportRaw = specs(cs).mb_support ?? specs(cs).form_factors ?? specs(cs).supported_form_factors;
+    const supports = Array.isArray(supportRaw)
+      ? supportRaw.map((x) => String(x).toUpperCase())
+      : String(supportRaw ?? "").toUpperCase().split(/[,\s/]+/).filter(Boolean);
+    if (mbFF && supports.length > 0 && !supports.includes(mbFF)) {
+      return warn(rule, {
+        zh: `机箱不支持 ${mbFF} 板型（支持: ${supports.join("/")}）`,
+        en: `Case does not support ${mbFF} (supports: ${supports.join("/")})`,
+      });
+    }
+    return null;
+  },
+  "pc.m2_slot_count": (rule, ctx) => {
+    const mb = findByCat(ctx, "pc-mb");
+    if (!mb) return null;
+    const slots = Number(specs(mb).m2_slots ?? specs(mb).nvme_slots ?? 0);
+    const m2s = findAllByCatPrefix(ctx, "pc-ssd-m2").concat(findAllByCatPrefix(ctx, "pc-nvme"));
+    const count = m2s.reduce((s, p) => {
+      const it = ctx.items.find((i) => i.id === p.id);
+      return s + (it?.qty ?? 1);
+    }, 0);
+    if (slots > 0 && count > slots) {
+      return warn(rule, {
+        zh: `M.2 硬盘 ${count} 块超过主板 ${slots} 个 M.2 插槽`,
+        en: `${count} M.2 SSDs exceed motherboard's ${slots} M.2 slots`,
+      });
+    }
+    return null;
+  },
+  "pc.gpu_length": (rule, ctx) => {
+    const gpu = findByCat(ctx, "pc-gpu");
+    const cs = findByCat(ctx, "pc-case");
+    if (!gpu || !cs) return null;
+    const glen = Number(specs(gpu).length_mm) || 0;
+    const cmax = Number(specs(cs).max_gpu_length_mm ?? specs(cs).gpu_max_mm) || 0;
+    if (glen && cmax && glen > cmax) {
+      return warn(rule, {
+        zh: `显卡长度 ${glen}mm 超过机箱允许 ${cmax}mm`,
+        en: `GPU ${glen}mm exceeds case max ${cmax}mm`,
+      });
+    }
+    return null;
+  },
+  "nas.bay_capacity": (rule, ctx) => {
+    const host = findByCat(ctx, "nas-host");
+    const disks = ctx.computed?.diskCount ?? 0;
+    if (!host || !disks) return null;
+    const bays = Number(specs(host).drive_bays ?? specs(host).bays) || 0;
+    if (bays > 0 && disks > bays) {
+      return warn(rule, {
+        zh: `硬盘 ${disks} 块超过机身 ${bays} 盘位`,
+        en: `${disks} disks exceed the ${bays}-bay chassis`,
+      });
+    }
+    return null;
+  },
+  "net.ap_coverage": (rule, ctx) => {
+    const cfg = (ctx as unknown as { config?: Record<string, unknown> }).config ?? {};
+    const area = Number(cfg.coverage_sqft ?? cfg.area_sqft ?? 0);
+    if (!area) return null;
+    const aps = findAllByCatPrefix(ctx, "net-ap");
+    const per = Number(rule.params.sqft_per_ap) || 1500;
+    const need = Math.ceil(area / per);
+    const have = aps.reduce((s, p) => {
+      const it = ctx.items.find((i) => i.id === p.id);
+      return s + (it?.qty ?? 1);
+    }, 0);
+    if (need > have) {
+      return warn(rule, {
+        zh: `${area} 平方英尺覆盖建议 ${need} 个 AP，当前 ${have}`,
+        en: `${area} sqft coverage suggests ${need} APs (current ${have})`,
+      });
+    }
+    return null;
+  },
+  "net.wifi_gen_for_10g": (rule, ctx) => {
+    const has10g = findAllByCatPrefix(ctx, "nas-10gbe").length > 0;
+    if (!has10g) return null;
+    const routers = [...findAllByCatPrefix(ctx, "net-router"), ...findAllByCatPrefix(ctx, "net-mesh")];
+    if (routers.length === 0) return null;
+    const minGen = Number(rule.params.min_gen) || 6;
+    const ok = routers.some((r) => Number(specs(r).wifi_generation ?? specs(r).wifi_gen ?? 0) >= minGen);
+    if (!ok) return warn(rule, {
+      zh: `已配置 10GbE，建议 Wi-Fi ${minGen} 及以上路由器`,
+      en: `10GbE detected — use Wi-Fi ${minGen}+ routers`,
+    });
+    return null;
+  },
 };
 
 export function evaluateCompat(rules: CompatRule[], ctx: CompatContext): CompatWarning[] {
@@ -207,6 +309,34 @@ export function evaluateCompat(rules: CompatRule[], ctx: CompatContext): CompatW
       if (w) out.push(w);
     } catch {
       // never let a broken rule crash the builder
+    }
+  }
+  return out;
+}
+
+export type CompatRuleResult = {
+  rule: CompatRule;
+  status: "hit" | "pass" | "skipped" | "unsupported";
+  warning: CompatWarning | null;
+};
+
+export function evaluateCompatDetailed(rules: CompatRule[], ctx: CompatContext): CompatRuleResult[] {
+  const out: CompatRuleResult[] = [];
+  for (const r of rules) {
+    if (!r.is_active) {
+      out.push({ rule: r, status: "skipped", warning: null });
+      continue;
+    }
+    const h = HANDLERS[r.rule_type];
+    if (!h) {
+      out.push({ rule: r, status: "unsupported", warning: null });
+      continue;
+    }
+    try {
+      const w = h(r, ctx);
+      out.push({ rule: r, status: w ? "hit" : "pass", warning: w });
+    } catch {
+      out.push({ rule: r, status: "skipped", warning: null });
     }
   }
   return out;
