@@ -93,3 +93,38 @@ function SharedView() {
 function SumRow({ label, value }: { label: string; value: string }) {
   return <div className="flex justify-between text-slate-600 py-0.5"><span>{label}</span><span className="text-slate-800">{value}</span></div>;
 }
+
+function ShareUnavailable({ status }: { status: "expired" | "not_found" }) {
+  const expired = status === "expired";
+  const title_zh = expired ? "分享链接已过期" : "分享链接无效";
+  const title_en = expired ? "Share link expired" : "Share link not found";
+  const body_zh = expired
+    ? "此分享链接已过期，请联系方案创建者获取新的链接。"
+    : "此分享链接无效或已被关闭。请向方案创建者确认最新链接。";
+  const body_en = expired
+    ? "This share link has expired. Please contact the solution owner for a new link."
+    : "This share link is invalid or has been closed. Please contact the solution owner for the latest link.";
+  return (
+    <SiteLayout>
+      <div className="mx-auto max-w-lg px-4 md:px-6 py-16 text-center">
+        <div className="bg-white rounded-2xl border p-8 shadow-sm">
+          <div className="text-3xl mb-3">{expired ? "⏳" : "🔒"}</div>
+          <div className="text-lg font-semibold text-slate-900">{title_zh}</div>
+          <div className="text-sm text-slate-500 mt-1">{title_en}</div>
+          <p className="mt-4 text-sm text-slate-600 leading-relaxed">{body_zh}</p>
+          <p className="mt-2 text-xs text-slate-500 leading-relaxed">{body_en}</p>
+          <div className="mt-6 flex justify-center gap-2">
+            <Link to="/tools/solution-builder" className="inline-flex items-center rounded-lg bg-blue-600 text-white text-sm px-4 py-2 hover:bg-blue-700">
+              前往方案配置中心 · Solution Builder
+            </Link>
+            <a href="mailto:hello@lioneapps.com" className="inline-flex items-center rounded-lg border border-slate-200 text-slate-700 text-sm px-4 py-2 hover:bg-slate-50">
+              hello@lioneapps.com
+            </a>
+          </div>
+        </div>
+      </div>
+    </SiteLayout>
+  );
+}
+
+}
