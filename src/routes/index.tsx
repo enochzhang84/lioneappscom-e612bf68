@@ -6,6 +6,13 @@ import { listProducts, listCases, type ProductCard, type CaseCard } from "@/lib/
 import { mediaUrl } from "@/lib/media";
 import { useLang, dict } from "@/lib/i18n";
 import { services } from "@/lib/services-data";
+import audienceHome from "@/assets/audience-home-users.jpg";
+import audienceBiz from "@/assets/audience-small-business.jpg";
+import audienceNonprofit from "@/assets/audience-nonprofit.jpg";
+import process1 from "@/assets/process-1-discovery.jpg";
+import process2 from "@/assets/process-2-design.jpg";
+import process3 from "@/assets/process-3-deployment.jpg";
+import process4 from "@/assets/process-4-support.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
