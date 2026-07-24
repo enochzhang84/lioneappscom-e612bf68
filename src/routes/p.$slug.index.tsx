@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
+import { useLang } from "@/lib/i18n";
+import sbPcImg from "@/assets/sb-pc-builder.jpg";
+import sbNasImg from "@/assets/sb-nas-builder.jpg";
+import sbNetImg from "@/assets/sb-network-planner.jpg";
+import sbFullImg from "@/assets/sb-full-solution.jpg";
 
 export const Route = createFileRoute("/p/$slug/")({
   validateSearch: z.object({ cat: z.string().optional() }).parse,
