@@ -208,6 +208,15 @@ function Home_() {
           </div>
         </div>
       </section>
+
+      {/* Recent projects (from CMS: cases → fallback to products) */}
+      {(featuredCases.length > 0 || featuredProducts.length > 0) && (
+        <section className="mx-auto max-w-6xl px-6 py-16">
+          <div className="flex items-end justify-between mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold">{t("cases.title")}</h2>
+            <Link to="/cases" className="text-sm font-medium text-primary hover:underline">
+              {t("cases.viewAll")} →
+            </Link>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {featuredCases.length > 0
