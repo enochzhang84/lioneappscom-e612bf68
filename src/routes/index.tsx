@@ -37,11 +37,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Home_() {
-  const { products, cases } = Route.useLoaderData();
   const { lang, t } = useLang();
 
-  const featuredCases = (cases as CaseCard[]).slice(0, 3);
-  const featuredProducts = (products as ProductCard[]).slice(0, 3);
+
 
   return (
     <SiteLayout>
