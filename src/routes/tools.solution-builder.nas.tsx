@@ -66,7 +66,9 @@ function NasBuilder() {
   if (level === "5" && diskCount < 3) warnings.push({ level: "error", message_zh: "RAID 5 至少需要 3 块硬盘", message_en: "RAID 5 requires at least 3 disks" });
   if (level === "6" && diskCount < 4) warnings.push({ level: "error", message_zh: "RAID 6 至少需要 4 块硬盘", message_en: "RAID 6 requires at least 4 disks" });
   if (level === "10" && diskCount % 2 !== 0) warnings.push({ level: "error", message_zh: "RAID 10 需要偶数硬盘", message_en: "RAID 10 requires an even number of disks" });
-  warnings.push({ level: "notice", message_zh: "RAID 不等于备份，重要数据请建立独立备份", message_en: "RAID is not a backup — keep independent backups" });
+  warnings.push({ level: "notice", message_zh: "RAID 不是备份，重要数据仍需建立独立备份。", message_en: "RAID is not a backup. Important data still requires an independent backup." });
+  warnings.push({ level: "notice", message_zh: "容量为估算值，实际可用容量因文件系统开销可能略有不同。", message_en: "Capacity is an estimate; actual usable capacity may vary due to filesystem overhead." });
+
 
   const computed = L === "zh"
     ? { "RAID 级别": level, "硬盘数量": diskCount, "单盘容量 (TB)": driveSize, "原始总容量 (TB)": raid.total, "可用容量 (TB)": raid.usable, "冗余容量 (TB)": raid.parity, "可容忍损坏盘数": raid.fault, "说明": raid.note_zh }

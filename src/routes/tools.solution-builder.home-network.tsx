@@ -59,7 +59,9 @@ function NetworkBuilder() {
   const warnings: CompatWarning[] = [
     { level: "notice", message_zh: `建议 Mesh/AP 覆盖 ${plan.mesh_nodes} 节点，交换机端口 ≥ ${plan.switch_ports}`, message_en: `Suggest ${plan.mesh_nodes} Mesh/AP node(s) and switch with ≥ ${plan.switch_ports} ports` },
     { level: "notice", message_zh: plan.bandwidth_zh, message_en: plan.bandwidth_en },
+    { level: "notice", message_zh: "该结果是初步规划建议，不等同于现场无线勘测或专业布线设计。", message_en: "This is a preliminary planning suggestion and does not replace an on-site wireless survey or professional cabling design." },
   ];
+
 
   const computed = L === "zh"
     ? { "建议 Mesh 节点": plan.mesh_nodes, "户外 AP": plan.ap_recommended, "交换机端口": plan.switch_ports, "PoE 功率 (W)": plan.poe_watts, "宽带建议": plan.bandwidth_zh }

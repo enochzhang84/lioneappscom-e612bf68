@@ -93,8 +93,9 @@ function PcBuilder() {
       }
     }
     if (!cpu || !mb || !psu) {
-      w.push({ level: "notice", message_zh: "尚未选择完整的核心组件（CPU/主板/电源）", message_en: "Core components (CPU/motherboard/PSU) not fully selected" });
+      w.push({ level: "notice", message_zh: "信息不足，需要采购前再次确认。", message_en: "Insufficient information. Final compatibility must be confirmed before purchase." });
     }
+
     return w;
   }, [selections, products, suggestedPsu]);
 
