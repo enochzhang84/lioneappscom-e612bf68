@@ -213,12 +213,13 @@ export const sbGetShared = createServerFn({ method: "POST" })
       .select("solution_number, solution_type, title, language, currency, items, config, computed, compat_warnings, subtotal, service_fee, tax_rate, tax_amount, discount, one_time_total, monthly_total, annual_total, share_expires_at, created_at, organization_name, customer_name")
       .eq("share_token", data.token)
       .maybeSingle();
-    if (error || !row) return { row: null as null };
+    if (error || !row) return { row: null, status: "not_found" as const };
     if (row.share_expires_at && new Date(row.share_expires_at).getTime() < Date.now()) {
-      return { row: null };
+      return { row: null, status: "expired" as const, expires_at: row.share_expires_at };
     }
-    return { row };
+    return { row, status: "ok" as const };
   });
+
 
 // ======== Admin ========
 
