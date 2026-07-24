@@ -217,7 +217,7 @@ export function CompatRules() {
         description={pendingDel ? `将永久删除 ${pendingDel.rule_code}。` : ""}
         confirmText="删除"
         variant="destructive"
-        onConfirm={() => pendingDel && delM.mutate(pendingDel.id)}
+        onConfirm={() => { if (pendingDel) delM.mutate(pendingDel.id); }}
       />
     </div>
   );
