@@ -355,6 +355,65 @@ function ProductsSection() {
           {historyOf && <PriceHistory product={historyOf} historyFn={historyFn} />}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!importPreview} onOpenChange={(o) => !o && setImportPreview(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {importPreview && (
+            <>
+              <DialogHeader>
+                <DialogTitle>CSV 导入预览</DialogTitle>
+                <DialogDescription>已解析 {importPreview.result.total} 行；确认后按 slug upsert。</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                <div className="rounded-md border border-emerald-200 bg-emerald-50 py-3">
+                  <div className="text-2xl font-semibold text-emerald-700">{importPreview.result.create_count}</div>
+                  <div className="text-emerald-700 text-xs">新增</div>
+                </div>
+                <div className="rounded-md border border-blue-200 bg-blue-50 py-3">
+                  <div className="text-2xl font-semibold text-blue-700">{importPreview.result.update_count}</div>
+                  <div className="text-blue-700 text-xs">更新</div>
+                </div>
+                <div className={`rounded-md border py-3 ${importPreview.result.error_count > 0 ? "border-red-200 bg-red-50" : "border-slate-200 bg-slate-50"}`}>
+                  <div className={`text-2xl font-semibold ${importPreview.result.error_count > 0 ? "text-red-700" : "text-slate-500"}`}>{importPreview.result.error_count}</div>
+                  <div className={`text-xs ${importPreview.result.error_count > 0 ? "text-red-700" : "text-slate-500"}`}>错误</div>
+                </div>
+              </div>
+              {importPreview.result.errors.length > 0 && (
+                <div className="mt-3 space-y-1 max-h-48 overflow-y-auto rounded-md border border-red-100 bg-red-50 p-2 text-xs">
+                  {importPreview.result.errors.map((e, i) => (
+                    <div key={i} className="text-red-800"><span className="font-mono">行 {e.row}</span>{e.slug ? ` · ${e.slug}` : ""} — {e.message}</div>
+                  ))}
+                </div>
+              )}
+              {(importPreview.result.create_samples.length > 0 || importPreview.result.update_samples.length > 0) && (
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                  {importPreview.result.create_samples.length > 0 && (
+                    <div className="rounded-md border p-2">
+                      <div className="font-medium text-slate-600 mb-1">新增示例</div>
+                      {importPreview.result.create_samples.map((s) => <div key={s.slug} className="text-slate-500"><span className="font-mono">{s.slug}</span> · {s.name_zh}</div>)}
+                    </div>
+                  )}
+                  {importPreview.result.update_samples.length > 0 && (
+                    <div className="rounded-md border p-2">
+                      <div className="font-medium text-slate-600 mb-1">更新示例</div>
+                      {importPreview.result.update_samples.map((s) => <div key={s.slug} className="text-slate-500"><span className="font-mono">{s.slug}</span> · {s.name_zh}</div>)}
+                    </div>
+                  )}
+                </div>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setImportPreview(null)}>取消</Button>
+                <Button
+                  disabled={bulk.isPending || importPreview.result.error_count === importPreview.result.total}
+                  onClick={() => bulk.mutate({ rows: importPreview.rows })}
+                >
+                  {bulk.isPending ? "导入中…" : `确认导入 ${importPreview.result.create_count + importPreview.result.update_count} 条`}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
