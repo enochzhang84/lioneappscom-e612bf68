@@ -455,6 +455,19 @@ function ProductForm({ value, brands, categories, onCancel, onSave, saving }: {
         </F>
         <F label="中文简介"><Input value={f.short_description_zh ?? ""} onChange={(e) => set("short_description_zh", e.target.value)} /></F>
         <F label="英文简介"><Input value={f.short_description_en ?? ""} onChange={(e) => set("short_description_en", e.target.value)} /></F>
+        <F label="世代 (Generation)"><Input value={f.generation ?? ""} onChange={(e) => set("generation", e.target.value)} placeholder="Intel 12th Gen / Ryzen 5000…" /></F>
+        <F label="系列 (Series)"><Input value={f.series ?? ""} onChange={(e) => set("series", e.target.value)} placeholder="Core i5 / Ryzen 7…" /></F>
+        <F label="架构 (Architecture)"><Input value={f.architecture ?? ""} onChange={(e) => set("architecture", e.target.value)} placeholder="Alder Lake / Zen 3…" /></F>
+        <F label="代号 (Codename)"><Input value={f.codename ?? ""} onChange={(e) => set("codename", e.target.value)} /></F>
+        <F label="发布年份"><Input type="number" value={f.launch_year ?? ""} onChange={(e) => set("launch_year", e.target.value === "" ? null : Number(e.target.value))} /></F>
+        <F label="数据完整度">
+          <select className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm" value={f.data_completeness ?? "stub"} onChange={(e) => set("data_completeness", e.target.value as SbProduct["data_completeness"])}>
+            <option value="stub">stub（占位）</option>
+            <option value="partial">partial（部分）</option>
+            <option value="complete">complete（完整）</option>
+          </select>
+        </F>
+        <F label="规格 PDF URL" className="md:col-span-2"><Input value={f.specification_pdf_url ?? ""} onChange={(e) => set("specification_pdf_url", e.target.value)} /></F>
         <F label="可见">
           <label className="inline-flex items-center gap-2 text-sm mt-2"><input type="checkbox" checked={!!f.is_visible} onChange={(e) => set("is_visible", e.target.checked)} /> 前台显示</label>
         </F>
