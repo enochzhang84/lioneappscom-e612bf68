@@ -124,13 +124,13 @@ function BlogIndex() {
       : "Practical knowledge about home networks, NAS private cloud, smart home systems, business websites, custom software and cloud deployment.";
 
   function goCategory(slug?: string) {
-    nav({ search: (prev) => ({ ...prev, category: slug, page: 1 }) });
+    nav({ search: (prev: SearchParams) => ({ ...prev, category: slug, page: 1 }) });
   }
   function goSearch(kw: string) {
-    nav({ search: (prev) => ({ ...prev, q: kw || undefined, page: 1 }) });
+    nav({ search: (prev: SearchParams) => ({ ...prev, q: kw || undefined, page: 1 }) });
   }
   function goPage(p: number) {
-    nav({ search: (prev) => ({ ...prev, page: p }) });
+    nav({ search: (prev: SearchParams) => ({ ...prev, page: p }) });
   }
 
   return (
