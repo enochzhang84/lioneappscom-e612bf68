@@ -218,69 +218,9 @@ function Home_() {
           </div>
         </div>
       </section>
+      {/* Future Home Digital Center — replaces prior "Recent projects" section */}
+      <FutureHomeSection lang={lang} />
 
-      {/* Recent projects (from CMS: cases → fallback to products) */}
-      {(featuredCases.length > 0 || featuredProducts.length > 0) && (
-        <section className="mx-auto max-w-6xl px-6 py-16">
-          <div className="flex items-end justify-between mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold">{t("cases.title")}</h2>
-            <Link to="/cases" className="text-sm font-medium text-primary hover:underline">
-              {t("cases.viewAll")} →
-            </Link>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {featuredCases.length > 0
-              ? featuredCases.map((c) => {
-                  const img = mediaUrl(c.cover_image_url);
-                  return (
-                    <Link
-                      key={c.id}
-                      to="/cases/$slug"
-                      params={{ slug: c.slug }}
-                      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/30"
-                    >
-                      <div className="aspect-[16/10] overflow-hidden bg-secondary grid place-items-center">
-                        {img ? (
-                          <img src={img} alt={c.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        ) : (
-                          <span className="text-3xl text-muted-foreground/40">{c.title.slice(0, 2)}</span>
-                        )}
-                      </div>
-                      <div className="p-5">
-                        {c.tag && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary">{c.tag}</span>}
-                        <h3 className="mt-3 text-lg font-semibold">{c.title}</h3>
-                        {c.summary && <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">{c.summary}</p>}
-                      </div>
-                    </Link>
-                  );
-                })
-              : featuredProducts.map((p) => {
-                  const img = mediaUrl(p.hero_image_url);
-                  return (
-                    <Link
-                      key={p.id}
-                      to="/products/$slug"
-                      params={{ slug: p.slug }}
-                      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/30"
-                    >
-                      <div className="aspect-[16/10] overflow-hidden bg-secondary grid place-items-center">
-                        {img ? (
-                          <img src={img} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        ) : (
-                          <span className="text-3xl text-muted-foreground/40">{p.title.slice(0, 2)}</span>
-                        )}
-                      </div>
-                      <div className="p-5">
-                        {p.tag && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary">{p.tag}</span>}
-                        <h3 className="mt-3 text-lg font-semibold">{p.title}</h3>
-                        {p.short_desc && <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">{p.short_desc}</p>}
-                      </div>
-                    </Link>
-                  );
-                })}
-          </div>
-        </section>
-      )}
 
       {/* Why choose us */}
       <section className="bg-card/40 border-y border-border/60">
