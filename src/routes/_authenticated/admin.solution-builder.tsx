@@ -99,6 +99,17 @@ function SolutionsPanel() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const share = useMutation({
+    mutationFn: (v: { id: string; action: "regenerate" | "revoke" | "set_expiry"; days?: number | null }) => shareFn({ data: v }),
+    onSuccess: (res, vars) => {
+      const msg = vars.action === "revoke" ? "分享已停用" : vars.action === "regenerate" ? "分享链接已重新生成" : "过期时间已更新";
+      toast.success(msg);
+      qc.invalidateQueries({ queryKey: ["admin-sb-solutions"] });
+      setShareRow((prev) => prev ? { ...prev, share_token: res.token, share_expires_at: res.expires } : prev);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const rows: SbSolutionRow[] = listQ.data?.rows ?? [];
 
   return (
