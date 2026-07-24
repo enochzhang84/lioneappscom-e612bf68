@@ -248,7 +248,7 @@ export function BuilderShell(props: Props) {
 
         {/* Right summary */}
         <aside className="hidden lg:block">
-          <SummaryCard L={L} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
+          <SummaryCard L={L} tool={props.tool} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
         </aside>
       </div>
 
