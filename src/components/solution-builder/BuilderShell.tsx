@@ -263,7 +263,7 @@ export function BuilderShell(props: Props) {
           <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
             <SheetTitle>{bi(SB_STRINGS.summary_title, L)}</SheetTitle>
             <div className="mt-3">
-              <SummaryCard L={L} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
+              <SummaryCard L={L} tool={props.tool} totals={totals} items={props.state.items} compat={props.state.compat_warnings} settings={settings} />
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <Button variant="outline" size="sm" onClick={handleSave} disabled={saving}>{bi(SB_STRINGS.save, L)}</Button>
                 <Button variant="outline" size="sm" onClick={handleExport} disabled={exportBusy}>{bi(SB_STRINGS.export_pdf, L)}</Button>
