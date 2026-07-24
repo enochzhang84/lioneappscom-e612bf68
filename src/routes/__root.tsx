@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import faviconAsset from "../assets/favicon.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PlatformProvider, ensurePlatformData } from "../lib/platform-bootstrap";
+import { LanguageProvider } from "../lib/i18n";
 
 
 
@@ -148,9 +149,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <PlatformProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-
-      <Outlet />
+        <LanguageProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </LanguageProvider>
       </PlatformProvider>
     </QueryClientProvider>
 

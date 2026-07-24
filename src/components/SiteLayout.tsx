@@ -22,16 +22,41 @@ import {
 import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { usePlatform } from "@/lib/platform-bootstrap";
+import { useLang } from "@/lib/i18n";
 
 const ADMIN_SECRET = "Loveliang@2026";
 
-const productLinks = [
-  { slug: "church", label: "教会管理平台", desc: "HOC3 — 事工全流程管理" },
-  { slug: "renovation", label: "装修报价平台", desc: "项目报价与客户管理" },
-  { slug: "office", label: "企业办公平台", desc: "考勤、排班、任务统计" },
-  { slug: "custom", label: "定制开发", desc: "按需打造的专属系统" },
-] as const;
+// Service dropdown groups. All items currently link to /contact — no fake pages,
+// no CMS mutations. When we build real service detail pages later, swap the `to` here.
+const serviceGroups = [
+  {
+    labelKey: "svc.group.home" as const,
+    items: [
+      { key: "svc.home.network" as const },
+      { key: "svc.home.nas" as const },
+      { key: "svc.home.smart" as const },
+      { key: "svc.home.media" as const },
+    ],
+  },
+  {
+    labelKey: "svc.group.biz" as const,
+    items: [
+      { key: "svc.biz.website" as const },
+      { key: "svc.biz.software" as const },
+      { key: "svc.biz.office" as const },
+      { key: "svc.biz.cloud" as const },
+    ],
+  },
+];
 
+const footerServices = [
+  "services.s1.t",
+  "services.s2.t",
+  "services.s3.t",
+  "services.s4.t",
+  "services.s5.t",
+  "services.s6.t",
+] as const;
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -41,9 +66,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
 
-  // 全站公共数据统一走 PlatformProvider，Header/Footer 不再自己请求。
   const { navPages } = usePlatform();
-
+  const { lang, setLang, t } = useLang();
 
   function handleLogoClick(e: React.MouseEvent) {
     if (location.pathname !== "/") return;
@@ -61,7 +85,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     }
   }
 
-
   function handleSubmitPassword(e: React.FormEvent) {
     e.preventDefault();
     if (password === ADMIN_SECRET) {
@@ -78,80 +101,98 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Toaster richColors position="top-center" />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 font-bold select-none">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 gap-4">
+          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 font-bold select-none shrink-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               L
             </div>
             <span>Lione Apps</span>
           </Link>
 
-
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
+              {/* 1. Home */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
                   <Link to="/" activeOptions={{ exact: true }} activeProps={{ className: "text-foreground font-medium" }}>
-                    首页
+                    {t("nav.home")}
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
+              {/* 2. Services (was 产品) */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent text-muted-foreground hover:text-foreground data-[state=open]:text-foreground">
-                  产品
+                  {t("nav.services")}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[420px] gap-2 p-3 md:grid-cols-2">
-                    {productLinks.map((p) => (
-                      <li key={p.slug}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/products/$slug"
-                            params={{ slug: p.slug }}
-                            className="block rounded-md p-3 hover:bg-accent"
-                          >
-                            <div className="text-sm font-medium">{p.label}</div>
-                            <div className="mt-0.5 text-xs text-muted-foreground">{p.desc}</div>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
+                  <div className="grid w-[520px] grid-cols-2 gap-4 p-4">
+                    {serviceGroups.map((g) => (
+                      <div key={g.labelKey}>
+                        <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {t(g.labelKey)}
+                        </div>
+                        <ul className="space-y-1">
+                          {g.items.map((it) => (
+                            <li key={it.key}>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  to="/contact"
+                                  className="block rounded-md px-2 py-2 text-sm hover:bg-accent"
+                                >
+                                  {t(it.key)}
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
+              {/* 3. Projects (was 案例) */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Link to="/cases" activeProps={{ className: "text-foreground font-medium" }}>案例</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Link to="/p/$slug" params={{ slug: "tools" }} activeProps={{ className: "text-foreground font-medium" }}>实用工具</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Link to="/p/$slug" params={{ slug: "ai" }} activeProps={{ className: "text-foreground font-medium" }}>AI 助手</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Link to="/blog" activeProps={{ className: "text-foreground font-medium" }}>博客</Link>
+                  <Link to="/cases" activeProps={{ className: "text-foreground font-medium" }}>
+                    {t("nav.projects")}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
+              {/* 4-8. Untouched routes/paths — only display text is translated. */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Link to="/about" activeProps={{ className: "text-foreground font-medium" }}>关于我们</Link>
+                  <Link to="/p/$slug" params={{ slug: "tools" }} activeProps={{ className: "text-foreground font-medium" }}>
+                    {t("nav.tools")}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Link to="/contact" activeProps={{ className: "text-foreground font-medium" }}>联系我们</Link>
+                  <Link to="/p/$slug" params={{ slug: "ai" }} activeProps={{ className: "text-foreground font-medium" }}>
+                    {t("nav.ai")}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/blog" activeProps={{ className: "text-foreground font-medium" }}>{t("nav.blog")}</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/about" activeProps={{ className: "text-foreground font-medium" }}>{t("nav.about")}</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/contact" activeProps={{ className: "text-foreground font-medium" }}>{t("nav.contact")}</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              {/* Extra CMS-driven pages (excluding tools/ai which are already pinned above) */}
               {navPages?.filter((p) => p.slug !== "tools" && p.slug !== "ai").map((p) => (
                 <NavigationMenuItem key={p.id}>
                   <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
@@ -168,9 +209,31 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             </NavigationMenuList>
           </NavigationMenu>
 
-          <Button asChild size="sm">
-            <Link to="/contact">联系咨询</Link>
-          </Button>
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Language switcher — desktop + mobile */}
+            <div className="flex items-center text-xs font-medium select-none">
+              <button
+                type="button"
+                onClick={() => setLang("zh")}
+                className={lang === "zh" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
+                aria-pressed={lang === "zh"}
+              >
+                中文
+              </button>
+              <span className="mx-1.5 text-muted-foreground/50">|</span>
+              <button
+                type="button"
+                onClick={() => setLang("en")}
+                className={lang === "en" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
+                aria-pressed={lang === "en"}
+              >
+                EN
+              </button>
+            </div>
+            <Button asChild size="sm" className="hidden sm:inline-flex">
+              <Link to="/contact">{t("nav.cta")}</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -185,31 +248,33 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               </div>
               <span>Lione Apps</span>
             </div>
-            <p className="mt-3 text-muted-foreground">
-              为教会、组织与小型企业打造专属管理平台。
-            </p>
+            <p className="mt-3 text-muted-foreground">{t("footer.brand.desc")}</p>
           </div>
           <div>
-            <div className="font-semibold mb-3">产品</div>
+            <div className="font-semibold mb-3">{t("footer.services")}</div>
             <ul className="space-y-2 text-muted-foreground">
-              {productLinks.map((p) => (
-                <li key={p.slug}><Link to="/products/$slug" params={{ slug: p.slug }} className="hover:text-foreground">{p.label}</Link></li>
+              {footerServices.map((k) => (
+                <li key={k}>
+                  <Link to="/contact" className="hover:text-foreground">
+                    {t(k)}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>
           <div>
-            <div className="font-semibold mb-3">公司</div>
+            <div className="font-semibold mb-3">{t("footer.company")}</div>
             <ul className="space-y-2 text-muted-foreground">
-              <li><Link to="/cases" className="hover:text-foreground">项目案例</Link></li>
-              <li><Link to="/about" className="hover:text-foreground">关于我们</Link></li>
-              <li><Link to="/contact" className="hover:text-foreground">联系我们</Link></li>
+              <li><Link to="/cases" className="hover:text-foreground">{t("footer.cases")}</Link></li>
+              <li><Link to="/about" className="hover:text-foreground">{t("footer.about")}</Link></li>
+              <li><Link to="/contact" className="hover:text-foreground">{t("footer.contact")}</Link></li>
               <li><a href="mailto:hello@lioneapps.com" className="hover:text-foreground">hello@lioneapps.com</a></li>
             </ul>
           </div>
         </div>
         <div className="border-t border-border">
           <div className="mx-auto max-w-6xl px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>© {new Date().getFullYear()} Lione Apps. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} Lione Apps. {t("footer.rights")}</span>
             <span>lioneapps.com</span>
           </div>
         </div>
@@ -242,7 +307,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         </DialogContent>
       </Dialog>
     </div>
-
   );
 }
 
