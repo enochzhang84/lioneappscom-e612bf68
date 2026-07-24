@@ -295,9 +295,7 @@ function ServiceIllustration({
           decoding="async"
           className="h-full w-full object-cover"
         />
-        <div className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 backdrop-blur ring-1 ring-black/5 shadow-sm">
-          <Icon className="h-4.5 w-4.5 text-primary" strokeWidth={1.8} />
-        </div>
+
       </div>
     );
   }
