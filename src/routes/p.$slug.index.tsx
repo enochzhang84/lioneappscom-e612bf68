@@ -91,6 +91,8 @@ function isToolsPage(page: Pick<PageFull, "page_type" | "slug">) {
 function ToolsPageView({ page, categories, items }: {
   page: PageFull; categories: ToolCategory[]; items: ToolItem[];
 }) {
+  const { lang } = useLang();
+  const isZh = lang === "zh";
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [query, setQuery] = useState("");
@@ -98,6 +100,7 @@ function ToolsPageView({ page, categories, items }: {
   const [activeId, setActiveId] = useState<string | null>(initialCat);
 
   const activeCat = categories.find(c => c.id === activeId) ?? categories[0] ?? null;
+
 
   const q = query.trim().toLowerCase();
   const matches = (it: ToolItem) =>
@@ -128,13 +131,17 @@ function ToolsPageView({ page, categories, items }: {
 
   return (
     <SiteLayout>
-      {/* Title section (full width) */}
+      {/* Title section (compact, left-aligned) */}
       <section data-tools-layout="true" className="border-b border-border">
-        <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-10 md:py-14">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{page.title}</h1>
-          <p className="mt-2 text-muted-foreground">
-            {(page.content && (page.content as { subtitle?: string }).subtitle) || "这里可以放副标题/说明文字"}
+        <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-6 md:py-8">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{page.title}</h1>
+          <p className="mt-1.5 text-sm md:text-base text-muted-foreground">
+            {(page.content && (page.content as { subtitle?: string }).subtitle) ||
+              (isZh
+                ? "集中使用各类配置、计算、查询与效率工具"
+                : "Access configuration, calculation, reference and productivity tools in one place.")}
           </p>
+
         </div>
       </section>
 
@@ -142,6 +149,12 @@ function ToolsPageView({ page, categories, items }: {
       <SolutionBuilderFeatured />
 
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
+        {/* Section header: More Utilities */}
+        <div className="pt-10 md:pt-12 pb-2">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight">
+            {isZh ? "其他实用工具" : "More Utilities"}
+          </h2>
+        </div>
 
         {/* Mobile category chips */}
         <div className="md:hidden -mx-4 px-4 py-3 border-b border-border overflow-x-auto">
@@ -159,6 +172,7 @@ function ToolsPageView({ page, categories, items }: {
 
         {/* Desktop split layout with fixed vertical divider */}
         <div className="grid md:grid-cols-[260px_1fr]">
+
           {/* Left sidebar */}
           <aside className="hidden md:block border-r border-border py-6 pr-4">
             <nav className="sticky top-24 space-y-1">
@@ -607,23 +621,21 @@ function SolutionBuilderFeatured() {
   const { lang } = useLang();
   const isZh = lang === "zh";
   return (
-    <section className="border-b border-border bg-gradient-to-b from-primary/[0.04] to-transparent">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-10 md:py-14">
-        <div className="flex items-end justify-between gap-4 flex-wrap mb-6 md:mb-8">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-              <span>✨</span> {isZh ? "精选" : "Featured"}
-            </div>
-            <h2 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight">
-              {isZh ? "方案配置中心" : "Solution Builder"}
-            </h2>
-            <p className="mt-1 text-sm md:text-base text-muted-foreground">
-              {isZh ? "专业规划与配置工具" : "Professional Planning & Configuration Tools"}
-            </p>
+    <section className="bg-gradient-to-b from-primary/[0.04] to-transparent">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-6 pt-8 md:pt-10 pb-6 md:pb-8">
+        <div className="mb-5 md:mb-6">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+            <span>✨</span> {isZh ? "精选" : "Featured"}
           </div>
+          <h2 className="mt-2 text-xl md:text-2xl font-bold tracking-tight">
+            {isZh ? "方案配置中心" : "Solution Builder"}
+          </h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {isZh ? "专业规划与配置工具" : "Professional Planning & Configuration Tools"}
+          </p>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SB_CARDS.map((c) => (
             <a
               key={c.key}
@@ -631,7 +643,8 @@ function SolutionBuilderFeatured() {
               className="group flex flex-col h-full rounded-2xl border border-border bg-card overflow-hidden transition
                 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5"
             >
-              <div className="aspect-[4/3] bg-gradient-to-br from-primary/10 via-primary/[0.04] to-transparent grid place-items-center overflow-hidden">
+              <div className="aspect-[16/10] bg-gradient-to-br from-primary/10 via-primary/[0.04] to-transparent grid place-items-center overflow-hidden">
+
                 <img
                   src={c.image}
                   alt={isZh ? c.titleZh : c.titleEn}
