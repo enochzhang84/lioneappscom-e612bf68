@@ -229,7 +229,7 @@ function ServiceBlock({
         />
       </div>
       <div>
-        <h3 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight">
+        <h3 className="text-2xl md:text-3xl font-bold tracking-tight">
           {service.title[lang]}
         </h3>
         <p className="mt-3 text-base text-muted-foreground leading-relaxed">
