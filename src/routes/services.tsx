@@ -223,11 +223,13 @@ function ServiceBlock({
     >
       <div className={flip ? "md:order-2" : ""}>
         <ServiceIllustration
+          image={service.image}
           gradient={service.gradient}
           Icon={Icon}
           alt={service.imageAlt[lang]}
         />
       </div>
+
       <div>
         <h3 className="text-2xl md:text-3xl font-bold tracking-tight">
           {service.title[lang]}
