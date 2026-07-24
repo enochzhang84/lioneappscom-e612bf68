@@ -149,6 +149,7 @@ function SolutionsPanel() {
                 {SOLUTION_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             ) },
+            { key: "share", header: "分享", cell: (r) => <ShareBadge row={r} onManage={() => setShareRow(r)} /> },
             { key: "created", header: "提交时间", cell: (r) => <span className="text-xs text-slate-500">{new Date(r.created_at).toLocaleString()}</span> },
             { key: "actions", header: "操作", cell: (r) => (
               <div className="flex gap-2">
