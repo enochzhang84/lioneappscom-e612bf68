@@ -87,36 +87,13 @@ export function SiteLayout({ children }: { children: ReactNode }) {
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              {/* 2. Services (was 产品) */}
+              {/* 2. Services — plain page link (was dropdown) */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-muted-foreground hover:text-foreground data-[state=open]:text-foreground">
-                  {t("nav.services")}
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid w-[520px] grid-cols-2 gap-4 p-4">
-                    {serviceGroups.map((g) => (
-                      <div key={g.labelKey}>
-                        <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                          {t(g.labelKey)}
-                        </div>
-                        <ul className="space-y-1">
-                          {g.items.map((it) => (
-                            <li key={it.key}>
-                              <NavigationMenuLink asChild>
-                                <Link
-                                  to="/contact"
-                                  className="block rounded-md px-2 py-2 text-sm hover:bg-accent"
-                                >
-                                  {t(it.key)}
-                                </Link>
-                              </NavigationMenuLink>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </NavigationMenuContent>
+                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/services" activeProps={{ className: "text-foreground font-medium" }}>
+                    {t("nav.services")}
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
 
               {/* 3. Projects (was 案例) */}
