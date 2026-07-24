@@ -126,9 +126,10 @@ export async function exportSolutionPdf(args: Args): Promise<void> {
   `;
 
   document.body.appendChild(doc);
+  let canvas: HTMLCanvasElement | null = null;
   try {
-    const canvas = await html2canvas(doc, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    canvas = await html2canvas(doc, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+    const pdf = new jsPDF({ unit: "mm", format: args.paper === "letter" ? "letter" : "a4", orientation: "portrait" });
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
     const imgW = pageW;
@@ -148,6 +149,17 @@ export async function exportSolutionPdf(args: Args): Promise<void> {
 
     const stamp = new Date().toISOString().slice(0, 10);
     pdf.save(`${solutionNo}_${stamp}.pdf`);
+  } finally {
+    // Explicit cleanup — helps GC across many consecutive exports and
+    // prevents the offscreen node from accumulating in the DOM.
+    document.body.removeChild(doc);
+    if (canvas) {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+  }
+}
+
   } finally {
     document.body.removeChild(doc);
   }
