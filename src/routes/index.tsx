@@ -523,14 +523,20 @@ function FutureHomeSection({ lang }: { lang: Lang }) {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {FH_TRENDS.map((t2) => {
-              const Icon = t2.icon;
               return (
                 <div
                   key={t2.title.en}
                   className="rounded-2xl border border-dashed border-primary/25 bg-background/70 p-5"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <Icon className="h-4 w-4" />
+                  <div className="flex h-24 items-center justify-start">
+                    <img
+                      src={t2.img}
+                      alt={bi(t2.alt, lang)}
+                      loading="lazy"
+                      width={768}
+                      height={768}
+                      className="h-24 w-auto object-contain drop-shadow-[0_10px_20px_rgba(37,99,235,0.18)]"
+                    />
                   </div>
                   <h4 className="mt-4 text-sm font-semibold leading-snug">{bi(t2.title, lang)}</h4>
                   <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
