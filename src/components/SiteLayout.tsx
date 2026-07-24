@@ -69,11 +69,16 @@ export function SiteLayout({ children }: { children: ReactNode }) {
       <Toaster richColors position="top-center" />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 gap-4">
-          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 font-bold select-none shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2.5 font-bold select-none shrink-0 min-w-0">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               L
             </div>
-            <span>Lione Apps</span>
+            <div className="flex min-w-0 flex-col leading-tight">
+              <span className="truncate">Lione Apps</span>
+              <span className="hidden sm:block truncate text-[10.5px] font-medium text-muted-foreground tracking-wide">
+                {t("brand.tagline")}
+              </span>
+            </div>
           </Link>
 
           <NavigationMenu className="hidden md:flex">
@@ -192,7 +197,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               </div>
               <span>Lione Apps</span>
             </div>
-            <p className="mt-3 text-muted-foreground">{t("footer.brand.desc")}</p>
+            <p className="mt-2 text-xs font-medium text-foreground/80">{t("brand.tagline")}</p>
+            <p className="mt-2 text-muted-foreground">{t("footer.brand.desc")}</p>
           </div>
           <div>
             <div className="font-semibold mb-3">{t("footer.services")}</div>

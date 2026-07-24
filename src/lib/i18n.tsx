@@ -169,6 +169,10 @@ export const dict: Dict = {
   "cta.email": { zh: "发送邮件", en: "Send Email" },
 
   // Footer
+  "brand.tagline": {
+    zh: "家庭与小型企业 IT 解决方案",
+    en: "Home & Small Business IT Solutions",
+  },
   "footer.brand.desc": {
     zh: "为家庭、组织和小型企业提供网络、软件与云平台解决方案。",
     en: "Network, software and cloud solutions for homes, organizations and small businesses.",

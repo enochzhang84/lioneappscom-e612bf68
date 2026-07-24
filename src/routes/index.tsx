@@ -46,8 +46,21 @@ function Home_() {
           className="absolute inset-0 -z-10 opacity-60"
           style={{ background: "radial-gradient(60% 50% at 50% 0%, oklch(0.55 0.22 264 / 0.18), transparent 70%)" }}
         />
-        <div className="mx-auto max-w-5xl px-6 pt-20 pb-14 md:pt-28 md:pb-20 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight">{t("hero.title")}</h1>
+        <div className="mx-auto max-w-[1200px] px-6 pt-20 pb-14 md:pt-28 md:pb-20 text-center">
+          <h1
+            className="mx-auto max-w-[1200px] font-bold tracking-tight text-balance lg:whitespace-nowrap"
+            style={{ fontSize: "clamp(1.9rem, 4.6vw, 3.5rem)", lineHeight: 1.1, letterSpacing: "-0.01em" }}
+          >
+            {lang === "zh" ? (
+              <>
+                <span className="whitespace-nowrap">为家庭与小型企业</span>
+                <span className="mx-1 lg:mx-2" />
+                <span className="whitespace-nowrap">打造可靠的数字生活</span>
+              </>
+            ) : (
+              t("hero.title")
+            )}
+          </h1>
           <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             {t("hero.subtitle")}
           </p>
