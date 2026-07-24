@@ -507,14 +507,20 @@ function FutureHomeSection({ lang }: { lang: Lang }) {
           </div>
           <div className="grid gap-4 md:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FH_ADVANTAGES.map((a) => {
-              const Icon = a.icon;
               return (
                 <div
                   key={a.title.en}
                   className="rounded-2xl border border-border/70 bg-background p-5 md:p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_14px_32px_-20px_rgba(37,99,235,0.35)]"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Icon className="h-5 w-5" />
+                  <div className="flex h-24 items-center justify-start">
+                    <img
+                      src={a.img}
+                      alt={bi(a.alt, lang)}
+                      loading="lazy"
+                      width={768}
+                      height={768}
+                      className="h-24 w-auto object-contain drop-shadow-[0_10px_20px_rgba(37,99,235,0.18)]"
+                    />
                   </div>
                   <h4 className="mt-4 text-base font-semibold">{bi(a.title, lang)}</h4>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
