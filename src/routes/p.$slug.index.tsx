@@ -621,23 +621,21 @@ function SolutionBuilderFeatured() {
   const { lang } = useLang();
   const isZh = lang === "zh";
   return (
-    <section className="border-b border-border bg-gradient-to-b from-primary/[0.04] to-transparent">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-10 md:py-14">
-        <div className="flex items-end justify-between gap-4 flex-wrap mb-6 md:mb-8">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-              <span>✨</span> {isZh ? "精选" : "Featured"}
-            </div>
-            <h2 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight">
-              {isZh ? "方案配置中心" : "Solution Builder"}
-            </h2>
-            <p className="mt-1 text-sm md:text-base text-muted-foreground">
-              {isZh ? "专业规划与配置工具" : "Professional Planning & Configuration Tools"}
-            </p>
+    <section className="bg-gradient-to-b from-primary/[0.04] to-transparent">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-6 pt-8 md:pt-10 pb-6 md:pb-8">
+        <div className="mb-5 md:mb-6">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+            <span>✨</span> {isZh ? "精选" : "Featured"}
           </div>
+          <h2 className="mt-2 text-xl md:text-2xl font-bold tracking-tight">
+            {isZh ? "方案配置中心" : "Solution Builder"}
+          </h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {isZh ? "专业规划与配置工具" : "Professional Planning & Configuration Tools"}
+          </p>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SB_CARDS.map((c) => (
             <a
               key={c.key}
@@ -645,7 +643,8 @@ function SolutionBuilderFeatured() {
               className="group flex flex-col h-full rounded-2xl border border-border bg-card overflow-hidden transition
                 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5"
             >
-              <div className="aspect-[4/3] bg-gradient-to-br from-primary/10 via-primary/[0.04] to-transparent grid place-items-center overflow-hidden">
+              <div className="aspect-[16/10] bg-gradient-to-br from-primary/10 via-primary/[0.04] to-transparent grid place-items-center overflow-hidden">
+
                 <img
                   src={c.image}
                   alt={isZh ? c.titleZh : c.titleEn}
