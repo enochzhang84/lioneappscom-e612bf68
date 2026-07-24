@@ -149,7 +149,12 @@ function ToolsPageView({ page, categories, items }: {
       <SolutionBuilderFeatured />
 
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
-
+        {/* Section header: More Utilities */}
+        <div className="pt-10 md:pt-12 pb-2">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight">
+            {isZh ? "其他实用工具" : "More Utilities"}
+          </h2>
+        </div>
 
         {/* Mobile category chips */}
         <div className="md:hidden -mx-4 px-4 py-3 border-b border-border overflow-x-auto">
@@ -167,6 +172,7 @@ function ToolsPageView({ page, categories, items }: {
 
         {/* Desktop split layout with fixed vertical divider */}
         <div className="grid md:grid-cols-[260px_1fr]">
+
           {/* Left sidebar */}
           <aside className="hidden md:block border-r border-border py-6 pr-4">
             <nav className="sticky top-24 space-y-1">
