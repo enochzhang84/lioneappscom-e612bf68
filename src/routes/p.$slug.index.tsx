@@ -596,7 +596,7 @@ const SB_CARDS: SbCard[] = [
   {
     key: "network",
     image: sbNetImg,
-    href: "/tools/solution-builder/network",
+    href: "/tools/solution-builder/home-network",
     titleZh: "家庭网络规划器",
     titleEn: "Home Network Planner",
     descZh: "设计 Wi-Fi、Mesh、交换机、PoE、综合布线与家庭网络。",
@@ -607,7 +607,7 @@ const SB_CARDS: SbCard[] = [
   {
     key: "full",
     image: sbFullImg,
-    href: "/tools/solution-builder",
+    href: "/tools/solution-builder/full-solution",
     titleZh: "整体方案配置中心",
     titleEn: "Complete Solution Builder",
     descZh: "将 PC、NAS 与家庭网络组合成完整方案，统一报价并导出 PDF。",
@@ -637,9 +637,9 @@ function SolutionBuilderFeatured() {
 
         <div className="grid gap-4 md:gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SB_CARDS.map((c) => (
-            <a
+            <Link
               key={c.key}
-              href={c.href}
+              to={c.href}
               className="group flex flex-col h-full rounded-2xl border border-border bg-card overflow-hidden transition
                 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5"
             >
@@ -668,7 +668,7 @@ function SolutionBuilderFeatured() {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
