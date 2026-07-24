@@ -81,15 +81,17 @@ const PUBLIC_PRODUCT_COLS =
   "id, category, subcategory, slug, name_zh, name_en, brand, brand_id, model, description_zh, description_en, short_description_zh, short_description_en, image_url, manufacturer_url, usage_tags, builder_types, specs, list_price, install_fee, monthly_fee, annual_fee, stock_status, stock_quantity, lead_time_days, warranty_months, is_visible, is_sample, sort_order, currency, price_updated_at, product_code, sku";
 
 export const sbListProducts = createServerFn({ method: "POST" })
-  .inputValidator((d: { categories?: string[] }) => d)
+  .inputValidator((d: { categories?: string[]; builder_type?: string }) => d)
   .handler(async ({ data }) => {
     const c = publicClient();
     let q = c.from("sb_products").select(PUBLIC_PRODUCT_COLS).eq("is_visible", true).is("deleted_at", null).order("sort_order", { ascending: true });
     if (data.categories && data.categories.length) q = q.in("category", data.categories);
+    if (data.builder_type) q = q.contains("builder_types", [data.builder_type]);
     const { data: rows, error } = await q;
     if (error) return { products: [] as SbProduct[], error: error.message };
     return { products: (rows ?? []) as unknown as SbProduct[] };
   });
+
 
 export const sbGetSettings = createServerFn({ method: "GET" }).handler(async () => {
   const c = publicClient();
