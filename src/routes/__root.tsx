@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import faviconAsset from "../assets/favicon.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PlatformProvider, ensurePlatformData } from "../lib/platform-bootstrap";
+import { LanguageProvider } from "../lib/i18n";
 
 
 
