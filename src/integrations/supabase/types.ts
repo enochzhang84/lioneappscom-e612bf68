@@ -1001,6 +1001,249 @@ export type Database = {
           },
         ]
       }
+      sb_products: {
+        Row: {
+          brand: string | null
+          category: string
+          compat: Json
+          cost_price: number | null
+          created_at: string
+          currency: string
+          description_en: string | null
+          description_zh: string | null
+          id: string
+          image_url: string | null
+          install_fee: number
+          is_sample: boolean
+          is_visible: boolean
+          list_price: number
+          model: string | null
+          name_en: string
+          name_zh: string
+          price_updated_at: string
+          slug: string
+          sort_order: number
+          specs: Json
+          stock_status: string
+          subcategory: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          compat?: Json
+          cost_price?: number | null
+          created_at?: string
+          currency?: string
+          description_en?: string | null
+          description_zh?: string | null
+          id?: string
+          image_url?: string | null
+          install_fee?: number
+          is_sample?: boolean
+          is_visible?: boolean
+          list_price?: number
+          model?: string | null
+          name_en: string
+          name_zh: string
+          price_updated_at?: string
+          slug: string
+          sort_order?: number
+          specs?: Json
+          stock_status?: string
+          subcategory?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          compat?: Json
+          cost_price?: number | null
+          created_at?: string
+          currency?: string
+          description_en?: string | null
+          description_zh?: string | null
+          id?: string
+          image_url?: string | null
+          install_fee?: number
+          is_sample?: boolean
+          is_visible?: boolean
+          list_price?: number
+          model?: string | null
+          name_en?: string
+          name_zh?: string
+          price_updated_at?: string
+          slug?: string
+          sort_order?: number
+          specs?: Json
+          stock_status?: string
+          subcategory?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sb_settings: {
+        Row: {
+          contact_email: string
+          contact_phone: string | null
+          currency: string
+          default_service_fee: number
+          disclaimer_en: string
+          disclaimer_zh: string
+          discount_rate: number
+          id: number
+          margin_rate: number
+          proposal_validity_days: number
+          tax_rate: number
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string
+          contact_phone?: string | null
+          currency?: string
+          default_service_fee?: number
+          disclaimer_en?: string
+          disclaimer_zh?: string
+          discount_rate?: number
+          id?: number
+          margin_rate?: number
+          proposal_validity_days?: number
+          tax_rate?: number
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string
+          contact_phone?: string | null
+          currency?: string
+          default_service_fee?: number
+          disclaimer_en?: string
+          disclaimer_zh?: string
+          discount_rate?: number
+          id?: number
+          margin_rate?: number
+          proposal_validity_days?: number
+          tax_rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sb_solutions: {
+        Row: {
+          admin_notes: string | null
+          annual_total: number
+          assigned_to: string | null
+          compat_warnings: Json
+          computed: Json
+          config: Json
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_budget: string | null
+          customer_city: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_notes: string | null
+          customer_phone: string | null
+          customer_timeline: string | null
+          deleted_at: string | null
+          discount: number
+          id: string
+          items: Json
+          language: string
+          monthly_total: number
+          one_time_total: number
+          organization_name: string | null
+          service_fee: number
+          share_expires_at: string | null
+          share_token: string | null
+          solution_number: string
+          solution_type: string
+          source: string
+          status: string
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          annual_total?: number
+          assigned_to?: string | null
+          compat_warnings?: Json
+          computed?: Json
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_budget?: string | null
+          customer_city?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_notes?: string | null
+          customer_phone?: string | null
+          customer_timeline?: string | null
+          deleted_at?: string | null
+          discount?: number
+          id?: string
+          items?: Json
+          language?: string
+          monthly_total?: number
+          one_time_total?: number
+          organization_name?: string | null
+          service_fee?: number
+          share_expires_at?: string | null
+          share_token?: string | null
+          solution_number?: string
+          solution_type: string
+          source?: string
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          annual_total?: number
+          assigned_to?: string | null
+          compat_warnings?: Json
+          computed?: Json
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_budget?: string | null
+          customer_city?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_notes?: string | null
+          customer_phone?: string | null
+          customer_timeline?: string | null
+          deleted_at?: string | null
+          discount?: number
+          id?: string
+          items?: Json
+          language?: string
+          monthly_total?: number
+          one_time_total?: number
+          organization_name?: string | null
+          service_fee?: number
+          share_expires_at?: string | null
+          share_token?: string | null
+          solution_number?: string
+          solution_type?: string
+          source?: string
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seo_meta: {
         Row: {
           canonical_url: string | null

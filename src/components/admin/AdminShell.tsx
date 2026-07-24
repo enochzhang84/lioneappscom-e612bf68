@@ -71,6 +71,7 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/exams", label: "Exams", icon: GraduationCap, group: "Exams" },
 
   { to: "/admin/products", label: "Products", icon: Package, group: "Products" },
+  { to: "/admin/solution-builder", label: "方案配置中心", icon: Wrench, group: "Products" },
 
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3, group: "Analytics" },
   { to: "/admin/seo", label: "SEO", icon: Search, group: "Analytics" },
