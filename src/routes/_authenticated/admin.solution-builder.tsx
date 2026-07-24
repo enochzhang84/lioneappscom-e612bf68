@@ -25,6 +25,7 @@ import { formatMoney } from "@/lib/solution-builder/calc";
 import { Link2, Copy, RefreshCw, Ban } from "lucide-react";
 import { ProductCatalog } from "@/components/admin/solution-builder/ProductCatalog";
 import { CompatRules } from "@/components/admin/solution-builder/CompatRules";
+import { CompatSimulator } from "@/components/admin/solution-builder/CompatSimulator";
 
 export const Route = createFileRoute("/_authenticated/admin/solution-builder")({
   component: SolutionBuilderAdmin,
