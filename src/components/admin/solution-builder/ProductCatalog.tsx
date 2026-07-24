@@ -97,7 +97,7 @@ function ProductsSection() {
   });
 
   const brands: SbBrand[] = brandsQ.data?.rows ?? [];
-  const cats: SbCategory[] = catsQ.data?.rows ?? [];
+  const cats: SbCategory[] = (catsQ.data?.rows ?? []) as unknown as SbCategory[];
   const rows: SbProduct[] = listQ.data?.rows ?? [];
   const filteredCats = useMemo(
     () => builderType ? cats.filter((c) => c.builder_type === builderType) : cats,
