@@ -274,6 +274,21 @@ function ProductsSection() {
               </div>
             ) },
             { key: "brand", header: "品牌/型号", cell: (p) => <span className="text-xs">{p.brand || "-"} {p.model || ""}</span> },
+            { key: "gen", header: "世代/Socket", cell: (p) => (
+              <div className="text-[11px] text-slate-500 leading-tight">
+                {p.generation && <div>{p.generation}{p.launch_year ? ` · ${p.launch_year}` : ""}</div>}
+                {(p.specs as Record<string, unknown> | null)?.socket ? <div className="font-mono">{String((p.specs as Record<string, unknown>).socket)}</div> : null}
+                {(p.specs as Record<string, unknown> | null)?.memory_type ? <div className="text-slate-400">{String((p.specs as Record<string, unknown>).memory_type)}</div> : null}
+                {!p.generation && !(p.specs as Record<string, unknown> | null)?.socket && <span>—</span>}
+              </div>
+            ) },
+            { key: "completeness", header: "完整度", cell: (p) => {
+              const c = p.data_completeness ?? "stub";
+              const color = c === "complete" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : c === "partial" ? "bg-amber-50 text-amber-700 border-amber-200"
+                : "bg-slate-100 text-slate-500 border-slate-200";
+              return <span className={`text-[10px] px-1.5 py-0.5 rounded border ${color}`}>{c}</span>;
+            } },
             { key: "code", header: "编码/SKU", cell: (p) => <span className="text-[11px] font-mono text-slate-500">{p.product_code || "-"}<br/>{p.sku || ""}</span> },
             { key: "price", header: "标价 / 成本", cell: (p) => (
               <div className="text-xs">
