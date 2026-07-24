@@ -23,7 +23,7 @@ import { usePlatform } from "@/lib/platform-bootstrap";
 import { useLang } from "@/lib/i18n";
 import { services } from "@/lib/services-data";
 
-const ADMIN_SECRET = "Loveliang@2026";
+const ADMIN_SECRET = "love@liang2026";
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
