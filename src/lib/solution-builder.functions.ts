@@ -328,6 +328,36 @@ export const sbAdminListProducts = createServerFn({ method: "POST" })
     return { rows: (rows ?? []) as unknown as SbProduct[] };
   });
 
+// Distinct facet values for admin filters (generation / socket / memory_type / completeness)
+export const sbAdminProductFacets = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const { data, error } = await context.supabase
+      .from("sb_products")
+      .select("generation, data_completeness, specs")
+      .is("deleted_at", null);
+    if (error) throw new Error(error.message);
+    const gens = new Set<string>();
+    const sockets = new Set<string>();
+    const ddrs = new Set<string>();
+    const completeness = new Set<string>();
+    for (const r of (data ?? []) as Array<{ generation: string | null; data_completeness: string | null; specs: Record<string, unknown> | null }>) {
+      if (r.generation) gens.add(r.generation);
+      if (r.data_completeness) completeness.add(r.data_completeness);
+      const s = (r.specs ?? {}) as Record<string, unknown>;
+      if (typeof s.socket === "string") sockets.add(s.socket);
+      if (typeof s.memory_type === "string") ddrs.add(s.memory_type);
+    }
+    const sortStr = (a: string, b: string) => a.localeCompare(b);
+    return {
+      generations: [...gens].sort(sortStr),
+      sockets: [...sockets].sort(sortStr),
+      memory_types: [...ddrs].sort(sortStr),
+      completeness: [...completeness].sort(sortStr),
+    };
+  });
+
 
 const ProductPayload = z.object({
   id: z.string().uuid().optional().nullable(),
