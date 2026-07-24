@@ -9,6 +9,12 @@ import {
   Cloud,
   type LucideIcon,
 } from "lucide-react";
+import imgHomeNetwork from "@/assets/service-home-network.jpg";
+import imgNas from "@/assets/service-nas.jpg";
+import imgSmartHome from "@/assets/service-smart-home.jpg";
+import imgWebsites from "@/assets/service-websites.jpg";
+import imgCustomSoftware from "@/assets/service-custom-software.jpg";
+import imgBusinessPlatforms from "@/assets/service-business-platforms.jpg";
 
 export type ServiceCategory = "home" | "business";
 
@@ -19,6 +25,8 @@ export type ServiceItem = {
   icon: LucideIcon;
   // Illustration gradient (used in lieu of stock photos — clean, modern, brand-consistent)
   gradient: string;
+  /** Optional hero image URL. Homepage service grid shows only items that have this. */
+  image?: string;
   title: { zh: string; en: string };
   short: { zh: string; en: string };
   full: { zh: string; en: string };
@@ -34,6 +42,7 @@ export const services: ServiceItem[] = [
     anchor: "home-network",
     icon: Wifi,
     gradient: "linear-gradient(135deg,#2563EB 0%,#38BDF8 100%)",
+    image: imgHomeNetwork,
     title: { zh: "家庭网络与 Wi-Fi", en: "Home Network & Wi-Fi" },
     short: {
       zh: "为家庭规划稳定的网络结构,改善弱信号、网络死角、速度不稳定和多设备连接问题。",
@@ -76,6 +85,7 @@ export const services: ServiceItem[] = [
     anchor: "nas-private-cloud",
     icon: HardDrive,
     gradient: "linear-gradient(135deg,#0EA5E9 0%,#6366F1 100%)",
+    image: imgNas,
     title: { zh: "NAS 与私有云", en: "NAS & Private Cloud" },
     short: {
       zh: "建立属于自己的家庭数据中心,集中保存照片、视频、文件和家庭影音资料。",
@@ -118,6 +128,7 @@ export const services: ServiceItem[] = [
     anchor: "smart-home",
     icon: HomeIcon,
     gradient: "linear-gradient(135deg,#10B981 0%,#14B8A6 100%)",
+    image: imgSmartHome,
     title: { zh: "智能家居网络", en: "Smart Home Network" },
     short: {
       zh: "整合摄像头、门锁、灯光、传感器和其他智能设备,让家庭设备连接更稳定、控制更简单。",
@@ -203,6 +214,7 @@ export const services: ServiceItem[] = [
     anchor: "business-websites",
     icon: Globe,
     gradient: "linear-gradient(135deg,#2563EB 0%,#7C3AED 100%)",
+    image: imgWebsites,
     title: { zh: "企业网站建设", en: "Business Websites" },
     short: {
       zh: "为小型企业、教会和组织建设简洁、专业、适合手机访问的官方网站。",
@@ -245,6 +257,7 @@ export const services: ServiceItem[] = [
     anchor: "custom-software",
     icon: Code2,
     gradient: "linear-gradient(135deg,#7C3AED 0%,#EC4899 100%)",
+    image: imgCustomSoftware,
     title: { zh: "定制软件开发", en: "Custom Software" },
     short: {
       zh: "根据企业真实工作流程开发管理系统,减少重复操作和人工记录。",
@@ -287,6 +300,7 @@ export const services: ServiceItem[] = [
     anchor: "business-platforms",
     icon: Users,
     gradient: "linear-gradient(135deg,#0EA5E9 0%,#2563EB 100%)",
+    image: imgBusinessPlatforms,
     title: { zh: "企业办公平台", en: "Business Office Platforms" },
     short: {
       zh: "将员工、任务、排班、考勤、审批和统计整合到统一的办公平台中。",
