@@ -308,15 +308,20 @@ export const sbAdminUpdateShare = createServerFn({ method: "POST" })
 // Products
 export const sbAdminListProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { category?: string } | undefined) => d ?? {})
+  .inputValidator((d: { category?: string; builder_type?: string; search?: string; brand_id?: string; include_deleted?: boolean } | undefined) => d ?? {})
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     let q = context.supabase.from("sb_products").select("*").order("category").order("sort_order");
+    if (!data?.include_deleted) q = q.is("deleted_at", null);
     if (data?.category) q = q.eq("category", data.category);
+    if (data?.brand_id) q = q.eq("brand_id", data.brand_id);
+    if (data?.builder_type) q = q.contains("builder_types", [data.builder_type]);
+    if (data?.search) q = q.or(`name_zh.ilike.%${data.search}%,name_en.ilike.%${data.search}%,brand.ilike.%${data.search}%,model.ilike.%${data.search}%,product_code.ilike.%${data.search}%,sku.ilike.%${data.search}%,slug.ilike.%${data.search}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return { rows: (rows ?? []) as unknown as SbProduct[] };
   });
+
 
 const ProductPayload = z.object({
   id: z.string().uuid().optional().nullable(),
