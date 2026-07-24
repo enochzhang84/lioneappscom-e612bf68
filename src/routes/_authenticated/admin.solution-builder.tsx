@@ -352,6 +352,8 @@ function SolutionDetail({ row, onPatch }: { row: SbSolutionRow; onPatch: (patch:
         <Sum k="一次性总价" v={formatMoney(Number(row.one_time_total), row.currency)} highlight />
       </div>
 
+      <SolutionCompatPanel row={row} autoRun />
+
       <div>
         <Label>管理员备注</Label>
         <textarea className="mt-1 w-full min-h-[80px] rounded-md border border-slate-200 bg-white px-3 py-2 text-sm" value={notes} onChange={(e) => setNotes(e.target.value)} />
