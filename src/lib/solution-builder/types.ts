@@ -62,19 +62,76 @@ export type SbProduct = {
   name_zh: string;
   name_en: string;
   brand: string | null;
+  brand_id: string | null;
   model: string | null;
+  product_code: string | null;
+  sku: string | null;
   description_zh: string | null;
   description_en: string | null;
+  short_description_zh: string | null;
+  short_description_en: string | null;
   image_url: string | null;
+  manufacturer_url: string | null;
+  builder_types: string[];
+  usage_tags: string[];
   specs: Record<string, any>;
   list_price: number;
+  cost_price?: number;                 // admin only; never returned to public
   install_fee: number;
+  monthly_fee: number;
+  annual_fee: number;
   stock_status: "in_stock" | "special_order" | "out_of_stock" | "discontinued";
+  stock_quantity: number | null;
+  lead_time_days: number | null;
+  warranty_months: number | null;
   is_visible: boolean;
   is_sample: boolean;
   sort_order: number;
   currency: string;
   price_updated_at: string;
+  deleted_at?: string | null;
+};
+
+export type SbBrand = {
+  id: string;
+  brand_code: string;
+  name: string;
+  name_zh: string | null;
+  name_en: string | null;
+  logo_url: string | null;
+  website_url: string | null;
+  country: string | null;
+  description: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SbCategory = {
+  id: string;
+  builder_type: "pc" | "nas" | "home-network" | "shared" | "service";
+  code: string;
+  name_zh: string;
+  name_en: string;
+  parent_code: string | null;
+  icon: string | null;
+  description: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SbPriceHistoryRow = {
+  id: string;
+  product_id: string;
+  field: string;
+  old_value: number | null;
+  new_value: number | null;
+  currency: string;
+  changed_by: string | null;
+  changed_at: string;
 };
 
 export type SbSolutionRow = {
