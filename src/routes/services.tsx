@@ -291,9 +291,9 @@ function ServiceBlock({
 
         <div className="mt-7 flex flex-wrap gap-3">
           <Button asChild>
-            <Link to="/contact" search={{ service: service.id } as never}>
+            <a href={`/contact?service=${service.id}`}>
               {lang === "zh" ? "咨询此服务" : "Ask About This Service"}
-            </Link>
+            </a>
           </Button>
           <Button asChild variant="outline">
             <Link to="/cases">
