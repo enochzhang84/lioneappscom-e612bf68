@@ -160,10 +160,7 @@ export async function exportSolutionPdf(args: Args): Promise<void> {
   }
 }
 
-  } finally {
-    document.body.removeChild(doc);
-  }
-}
+
 
 function sumRow(label: string, value: string, bold = false): string {
   return `<tr>
