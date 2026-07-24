@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Mail, MessageCircle, Users, Building2, Church, Search, PenTool, Wrench, LifeBuoy, Check, Wifi, HardDrive, Home as HomeIcon, Film, Shield, RefreshCw, Lock, Layers, TrendingUp, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteLayout } from "@/components/SiteLayout";
-import { listProducts, listCases, type ProductCard, type CaseCard } from "@/lib/cms.functions";
+
 import { useLang, dict } from "@/lib/i18n";
 import { services } from "@/lib/services-data";
 import audienceHome from "@/assets/audience-home-users.jpg";
@@ -29,12 +29,9 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
     ],
   }),
-  loader: async () => {
-    const [products, cases] = await Promise.all([listProducts(), listCases()]);
-    return { products, cases };
-  },
   component: Home_,
 });
+
 
 function Home_() {
   const { lang, t } = useLang();
