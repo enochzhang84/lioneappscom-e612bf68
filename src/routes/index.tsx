@@ -53,8 +53,7 @@ function Home_() {
           >
             {lang === "zh" ? (
               <>
-                <span className="whitespace-nowrap">为家庭与小型企业</span>
-                <span className="mx-1 lg:mx-2" />
+                <span className="whitespace-nowrap">为家庭与小型企业</span>{" "}
                 <span className="whitespace-nowrap">打造可靠的数字生活</span>
               </>
             ) : (
