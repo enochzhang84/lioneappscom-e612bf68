@@ -22,6 +22,7 @@ import {
   sbAdminDeleteCategory,
   sbAdminPriceHistory,
   sbAdminBulkUpsertProducts,
+  sbAdminProductFacets,
 } from "@/lib/solution-builder.functions";
 import type { SbProduct, SbBrand, SbCategory, SbPriceHistoryRow } from "@/lib/solution-builder/types";
 import { formatMoney } from "@/lib/solution-builder/calc";
