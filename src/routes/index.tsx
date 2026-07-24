@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Mail, MessageCircle, Users, Building2, Church, Search, PenTool, Wrench, LifeBuoy, Check } from "lucide-react";
+import { ArrowRight, Mail, MessageCircle, Users, Building2, Church, Search, PenTool, Wrench, LifeBuoy, Check, Wifi, HardDrive, Home as HomeIcon, Film, Shield, RefreshCw, Lock, Layers, TrendingUp, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteLayout } from "@/components/SiteLayout";
 import { listProducts, listCases, type ProductCard, type CaseCard } from "@/lib/cms.functions";
-import { mediaUrl } from "@/lib/media";
 import { useLang, dict } from "@/lib/i18n";
 import { services } from "@/lib/services-data";
 import audienceHome from "@/assets/audience-home-users.jpg";
@@ -13,6 +12,12 @@ import process1 from "@/assets/process-1-discovery.jpg";
 import process2 from "@/assets/process-2-design.jpg";
 import process3 from "@/assets/process-3-deployment.jpg";
 import process4 from "@/assets/process-4-support.jpg";
+import futureHero from "@/assets/future-home-hero.jpg";
+import futureNetwork from "@/assets/future-home-network.jpg";
+import futureNas from "@/assets/future-home-nas.jpg";
+import futureSmart from "@/assets/future-home-smart.jpg";
+import futureMedia from "@/assets/future-home-media.jpg";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
