@@ -17,6 +17,8 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { usePlatform } from "@/lib/platform-bootstrap";
@@ -32,6 +34,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const { navPages } = usePlatform();
   const { lang, setLang, t } = useLang();
@@ -182,6 +185,40 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             <Button asChild size="sm" className="hidden sm:inline-flex">
               <Link to="/contact">{t("nav.cta")}</Link>
             </Button>
+
+            {/* Mobile hamburger */}
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  aria-label="Open menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72 p-0">
+                <nav className="flex flex-col gap-1 p-6 pt-10 text-base">
+                  <Link to="/" onClick={() => setMobileOpen(false)} activeOptions={{ exact: true }} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.home")}</Link>
+                  <Link to="/services" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.services")}</Link>
+                  <Link to="/cases" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.projects")}</Link>
+                  <Link to="/p/$slug" params={{ slug: "tools" }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.tools")}</Link>
+                  <Link to="/p/$slug" params={{ slug: "ai" }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.ai")}</Link>
+                  <Link to="/blog" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.blog")}</Link>
+                  <Link to="/about" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.about")}</Link>
+                  <Link to="/contact" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.contact")}</Link>
+                  {navPages?.filter((p) => p.slug !== "tools" && p.slug !== "ai").map((p) => (
+                    <Link key={p.id} to="/p/$slug" params={{ slug: p.slug }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">
+                      {p.nav_label}
+                    </Link>
+                  ))}
+                  <Button asChild size="sm" className="mt-4">
+                    <Link to="/contact" onClick={() => setMobileOpen(false)}>{t("nav.cta")}</Link>
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
