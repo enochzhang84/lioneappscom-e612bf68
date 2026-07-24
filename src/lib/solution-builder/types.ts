@@ -100,7 +100,7 @@ export type SbProduct = {
   launch_date?: string | null;
   gallery_urls?: string[] | null;
   specification_pdf_url?: string | null;
-  performance_scores?: Record<string, unknown> | null;
+  performance_scores?: Record<string, number> | null;
   data_completeness?: "stub" | "partial" | "complete" | null;
 };
 
