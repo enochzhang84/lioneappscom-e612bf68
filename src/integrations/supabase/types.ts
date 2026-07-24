@@ -1004,22 +1004,31 @@ export type Database = {
       sb_products: {
         Row: {
           annual_fee: number
+          architecture: string | null
           brand: string | null
           brand_id: string | null
           builder_types: string[]
           category: string
+          category_id: string | null
+          codename: string | null
           compat: Json
           cost_price: number | null
           created_at: string
           currency: string
+          data_completeness: string
           deleted_at: string | null
           description_en: string | null
           description_zh: string | null
+          gallery_urls: string[]
+          generation: string | null
           id: string
           image_url: string | null
           install_fee: number
+          internal_notes: string | null
           is_sample: boolean
           is_visible: boolean
+          launch_date: string | null
+          launch_year: number | null
           lead_time_days: number | null
           list_price: number
           manufacturer_url: string | null
@@ -1027,13 +1036,16 @@ export type Database = {
           monthly_fee: number
           name_en: string
           name_zh: string
+          performance_scores: Json
           price_updated_at: string
           product_code: string | null
+          series: string | null
           short_description_en: string | null
           short_description_zh: string | null
           sku: string | null
           slug: string
           sort_order: number
+          specification_pdf_url: string | null
           specs: Json
           stock_quantity: number | null
           stock_status: string
@@ -1044,22 +1056,31 @@ export type Database = {
         }
         Insert: {
           annual_fee?: number
+          architecture?: string | null
           brand?: string | null
           brand_id?: string | null
           builder_types?: string[]
           category: string
+          category_id?: string | null
+          codename?: string | null
           compat?: Json
           cost_price?: number | null
           created_at?: string
           currency?: string
+          data_completeness?: string
           deleted_at?: string | null
           description_en?: string | null
           description_zh?: string | null
+          gallery_urls?: string[]
+          generation?: string | null
           id?: string
           image_url?: string | null
           install_fee?: number
+          internal_notes?: string | null
           is_sample?: boolean
           is_visible?: boolean
+          launch_date?: string | null
+          launch_year?: number | null
           lead_time_days?: number | null
           list_price?: number
           manufacturer_url?: string | null
@@ -1067,13 +1088,16 @@ export type Database = {
           monthly_fee?: number
           name_en: string
           name_zh: string
+          performance_scores?: Json
           price_updated_at?: string
           product_code?: string | null
+          series?: string | null
           short_description_en?: string | null
           short_description_zh?: string | null
           sku?: string | null
           slug: string
           sort_order?: number
+          specification_pdf_url?: string | null
           specs?: Json
           stock_quantity?: number | null
           stock_status?: string
@@ -1084,22 +1108,31 @@ export type Database = {
         }
         Update: {
           annual_fee?: number
+          architecture?: string | null
           brand?: string | null
           brand_id?: string | null
           builder_types?: string[]
           category?: string
+          category_id?: string | null
+          codename?: string | null
           compat?: Json
           cost_price?: number | null
           created_at?: string
           currency?: string
+          data_completeness?: string
           deleted_at?: string | null
           description_en?: string | null
           description_zh?: string | null
+          gallery_urls?: string[]
+          generation?: string | null
           id?: string
           image_url?: string | null
           install_fee?: number
+          internal_notes?: string | null
           is_sample?: boolean
           is_visible?: boolean
+          launch_date?: string | null
+          launch_year?: number | null
           lead_time_days?: number | null
           list_price?: number
           manufacturer_url?: string | null
@@ -1107,13 +1140,16 @@ export type Database = {
           monthly_fee?: number
           name_en?: string
           name_zh?: string
+          performance_scores?: Json
           price_updated_at?: string
           product_code?: string | null
+          series?: string | null
           short_description_en?: string | null
           short_description_zh?: string | null
           sku?: string | null
           slug?: string
           sort_order?: number
+          specification_pdf_url?: string | null
           specs?: Json
           stock_quantity?: number | null
           stock_status?: string
@@ -1128,6 +1164,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "solution_product_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sb_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "solution_product_categories"
             referencedColumns: ["id"]
           },
         ]
