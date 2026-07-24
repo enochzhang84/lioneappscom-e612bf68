@@ -533,7 +533,7 @@ function CategoriesSection() {
     onSuccess: () => { toast.success("已删除"); qc.invalidateQueries({ queryKey: ["admin-sb-categories"] }); setPending(null); },
     onError: (e: Error) => toast.error(e.message),
   });
-  const rows: SbCategory[] = (q.data?.rows ?? []).filter((c) => !filter || c.builder_type === filter);
+  const rows: SbCategory[] = ((q.data?.rows ?? []) as unknown as SbCategory[]).filter((c) => !filter || c.builder_type === filter);
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
