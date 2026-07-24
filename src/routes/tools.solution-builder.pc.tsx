@@ -18,7 +18,7 @@ export const Route = createFileRoute("/tools/solution-builder/pc")({
   component: PcBuilder,
 });
 
-const CATS = ["pc-cpu","pc-motherboard","pc-gpu","pc-ram","pc-ssd","pc-hdd","pc-psu","pc-case","pc-cooler","pc-os","service-install"];
+const CATS = ["pc-cpu","pc-mb","pc-gpu","pc-ram","pc-ssd","pc-hdd","pc-psu","pc-case","pc-cooler","pc-os","service-install"];
 
 const USE_CASES = [
   { key: "office", zh: "家庭 / 普通办公", en: "Home / Office" },
