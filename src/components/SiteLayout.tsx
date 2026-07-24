@@ -13,50 +13,17 @@ import {
 } from "@/components/ui/dialog";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { usePlatform } from "@/lib/platform-bootstrap";
 import { useLang } from "@/lib/i18n";
+import { services } from "@/lib/services-data";
 
 const ADMIN_SECRET = "Loveliang@2026";
-
-// Service dropdown groups. All items currently link to /contact — no fake pages,
-// no CMS mutations. When we build real service detail pages later, swap the `to` here.
-const serviceGroups = [
-  {
-    labelKey: "svc.group.home" as const,
-    items: [
-      { key: "svc.home.network" as const },
-      { key: "svc.home.nas" as const },
-      { key: "svc.home.smart" as const },
-      { key: "svc.home.media" as const },
-    ],
-  },
-  {
-    labelKey: "svc.group.biz" as const,
-    items: [
-      { key: "svc.biz.website" as const },
-      { key: "svc.biz.software" as const },
-      { key: "svc.biz.office" as const },
-      { key: "svc.biz.cloud" as const },
-    ],
-  },
-];
-
-const footerServices = [
-  "services.s1.t",
-  "services.s2.t",
-  "services.s3.t",
-  "services.s4.t",
-  "services.s5.t",
-  "services.s6.t",
-] as const;
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
