@@ -24,10 +24,7 @@ function SharedView() {
   const compat = (shared.compat_warnings as unknown as import("@/lib/solution-builder/types").CompatWarning[]) ?? [];
   const cur = shared.currency;
 
-  const L = (shared.language === "en" ? "en" : "zh") as "zh" | "en";
-  const items = (shared.items as unknown as import("@/lib/solution-builder/types").LineItem[]) ?? [];
-  const compat = (shared.compat_warnings as unknown as import("@/lib/solution-builder/types").CompatWarning[]) ?? [];
-  const cur = shared.currency;
+
 
   return (
     <SiteLayout>
