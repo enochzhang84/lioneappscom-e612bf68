@@ -12,9 +12,11 @@ import {
 import imgHomeNetwork from "@/assets/service-home-network.jpg";
 import imgNas from "@/assets/service-nas.jpg";
 import imgSmartHome from "@/assets/service-smart-home.jpg";
+import imgHomeMedia from "@/assets/service-home-media.jpg";
 import imgWebsites from "@/assets/service-websites.jpg";
 import imgCustomSoftware from "@/assets/service-custom-software.jpg";
 import imgBusinessPlatforms from "@/assets/service-business-platforms.jpg";
+import imgCloudDeployment from "@/assets/service-cloud-deployment.jpg";
 
 export type ServiceCategory = "home" | "business";
 
@@ -171,6 +173,7 @@ export const services: ServiceItem[] = [
     anchor: "home-media",
     icon: Film,
     gradient: "linear-gradient(135deg,#D97706 0%,#F59E0B 100%)",
+    image: imgHomeMedia,
     title: { zh: "家庭影音与媒体中心", en: "Home Media Center" },
     short: {
       zh: "将电视、音响、功放、NAS 和影音资料连接起来,打造方便管理的家庭娱乐中心。",
@@ -343,6 +346,7 @@ export const services: ServiceItem[] = [
     anchor: "cloud-deployment",
     icon: Cloud,
     gradient: "linear-gradient(135deg,#0F766E 0%,#0EA5E9 100%)",
+    image: imgCloudDeployment,
     title: { zh: "云服务器部署与维护", en: "Cloud Deployment & Support" },
     short: {
       zh: "为网站和软件提供 VPS、Docker、数据库、域名、SSL、备份和长期维护服务。",
