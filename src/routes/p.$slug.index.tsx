@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
+import { useLang } from "@/lib/i18n";
+import sbPcImg from "@/assets/sb-pc-builder.jpg";
+import sbNasImg from "@/assets/sb-nas-builder.jpg";
+import sbNetImg from "@/assets/sb-network-planner.jpg";
+import sbFullImg from "@/assets/sb-full-solution.jpg";
 
 export const Route = createFileRoute("/p/$slug/")({
   validateSearch: z.object({ cat: z.string().optional() }).parse,
@@ -133,7 +138,11 @@ function ToolsPageView({ page, categories, items }: {
         </div>
       </section>
 
+      {/* Featured: Solution Builder */}
+      <SolutionBuilderFeatured />
+
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
+
         {/* Mobile category chips */}
         <div className="md:hidden -mx-4 px-4 py-3 border-b border-border overflow-x-auto">
           <div className="flex gap-2 min-w-max">
@@ -534,3 +543,123 @@ function ToolCardView({ card }: { card: Extract<Block, { type: "tool_card" }> })
     <a href={card.href}>{inner}</a>
   );
 }
+
+type SbCard = {
+  key: string;
+  image: string;
+  href: string;
+  titleZh: string;
+  titleEn: string;
+  descZh: string;
+  descEn: string;
+  ctaZh: string;
+  ctaEn: string;
+};
+
+const SB_CARDS: SbCard[] = [
+  {
+    key: "pc",
+    image: sbPcImg,
+    href: "/tools/solution-builder/pc",
+    titleZh: "PC 装机配置器",
+    titleEn: "PC Builder",
+    descZh: "配置兼容的定制主机，实时计算价格并进行兼容性检查。",
+    descEn: "Build a compatible custom PC with real-time pricing and compatibility checks.",
+    ctaZh: "启动配置器",
+    ctaEn: "Launch Builder",
+  },
+  {
+    key: "nas",
+    image: sbNasImg,
+    href: "/tools/solution-builder/nas",
+    titleZh: "NAS 与私有云配置器",
+    titleEn: "NAS & Private Cloud Builder",
+    descZh: "规划 NAS、存储、RAID、备份与私有云解决方案。",
+    descEn: "Plan your NAS, storage, RAID, backup and private cloud solution.",
+    ctaZh: "启动配置器",
+    ctaEn: "Launch Builder",
+  },
+  {
+    key: "network",
+    image: sbNetImg,
+    href: "/tools/solution-builder/network",
+    titleZh: "家庭网络规划器",
+    titleEn: "Home Network Planner",
+    descZh: "设计 Wi-Fi、Mesh、交换机、PoE、综合布线与家庭网络。",
+    descEn: "Design Wi-Fi, Mesh, switches, PoE, structured cabling and home networking.",
+    ctaZh: "启动规划器",
+    ctaEn: "Launch Planner",
+  },
+  {
+    key: "full",
+    image: sbFullImg,
+    href: "/tools/solution-builder",
+    titleZh: "整体方案配置中心",
+    titleEn: "Complete Solution Builder",
+    descZh: "将 PC、NAS 与家庭网络组合成完整方案，统一报价并导出 PDF。",
+    descEn: "Combine PC, NAS and Home Network into one complete solution with unified pricing and PDF quotation.",
+    ctaZh: "打开配置中心",
+    ctaEn: "Open Builder",
+  },
+];
+
+function SolutionBuilderFeatured() {
+  const { lang } = useLang();
+  const isZh = lang === "zh";
+  return (
+    <section className="border-b border-border bg-gradient-to-b from-primary/[0.04] to-transparent">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-10 md:py-14">
+        <div className="flex items-end justify-between gap-4 flex-wrap mb-6 md:mb-8">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+              <span>✨</span> {isZh ? "精选" : "Featured"}
+            </div>
+            <h2 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight">
+              {isZh ? "方案配置中心" : "Solution Builder"}
+            </h2>
+            <p className="mt-1 text-sm md:text-base text-muted-foreground">
+              {isZh ? "专业规划与配置工具" : "Professional Planning & Configuration Tools"}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {SB_CARDS.map((c) => (
+            <a
+              key={c.key}
+              href={c.href}
+              className="group flex flex-col h-full rounded-2xl border border-border bg-card overflow-hidden transition
+                hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5"
+            >
+              <div className="aspect-[4/3] bg-gradient-to-br from-primary/10 via-primary/[0.04] to-transparent grid place-items-center overflow-hidden">
+                <img
+                  src={c.image}
+                  alt={isZh ? c.titleZh : c.titleEn}
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="flex flex-col flex-1 p-5">
+                <h3 className="text-base font-semibold">
+                  {isZh ? c.titleZh : c.titleEn}
+                </h3>
+                <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                  {isZh ? c.descZh : c.descEn}
+                </p>
+                <div className="mt-4 pt-4 border-t border-border/60">
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
+                    {isZh ? c.ctaZh : c.ctaEn}
+                    <ArrowRight size={14} />
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
