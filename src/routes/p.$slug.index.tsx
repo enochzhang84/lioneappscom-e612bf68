@@ -131,28 +131,14 @@ function ToolsPageView({ page, categories, items }: {
 
   return (
     <SiteLayout>
-      {/* Title section (compact, left-aligned) */}
-      <section data-tools-layout="true" className="border-b border-border">
-        <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-6 md:py-8">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{page.title}</h1>
-          <p className="mt-1.5 text-sm md:text-base text-muted-foreground">
-            {(page.content && (page.content as { subtitle?: string }).subtitle) ||
-              (isZh
-                ? "集中使用各类配置、计算、查询与效率工具"
-                : "Access configuration, calculation, reference and productivity tools in one place.")}
-          </p>
-
-        </div>
-      </section>
-
-      {/* Featured: Solution Builder */}
+      {/* Featured: Solution Builder (page top) */}
       <SolutionBuilderFeatured />
 
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
-        {/* Section header: More Utilities */}
+        {/* Section header: Tool Collection */}
         <div className="pt-10 md:pt-12 pb-2">
           <h2 className="text-xl md:text-2xl font-bold tracking-tight">
-            {isZh ? "其他实用工具" : "More Utilities"}
+            {isZh ? "工具合集" : "Tool Collection"}
           </h2>
         </div>
 
