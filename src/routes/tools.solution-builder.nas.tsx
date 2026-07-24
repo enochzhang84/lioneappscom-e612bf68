@@ -31,7 +31,7 @@ const RAID_OPTS: { v: RaidLevel; zh: string; en: string }[] = [
 
 function NasBuilder() {
   const { lang } = useLang(); const L = lang === "en" ? "en" : "zh";
-  const productsQ = useProducts(CATS, "nas");
+  const productsQ = useProducts(CATS);
   const products = productsQ.data?.products;
 
   const [title, setTitle] = useState(L === "zh" ? "我的 NAS 方案" : "My NAS Solution");

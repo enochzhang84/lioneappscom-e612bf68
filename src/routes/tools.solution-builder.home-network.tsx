@@ -23,7 +23,7 @@ const CATS = ["net-router", "net-mesh", "net-ap", "net-switch", "net-cable", "up
 
 function NetworkBuilder() {
   const { lang } = useLang(); const L = lang === "en" ? "en" : "zh";
-  const productsQ = useProducts(CATS, "home-network");
+  const productsQ = useProducts(CATS);
   const products = productsQ.data?.products;
 
   const [title, setTitle] = useState(L === "zh" ? "我的家庭网络方案" : "My Home Network Plan");
