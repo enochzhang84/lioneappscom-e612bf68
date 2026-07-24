@@ -64,6 +64,7 @@ function SolutionBuilderAdmin() {
       {tab === "solutions" && <SolutionsPanel />}
       {tab === "catalog" && <ProductCatalog />}
       {tab === "compat" && <CompatRules />}
+      {tab === "simulator" && <CompatSimulator />}
       {tab === "products" && <ProductsPanel />}
       {tab === "settings" && <SettingsPanel />}
     </div>
