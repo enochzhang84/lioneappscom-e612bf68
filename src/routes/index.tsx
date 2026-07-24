@@ -21,6 +21,12 @@ import trendStorage from "@/assets/future-home-trend-1.png";
 import trendNetwork from "@/assets/future-home-trend-2.png";
 import trendAi from "@/assets/future-home-trend-3.png";
 import trendSecurity from "@/assets/future-home-trend-4.png";
+import advOwn from "@/assets/future-home-adv-1.png";
+import advBackup from "@/assets/future-home-adv-2.png";
+import advPrivacy from "@/assets/future-home-adv-3.png";
+import advUnified from "@/assets/future-home-adv-4.png";
+import advScale from "@/assets/future-home-adv-5.png";
+import advValue from "@/assets/future-home-adv-6.png";
 
 
 export const Route = createFileRoute("/")({
