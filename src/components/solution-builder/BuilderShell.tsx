@@ -6,14 +6,15 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { ArrowLeft, Download, Save, Share2, Printer, Send, ChevronRight, AlertTriangle, Check, Info, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Save, Share2, Printer, Send, ChevronRight, AlertTriangle, Check, Info, Loader2, BookOpen, CircleDot } from "lucide-react";
 import { SB_STRINGS, bi, type Lang } from "@/lib/solution-builder/i18n";
 import { formatMoney, computeTotals } from "@/lib/solution-builder/calc";
-import type { LineItem, CompatWarning, SolutionState, ToolKey, SbSettings } from "@/lib/solution-builder/types";
+import type { LineItem, CompatWarning, SolutionState, ToolKey, SbSettings, CompatRule } from "@/lib/solution-builder/types";
 import { sbGetSettings, sbSaveMine, sbSubmitPublic, sbShareMine } from "@/lib/solution-builder.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SubmitDialog } from "./SubmitDialog";
 import { exportSolutionPdf } from "./pdf";
+import { useCompatRules } from "./builderHelpers";
 import { useLang } from "@/lib/i18n";
 
 type Props = {
