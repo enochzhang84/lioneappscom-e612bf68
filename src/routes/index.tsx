@@ -17,6 +17,10 @@ import futureNetwork from "@/assets/future-home-network.jpg";
 import futureNas from "@/assets/future-home-nas.jpg";
 import futureSmart from "@/assets/future-home-smart.jpg";
 import futureMedia from "@/assets/future-home-media.jpg";
+import trendStorage from "@/assets/future-home-trend-1.png";
+import trendNetwork from "@/assets/future-home-trend-2.png";
+import trendAi from "@/assets/future-home-trend-3.png";
+import trendSecurity from "@/assets/future-home-trend-4.png";
 
 
 export const Route = createFileRoute("/")({
@@ -374,26 +378,30 @@ const FH_ADVANTAGES: { icon: React.ComponentType<{ className?: string }>; title:
   },
 ];
 
-const FH_TRENDS: { icon: React.ComponentType<{ className?: string }>; title: Bi; desc: Bi }[] = [
+const FH_TRENDS: { img: string; alt: Bi; title: Bi; desc: Bi }[] = [
   {
-    icon: HardDrive,
+    img: trendStorage,
+    alt: { zh: "NAS 与云端同步 3D 插画", en: "NAS and cloud sync 3D illustration" },
     title: { zh: "本地存储与公共云并存", en: "Local Storage and Public Cloud Working Together" },
-    desc: { zh: "重要数据保存在家庭 NAS，本地备份与公共云备份形成互补，而不是完全依赖单一平台。", en: "Important data lives on a home NAS while public cloud complements local backups, instead of relying on any single platform." },
+    desc: { zh: "重要数据保存在家庭 NAS,本地备份与公共云备份形成互补,而不是完全依赖单一平台。", en: "Important data lives on a home NAS while public cloud complements local backups, instead of relying on any single platform." },
   },
   {
-    icon: Wifi,
+    img: trendNetwork,
+    alt: { zh: "Mesh Wi-Fi 与智能家居户型 3D 插画", en: "Mesh Wi-Fi and smart home floor plan 3D illustration" },
     title: { zh: "网络与智能家居统一规划", en: "Unified Networking and Smart Home Design" },
     desc: { zh: "未来家庭会在装修或升级时统一规划 Wi-Fi、有线网络、摄像头、传感器和智能控制系统。", en: "Future homes will plan Wi-Fi, wired networks, cameras, sensors and smart control together during renovation or upgrades." },
   },
   {
-    icon: Cpu,
+    img: trendAi,
+    alt: { zh: "AI 芯片、NAS 与摄像头自动化 3D 插画", en: "AI chip, NAS and camera automation 3D illustration" },
     title: { zh: "家庭 AI 与自动化增加", en: "More Home AI and Automation" },
     desc: { zh: "家庭服务器和 NAS 将逐步承担本地 AI、照片管理、监控识别和自动化任务。", en: "Home servers and NAS units will gradually take on local AI, photo management, camera analysis and automation tasks." },
   },
   {
-    icon: Shield,
+    img: trendSecurity,
+    alt: { zh: "家庭网络分区与安全防护 3D 插画", en: "Segmented home network security 3D illustration" },
     title: { zh: "家庭设备更重视安全隔离", en: "Stronger Security and Device Isolation" },
-    desc: { zh: "访客设备、智能设备、工作电脑和家庭存储会使用不同网络区域，提高安全性和稳定性。", en: "Guest devices, smart devices, work computers and home storage will live in separate network zones for better security and stability." },
+    desc: { zh: "访客设备、智能设备、工作电脑和家庭存储会使用不同网络区域,提高安全性和稳定性。", en: "Guest devices, smart devices, work computers and home storage will live in separate network zones for better security and stability." },
   },
 ];
 
@@ -515,14 +523,20 @@ function FutureHomeSection({ lang }: { lang: Lang }) {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {FH_TRENDS.map((t2) => {
-              const Icon = t2.icon;
               return (
                 <div
                   key={t2.title.en}
                   className="rounded-2xl border border-dashed border-primary/25 bg-background/70 p-5"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <Icon className="h-4 w-4" />
+                  <div className="flex h-24 items-center justify-start">
+                    <img
+                      src={t2.img}
+                      alt={bi(t2.alt, lang)}
+                      loading="lazy"
+                      width={768}
+                      height={768}
+                      className="h-24 w-auto object-contain drop-shadow-[0_10px_20px_rgba(37,99,235,0.18)]"
+                    />
                   </div>
                   <h4 className="mt-4 text-sm font-semibold leading-snug">{bi(t2.title, lang)}</h4>
                   <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
