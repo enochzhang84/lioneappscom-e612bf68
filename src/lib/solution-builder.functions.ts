@@ -310,7 +310,7 @@ export const sbAdminUpdateShare = createServerFn({ method: "POST" })
 // Products
 export const sbAdminListProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { category?: string; builder_type?: string; search?: string; brand_id?: string; include_deleted?: boolean } | undefined) => d ?? {})
+  .inputValidator((d: { category?: string; builder_type?: string; search?: string; brand_id?: string; include_deleted?: boolean; generation?: string; socket?: string; ddr?: string; completeness?: string } | undefined) => d ?? {})
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     let q = context.supabase.from("sb_products").select("*").order("category").order("sort_order");
@@ -318,6 +318,10 @@ export const sbAdminListProducts = createServerFn({ method: "POST" })
     if (data?.category) q = q.eq("category", data.category);
     if (data?.brand_id) q = q.eq("brand_id", data.brand_id);
     if (data?.builder_type) q = q.contains("builder_types", [data.builder_type]);
+    if (data?.generation) q = q.eq("generation", data.generation);
+    if (data?.completeness) q = q.eq("data_completeness", data.completeness);
+    if (data?.socket) q = q.eq("specs->>socket", data.socket);
+    if (data?.ddr) q = q.eq("specs->>memory_type", data.ddr);
     if (data?.search) q = q.or(`name_zh.ilike.%${data.search}%,name_en.ilike.%${data.search}%,brand.ilike.%${data.search}%,model.ilike.%${data.search}%,product_code.ilike.%${data.search}%,sku.ilike.%${data.search}%,slug.ilike.%${data.search}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -359,6 +363,19 @@ const ProductPayload = z.object({
   is_sample: z.boolean().default(false),
   sort_order: z.number().int().default(0),
   currency: z.string().default("USD"),
+  // M1 extended fields
+  category_id: z.string().uuid().nullable().optional(),
+  series: z.string().max(120).nullable().optional(),
+  generation: z.string().max(60).nullable().optional(),
+  codename: z.string().max(120).nullable().optional(),
+  architecture: z.string().max(120).nullable().optional(),
+  launch_year: z.number().int().min(1990).max(2100).nullable().optional(),
+  launch_date: z.string().max(40).nullable().optional(),
+  gallery_urls: z.array(z.string().max(1000)).max(20).nullable().optional(),
+  specification_pdf_url: z.string().max(1000).nullable().optional(),
+  performance_scores: z.record(z.string(), z.number()).nullable().optional(),
+  data_completeness: z.enum(["stub", "partial", "complete"]).nullable().optional(),
+  internal_notes: z.string().max(4000).nullable().optional(),
 });
 
 export const sbAdminSaveProduct = createServerFn({ method: "POST" })
