@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { SiteLayout } from "@/components/SiteLayout";
 import { useLang, dict } from "@/lib/i18n";
 import {
-  services,
   homeServices,
   businessServices,
   type ServiceItem,
 } from "@/lib/services-data";
+import heroEcosystem from "@/assets/services-hero-ecosystem.jpg";
+
 
 export const Route = createFileRoute("/services")({
   head: () => ({
