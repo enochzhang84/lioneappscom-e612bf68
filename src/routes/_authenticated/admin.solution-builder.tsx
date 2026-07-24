@@ -35,6 +35,7 @@ const TABS = [
   { key: "solutions", label: "客户方案" },
   { key: "catalog", label: "产品资料库" },
   { key: "compat", label: "兼容性规则" },
+  { key: "simulator", label: "规则测试台" },
   { key: "products", label: "产品与价格（旧）" },
   { key: "settings", label: "参数设置" },
 ] as const;
