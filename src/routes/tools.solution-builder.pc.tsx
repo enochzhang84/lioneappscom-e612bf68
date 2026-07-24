@@ -30,14 +30,14 @@ const USE_CASES = [
 
 function PcBuilder() {
   const { lang } = useLang(); const L = lang === "en" ? "en" : "zh";
-  const productsQ = useProducts(CATS);
+  const productsQ = useProducts(CATS, "pc");
   const products = productsQ.data?.products;
 
   const [useCase, setUseCase] = useState("office");
   const [title, setTitle] = useState(L === "zh" ? "我的电脑方案" : "My PC Build");
   const [selections, setSelections] = useState<Record<string, { id: string | null; qty: number }>>({
     "pc-cpu": { id: null, qty: 1 },
-    "pc-motherboard": { id: null, qty: 1 },
+    "pc-mb": { id: null, qty: 1 },
     "pc-gpu": { id: null, qty: 1 },
     "pc-ram": { id: null, qty: 1 },
     "pc-ssd": { id: null, qty: 1 },
@@ -48,6 +48,7 @@ function PcBuilder() {
     "pc-os": { id: null, qty: 1 },
     "service-install": { id: null, qty: 1 },
   });
+
 
   const items = useMemo<LineItem[]>(() => {
     const out: LineItem[] = [];
