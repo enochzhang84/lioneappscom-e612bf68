@@ -151,19 +151,19 @@ export function CompatRules() {
       ) : (
         <DataTable
           columns={[
-            { key: "sort_order", header: "序", width: "60px", render: (r: Row) => <span className="text-slate-500">{r.sort_order}</span> },
-            { key: "rule_code", header: "Code", render: (r: Row) => <code className="text-xs">{r.rule_code}</code> },
-            { key: "rule_type", header: "类型", render: (r: Row) => <span className="text-xs text-slate-600">{r.rule_type}</span> },
+            { key: "sort_order", header: "序", width: "60px", cell: (r: Row) => <span className="text-slate-500">{r.sort_order}</span> },
+            { key: "rule_code", header: "Code", cell: (r: Row) => <code className="text-xs">{r.rule_code}</code> },
+            { key: "rule_type", header: "类型", cell: (r: Row) => <span className="text-xs text-slate-600">{r.rule_type}</span> },
             {
               key: "severity",
               header: "级别",
               width: "90px",
-              render: (r: Row) => <Badge className={SEV_COLOR[r.severity]}>{r.severity}</Badge>,
+              cell: (r: Row) => <Badge className={SEV_COLOR[r.severity]}>{r.severity}</Badge>,
             },
             {
               key: "message",
               header: "消息",
-              render: (r: Row) => (
+              cell: (r: Row) => (
                 <div className="text-xs text-slate-700 space-y-0.5">
                   <div>{r.message_zh || <span className="text-slate-400">— zh 未填 —</span>}</div>
                   <div className="text-slate-500">{r.message_en || <span className="text-slate-400">— en missing —</span>}</div>
@@ -174,7 +174,7 @@ export function CompatRules() {
               key: "is_active",
               header: "启用",
               width: "80px",
-              render: (r: Row) => (
+              cell: (r: Row) => (
                 <Switch
                   checked={r.is_active}
                   onCheckedChange={(v) => saveM.mutate({ ...r, is_active: v })}
@@ -185,7 +185,7 @@ export function CompatRules() {
               key: "actions",
               header: "",
               width: "120px",
-              render: (r: Row) => (
+              cell: (r: Row) => (
                 <div className="flex gap-1 justify-end">
                   <Button size="sm" variant="ghost" onClick={() => setEditing({ ...r, params: r.params ?? {} })}>
                     <Pencil className="h-4 w-4" />
