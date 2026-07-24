@@ -1,74 +1,113 @@
-## 目标
+# 博客系统升级方案
 
-重新定位 Lione Apps 为「家庭与小型企业 IT 解决方案」，重做首页，加入全站中英文切换，只改前 3 个导航项，其余 5 项功能路由保持不变。
+现状：`blog_posts` 表已存在（单语字段），前台 `/blog` 与 `/blog/$slug`、后台 `/admin/blog` 已搭好基础。但当前完全不支持中英双语，无分类/标签/评论/设置四张表，编辑器是纯 textarea，无搜索/分页/推荐/相关文章/SEO 结构化数据/RSS/sitemap/自动保存/预览/软删除/权限细分。
 
----
-
-## 一、i18n 基础设施（新增）
-
-新文件 `src/lib/i18n.tsx`：
-- `LanguageProvider`：`lang: 'zh' | 'en'`，`setLang(l)`，默认根据 `navigator.language` 判断（zh* → zh，其它 → en），持久化到 `localStorage['lione:lang']`。
-- `useLang()` hook。
-- `useT()` 返回 `t(key)` 查字典。
-- 字典存在同文件常量 `dict` 中（zh / en 两份，覆盖首页、导航、页脚、通用按钮）。
-- SSR 安全：初始值在 `useEffect` 中读 localStorage（避免 hydration 不匹配），首屏用默认 `zh`。
-- 语言切换不刷新页面（React state）。
-
-在 `src/routes/__root.tsx` 中 `<PlatformProvider>` 内包裹 `<LanguageProvider>`。
-
-## 二、SEO 双语（首页）
-
-`src/routes/index.tsx` 的 `head()` 保持默认中文；组件内用 `useEffect` 根据当前 `lang` 动态 `document.title = ...` 和更新 `meta[name=description]` / `og:*`。这样切换语言时 SEO 文本同步（首屏 SSR 仍是中文，符合"默认中文"）。
-
-## 三、导航栏（`src/components/SiteLayout.tsx`）
-
-前 3 项改为：
-- 中：首页 / 服务 / 项目案例
-- 英：Home / Services / Projects
-
-"服务" 下拉菜单重做为两组（家庭服务 / 企业服务），共 8 个子项，全部指向 `/products/$slug`（复用现有 products 路由，slug 沿用现有：church / renovation / office / custom 等；新增子项若无对应产品则先指向 `/contact`，避免创建新路由/破坏 CMS）。
-
-方案：下拉菜单展示 8 个服务分类，链接策略：
-- 家庭网络与 Wi-Fi / NAS 与私有云 / 智能家居网络 / 家庭影音 → 目前无对应产品页 → 全部指向 `/contact`（避免创建假页面 / 空 CMS 记录）
-- 企业网站建设 / 定制软件开发 / 企业办公平台 / 云服务器部署 → 指向 `/contact`（同上，避免破坏现有 products）
-
-（后 5 项：实用工具 / AI 助手 / 博客 / 关于我们 / 联系我们 —— 路由、下拉、图标、顺序全部不动，只把展示文本改成 `t()` 查字典。）
-
-右侧新增语言切换按钮 `中文 | EN`（桌面端 & 手机端）。
-
-## 四、首页（`src/routes/index.tsx`）
-
-完全重写呈现层，loader 只保留 `getSettings()`（不再依赖 products 数据展示"产品卡片"）。新首页板块（全部双语，通过 `useT`）：
-
-1. Hero — 主/副标题、两个按钮、辅助标签
-2. 我们的服务（6 张卡片，硬编码文案 + emoji/icon，不用 CMS）
-3. 我们为谁服务（3 组：家庭 / 小型企业 / 教会与非营利）
-4. 合作流程（4 步）
-5. 项目案例（复用 `listCases()`，最多 3 条；标题双语，无案例时不显示）
-6. 为什么选择 Lione Apps（6 条优势）
-7. 底部联系 CTA
-
-保留现有配色、圆角、间距风格。图片：使用 lucide-react 图标 + gradient 卡片背景（不生成新图，避免范围外改动）。
-
-## 五、页脚
-
-在 `SiteLayout` 中把 "产品" 栏改为 "服务/Services"，列出 6 项（指向 `/contact`），品牌说明双语，其余保留。
-
-## 六、CMS 双语字段（不动数据库）
-
-用户要求 CMS 支持 zh/en 字段，但强限制"不要修改现有 CMS 功能、不要破坏数据"。本次范围内**不加 schema 迁移**，避免破坏 24 个现有表；改为在计划说明中标注：CMS 双语字段作为后续独立任务处理（首页硬编码文案已完全双语，不阻塞用户体验）。
+要把需求文档里的 26 节全部一次做完，工作量约等于重建一个小型 CMS。建议**分三阶段交付**，每阶段独立可用、可验收。本次请先确认走哪个阶段（默认建议 P1 立即开工）。
 
 ---
 
-## 技术细节
+## P1 · 核心可用（本次立即实现）
 
-- 新增：`src/lib/i18n.tsx`
-- 改动：`src/routes/__root.tsx`（挂 Provider）、`src/components/SiteLayout.tsx`（导航/页脚/语言切换）、`src/routes/index.tsx`（首页重写）
-- 不改：其它路由、CMS、后台、数据库、Bible/Quiz/AI 等
-- 后 5 个导航项：URL / 组件 / 顺序完全不变，仅显示文字走 `t()`
+目标：博客真正"能读能写能发布"，双语完整，SEO 达标，风格统一。
 
-## 不做
+### 数据库迁移（一次性）
+在现有 `blog_posts` 上扩展，**不删任何字段、不清数据**：
+- 增加双语列：`title_zh/title_en, excerpt_zh/en, content_zh/en, cover_alt_zh/en, seo_title_zh/en, meta_description_zh/en`
+- 增加运营列：`reading_time, og_image_url, deleted_at, scheduled_at, allow_comments`
+- 迁移旧 `title/excerpt/content` → `*_zh`（保留原字段作兼容视图）
+- 新增 `blog_categories`（双语 name/description、slug、sort_order、is_active）
+- 新增 `blog_tags`（双语 name、slug）+ `blog_post_tags` 关联表
+- `blog_posts.category_id` 外键指向 `blog_categories`
+- 所有表：GRANT + RLS（公开 SELECT 已发布；管理员全权限，用 `has_role`）
+- 种子 10 个默认分类（家庭网络/NAS/智能家居/…）
+- 3 篇双语草稿示例（不发布）
 
-- 不做 CMS zh/en 迁移（会碰现有数据）
-- 不为 8 个服务子项创建独立路由页（保留最小改动，统一指向 `/contact`）
-- 不重做其它页面的双语（本次只覆盖导航 + 页脚 + 首页；其它页面文字保持原状 —— 用户主要诉求是"整站"，但严格限制里说"不要重构与本次任务无关的页面"。若你希望所有子页面也全部双语，请确认，我会追加。）
+### 前台 `/blog`（重写列表页）
+- Hero：双语主副标题 + 现有科技风插图（复用 `services-hero-ecosystem.jpg`）
+- 推荐区：`featured=true` 取 1 大 + 3 小；无则回退最新
+- 分类胶囊筛选栏（`?category=slug`）
+- 搜索框（`?q=`，防抖，按标题/摘要/正文/标签模糊匹配）
+- 三列文章卡片（封面/分类/标题/摘要/日期/阅读时间/作者/CTA）
+- 分页（`?page=`，每页 9）
+- 空状态双语提示
+- 底部咨询 CTA
+- 完整 `head()` SEO（含 hreflang zh/en）
+
+### 前台 `/blog/$slug`（重写详情页）
+- 面包屑、分类、标题、摘要、作者、日期、阅读时间
+- 封面图（16:10, lazy）
+- 正文渲染（Markdown → HTML，用 `marked` + `DOMPurify`；P1 不上富文本，编辑器仍是增强版 Markdown）
+- 侧栏自动生成目录（桌面 sticky，移动折叠）
+- 标签 chips
+- 分享按钮（原生 Web Share + 复制链接）
+- 相关文章（同分类 → 同标签 → 最新，最多 3 篇）
+- Article JSON-LD + BreadcrumbList JSON-LD + og:image/twitter:image
+- 未发布文章 → `notFound()`；`robots: noindex` 只在预览模式
+
+### 前台语言切换
+- 当某篇仅有一种语言：显示"该文章暂未提供中文/English 版本"友好提示 + 切回可用语言按钮
+
+### 后台 `/admin/blog`（重写列表）
+- 表格列：封面缩略图 / 中英标题 / 分类 / 状态 / 作者 / 发布时间 / 浏览 / 推荐 / 操作
+- 筛选：标题搜索、分类、状态、作者
+- 状态徽标：draft / scheduled / published / unpublished
+- 单条操作：编辑 / 预览 / 复制 / 发布 / 下架 / 软删除（二次确认）
+- 批量：发布 / 下架 / 删除
+
+### 后台 `/admin/blog/$id`（重写编辑）
+- Tabs：**基础（中）| 基础（英）| 发布 | SEO | 封面/媒体**
+- 中英各自：title / slug / excerpt / content（Markdown 编辑器 + 实时预览）
+- 发布：状态、定时发布、推荐开关、允许评论、显示作者、显示阅读时间
+- SEO：seo_title、meta_description、og_image、canonical、关键词（zh/en 各一份）
+- 封面：从 `site-media` bucket 选择/上传（复用现有 File Library）
+- **自动保存草稿**：3s 防抖、显示"最近保存时间"
+- **未保存离开提示**：`useBlocker`
+- **预览**：在新标签打开 `/blog/$slug?preview=<token>`，token 存 sessionStorage 校验
+
+### 分类管理 `/admin/blog/categories`
+新页面：新增 / 编辑 / 排序（↑↓ 按钮）/ 隐藏 / 删除（若分类下有文章则拒绝并提示重新分配）
+
+### 后台侧栏
+现有 `AdminShell` 已有单条 `Content — 文章`。改为 `Blog Management / 博客管理`（`Newspaper` 图标），点开显示子页面：文章列表、新建文章、分类管理。标签/评论/设置留 P2。
+
+### 权限
+复用现有 `has_role(_,'admin')`。P1 不细分 8 种权限，"是否管理员"即可控制入口和写操作（RLS 已在库层保护）。细分权限放 P2。
+
+### SEO 基础设施
+- `/sitemap.xml`：在现有 sitemap 里追加所有已发布文章 URL（zh + en 两条 `<url>` + hreflang）
+- 若无 sitemap 路由则新建 `src/routes/sitemap[.]xml.ts`
+
+---
+
+## P2 · 增强（下轮）
+- 标签管理页 + 前台标签筛选
+- 评论表（`blog_comments`）+ 审核后台 + 前台评论表单（默认关闭，全局开关）
+- 博客设置表（`blog_settings`）+ 后台设置页
+- 富文本编辑器升级到 TipTap（保留 Markdown 兼容）
+- 图片裁切 + WebP 自动转换
+- 8 种细分权限
+- RSS Feed `/rss.xml`
+
+## P3 · 精修（视需要）
+- 定时发布任务（pg_cron 触发 server route）
+- 文章内嵌 YouTube/视频/按钮组件
+- 全文搜索（Postgres `tsvector` 或 pg_trgm 索引）
+- 浏览量去重（IP+UA hash / 24h 去重）
+- 草稿协作、修订历史
+
+---
+
+## 技术要点
+- 迁移采用 `ADD COLUMN IF NOT EXISTS` + 数据回填，不影响现有 4 张管理页面
+- 前台 Markdown 渲染：`marked@^12` + `dompurify@^3`（体积 <50KB gzip，Worker 兼容）
+- Server functions：`listPublicPosts` / `getPostBySlug` 用 server publishable client（RLS 已限只读已发布），管理端用 `requireSupabaseAuth`
+- 图片：走现有 `site-media` bucket + File Library，不引入新上传组件
+- **不动**：首页、服务、案例、工具、AI、关于、联系、导航顺序、Logo、品牌、i18n 机制、登录系统
+
+---
+
+## 交付边界确认
+请回复：
+1. **"开始 P1"** — 我按上述 P1 全量实施（预计 1 次大迁移 + 约 8-10 个文件改写/新增）
+2. **"只做 X 部分"** — 例如"只做双语迁移+前台列表和详情"，其他留后
+3. **调整方案** — 指出要删/加的部分
