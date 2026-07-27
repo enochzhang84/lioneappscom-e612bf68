@@ -665,3 +665,34 @@ function SolutionBuilderFeatured() {
   );
 }
 
+
+function PhotoWallFeatured() {
+  const { lang } = useLang();
+  const isZh = lang === "zh";
+  return (
+    <section className="mx-auto max-w-[1400px] px-4 md:px-6 pt-6">
+      <Link
+        to="/tools/photo-wall"
+        className="group flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg sm:flex-row sm:items-center"
+      >
+        <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-primary/10 text-3xl">🖼️</div>
+        <div className="min-w-0 flex-1">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+            ✨ {isZh ? "全新上线" : "New"}
+          </div>
+          <h3 className="mt-1.5 text-lg font-bold tracking-tight">
+            Photo Wall Studio · {isZh ? "照片墙工作室" : "Photo Wall Studio"}
+          </h3>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {isZh
+              ? "专业照片墙与视频编辑器：模板、文字、音乐、动画、布局、时间轴，一键导出 MP4。"
+              : "Pro photo-wall & video editor: templates, text, music, animation, layouts, timeline, MP4 export."}
+          </p>
+        </div>
+        <span className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+          {isZh ? "开始制作" : "Start"}
+        </span>
+      </Link>
+    </section>
+  );
+}
