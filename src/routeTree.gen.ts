@@ -26,6 +26,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as ToolsSolutionBuilderRouteImport } from './routes/tools.solution-builder'
+import { Route as ToolsPhotoWallRouteImport } from './routes/tools.photo-wall'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -157,6 +158,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
 const ToolsSolutionBuilderRoute = ToolsSolutionBuilderRouteImport.update({
   id: '/solution-builder',
   path: '/solution-builder',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsPhotoWallRoute = ToolsPhotoWallRouteImport.update({
+  id: '/photo-wall',
+  path: '/photo-wall',
   getParentRoute: () => ToolsRoute,
 } as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
@@ -445,6 +451,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallRoute
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/tools/': typeof ToolsIndexRoute
@@ -509,6 +516,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallRoute
   '/blog': typeof BlogIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/admin/ai': typeof AuthenticatedAdminAiRoute
@@ -569,6 +577,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallRoute
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/tools/': typeof ToolsIndexRoute
@@ -637,6 +646,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/tools/photo-wall'
     | '/tools/solution-builder'
     | '/blog/'
     | '/tools/'
@@ -701,6 +711,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/tools/photo-wall'
     | '/blog'
     | '/tools'
     | '/admin/ai'
@@ -760,6 +771,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/tools/photo-wall'
     | '/tools/solution-builder'
     | '/blog/'
     | '/tools/'
@@ -952,6 +964,13 @@ declare module '@tanstack/react-router' {
       path: '/solution-builder'
       fullPath: '/tools/solution-builder'
       preLoaderRoute: typeof ToolsSolutionBuilderRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/photo-wall': {
+      id: '/tools/photo-wall'
+      path: '/photo-wall'
+      fullPath: '/tools/photo-wall'
+      preLoaderRoute: typeof ToolsPhotoWallRouteImport
       parentRoute: typeof ToolsRoute
     }
     '/products/$slug': {
@@ -1502,11 +1521,13 @@ const ToolsSolutionBuilderRouteWithChildren =
   ToolsSolutionBuilderRoute._addFileChildren(ToolsSolutionBuilderRouteChildren)
 
 interface ToolsRouteChildren {
+  ToolsPhotoWallRoute: typeof ToolsPhotoWallRoute
   ToolsSolutionBuilderRoute: typeof ToolsSolutionBuilderRouteWithChildren
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsPhotoWallRoute: ToolsPhotoWallRoute,
   ToolsSolutionBuilderRoute: ToolsSolutionBuilderRouteWithChildren,
   ToolsIndexRoute: ToolsIndexRoute,
 }
