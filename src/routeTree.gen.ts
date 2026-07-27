@@ -26,17 +26,20 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as ToolsSolutionBuilderRouteImport } from './routes/tools.solution-builder'
+import { Route as ToolsPhotoWallRouteImport } from './routes/tools.photo-wall'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ToolsSolutionBuilderIndexRouteImport } from './routes/tools.solution-builder.index'
+import { Route as ToolsPhotoWallIndexRouteImport } from './routes/tools.photo-wall.index'
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ToolsSolutionBuilderPcRouteImport } from './routes/tools.solution-builder.pc'
 import { Route as ToolsSolutionBuilderNasRouteImport } from './routes/tools.solution-builder.nas'
 import { Route as ToolsSolutionBuilderHomeNetworkRouteImport } from './routes/tools.solution-builder.home-network'
 import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/tools.solution-builder.full-solution'
+import { Route as ToolsPhotoWallIdRouteImport } from './routes/tools.photo-wall.$id'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
@@ -159,6 +162,11 @@ const ToolsSolutionBuilderRoute = ToolsSolutionBuilderRouteImport.update({
   path: '/solution-builder',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsPhotoWallRoute = ToolsPhotoWallRouteImport.update({
+  id: '/photo-wall',
+  path: '/photo-wall',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/products/$slug',
   path: '/products/$slug',
@@ -185,6 +193,11 @@ const ToolsSolutionBuilderIndexRoute =
     path: '/',
     getParentRoute: () => ToolsSolutionBuilderRoute,
   } as any)
+const ToolsPhotoWallIndexRoute = ToolsPhotoWallIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsPhotoWallRoute,
+} as any)
 const PSlugIndexRoute = PSlugIndexRouteImport.update({
   id: '/p/$slug/',
   path: '/p/$slug/',
@@ -217,6 +230,11 @@ const ToolsSolutionBuilderFullSolutionRoute =
     path: '/full-solution',
     getParentRoute: () => ToolsSolutionBuilderRoute,
   } as any)
+const ToolsPhotoWallIdRoute = ToolsPhotoWallIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ToolsPhotoWallRoute,
+} as any)
 const PDriveC1Route = PDriveC1RouteImport.update({
   id: '/p/drive/c1',
   path: '/p/drive/c1',
@@ -445,6 +463,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallRouteWithChildren
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/tools/': typeof ToolsIndexRoute
@@ -464,12 +483,14 @@ export interface FileRoutesByFullPath {
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
   '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
   '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
   '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
+  '/tools/photo-wall/': typeof ToolsPhotoWallIndexRoute
   '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
@@ -520,12 +541,14 @@ export interface FileRoutesByTo {
   '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
   '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
   '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
   '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallIndexRoute
   '/tools/solution-builder': typeof ToolsSolutionBuilderIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
@@ -569,6 +592,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallRouteWithChildren
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/tools/': typeof ToolsIndexRoute
@@ -588,12 +612,14 @@ export interface FileRoutesById {
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
   '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
   '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
   '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
+  '/tools/photo-wall/': typeof ToolsPhotoWallIndexRoute
   '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
   '/_authenticated/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/_authenticated/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
@@ -637,6 +663,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/tools/photo-wall'
     | '/tools/solution-builder'
     | '/blog/'
     | '/tools/'
@@ -656,12 +683,14 @@ export interface FileRouteTypes {
     | '/admin/tools'
     | '/admin/users'
     | '/p/drive/c1'
+    | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
     | '/tools/solution-builder/home-network'
     | '/tools/solution-builder/nas'
     | '/tools/solution-builder/pc'
     | '/admin/'
     | '/p/$slug/'
+    | '/tools/photo-wall/'
     | '/tools/solution-builder/'
     | '/admin/blog/$id'
     | '/admin/blog/categories'
@@ -712,12 +741,14 @@ export interface FileRouteTypes {
     | '/admin/solution-builder'
     | '/admin/users'
     | '/p/drive/c1'
+    | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
     | '/tools/solution-builder/home-network'
     | '/tools/solution-builder/nas'
     | '/tools/solution-builder/pc'
     | '/admin'
     | '/p/$slug'
+    | '/tools/photo-wall'
     | '/tools/solution-builder'
     | '/admin/blog/$id'
     | '/admin/blog/categories'
@@ -760,6 +791,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
+    | '/tools/photo-wall'
     | '/tools/solution-builder'
     | '/blog/'
     | '/tools/'
@@ -779,12 +811,14 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tools'
     | '/_authenticated/admin/users'
     | '/p/drive/c1'
+    | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
     | '/tools/solution-builder/home-network'
     | '/tools/solution-builder/nas'
     | '/tools/solution-builder/pc'
     | '/_authenticated/admin/'
     | '/p/$slug/'
+    | '/tools/photo-wall/'
     | '/tools/solution-builder/'
     | '/_authenticated/admin/blog/$id'
     | '/_authenticated/admin/blog/categories'
@@ -954,6 +988,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsSolutionBuilderRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/photo-wall': {
+      id: '/tools/photo-wall'
+      path: '/photo-wall'
+      fullPath: '/tools/photo-wall'
+      preLoaderRoute: typeof ToolsPhotoWallRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/products/$slug': {
       id: '/products/$slug'
       path: '/products/$slug'
@@ -988,6 +1029,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/tools/solution-builder/'
       preLoaderRoute: typeof ToolsSolutionBuilderIndexRouteImport
       parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/photo-wall/': {
+      id: '/tools/photo-wall/'
+      path: '/'
+      fullPath: '/tools/photo-wall/'
+      preLoaderRoute: typeof ToolsPhotoWallIndexRouteImport
+      parentRoute: typeof ToolsPhotoWallRoute
     }
     '/p/$slug/': {
       id: '/p/$slug/'
@@ -1030,6 +1078,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/tools/solution-builder/full-solution'
       preLoaderRoute: typeof ToolsSolutionBuilderFullSolutionRouteImport
       parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/photo-wall/$id': {
+      id: '/tools/photo-wall/$id'
+      path: '/$id'
+      fullPath: '/tools/photo-wall/$id'
+      preLoaderRoute: typeof ToolsPhotoWallIdRouteImport
+      parentRoute: typeof ToolsPhotoWallRoute
     }
     '/p/drive/c1': {
       id: '/p/drive/c1'
@@ -1480,6 +1535,20 @@ const CasesRouteChildren: CasesRouteChildren = {
 
 const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
 
+interface ToolsPhotoWallRouteChildren {
+  ToolsPhotoWallIdRoute: typeof ToolsPhotoWallIdRoute
+  ToolsPhotoWallIndexRoute: typeof ToolsPhotoWallIndexRoute
+}
+
+const ToolsPhotoWallRouteChildren: ToolsPhotoWallRouteChildren = {
+  ToolsPhotoWallIdRoute: ToolsPhotoWallIdRoute,
+  ToolsPhotoWallIndexRoute: ToolsPhotoWallIndexRoute,
+}
+
+const ToolsPhotoWallRouteWithChildren = ToolsPhotoWallRoute._addFileChildren(
+  ToolsPhotoWallRouteChildren,
+)
+
 interface ToolsSolutionBuilderRouteChildren {
   ToolsSolutionBuilderFullSolutionRoute: typeof ToolsSolutionBuilderFullSolutionRoute
   ToolsSolutionBuilderHomeNetworkRoute: typeof ToolsSolutionBuilderHomeNetworkRoute
@@ -1502,11 +1571,13 @@ const ToolsSolutionBuilderRouteWithChildren =
   ToolsSolutionBuilderRoute._addFileChildren(ToolsSolutionBuilderRouteChildren)
 
 interface ToolsRouteChildren {
+  ToolsPhotoWallRoute: typeof ToolsPhotoWallRouteWithChildren
   ToolsSolutionBuilderRoute: typeof ToolsSolutionBuilderRouteWithChildren
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsPhotoWallRoute: ToolsPhotoWallRouteWithChildren,
   ToolsSolutionBuilderRoute: ToolsSolutionBuilderRouteWithChildren,
   ToolsIndexRoute: ToolsIndexRoute,
 }
