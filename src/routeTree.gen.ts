@@ -39,6 +39,7 @@ import { Route as ToolsSolutionBuilderPcRouteImport } from './routes/tools.solut
 import { Route as ToolsSolutionBuilderNasRouteImport } from './routes/tools.solution-builder.nas'
 import { Route as ToolsSolutionBuilderHomeNetworkRouteImport } from './routes/tools.solution-builder.home-network'
 import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/tools.solution-builder.full-solution'
+import { Route as ToolsPhotoWallIdRouteImport } from './routes/tools.photo-wall.$id'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
@@ -229,6 +230,11 @@ const ToolsSolutionBuilderFullSolutionRoute =
     path: '/full-solution',
     getParentRoute: () => ToolsSolutionBuilderRoute,
   } as any)
+const ToolsPhotoWallIdRoute = ToolsPhotoWallIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ToolsPhotoWallRoute,
+} as any)
 const PDriveC1Route = PDriveC1RouteImport.update({
   id: '/p/drive/c1',
   path: '/p/drive/c1',
@@ -477,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
   '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
   '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
@@ -534,6 +541,7 @@ export interface FileRoutesByTo {
   '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
   '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
   '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
@@ -604,6 +612,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/p/drive/c1': typeof PDriveC1Route
+  '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
   '/tools/solution-builder/home-network': typeof ToolsSolutionBuilderHomeNetworkRoute
   '/tools/solution-builder/nas': typeof ToolsSolutionBuilderNasRoute
@@ -674,6 +683,7 @@ export interface FileRouteTypes {
     | '/admin/tools'
     | '/admin/users'
     | '/p/drive/c1'
+    | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
     | '/tools/solution-builder/home-network'
     | '/tools/solution-builder/nas'
@@ -731,6 +741,7 @@ export interface FileRouteTypes {
     | '/admin/solution-builder'
     | '/admin/users'
     | '/p/drive/c1'
+    | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
     | '/tools/solution-builder/home-network'
     | '/tools/solution-builder/nas'
@@ -800,6 +811,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tools'
     | '/_authenticated/admin/users'
     | '/p/drive/c1'
+    | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
     | '/tools/solution-builder/home-network'
     | '/tools/solution-builder/nas'
@@ -1066,6 +1078,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/tools/solution-builder/full-solution'
       preLoaderRoute: typeof ToolsSolutionBuilderFullSolutionRouteImport
       parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/photo-wall/$id': {
+      id: '/tools/photo-wall/$id'
+      path: '/$id'
+      fullPath: '/tools/photo-wall/$id'
+      preLoaderRoute: typeof ToolsPhotoWallIdRouteImport
+      parentRoute: typeof ToolsPhotoWallRoute
     }
     '/p/drive/c1': {
       id: '/p/drive/c1'
@@ -1517,10 +1536,12 @@ const CasesRouteChildren: CasesRouteChildren = {
 const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
 
 interface ToolsPhotoWallRouteChildren {
+  ToolsPhotoWallIdRoute: typeof ToolsPhotoWallIdRoute
   ToolsPhotoWallIndexRoute: typeof ToolsPhotoWallIndexRoute
 }
 
 const ToolsPhotoWallRouteChildren: ToolsPhotoWallRouteChildren = {
+  ToolsPhotoWallIdRoute: ToolsPhotoWallIdRoute,
   ToolsPhotoWallIndexRoute: ToolsPhotoWallIndexRoute,
 }
 
