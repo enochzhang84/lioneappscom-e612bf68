@@ -134,6 +134,9 @@ function ToolsPageView({ page, categories, items }: {
       {/* Featured: Solution Builder (page top) */}
       <SolutionBuilderFeatured />
 
+      <PhotoWallFeatured />
+
+
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
         {/* Section header: Tool Collection */}
         <div className="pt-10 md:pt-12 pb-2">
