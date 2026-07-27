@@ -32,6 +32,7 @@ import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ToolsSolutionBuilderIndexRouteImport } from './routes/tools.solution-builder.index'
+import { Route as ToolsPhotoWallIndexRouteImport } from './routes/tools.photo-wall.index'
 import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ToolsSolutionBuilderPcRouteImport } from './routes/tools.solution-builder.pc'
@@ -191,6 +192,11 @@ const ToolsSolutionBuilderIndexRoute =
     path: '/',
     getParentRoute: () => ToolsSolutionBuilderRoute,
   } as any)
+const ToolsPhotoWallIndexRoute = ToolsPhotoWallIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsPhotoWallRoute,
+} as any)
 const PSlugIndexRoute = PSlugIndexRouteImport.update({
   id: '/p/$slug/',
   path: '/p/$slug/',
@@ -451,7 +457,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
-  '/tools/photo-wall': typeof ToolsPhotoWallRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallRouteWithChildren
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/tools/': typeof ToolsIndexRoute
@@ -477,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
+  '/tools/photo-wall/': typeof ToolsPhotoWallIndexRoute
   '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
@@ -516,7 +523,6 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
-  '/tools/photo-wall': typeof ToolsPhotoWallRoute
   '/blog': typeof BlogIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/admin/ai': typeof AuthenticatedAdminAiRoute
@@ -534,6 +540,7 @@ export interface FileRoutesByTo {
   '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/p/$slug': typeof PSlugIndexRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallIndexRoute
   '/tools/solution-builder': typeof ToolsSolutionBuilderIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
@@ -577,7 +584,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/cases/$slug': typeof CasesSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
-  '/tools/photo-wall': typeof ToolsPhotoWallRoute
+  '/tools/photo-wall': typeof ToolsPhotoWallRouteWithChildren
   '/tools/solution-builder': typeof ToolsSolutionBuilderRouteWithChildren
   '/blog/': typeof BlogIndexRoute
   '/tools/': typeof ToolsIndexRoute
@@ -603,6 +610,7 @@ export interface FileRoutesById {
   '/tools/solution-builder/pc': typeof ToolsSolutionBuilderPcRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/p/$slug/': typeof PSlugIndexRoute
+  '/tools/photo-wall/': typeof ToolsPhotoWallIndexRoute
   '/tools/solution-builder/': typeof ToolsSolutionBuilderIndexRoute
   '/_authenticated/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/_authenticated/admin/blog/categories': typeof AuthenticatedAdminBlogCategoriesRoute
@@ -672,6 +680,7 @@ export interface FileRouteTypes {
     | '/tools/solution-builder/pc'
     | '/admin/'
     | '/p/$slug/'
+    | '/tools/photo-wall/'
     | '/tools/solution-builder/'
     | '/admin/blog/$id'
     | '/admin/blog/categories'
@@ -711,7 +720,6 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/cases/$slug'
     | '/products/$slug'
-    | '/tools/photo-wall'
     | '/blog'
     | '/tools'
     | '/admin/ai'
@@ -729,6 +737,7 @@ export interface FileRouteTypes {
     | '/tools/solution-builder/pc'
     | '/admin'
     | '/p/$slug'
+    | '/tools/photo-wall'
     | '/tools/solution-builder'
     | '/admin/blog/$id'
     | '/admin/blog/categories'
@@ -797,6 +806,7 @@ export interface FileRouteTypes {
     | '/tools/solution-builder/pc'
     | '/_authenticated/admin/'
     | '/p/$slug/'
+    | '/tools/photo-wall/'
     | '/tools/solution-builder/'
     | '/_authenticated/admin/blog/$id'
     | '/_authenticated/admin/blog/categories'
@@ -1007,6 +1017,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/tools/solution-builder/'
       preLoaderRoute: typeof ToolsSolutionBuilderIndexRouteImport
       parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/photo-wall/': {
+      id: '/tools/photo-wall/'
+      path: '/'
+      fullPath: '/tools/photo-wall/'
+      preLoaderRoute: typeof ToolsPhotoWallIndexRouteImport
+      parentRoute: typeof ToolsPhotoWallRoute
     }
     '/p/$slug/': {
       id: '/p/$slug/'
@@ -1499,6 +1516,18 @@ const CasesRouteChildren: CasesRouteChildren = {
 
 const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
 
+interface ToolsPhotoWallRouteChildren {
+  ToolsPhotoWallIndexRoute: typeof ToolsPhotoWallIndexRoute
+}
+
+const ToolsPhotoWallRouteChildren: ToolsPhotoWallRouteChildren = {
+  ToolsPhotoWallIndexRoute: ToolsPhotoWallIndexRoute,
+}
+
+const ToolsPhotoWallRouteWithChildren = ToolsPhotoWallRoute._addFileChildren(
+  ToolsPhotoWallRouteChildren,
+)
+
 interface ToolsSolutionBuilderRouteChildren {
   ToolsSolutionBuilderFullSolutionRoute: typeof ToolsSolutionBuilderFullSolutionRoute
   ToolsSolutionBuilderHomeNetworkRoute: typeof ToolsSolutionBuilderHomeNetworkRoute
@@ -1521,13 +1550,13 @@ const ToolsSolutionBuilderRouteWithChildren =
   ToolsSolutionBuilderRoute._addFileChildren(ToolsSolutionBuilderRouteChildren)
 
 interface ToolsRouteChildren {
-  ToolsPhotoWallRoute: typeof ToolsPhotoWallRoute
+  ToolsPhotoWallRoute: typeof ToolsPhotoWallRouteWithChildren
   ToolsSolutionBuilderRoute: typeof ToolsSolutionBuilderRouteWithChildren
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
-  ToolsPhotoWallRoute: ToolsPhotoWallRoute,
+  ToolsPhotoWallRoute: ToolsPhotoWallRouteWithChildren,
   ToolsSolutionBuilderRoute: ToolsSolutionBuilderRouteWithChildren,
   ToolsIndexRoute: ToolsIndexRoute,
 }
