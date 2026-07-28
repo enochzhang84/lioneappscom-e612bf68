@@ -31,11 +31,18 @@ export interface PWPhoto {
 }
 
 
-export type TextKind = "title" | "subtitle" | "caption" | "verse" | "outro";
+/** 文字类型：与海报提取的分类一一对应 */
+export type TextKind =
+  | "title" | "subtitle" | "theme" | "eventName"
+  | "speaker" | "date" | "time" | "place"
+  | "host" | "url" | "signup" | "verse"
+  | "caption" | "outro" | "body";
 
 export interface PWText {
   id: string;
   kind: TextKind;
+  /** 图层名称（时间轴 / 图层列表显示） */
+  name?: string;
   text: string;
   preset: string;
   font: string;
@@ -43,12 +50,123 @@ export interface PWText {
   color: string;
   align: "left" | "center" | "right";
   shadow: boolean;
-  /** 文字动画 ID（动画资源库 · 文字动画），兼容旧值 fade / rise / none */
+  /** 文字动画 ID（动画资源库 · 文字动画），兼容旧值 fade / rise / none。作为入场动画 */
   animation: string;
 
   start: number; // 秒
   duration: number; // 秒
+
+  /* ---------- 排版 ---------- */
+  /** 字重 100-900 */
+  weight?: number;
+  italic?: boolean;
+  underline?: boolean;
+  strike?: boolean;
+  /** 字间距（em） */
+  letterSpacing?: number;
+  /** 行间距倍数 */
+  lineHeight?: number;
+  /** 大小写转换 */
+  transform?: "none" | "upper" | "lower";
+  /** 自动换行 */
+  wrap?: boolean;
+  /** 最大宽度（占画布宽 0.1..1） */
+  maxWidth?: number;
+  /** 最大行数，超出省略 */
+  maxLines?: number;
+  /** 垂直对齐（相对 y 锚点） */
+  valign?: "top" | "middle" | "bottom";
+
+  /* ---------- 颜色与样式 ---------- */
+  /** 渐变文字的第二色，留空 = 纯色 */
+  colorTo?: string | null;
+  strokeWidth?: number;
+  strokeColor?: string;
+  shadowColor?: string;
+  shadowBlur?: number;
+  /** 发光强度 0..1 */
+  glow?: number;
+  glowColor?: string;
+  /** 文字背景 */
+  bgColor?: string | null;
+  bgOpacity?: number;
+  bgRadius?: number;
+  bgPad?: number;
+
+  /* ---------- 位置与变换 ---------- */
+  /** 锚点 X（0..1 画布宽），缺省按 align 推导 */
+  x?: number;
+  /** 锚点 Y（0..1 画布高），缺省按 kind 推导 */
+  y?: number;
+  scale?: number;
+  rotate?: number; // 角度
+  opacity?: number; // 0..1
+  /** 图层顺序，越大越靠上 */
+  z?: number;
+  locked?: boolean;
+  hidden?: boolean;
+
+  /* ---------- 动画 ---------- */
+  /** 退场动画 ID */
+  animOut?: string;
+  /** 持续动画（漂浮 / 呼吸 / 扫光…） */
+  animMotion?: string;
+  /** 入场 / 退场时长（秒） */
+  animDur?: number;
+  /** 入场延迟（秒） */
+  animDelay?: number;
+  animSpeed?: number;
+  animEasing?: string;
+  /** 逐字 / 逐行间隔（秒） */
+  animStagger?: number;
+  animIntensity?: number;
+  animLoop?: boolean;
+
+  /** 所属分组：intro = 开场场景文字 */
+  group?: "intro" | null;
 }
+
+/* ---------------- 开场场景 Opening Scene ---------------- */
+export type IntroBgKind =
+  | "color" | "gradient" | "posterBlur" | "poster" | "cover" | "firstPhoto" | "custom";
+
+export interface PWIntro {
+  enabled: boolean;
+  /** 开场总时长（秒） */
+  duration: number;
+  /** 开场模板 key */
+  template: string;
+  bg: IntroBgKind;
+  /** 背景图片 assetId（海报 / 自定义） */
+  bgAssetId?: string | null;
+  blur: number; // px @1080p
+  scale: number; // 1.0 - 1.3
+  dim: number; // 0..1 黑色遮罩
+  bgColor: string;
+  bgColor2?: string;
+  /** 与正文照片墙之间的衔接方式 */
+  outro: "fade" | "zoom" | "slide" | "cut";
+  /** 原海报与正文的关系（仅记录用户选择，不删除任何素材） */
+  posterUse?: "textOnly" | "bgOnly" | "keepInBody" | "coverOnly";
+}
+
+export function defaultIntro(): PWIntro {
+  return {
+    enabled: false,
+    duration: 7,
+    template: "church",
+    bg: "posterBlur",
+    bgAssetId: null,
+    blur: 24,
+    scale: 1.1,
+    dim: 0.45,
+    bgColor: "#0b0d12",
+    bgColor2: "#1b2436",
+    outro: "fade",
+    posterUse: "keepInBody",
+  };
+}
+
 
 export interface PWMusic {
   id: string;
@@ -158,6 +276,8 @@ export interface PWProject {
   music: PWMusic[];
   settings: PWSettings;
   timeline?: PWTimelineState;
+  /** 开场场景（从海报提取主题后生成） */
+  intro?: PWIntro | null;
   /** 发布快照：真实预览与「已发布版」导出读取此版本 */
   publishedSnapshot?: Omit<PWProject, "publishedSnapshot"> | null;
   publishedAt?: number | null;
@@ -238,6 +358,7 @@ export function newProject(name = "未命名照片墙", aspect: AspectKey = "16:
     music: [],
     settings: defaultSettings(),
     timeline: defaultTimelineState(),
+    intro: null,
     publishedSnapshot: null,
     publishedAt: null,
   };
