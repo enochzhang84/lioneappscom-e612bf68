@@ -99,7 +99,31 @@ export interface PWSettings {
   loop: boolean;
   bgColor: string;
   accent: string;
+  /* ---------- 动画资源库 Animation Library ---------- */
+  /** 全局图片动画 ID（优先于旧版 animation 字段） */
+  animationId?: string;
+  /** 转场动画 ID */
+  transitionId?: string;
+  /** 缓动方式 */
+  easing?: string;
+  /** 自定义贝塞尔曲线 */
+  customBezier?: [number, number, number, number];
+  /** 动画速度倍率 */
+  animSpeed?: number;
+  /** 动画延迟（占片段比例 0..0.8） */
+  animDelay?: number;
+  /** 片段内循环播放动画 */
+  animLoop?: boolean;
+  /** 动画幅度 0..2 */
+  animIntensity?: number;
+  /** 性能模式 */
+  perfMode?: "smooth" | "balanced" | "quality";
+  /** 每张随机动画（不连续重复） */
+  animRandom?: boolean;
+  /** 当前套用的动画组合 key */
+  animCombo?: string | null;
 }
+
 
 export interface PWProject {
   id: string;
