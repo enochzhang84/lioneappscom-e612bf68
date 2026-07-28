@@ -102,6 +102,32 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
     return () => cancelAnimationFrame(raf);
   }, [playing, timeline.total, project.settings.loop]);
 
+  /* 背景音乐：与编辑器时间轴同步 */
+  const audioRef = React.useRef<AudioController | null>(null);
+  const musicKey = project.music.map((m) => `${m.assetId}:${m.volume}:${m.muted}:${m.startTime ?? 0}:${m.loop}`).join("|");
+  React.useEffect(() => {
+    let disposed = false;
+    audioRef.current?.dispose();
+    audioRef.current = null;
+    if (project.music.length) {
+      void createAudioController(project).then((c) => {
+        if (disposed) c.dispose();
+        else audioRef.current = c;
+      });
+    }
+    return () => {
+      disposed = true;
+      audioRef.current?.dispose();
+      audioRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [musicKey]);
+  React.useEffect(() => {
+    audioRef.current?.sync(time, playing);
+  }, [time, playing]);
+
+
+
   /* 快捷键 */
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
