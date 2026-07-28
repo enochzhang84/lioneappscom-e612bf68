@@ -25,6 +25,9 @@ export interface PWPhoto {
   duration?: number | null; // 秒，单张覆盖
   /** 单张动画覆盖（动画资源库 ID） */
   animationId?: string | null;
+  /** 是否加入画面轨（时间轴）。undefined / true = 已加入；false = 仅在素材库 */
+  inTimeline?: boolean;
+
 }
 
 
