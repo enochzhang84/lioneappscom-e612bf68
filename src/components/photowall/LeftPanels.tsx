@@ -194,6 +194,12 @@ function ImagesPanel() {
           <span>未加入：<b className={outCount ? "text-amber-300" : "text-white"}>{outCount}</b> 张</span>
           <span>画面轨：<b className="text-white">{timeline.pageCount}</b> 屏 · 每屏 {timeline.perPage} 张</span>
         </div>
+        {timeline.perPage > 1 && inCount > timeline.perPage && (
+          <p className="mt-1.5 text-[10px] leading-relaxed text-white/40">
+            当前布局每屏同时显示 {timeline.perPage} 张，所以 {inCount} 张图片被分成 {timeline.pageCount} 屏（总时长 {fmtTime(timeline.total)}），没有任何图片被丢弃。
+            想让每张单独占一屏（{inCount} 个片段），请在「布局」中选择「单张轮播」。
+          </p>
+        )}
         {outCount > 0 && (
           <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-amber-400/15 px-2 py-1.5 text-amber-200">
             <span>有 {outCount} 张图片尚未加入时间轴</span>
