@@ -302,6 +302,7 @@ function ImagesPanel() {
       <div className="grid grid-cols-3 gap-2">
         {filtered.slice(0, visible).map((ph) => {
           const sel = selectedIds.includes(ph.id);
+          const inTl = ph.inTimeline !== false;
           return (
             <ContextMenu key={ph.id}>
               <ContextMenuTrigger asChild>
@@ -311,34 +312,47 @@ function ImagesPanel() {
                     sel ? "ring-primary" : selection.id === ph.id ? "ring-white/50" : "ring-transparent hover:ring-white/25"
                   }`}
                 >
-                  <Thumb assetId={ph.assetId} className="h-full w-full object-cover" />
+                  <Thumb assetId={ph.assetId} className={`h-full w-full object-cover ${inTl ? "" : "opacity-45 grayscale"}`} />
                   <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-gradient-to-t from-black/80 to-transparent p-1 opacity-0 transition group-hover:opacity-100">
                     <button title="重点" onClick={(e) => { e.stopPropagation(); setProject((p) => ({ ...p, photos: p.photos.map((x) => (x.id === ph.id ? { ...x, highlight: !x.highlight } : x)) })); }}
                       className="rounded p-1 text-white/80 hover:text-amber-300"><Star className="h-3.5 w-3.5" /></button>
                     <button title="编辑" onClick={(e) => { e.stopPropagation(); setSelection({ type: "photo", id: ph.id }); }}
                       className="rounded p-1 text-white/80 hover:text-white"><Pencil className="h-3.5 w-3.5" /></button>
-                    <button title="移除" onClick={(e) => { e.stopPropagation(); removePhotos([ph.id]); }}
+                    <button title={inTl ? "从时间轴移除" : "加入时间轴"} onClick={(e) => { e.stopPropagation(); inTl ? removeFromTimeline([ph.id]) : addToTimeline([ph.id]); }}
+                      className="rounded p-1 text-white/80 hover:text-primary">{inTl ? <Square className="h-3.5 w-3.5" /> : <CheckSquare className="h-3.5 w-3.5" />}</button>
+                    <button title="删除素材" onClick={(e) => { e.stopPropagation(); setConfirm({ title: "删除素材", desc: `将从素材库彻底删除「${ph.name}」，同时从时间轴移除。若只想让它不参与播放，请改用「从时间轴移除」。`, run: () => removePhotos([ph.id]) }); }}
                       className="rounded p-1 text-white/80 hover:text-rose-400"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
-                  <div className="absolute left-1 top-1 flex gap-1">
-                    {ph.highlight && <span className="rounded bg-amber-400/90 px-1 text-[9px] font-semibold text-black">重点</span>}
+                  <div className="absolute left-1 top-1 flex flex-wrap gap-1">
+                    <span className={`rounded px-1 text-[9px] font-semibold ${inTl ? "bg-primary text-primary-foreground" : "bg-white/80 text-black"}`}>
+                      {inTl ? "已在时间轴" : "未加入"}
+                    </span>
+                    {ph.highlight && <span className="rounded bg-amber-400/90 px-1 text-[9px] font-semibold text-black">主图</span>}
                     {ph.cover && <span className="rounded bg-sky-400/90 px-1 text-[9px] font-semibold text-black">封面</span>}
                     {(ph.caption || ph.title) && <span className="rounded bg-emerald-400/90 px-1 text-[9px] font-semibold text-black">解说</span>}
                   </div>
                 </div>
               </ContextMenuTrigger>
-              <ContextMenuContent className="w-48">
+              <ContextMenuContent className="w-52">
                 <ContextMenuItem onSelect={() => setSelection({ type: "photo", id: ph.id })}><Eye className="mr-2 h-3.5 w-3.5" />打开预览 / 编辑</ContextMenuItem>
+                {inTl
+                  ? <ContextMenuItem onSelect={() => removeFromTimeline([ph.id])}>从时间轴移除（保留素材）</ContextMenuItem>
+                  : <ContextMenuItem onSelect={() => addToTimeline([ph.id])}>加入时间轴</ContextMenuItem>}
                 <ContextMenuItem onSelect={() => setProject((p) => ({ ...p, photos: p.photos.map((x) => ({ ...x, cover: x.id === ph.id })) }))}>设为封面</ContextMenuItem>
                 <ContextMenuItem onSelect={() => setProject((p) => ({ ...p, photos: p.photos.map((x) => (x.id === ph.id ? { ...x, highlight: !x.highlight } : x)) }))}>设为重点照片</ContextMenuItem>
                 <ContextMenuSeparator />
                 <ContextMenuItem onSelect={() => setProject((p) => ({ ...p, photos: p.photos.map((x) => (x.id === ph.id ? { ...x, rotate: (x.rotate + 90) % 360 } : x)) }))}>旋转 90°</ContextMenuItem>
-                <ContextMenuItem onSelect={() => setProject((p) => { const i = p.photos.findIndex((x) => x.id === ph.id); const copy = { ...ph, id: crypto.randomUUID() }; const arr = [...p.photos]; arr.splice(i + 1, 0, copy); return { ...p, photos: arr }; })}>复制</ContextMenuItem>
+                <ContextMenuItem onSelect={() => setProject((p) => { const i = p.photos.findIndex((x) => x.id === ph.id); const copy = { ...ph, id: crypto.randomUUID() }; const arr = [...p.photos]; arr.splice(i + 1, 0, copy); return { ...p, photos: arr }; })}>复制片段</ContextMenuItem>
                 <ContextMenuItem onSelect={() => { void assetUrl(ph.assetId).then((u) => { if (u) { const a = document.createElement("a"); a.href = u; a.download = ph.name; a.click(); } }); }}>
                   <Download className="mr-2 h-3.5 w-3.5" />下载原图
                 </ContextMenuItem>
                 <ContextMenuSeparator />
-                <ContextMenuItem className="text-destructive" onSelect={() => removePhotos([ph.id])}>移除</ContextMenuItem>
+                <ContextMenuItem className="text-destructive" onSelect={() => setConfirm({ title: "删除素材", desc: `将从素材库彻底删除「${ph.name}」，同时从时间轴移除。若只想让它不参与播放，请改用「从时间轴移除」。`, run: () => removePhotos([ph.id]) })}>删除素材</ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          );
+        })}
+
               </ContextMenuContent>
             </ContextMenu>
           );
