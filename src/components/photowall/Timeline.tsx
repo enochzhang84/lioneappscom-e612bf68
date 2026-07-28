@@ -2,7 +2,7 @@ import * as React from "react";
 import { Play, Pause, Square, SkipBack, Magnet, ChevronDown, ChevronUp, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { fmtTime } from "@/lib/photowall/render";
+import { fmtTime, heroPlan } from "@/lib/photowall/render";
 import { defaultTimelineState } from "@/lib/photowall/types";
 import { assetUrl } from "@/lib/photowall/store";
 import { useEditor } from "./ctx";
