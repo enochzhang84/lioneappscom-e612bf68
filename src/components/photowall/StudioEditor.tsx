@@ -207,13 +207,35 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
                 <Save className="h-4 w-4" /> 保存
               </Button>
               <Button size="sm" className="gap-1"
-                onClick={() => { setProject((p) => ({ ...p, status: "published" })); toast.success("已发布，可在最近项目中播放"); }}>
+                onClick={() => {
+                  setProject((p) => {
+                    const { publishedSnapshot: _ignored, ...snap } = p;
+                    return { ...p, status: "published", publishedSnapshot: snap };
+                  });
+                  toast.success("已发布，真实预览将播放此版本");
+                }}>
                 <PublishIcon className="h-4 w-4" /> 发布
               </Button>
-              <Button variant="secondary" size="sm" className="gap-1" onClick={() => setPanel("export")}>
-                <Download className="h-4 w-4" /> 导出 MP4
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm" className="gap-1">
+                    <Download className="h-4 w-4" /> 导出 <ChevronDown className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>选择导出格式</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => { setExportFormat("mp4"); setPanel("export"); setExportKick((k) => k + 1); }}>
+                    MP4（H.264 / AAC）
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setExportFormat("webm"); setPanel("export"); setExportKick((k) => k + 1); }}>
+                    WebM（VP9 / Opus）
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setPanel("export")}>打开导出设置…</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <IconBtn tip="关闭" onClick={() => navigate({ to: "/tools/photo-wall" })}><X className="h-4 w-4" /></IconBtn>
+
             </div>
           </header>
 
