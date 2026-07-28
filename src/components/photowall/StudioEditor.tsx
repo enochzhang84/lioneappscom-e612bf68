@@ -164,10 +164,24 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
               {project.status === "published" ? "已发布" : "草稿"}
             </span>
 
-            <div className="mx-auto flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5">
               <IconBtn tip="撤销" onClick={undo} disabled={!past.length}><Undo2 className="h-4 w-4" /></IconBtn>
               <IconBtn tip="重做" onClick={redo} disabled={!future.length}><Redo2 className="h-4 w-4" /></IconBtn>
-              <IconBtn tip="全屏预览" onClick={() => { setPreviewMode(true); setTime(0); setPlaying(true); }}><Eye className="h-4 w-4" /></IconBtn>
+              <Button
+                variant="secondary" size="sm" className="gap-1"
+                onClick={async () => {
+                  setPlaying(false);
+                  setSaveState("saving");
+                  try {
+                    await saveProject(project);
+                    setSaveState("saved");
+                  } catch { setSaveState("error"); }
+                  window.open(`/display/photo-wall-preview/${project.id}`, "_blank", "noopener");
+                }}
+              >
+                <PlayCircle className="h-4 w-4" /> 真实预览
+              </Button>
+
               <div className="mx-1 flex rounded-lg bg-white/[0.06] p-0.5">
                 {(Object.keys(ASPECTS) as (keyof typeof ASPECTS)[]).map((k) => (
                   <button key={k} onClick={() => setProject((p) => ({ ...p, aspect: k }))}
