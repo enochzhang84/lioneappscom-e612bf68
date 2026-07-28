@@ -382,15 +382,25 @@ function TemplatesPanel() {
           <button
             key={t.key}
             onClick={() => {
+              const per = photosPerPage((t.patch.layout ?? project.settings.layout) as LayoutKey);
+              const total = project.photos.filter((x) => x.inTimeline !== false).length;
               setProject((p) => ({
                 ...p,
+                // 只改设置，绝不裁剪照片：全部图片继续参与，按每屏张数自动分组
+                photos: p.photos,
                 settings: {
                   ...p.settings, ...t.patch,
                   openingText: t.opening, openingSub: t.openingSub, endingText: t.ending,
                 },
               }));
-              toast.success(`已套用模板：${t.name}`);
+              toast.success(
+                `已套用模板：${t.name}`,
+                total > per
+                  ? { description: `当前 ${total} 张图片将按每屏 ${per} 张自动分为 ${Math.ceil(total / per)} 屏，不会丢弃任何图片。` }
+                  : undefined,
+              );
             }}
+
             className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition hover:border-primary/60 hover:bg-primary/10"
           >
             <span className="text-xl">{t.emoji}</span>
