@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TEXT_PRESETS } from "@/lib/photowall/presets";
+import { ANIMATION_LIBRARY, TEXT_ANIMS } from "@/lib/photowall/animations";
 import { RotateCcw, RotateCw, Star, Image as ImageIcon, Type, Music2, Sparkles } from "lucide-react";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
