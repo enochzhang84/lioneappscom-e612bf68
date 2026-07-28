@@ -248,10 +248,11 @@ export function Inspector() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fade">淡入淡出</SelectItem>
-                  <SelectItem value="rise">上升出现</SelectItem>
-                  <SelectItem value="none">无</SelectItem>
+                  {TEXT_ANIMS.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name} · {t.en}</SelectItem>
+                  ))}
                 </SelectContent>
+
               </Select>
             </Row>
             <div className="grid grid-cols-2 gap-2">
