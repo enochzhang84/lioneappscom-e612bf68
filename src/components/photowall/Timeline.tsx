@@ -76,6 +76,26 @@ export function Timeline() {
   }
 
   const pageSegs = timeline.segments.filter((s) => s.kind === "page");
+  const inTimelineCount = project.photos.filter((p) => p.inTimeline !== false).length;
+
+  /* Shift + 滚轮横向滚动；普通滚轮在内容超宽时也横向滚动 */
+  const onWheel = React.useCallback((e: React.WheelEvent) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const dx = e.shiftKey ? e.deltaY : e.deltaX;
+    if (dx) { el.scrollLeft += dx; e.preventDefault(); }
+  }, []);
+
+  /* 播放时时间轴自动跟随播放指针 */
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const x = (time / Math.max(0.001, total)) * width;
+    const pad = 80;
+    if (x < el.scrollLeft + pad) el.scrollLeft = Math.max(0, x - pad);
+    else if (x > el.scrollLeft + el.clientWidth - pad) el.scrollLeft = x - el.clientWidth + pad;
+  }, [time, total, width]);
+
 
   function setSegDuration(segIndex: number, dur: number) {
     const seg = pageSegs[segIndex];
