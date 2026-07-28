@@ -23,7 +23,10 @@ export interface PWPhoto {
   highlight: boolean;
   cover: boolean;
   duration?: number | null; // 秒，单张覆盖
+  /** 单张动画覆盖（动画资源库 ID） */
+  animationId?: string | null;
 }
+
 
 export type TextKind = "title" | "subtitle" | "caption" | "verse" | "outro";
 
