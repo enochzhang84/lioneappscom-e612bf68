@@ -168,6 +168,26 @@ export function Inspector() {
                 }
               />
             </Row>
+            <Row label="本张动画（留空跟随全局）">
+              <Select
+                value={photo.animationId ?? "__global"}
+                onValueChange={(v) =>
+                  setProject((p) => ({
+                    ...p,
+                    photos: p.photos.map((x) => (x.id === photo.id ? { ...x, animationId: v === "__global" ? null : v } : x)),
+                  }))
+                }
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="__global">跟随全局设置</SelectItem>
+                  {ANIMATION_LIBRARY.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name} · {a.en}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Row>
+
           </>
         )}
 
