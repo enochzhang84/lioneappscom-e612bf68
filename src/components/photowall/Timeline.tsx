@@ -162,15 +162,22 @@ export function Timeline() {
         {/* 固定轨道名 */}
         <div className="shrink-0 border-r border-white/10 bg-[#151922]" style={{ width: LABEL_W }}>
           <div className="h-6 border-b border-white/10" />
-          {["画面轨", "主图轨", "文字轨", "音频轨", "转场轨"].map((n) => (
-            <div key={n} className="flex items-center border-b border-white/5 px-3 text-[11px] text-white/55" style={{ height: ROW_H }}>
-              {n}
+          {[
+            { n: "画面轨", sub: `${inTimelineCount} 张 · ${pageSegs.length} 屏` },
+            { n: "主图轨", sub: "" },
+            { n: "文字轨", sub: "" },
+            { n: "音频轨", sub: "" },
+            { n: "转场轨", sub: "" },
+          ].map((r) => (
+            <div key={r.n} className="flex flex-col justify-center border-b border-white/5 px-3 text-[11px] text-white/55" style={{ height: ROW_H }}>
+              <span>{r.n}</span>
+              {r.sub && <span className="text-[9px] tabular-nums text-white/35">{r.sub}</span>}
             </div>
           ))}
         </div>
 
         {/* 可横向滚动内容 */}
-        <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto overflow-y-auto">
+        <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto overflow-y-auto" onWheel={onWheel}>
           <div ref={laneRef} className="relative" style={{ width }}>
             {/* 刻度 */}
             <div className="sticky top-0 z-10 h-6 cursor-pointer border-b border-white/10 bg-[#12151c]" onPointerDown={startScrub}>
@@ -187,7 +194,10 @@ export function Timeline() {
                 const left = (s.start / total) * width;
                 const w = ((s.end - s.start) / total) * width;
                 const first = s.photos[0];
-                const sel = first && selection.type === "photo" && selection.id === first.id;
+                const sel = s.photos.some((ph) => selection.type === "photo" && selection.id === ph.id);
+                const boxW = Math.max(8, w - 2);
+                const maxThumbs = Math.max(1, Math.floor((boxW - 12) / 22));
+                const shown = s.photos.slice(0, maxThumbs);
                 return (
                   <div
                     key={i}
@@ -196,16 +206,23 @@ export function Timeline() {
                     className={`absolute top-1 flex cursor-grab items-center gap-1.5 overflow-hidden rounded-md border bg-white/[0.07] px-1 ${
                       sel ? "border-primary ring-1 ring-primary" : "border-white/10 hover:border-white/30"
                     }`}
-                    style={{ left, width: Math.max(8, w - 2), height: ROW_H - 8 }}
-                    title={`${first?.name ?? ""} ${fmtTime(s.start)} → ${fmtTime(s.end)}`}
+                    style={{ left, width: boxW, height: ROW_H - 8 }}
+                    title={`第 ${i + 1} 屏（${s.photos.length} 张）：${s.photos.map((x) => x.name).join("、")}\n${fmtTime(s.start)} → ${fmtTime(s.end)}`}
                   >
                     <span
                       onPointerDown={(e) => { e.stopPropagation(); drag(e, (d) => setSegDuration(i, (s.end - s.start) - d)); }}
                       className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize bg-primary/50 opacity-0 hover:opacity-100"
                     />
-                    {first && <Thumb assetId={first.assetId} />}
+                    <span className="flex shrink-0 items-center gap-0.5">
+                      {shown.map((ph) => <Thumb key={ph.id} assetId={ph.assetId} />)}
+                      {s.photos.length > shown.length && (
+                        <span className="rounded bg-white/15 px-1 text-[9px] text-white/70">+{s.photos.length - shown.length}</span>
+                      )}
+                    </span>
                     <span className="min-w-0 flex-1 leading-tight">
-                      <span className="block truncate text-[10px] text-white/85">{first?.name ?? `#${i + 1}`}</span>
+                      <span className="block truncate text-[10px] text-white/85">
+                        第 {i + 1} 屏 · {s.photos.length} 张
+                      </span>
                       <span className="block truncate text-[9px] tabular-nums text-white/40">
                         {fmtTime(s.start)}–{fmtTime(s.end)} · {(s.end - s.start).toFixed(1)}s
                       </span>
@@ -223,6 +240,7 @@ export function Timeline() {
                 );
               })}
             </Row>
+
 
             {/* 主图轨：进入全屏 / 全屏停留 / 退出全屏 */}
             <Row>
