@@ -40,7 +40,9 @@ export interface PWText {
   color: string;
   align: "left" | "center" | "right";
   shadow: boolean;
-  animation: "fade" | "rise" | "none";
+  /** 文字动画 ID（动画资源库 · 文字动画），兼容旧值 fade / rise / none */
+  animation: string;
+
   start: number; // 秒
   duration: number; // 秒
 }
