@@ -59,6 +59,12 @@ export function Inspector() {
 
   const photo = selection.type === "photo" ? project.photos.find((p) => p.id === selection.id) : null;
   const text = selection.type === "text" ? project.texts.find((t) => t.id === selection.id) : null;
+
+  const patchText = React.useCallback(
+    (id: string, patch: Partial<PWText>) =>
+      setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
+    [setProject],
+  );
   const music = selection.type === "music" ? project.music.find((m) => m.id === selection.id) : null;
 
   const title = photo ? "图片属性" : text ? "文字属性" : music ? "音乐属性" : "画布属性";
