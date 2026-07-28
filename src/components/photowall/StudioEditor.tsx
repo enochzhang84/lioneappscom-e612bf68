@@ -126,6 +126,27 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
     audioRef.current?.sync(time, playing);
   }, [time, playing]);
 
+  /* 数据修复：加载时检测「已上传但未加入画面轨」的图片 */
+  const repairedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (repairedRef.current) return;
+    repairedRef.current = true;
+    const missing = project.photos.filter((p) => p.inTimeline === false);
+    if (!missing.length) return;
+    toast.warning(`检测到 ${missing.length} 张图片尚未加入时间轴`, {
+      duration: 12000,
+      description: "可自动按素材库顺序追加到现有片段之后，已有片段的时长与动画配置保持不变。",
+      action: {
+        label: "自动补全",
+        onClick: () => {
+          setProject((p) => ({ ...p, photos: p.photos.map((x) => ({ ...x, inTimeline: true })) }));
+          toast.success(`已补全 ${missing.length} 张图片到画面轨`);
+        },
+      },
+      cancel: { label: "稍后处理", onClick: () => {} },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   /* 快捷键 */
