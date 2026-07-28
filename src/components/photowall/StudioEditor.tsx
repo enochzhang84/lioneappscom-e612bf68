@@ -2,22 +2,27 @@ import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
-  ChevronLeft, Undo2, Redo2, Eye, Save, Upload as PublishIcon, Download, X, PanelLeftClose, PanelLeftOpen,
-  Ruler, Grid2x2, Loader2, Check, AlertCircle,
+  ChevronLeft, Undo2, Redo2, PlayCircle, Save, Upload as PublishIcon, Download, X, PanelLeftClose, PanelLeftOpen,
+  Ruler, Grid2x2, Loader2, Check, AlertCircle, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ASPECTS, type PWProject, type PWSettings } from "@/lib/photowall/types";
 import { buildTimeline } from "@/lib/photowall/render";
 import { saveProject } from "@/lib/photowall/store";
+import { createAudioController, type AudioController } from "@/lib/photowall/audio";
 import { EditorCtx, useImages, type Selection } from "./ctx";
 import { RAIL, type PanelKey } from "./rail";
 import { LeftPanel } from "./LeftPanels";
 import { PreviewCanvas } from "./PreviewCanvas";
+import { PlaybackBar } from "./PlaybackBar";
 import { Inspector } from "./Inspector";
-import { TimelineBar } from "./TimelineBar";
+import { Timeline } from "./Timeline";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -36,10 +41,12 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
   const [showGrid, setShowGrid] = React.useState(false);
   const [showSafe, setShowSafe] = React.useState(false);
   const [saveState, setSaveState] = React.useState<SaveState>("idle");
-  const [previewMode, setPreviewMode] = React.useState(false);
+  const [exportKick, setExportKick] = React.useState(0);
+  const [exportFormat, setExportFormat] = React.useState<"mp4" | "webm">("mp4");
 
   const { images } = useImages(project);
   const timeline = React.useMemo(() => buildTimeline(project), [project]);
+
 
   const setProject = React.useCallback(
     (updater: (p: PWProject) => PWProject, opts?: { history?: boolean }) => {
@@ -109,9 +116,8 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
       } else if (e.code === "Space") {
         e.preventDefault();
         setPlaying((v) => !v);
-      } else if (e.key === "Escape") {
-        setPreviewMode(false);
       }
+
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
