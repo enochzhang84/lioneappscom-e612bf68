@@ -219,7 +219,77 @@ export function photoAnimState(project: PWProject, photo: PWPhoto | undefined, p
 }
 
 
+/* ------------------------------ 主图放大 Hero ------------------------------ */
+export type HeroPhase = "none" | "enter" | "hold" | "exit";
+
+export interface HeroPlan {
+  /** 该片段内的主图下标，-1 表示无主图 */
+  index: number;
+  /** 相对片段起点的秒数 */
+  start: number;
+  inDur: number;
+  holdDur: number;
+  outDur: number;
+  end: number;
+  /** 全屏程度 0..1 */
+  k: number;
+  phase: HeroPhase;
+  mode: "grid" | "fullscreen" | "overlay";
+}
+
+const heroEase = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2); // cinematic ease-in-out
+
+/** 计算某片段的主图全屏计划（时间轴 / 预览 / 导出共用，保证与 currentTime 同步） */
+export function heroPlan(project: PWProject, seg: Segment, timeInSeg: number): HeroPlan {
+  const st = project.settings;
+  const mode = st.heroMode ?? "fullscreen";
+  const idx = seg.kind === "page" ? seg.photos.findIndex((x) => x.highlight) : -1;
+  const d = Math.max(0.001, seg.end - seg.start);
+  const empty: HeroPlan = { index: -1, start: 0, inDur: 0, holdDur: 0, outDur: 0, end: 0, k: 0, phase: "none", mode };
+  if (idx < 0 || mode === "grid") return { ...empty, index: mode === "grid" ? idx : -1 };
+
+  let inDur = Math.max(0.2, Math.min(st.heroIn ?? 1, d * 0.35));
+  let outDur = Math.max(0.2, Math.min(st.heroOut ?? 1, d * 0.35));
+  let holdDur = Math.max(0, Math.min(st.heroHold ?? 5, d - inDur - outDur));
+  let total = inDur + holdDur + outDur;
+  if (total > d) {
+    const s = d / total;
+    inDur *= s; holdDur *= s; outDur *= s; total = d;
+  }
+  const start = (d - total) / 2;
+  const end = start + total;
+
+  let k = 0;
+  let phase: HeroPhase = "none";
+  const t = timeInSeg;
+  if (t >= start && t < start + inDur) {
+    k = heroEase((t - start) / Math.max(0.001, inDur));
+    phase = "enter";
+  } else if (t >= start + inDur && t < start + inDur + holdDur) {
+    k = 1;
+    phase = "hold";
+  } else if (t >= start + inDur + holdDur && t <= end) {
+    k = 1 - heroEase((t - start - inDur - holdDur) / Math.max(0.001, outDur));
+    phase = "exit";
+  }
+  return { index: idx, start, inDur, holdDur, outDur, end, k, phase, mode };
+}
+
+/** 主图焦点位置 → 0..1 */
+export function heroFocusPoint(project: PWProject, ph: PWPhoto | undefined): { fx: number; fy: number } {
+  const f = project.settings.heroFocus ?? "center";
+  switch (f) {
+    case "top": return { fx: 0.5, fy: 0 };
+    case "bottom": return { fx: 0.5, fy: 1 };
+    case "left": return { fx: 0, fy: 0.5 };
+    case "right": return { fx: 1, fy: 0.5 };
+    case "custom": return { fx: ph?.focusX ?? 0.5, fy: ph?.focusY ?? 0.5 };
+    default: return { fx: 0.5, fy: 0.5 };
+  }
+}
+
 export type ImageMap = Map<string, HTMLImageElement>;
+
 
 function fitText(ctx: CanvasRenderingContext2D, text: string, maxW: number) {
   let t = text;
@@ -318,37 +388,63 @@ export function drawFrame(
     ctx.translate(-W / 2, -H / 2);
     if (trans.blur && perf === "quality") ctx.filter = `blur(${trans.blur}px)`;
 
-    seg.photos.forEach((ph, i) => {
-      const r = rects[i] ?? rects[rects.length - 1];
-      if (!r) return;
+    const hero = heroPlan(project, seg, time - seg.start);
+    const heroK = hero.index >= 0 ? hero.k : 0;
+
+    const drawPhoto = (ph: PWPhoto, i: number, k: number) => {
+      const r0 = rects[i] ?? rects[rects.length - 1];
+      if (!r0) return;
+      // 主图全屏：网格矩形 → 整幅画布（overlay 模式保留少量边距）
+      const inset = hero.mode === "overlay" ? Math.min(W, H) * 0.045 : 0;
+      const target = { x: inset, y: inset, w: W - inset * 2, h: H - inset * 2 };
+      const r = k > 0
+        ? {
+            x: r0.x + (target.x - r0.x) * k,
+            y: r0.y + (target.y - r0.y) * k,
+            w: r0.w + (target.w - r0.w) * k,
+            h: r0.h + (target.h - r0.h) * k,
+            rot: (r0.rot ?? 0) * (1 - k),
+          }
+        : r0;
       const img = images.get(ph.assetId);
       const seed = i + seg.index * 3 + 1;
       const a = photoAnimState(project, ph, p, seed, seg.index * tl.perPage + i);
-      const isPolaroid = st.layout === "polaroid";
+      const isPolaroid = st.layout === "polaroid" && k < 0.5;
       const frameW = isPolaroid ? Math.round(r.w * 0.045) : 0;
-      const rot = (r.rot ?? 0) + (st.rotateRandom ? ((seed * 37) % 7 - 3) * 0.008 : 0) + (ph.rotate * Math.PI) / 180 + a.rot;
+      const rot =
+        ((r.rot ?? 0) +
+          (st.rotateRandom ? ((seed * 37) % 7 - 3) * 0.008 : 0) +
+          (ph.rotate * Math.PI) / 180 +
+          a.rot) *
+        (1 - k);
+
+      // 其他缩略图在主图全屏时变暗 / 隐藏
+      let dim = 1;
+      if (heroK > 0 && i !== hero.index) dim = Math.max(0, 1 - heroK * (st.heroDim ?? 0.9));
 
       ctx.save();
-      ctx.globalAlpha = fade * trans.alpha * a.alpha;
-      ctx.translate(r.x + r.w / 2 + a.dx * W, r.y + r.h / 2 + a.dy * H);
+      ctx.globalAlpha = fade * trans.alpha * a.alpha * dim;
+      ctx.translate(r.x + r.w / 2 + a.dx * W * (1 - k), r.y + r.h / 2 + a.dy * H * (1 - k));
       if (rot) ctx.rotate(rot);
       ctx.translate(-r.w / 2, -r.h / 2);
 
-      const radius = (ph.radius || st.radius) * (W / 1920) * 1.4;
+      const radius = (ph.radius || st.radius) * (W / 1920) * 1.4 * (1 - k);
 
-      if (st.shadow) {
-        ctx.shadowColor = "rgba(0,0,0,.45)";
-        ctx.shadowBlur = 40 * (W / 1920);
-        ctx.shadowOffsetY = 14 * (W / 1920);
+      if (st.shadow && k < 1) {
+        ctx.shadowColor = `rgba(0,0,0,${0.45 * (1 - k)})`;
+        ctx.shadowBlur = 40 * (W / 1920) * (1 - k);
+        ctx.shadowOffsetY = 14 * (W / 1920) * (1 - k);
       }
       if (isPolaroid) {
         ctx.fillStyle = "#fdfdfb";
         roundRect(ctx, -frameW, -frameW, r.w + frameW * 2, r.h + frameW * 4.5, radius * 0.5);
         ctx.fill();
-      } else if (ph.highlight) {
+      } else if (ph.highlight && k < 0.15) {
+        ctx.globalAlpha *= 1 - k / 0.15;
         ctx.fillStyle = st.accent;
         roundRect(ctx, -4, -4, r.w + 8, r.h + 8, radius + 4);
         ctx.fill();
+        ctx.globalAlpha = fade * trans.alpha * a.alpha * dim;
       }
       ctx.shadowColor = "transparent";
       ctx.shadowBlur = 0;
@@ -357,11 +453,36 @@ export function drawFrame(
       roundRect(ctx, 0, 0, r.w, r.h, radius);
       ctx.save();
       ctx.clip();
+      const fitContain = k > 0 && (st.heroFit ?? "cover") === "contain";
       if (img && img.complete && img.naturalWidth) {
         if (a.blur > 0) ctx.filter = `blur(${a.blur}px)`;
-        const fx = Math.min(1, Math.max(0, ph.focusX + a.focusDX));
-        const fy = Math.min(1, Math.max(0, ph.focusY + a.focusDY));
-        drawCover(ctx, img, img.naturalWidth, img.naturalHeight, 0, 0, r.w, r.h, fx, fy, a.scale);
+        const hf = heroFocusPoint(project, ph);
+        const fx = Math.min(1, Math.max(0, (k > 0 ? hf.fx : ph.focusX) + a.focusDX));
+        const fy = Math.min(1, Math.max(0, (k > 0 ? hf.fy : ph.focusY) + a.focusDY));
+        if (fitContain) {
+          // 背景填充：同图放大模糊 / 纯色 / 变暗
+          const bg = st.heroBg ?? "blur";
+          ctx.save();
+          if (bg === "blur" && perf !== "smooth") {
+            ctx.filter = "blur(24px) saturate(1.15)";
+            drawCover(ctx, img, img.naturalWidth, img.naturalHeight, -r.w * 0.06, -r.h * 0.06, r.w * 1.12, r.h * 1.12, 0.5, 0.5, 1.1);
+            ctx.filter = "none";
+            ctx.fillStyle = "rgba(0,0,0,.25)";
+          } else if (bg === "color") {
+            ctx.fillStyle = st.accent + "33";
+          } else {
+            ctx.fillStyle = bg === "dim" ? "rgba(0,0,0,.55)" : st.bgColor;
+          }
+          ctx.fillRect(0, 0, r.w, r.h);
+          ctx.restore();
+          // 前景：完整显示（contain）
+          const cs = Math.min(r.w / img.naturalWidth, r.h / img.naturalHeight) * a.scale;
+          const dw = img.naturalWidth * cs;
+          const dh = img.naturalHeight * cs;
+          ctx.drawImage(img, (r.w - dw) / 2, (r.h - dh) / 2, dw, dh);
+        } else {
+          drawCover(ctx, img, img.naturalWidth, img.naturalHeight, 0, 0, r.w, r.h, fx, fy, a.scale);
+        }
         ctx.filter = "none";
       } else {
         ctx.fillStyle = "rgba(255,255,255,.06)";
@@ -382,23 +503,34 @@ export function drawFrame(
         ctx.fillRect(0, r.h - barH, r.w, barH);
         ctx.fillStyle = "#fff";
         ctx.textAlign = "left";
-        const fs = Math.max(H * 0.026, r.h * 0.058);
+        const fs = Math.max(H * 0.026, k > 0 ? H * 0.04 : r.h * 0.058);
         ctx.font = `600 ${Math.round(fs)}px 'Noto Sans SC', system-ui, sans-serif`;
         ctx.fillText(fitText(ctx, cap, r.w * 0.9), r.w * 0.05, r.h - barH * 0.32);
       }
       ctx.restore();
 
-      const bw = ph.border || st.border;
-      if (bw > 0) {
+      const bw = (ph.border || st.border) * (1 - k);
+      if (bw > 0.01) {
         ctx.strokeStyle = "rgba(255,255,255,.9)";
         ctx.lineWidth = bw * (W / 1920) * 1.4;
         roundRect(ctx, 0, 0, r.w, r.h, radius);
         ctx.stroke();
       }
       ctx.restore();
+    };
+
+    // 先画其他缩略图，主图最后绘制（保证全屏时层级最高）
+    seg.photos.forEach((ph, i) => {
+      if (i === hero.index && heroK > 0) return;
+      drawPhoto(ph, i, 0);
     });
+    if (hero.index >= 0 && heroK > 0) {
+      const hp = seg.photos[hero.index];
+      if (hp) drawPhoto(hp, hero.index, heroK);
+    }
     ctx.filter = "none";
     ctx.restore();
+
   }
 
   // 转场闪光 / 黑白场覆盖

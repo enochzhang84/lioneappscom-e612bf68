@@ -443,9 +443,71 @@ function LayoutPanel() {
           <Switch checked={Boolean(s[k as "shadow"])} onCheckedChange={(v) => patchSettings({ [k]: v } as never)} />
         </div>
       ))}
+
+      <div className="space-y-2.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+        <div>
+          <span className="text-xs font-medium text-white">主图展示方式</span>
+          <p className="mt-0.5 text-[10px] text-white/40">在「图片」面板把某张照片设为「重点照片」，即成为该屏主图</p>
+        </div>
+        <div className="grid grid-cols-3 gap-1">
+          {([["grid", "网格内放大"], ["fullscreen", "全屏覆盖"], ["overlay", "全屏浮层"]] as const).map(([k, l]) => (
+            <button key={k} onClick={() => patchSettings({ heroMode: k })}
+              className={`rounded-lg px-1.5 py-1.5 text-[11px] transition ${(s.heroMode ?? "fullscreen") === k ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/65 hover:bg-white/15"}`}>{l}</button>
+          ))}
+        </div>
+
+        <div className="space-y-1.5">
+          <span className="text-[11px] text-white/55">主图全屏适配</span>
+          <div className="grid grid-cols-2 gap-1">
+            {([["cover", "铺满屏幕（无黑边）"], ["contain", "完整显示（不裁切）"]] as const).map(([k, l]) => (
+              <button key={k} onClick={() => patchSettings({ heroFit: k })}
+                className={`rounded-lg px-1.5 py-1.5 text-[11px] transition ${(s.heroFit ?? "cover") === k ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/65 hover:bg-white/15"}`}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <span className="text-[11px] text-white/55">图片焦点位置（避免人脸被裁切）</span>
+          <div className="grid grid-cols-3 gap-1">
+            {([["center", "居中"], ["top", "顶部"], ["bottom", "底部"], ["left", "左侧"], ["right", "右侧"], ["custom", "自定义"]] as const).map(([k, l]) => (
+              <button key={k} onClick={() => patchSettings({ heroFocus: k })}
+                className={`rounded-lg px-1.5 py-1 text-[11px] transition ${(s.heroFocus ?? "center") === k ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/65 hover:bg-white/15"}`}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        {(s.heroFit ?? "cover") === "contain" && (
+          <div className="space-y-1.5">
+            <span className="text-[11px] text-white/55">留白区域背景</span>
+            <div className="grid grid-cols-4 gap-1">
+              {([["blur", "同图模糊"], ["black", "纯色"], ["color", "主题色"], ["dim", "变暗"]] as const).map(([k, l]) => (
+                <button key={k} onClick={() => patchSettings({ heroBg: k })}
+                  className={`rounded-lg px-1 py-1 text-[10px] transition ${(s.heroBg ?? "blur") === k ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/65 hover:bg-white/15"}`}>{l}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <Field label={`进入全屏 ${(s.heroIn ?? 1).toFixed(1)}s`}>
+          <Slider value={[s.heroIn ?? 1]} min={0.3} max={3} step={0.1} onValueChange={(v) => patchSettings({ heroIn: v[0] })} />
+        </Field>
+        <Field label={`全屏停留 ${(s.heroHold ?? 5).toFixed(1)}s`}>
+          <Slider value={[s.heroHold ?? 5]} min={0} max={20} step={0.5} onValueChange={(v) => patchSettings({ heroHold: v[0] })} />
+        </Field>
+        <Field label={`退出全屏 ${(s.heroOut ?? 1).toFixed(1)}s`}>
+          <Slider value={[s.heroOut ?? 1]} min={0.3} max={3} step={0.1} onValueChange={(v) => patchSettings({ heroOut: v[0] })} />
+        </Field>
+        <Field label={`其他缩略图变暗 ${Math.round((s.heroDim ?? 0.9) * 100)}%（100% = 完全隐藏）`}>
+          <Slider value={[s.heroDim ?? 0.9]} min={0} max={1} step={0.05} onValueChange={(v) => patchSettings({ heroDim: v[0] })} />
+        </Field>
+        <p className="text-[10px] leading-relaxed text-white/35">
+          主图全屏与统一 currentTime 同步：暂停会停在当前动画帧，拖动时间轴可看到对应的放大比例与位置；预览与 MP4 导出效果一致。
+        </p>
+      </div>
     </PanelShell>
   );
 }
+
 
 function PlayPanel() {
   const { project, patchSettings, timeline, time, setTime, playing, setPlaying } = useEditor();
