@@ -219,7 +219,77 @@ export function photoAnimState(project: PWProject, photo: PWPhoto | undefined, p
 }
 
 
+/* ------------------------------ 主图放大 Hero ------------------------------ */
+export type HeroPhase = "none" | "enter" | "hold" | "exit";
+
+export interface HeroPlan {
+  /** 该片段内的主图下标，-1 表示无主图 */
+  index: number;
+  /** 相对片段起点的秒数 */
+  start: number;
+  inDur: number;
+  holdDur: number;
+  outDur: number;
+  end: number;
+  /** 全屏程度 0..1 */
+  k: number;
+  phase: HeroPhase;
+  mode: "grid" | "fullscreen" | "overlay";
+}
+
+const heroEase = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2); // cinematic ease-in-out
+
+/** 计算某片段的主图全屏计划（时间轴 / 预览 / 导出共用，保证与 currentTime 同步） */
+export function heroPlan(project: PWProject, seg: Segment, timeInSeg: number): HeroPlan {
+  const st = project.settings;
+  const mode = st.heroMode ?? "fullscreen";
+  const idx = seg.kind === "page" ? seg.photos.findIndex((x) => x.highlight) : -1;
+  const d = Math.max(0.001, seg.end - seg.start);
+  const empty: HeroPlan = { index: -1, start: 0, inDur: 0, holdDur: 0, outDur: 0, end: 0, k: 0, phase: "none", mode };
+  if (idx < 0 || mode === "grid") return { ...empty, index: mode === "grid" ? idx : -1 };
+
+  let inDur = Math.max(0.2, Math.min(st.heroIn ?? 1, d * 0.35));
+  let outDur = Math.max(0.2, Math.min(st.heroOut ?? 1, d * 0.35));
+  let holdDur = Math.max(0, Math.min(st.heroHold ?? 5, d - inDur - outDur));
+  let total = inDur + holdDur + outDur;
+  if (total > d) {
+    const s = d / total;
+    inDur *= s; holdDur *= s; outDur *= s; total = d;
+  }
+  const start = (d - total) / 2;
+  const end = start + total;
+
+  let k = 0;
+  let phase: HeroPhase = "none";
+  const t = timeInSeg;
+  if (t >= start && t < start + inDur) {
+    k = heroEase((t - start) / Math.max(0.001, inDur));
+    phase = "enter";
+  } else if (t >= start + inDur && t < start + inDur + holdDur) {
+    k = 1;
+    phase = "hold";
+  } else if (t >= start + inDur + holdDur && t <= end) {
+    k = 1 - heroEase((t - start - inDur - holdDur) / Math.max(0.001, outDur));
+    phase = "exit";
+  }
+  return { index: idx, start, inDur, holdDur, outDur, end, k, phase, mode };
+}
+
+/** 主图焦点位置 → 0..1 */
+export function heroFocusPoint(project: PWProject, ph: PWPhoto | undefined): { fx: number; fy: number } {
+  const f = project.settings.heroFocus ?? "center";
+  switch (f) {
+    case "top": return { fx: 0.5, fy: 0 };
+    case "bottom": return { fx: 0.5, fy: 1 };
+    case "left": return { fx: 0, fy: 0.5 };
+    case "right": return { fx: 1, fy: 0.5 };
+    case "custom": return { fx: ph?.focusX ?? 0.5, fy: ph?.focusY ?? 0.5 };
+    default: return { fx: 0.5, fy: 0.5 };
+  }
+}
+
 export type ImageMap = Map<string, HTMLImageElement>;
+
 
 function fitText(ctx: CanvasRenderingContext2D, text: string, maxW: number) {
   let t = text;
