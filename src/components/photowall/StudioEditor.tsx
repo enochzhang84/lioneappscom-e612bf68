@@ -262,30 +262,23 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
             {/* 左侧面板 */}
             {!collapsed && (
               <div className="w-[320px] shrink-0 overflow-hidden border-r border-white/10 bg-[#151922]">
-                <LeftPanel panel={panel} />
+                <LeftPanel panel={panel} exportKick={exportKick} exportFormat={exportFormat} />
               </div>
             )}
 
-            {/* 画布 + 时间轴 */}
+            {/* 画布 + 进度条 + 时间轴 */}
             <div className="flex min-w-0 flex-1 flex-col">
               <PreviewCanvas zoom={zoom} setZoom={setZoom} showGrid={showGrid} showSafe={showSafe} />
-              <TimelineBar />
+              <PlaybackBar />
+              <Timeline />
             </div>
 
             {/* 右侧属性面板 */}
             <Inspector />
           </div>
-
-          {previewMode && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black" onClick={() => setPreviewMode(false)}>
-              <div className="w-full max-w-[92vw]">
-                <PreviewCanvas zoom={1.7} setZoom={() => {}} showGrid={false} showSafe={false} />
-              </div>
-              <span className="absolute bottom-6 text-xs text-white/40">点击任意处或按 Esc 退出预览</span>
-            </div>
-          )}
         </div>
       </TooltipProvider>
+
     </EditorCtx.Provider>
   );
 }
