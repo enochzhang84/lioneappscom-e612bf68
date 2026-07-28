@@ -175,26 +175,49 @@ function drawCover(
 
 export interface AnimState { scale: number; dx: number; dy: number; alpha: number; blur: number }
 
-export function animState(kind: AnimationKey, p: number, seed: number, zoom: number, hold: number): AnimState {
-  const e = p * p * (3 - 2 * p); // smoothstep
-  const holdP = Math.min(1, p / Math.max(0.01, 1 - hold * 0.5));
-  switch (kind) {
-    case "kenburns":
-      return { scale: 1 + (zoom - 1) * e, dx: (seed % 2 ? 1 : -1) * e * 0.02, dy: (seed % 3 ? -1 : 1) * e * 0.015, alpha: 1, blur: 0 };
-    case "zoomRandom": {
-      const dir = seed % 2 === 0 ? 1 : -1;
-      return { scale: dir > 0 ? 1 + (zoom - 1) * e : zoom - (zoom - 1) * e, dx: 0, dy: 0, alpha: 1, blur: 0 };
-    }
-    case "float":
-      return { scale: 1.02, dx: Math.sin(p * Math.PI * 2 + seed) * 0.006, dy: Math.cos(p * Math.PI * 2 + seed) * 0.01, alpha: 1, blur: 0 };
-    case "focus":
-      return { scale: 1 + (zoom - 1) * (1 - holdP) * 0.6, dx: 0, dy: 0, alpha: 1, blur: (1 - Math.min(1, p * 4)) * 14 };
-    case "fade":
-      return { scale: 1.01, dx: 0, dy: 0, alpha: 1, blur: 0 };
-    default:
-      return { scale: 1, dx: 0, dy: 0, alpha: 1, blur: 0 };
-  }
+/** 兼容旧调用：委托给动画资源库 */
+export function animState(kind: AnimationKey | string, p: number, seed: number, zoom: number, hold: number): AnimState {
+  const a = evalAnimation(resolveAnimId(kind), p, { seed, zoom, hold, intensity: 1 });
+  return { scale: a.scale, dx: a.dx, dy: a.dy, alpha: a.alpha, blur: a.blur };
 }
+
+/** 求某张照片在当前片段中的动画 ID（单张覆盖 > 随机序列 > 全局） */
+export function photoAnimId(project: PWProject, photo: PWPhoto | undefined, globalIndex: number): string {
+  if (photo?.animationId) return resolveAnimId(photo.animationId);
+  const st = project.settings;
+  if (st.animRandom) {
+    const seq = randomSeqFor(project);
+    if (seq.length) return seq[globalIndex % seq.length];
+  }
+  return resolveAnimId(st.animationId ?? st.animation);
+}
+
+const seqCache = new WeakMap<PWProject, string[]>();
+function randomSeqFor(project: PWProject): string[] {
+  const cached = seqCache.get(project);
+  if (cached) return cached;
+  const seq = randomSequence("all", Math.max(8, project.photos.length));
+  seqCache.set(project, seq);
+  return seq;
+}
+
+/** 求某张照片的完整动画状态（编辑器 / 预览 / 导出统一入口） */
+export function photoAnimState(project: PWProject, photo: PWPhoto | undefined, p: number, seed: number, globalIndex: number): AnimEval {
+  const st = project.settings;
+  return evalAnimation(photoAnimId(project, photo, globalIndex), p, {
+    seed,
+    zoom: st.zoom,
+    hold: st.hold,
+    intensity: st.animIntensity ?? 1,
+    easing: (st.easing as EasingKey) ?? "cinematic",
+    customBezier: st.customBezier,
+    speed: st.animSpeed ?? 1,
+    delay: st.animDelay ?? 0,
+    loop: st.animLoop ?? false,
+    perf: (st.perfMode as PerfMode) ?? "quality",
+  });
+}
+
 
 export type ImageMap = Map<string, HTMLImageElement>;
 
