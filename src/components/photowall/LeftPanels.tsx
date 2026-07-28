@@ -175,10 +175,53 @@ function ImagesPanel() {
         <p className="mt-1 text-[11px] text-white/40">自动按 Hash 检测重复图片</p>
       </div>
 
+      {/* 上传方式 */}
+      <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2">
+        <div className="mb-1.5 text-[11px] text-white/55">上传方式</div>
+        <div className="grid grid-cols-2 gap-1">
+          {([[true, "上传并加入时间轴"], [false, "仅上传到素材库"]] as const).map(([v, l]) => (
+            <button key={String(v)} onClick={() => setUploadToTimeline(v)}
+              className={`rounded-lg px-1.5 py-1.5 text-[11px] transition ${uploadToTimeline === v ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/65 hover:bg-white/15"}`}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* 素材 / 时间轴数量统计 */}
+      <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2.5 text-[11px]">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-white/60">
+          <span>素材库：<b className="text-white">{project.photos.length}</b> 张</span>
+          <span>已加入时间轴：<b className="text-white">{inCount}</b> 张</span>
+          <span>未加入：<b className={outCount ? "text-amber-300" : "text-white"}>{outCount}</b> 张</span>
+          <span>画面轨：<b className="text-white">{timeline.pageCount}</b> 屏 · 每屏 {timeline.perPage} 张</span>
+        </div>
+        {outCount > 0 && (
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-amber-400/15 px-2 py-1.5 text-amber-200">
+            <span>有 {outCount} 张图片尚未加入时间轴</span>
+            <Button size="sm" className="h-6 px-2 text-[11px]" onClick={() => addToTimeline(project.photos.map((p) => p.id))}>全部加入</Button>
+          </div>
+        )}
+      </div>
+
+      {/* 时间轴批量操作 */}
+      <div className="flex flex-wrap gap-1.5 text-[11px]">
+        <Button size="sm" variant="secondary" className="h-7 px-2" onClick={() => addToTimeline(project.photos.map((p) => p.id))}>全部加入时间轴</Button>
+        <Button size="sm" variant="secondary" className="h-7 px-2" disabled={!selectedIds.length} onClick={() => addToTimeline(selectedIds)}>选中加入时间轴</Button>
+        <Button size="sm" variant="secondary" className="h-7 px-2" disabled={!selectedIds.length} onClick={() => removeFromTimeline(selectedIds)}>从时间轴移除</Button>
+        <Button
+          size="sm" variant="secondary" className="h-7 px-2" disabled={!inCount}
+          onClick={() => setConfirm({
+            title: "清空画面轨",
+            desc: "所有图片将退出时间轴，但仍保留在素材库中，可随时重新加入。",
+            run: () => removeFromTimeline(project.photos.map((p) => p.id)),
+          })}
+        >清空画面轨</Button>
+      </div>
+
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索图片…" className={darkInput("pl-8 h-9")} />
       </div>
+
 
       <div className="flex flex-wrap gap-1.5 text-[11px]">
         <Button size="sm" variant="secondary" className="h-7 gap-1 px-2" onClick={() => setSelectedIds(filtered.map((p) => p.id))}>
