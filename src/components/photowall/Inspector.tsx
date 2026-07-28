@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { FONT_STACKS, TEXT_KINDS, TEXT_TEMPLATES } from "@/lib/photowall/text";
+import { TEXT_IN_ANIMS, TEXT_MOTION_ANIMS, TEXT_OUT_ANIMS } from "@/lib/photowall/animations";
+import type { PWText } from "@/lib/photowall/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TEXT_PRESETS } from "@/lib/photowall/presets";
 import { ANIMATION_LIBRARY, TEXT_ANIMS } from "@/lib/photowall/animations";
@@ -56,6 +59,12 @@ export function Inspector() {
 
   const photo = selection.type === "photo" ? project.photos.find((p) => p.id === selection.id) : null;
   const text = selection.type === "text" ? project.texts.find((t) => t.id === selection.id) : null;
+
+  const patchText = React.useCallback(
+    (id: string, patch: Partial<PWText>) =>
+      setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
+    [setProject],
+  );
   const music = selection.type === "music" ? project.music.find((m) => m.id === selection.id) : null;
 
   const title = photo ? "图片属性" : text ? "文字属性" : music ? "音乐属性" : "画布属性";
@@ -201,99 +210,200 @@ export function Inspector() {
                 onChange={(e) => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, text: e.target.value } : x)) }))}
               />
             </Row>
-            <Row label="文字模板">
+            <Row label="类型">
+              <Select value={text.kind} onValueChange={(v) => patchText(text.id, { kind: v as PWText["kind"] })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {TEXT_KINDS.map((k) => <SelectItem key={k.kind} value={k.kind}>{k.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Row>
+            <Row label="样式模板">
               <Select
                 value={text.preset}
                 onValueChange={(v) => {
-                  const pre = TEXT_PRESETS.find((x) => x.key === v)!;
-                  setProject((p) => ({
-                    ...p,
-                    texts: p.texts.map((x) =>
-                      x.id === text.id ? { ...x, preset: v, font: pre.font, color: pre.color, size: pre.size, shadow: pre.shadow } : x,
-                    ),
-                  }));
+                  const tpl = TEXT_TEMPLATES.find((x) => x.key === v);
+                  if (tpl) patchText(text.id, { ...tpl.patch, preset: v });
                 }}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="自定义" /></SelectTrigger>
                 <SelectContent>
-                  {TEXT_PRESETS.map((t) => (
-                    <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>
+                  {TEXT_TEMPLATES.map((t) => (
+                    <SelectItem key={t.key} value={t.key}>{t.name} · {t.use}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Row>
-            <NumberSlider
-              label="字号（画布高度 %）"
-              value={text.size}
-              min={2}
-              max={16}
-              step={0.5}
-              suffix="%"
-              onChange={(v) => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, size: v } : x)) }))}
-            />
-            <Row label="颜色">
-              <Input
-                type="color"
-                className="h-9 p-1"
-                value={text.color}
-                onChange={(e) => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, color: e.target.value } : x)) }))}
-              />
-            </Row>
-            <Row label="对齐">
-              <div className="grid grid-cols-3 gap-1.5">
-                {(["left", "center", "right"] as const).map((a) => (
-                  <Button
-                    key={a}
-                    size="sm"
-                    variant={text.align === a ? "default" : "outline"}
-                    onClick={() => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, align: a } : x)) }))}
-                  >
-                    {a === "left" ? "左" : a === "center" ? "中" : "右"}
-                  </Button>
-                ))}
-              </div>
-            </Row>
+
+            {/* 字体排版 */}
+            <div className="grid grid-cols-2 gap-2">
+              <Row label="字体">
+                <Select value={text.font} onValueChange={(v) => patchText(text.id, { font: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {FONT_STACKS.map((f) => <SelectItem key={f.key} value={f.key}>{f.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Row>
+              <Row label="字重">
+                <Select value={String(text.weight ?? 600)} onValueChange={(v) => patchText(text.id, { weight: Number(v) })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[300, 400, 500, 600, 700, 800, 900].map((w) => <SelectItem key={w} value={String(w)}>{w}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Row>
+            </div>
+            <NumberSlider label="字号（画布高度 %）" value={text.size} min={1.5} max={16} step={0.1} suffix="%"
+              onChange={(v) => patchText(text.id, { size: v })} />
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="字间距" value={text.letterSpacing ?? 0} min={-0.05} max={0.4} step={0.01}
+                onChange={(v) => patchText(text.id, { letterSpacing: v })} />
+              <NumberSlider label="行高" value={text.lineHeight ?? 1.25} min={0.9} max={2.2} step={0.05}
+                onChange={(v) => patchText(text.id, { lineHeight: v })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="最大宽度" value={text.maxWidth ?? 0.86} min={0.2} max={1} step={0.02}
+                onChange={(v) => patchText(text.id, { maxWidth: v })} />
+              <NumberSlider label="最多行数" value={text.maxLines ?? 3} min={1} max={8} step={1}
+                onChange={(v) => patchText(text.id, { maxLines: v })} />
+            </div>
+
+            {/* 颜色 / 描边 / 背景 */}
+            <div className="grid grid-cols-2 gap-2">
+              <Row label="颜色">
+                <Input type="color" className="h-9 p-1" value={text.color} onChange={(e) => patchText(text.id, { color: e.target.value })} />
+              </Row>
+              <Row label="渐变第二色">
+                <div className="flex gap-1">
+                  <Input type="color" className="h-9 flex-1 p-1" value={text.colorTo ?? "#ffffff"}
+                    onChange={(e) => patchText(text.id, { colorTo: e.target.value })} />
+                  <Button size="sm" variant="outline" onClick={() => patchText(text.id, { colorTo: null })}>清除</Button>
+                </div>
+              </Row>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="描边粗细" value={text.strokeWidth ?? 0} min={0} max={0.2} step={0.005}
+                onChange={(v) => patchText(text.id, { strokeWidth: v })} />
+              <Row label="描边颜色">
+                <Input type="color" className="h-9 p-1" value={text.strokeColor ?? "#000000"}
+                  onChange={(e) => patchText(text.id, { strokeColor: e.target.value })} />
+              </Row>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="发光强度" value={text.glow ?? 0} min={0} max={1} step={0.05}
+                onChange={(v) => patchText(text.id, { glow: v })} />
+              <Row label="发光颜色">
+                <Input type="color" className="h-9 p-1" value={text.glowColor ?? "#4fc3ff"}
+                  onChange={(e) => patchText(text.id, { glowColor: e.target.value })} />
+              </Row>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Row label="底板颜色">
+                <div className="flex gap-1">
+                  <Input type="color" className="h-9 flex-1 p-1" value={text.bgColor ?? "#000000"}
+                    onChange={(e) => patchText(text.id, { bgColor: e.target.value })} />
+                  <Button size="sm" variant="outline" onClick={() => patchText(text.id, { bgColor: null })}>无</Button>
+                </div>
+              </Row>
+              <NumberSlider label="底板透明度" value={text.bgOpacity ?? 0.45} min={0} max={1} step={0.05}
+                onChange={(v) => patchText(text.id, { bgOpacity: v })} />
+            </div>
+
+            {/* 位置对齐 */}
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="水平位置 X" value={text.x ?? 0.5} min={0} max={1} step={0.01}
+                onChange={(v) => patchText(text.id, { x: v })} />
+              <NumberSlider label="垂直位置 Y" value={text.y ?? 0.5} min={0} max={1} step={0.01}
+                onChange={(v) => patchText(text.id, { y: v })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Row label="水平对齐">
+                <div className="grid grid-cols-3 gap-1">
+                  {(["left", "center", "right"] as const).map((a) => (
+                    <Button key={a} size="sm" variant={text.align === a ? "default" : "outline"} onClick={() => patchText(text.id, { align: a })}>
+                      {a === "left" ? "左" : a === "center" ? "中" : "右"}
+                    </Button>
+                  ))}
+                </div>
+              </Row>
+              <Row label="垂直对齐">
+                <div className="grid grid-cols-3 gap-1">
+                  {(["top", "middle", "bottom"] as const).map((a) => (
+                    <Button key={a} size="sm" variant={(text.valign ?? "middle") === a ? "default" : "outline"} onClick={() => patchText(text.id, { valign: a })}>
+                      {a === "top" ? "上" : a === "middle" ? "中" : "下"}
+                    </Button>
+                  ))}
+                </div>
+              </Row>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Button size="sm" variant="outline" onClick={() => patchText(text.id, { x: 0.5, align: "center" })}>水平居中</Button>
+              <Button size="sm" variant="outline" onClick={() => patchText(text.id, { y: 0.5, valign: "middle" })}>垂直居中</Button>
+              <Button size="sm" variant="outline" onClick={() => patchText(text.id, { rotate: 0, scale: 1 })}>重置变换</Button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="旋转（度）" value={text.rotate ?? 0} min={-180} max={180} step={1}
+                onChange={(v) => patchText(text.id, { rotate: v })} />
+              <NumberSlider label="整体缩放" value={text.scale ?? 1} min={0.2} max={3} step={0.05}
+                onChange={(v) => patchText(text.id, { scale: v })} />
+            </div>
             <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3 py-2">
               <span className="text-xs font-medium">文字阴影</span>
-              <Switch
-                checked={text.shadow}
-                onCheckedChange={(v) => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, shadow: v } : x)) }))}
-              />
+              <Switch checked={text.shadow} onCheckedChange={(v) => patchText(text.id, { shadow: v })} />
             </div>
-            <Row label="动画">
-              <Select
-                value={text.animation}
-                onValueChange={(v) =>
-                  setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, animation: v as typeof x.animation } : x)) }))
-                }
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {TEXT_ANIMS.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.name} · {t.en}</SelectItem>
-                  ))}
-                </SelectContent>
 
-              </Select>
-            </Row>
+            {/* 三段式动画 */}
+            <div className="grid grid-cols-1 gap-2">
+              <Row label="入场动画">
+                <Select value={text.animation} onValueChange={(v) => patchText(text.id, { animation: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TEXT_IN_ANIMS.map((t) => <SelectItem key={t.id} value={t.id}>{t.name} · {t.desc}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Row>
+              <Row label="持续动画">
+                <Select value={text.animMotion ?? "none"} onValueChange={(v) => patchText(text.id, { animMotion: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TEXT_MOTION_ANIMS.map((t) => <SelectItem key={t.id} value={t.id}>{t.name} · {t.desc}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Row>
+              <Row label="退场动画">
+                <Select value={text.animOut ?? "fade-out"} onValueChange={(v) => patchText(text.id, { animOut: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TEXT_OUT_ANIMS.map((t) => <SelectItem key={t.id} value={t.id}>{t.name} · {t.desc}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Row>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="动画时长（秒）" value={text.animDur ?? 0.8} min={0.2} max={3} step={0.1}
+                onChange={(v) => patchText(text.id, { animDur: v })} />
+              <NumberSlider label="动画延迟（秒）" value={text.animDelay ?? 0} min={0} max={5} step={0.1}
+                onChange={(v) => patchText(text.id, { animDelay: v })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <NumberSlider label="速度倍率" value={text.animSpeed ?? 1} min={0.3} max={3} step={0.1}
+                onChange={(v) => patchText(text.id, { animSpeed: v })} />
+              <NumberSlider label="逐字间隔（秒）" value={text.animStagger ?? 0.05} min={0.01} max={0.3} step={0.01}
+                onChange={(v) => patchText(text.id, { animStagger: v })} />
+            </div>
+            <NumberSlider label="动画强度" value={text.animIntensity ?? 1} min={0.2} max={2} step={0.1}
+              onChange={(v) => patchText(text.id, { animIntensity: v })} />
+
+            {/* 时间轴 */}
             <div className="grid grid-cols-2 gap-2">
               <Row label="开始（秒）">
-                <Input
-                  type="number"
-                  min={0}
-                  step={0.5}
-                  value={text.start}
-                  onChange={(e) => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, start: Number(e.target.value) } : x)) }))}
-                />
+                <Input type="number" min={0} step={0.5} value={text.start}
+                  onChange={(e) => patchText(text.id, { start: Number(e.target.value) })} />
               </Row>
               <Row label="时长（秒）">
-                <Input
-                  type="number"
-                  min={0.5}
-                  step={0.5}
-                  value={text.duration}
-                  onChange={(e) => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === text.id ? { ...x, duration: Number(e.target.value) } : x)) }))}
-                />
+                <Input type="number" min={0.5} step={0.5} value={text.duration}
+                  onChange={(e) => patchText(text.id, { duration: Math.max(0.5, Number(e.target.value)) })} />
               </Row>
             </div>
           </>

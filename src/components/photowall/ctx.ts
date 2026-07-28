@@ -38,14 +38,17 @@ export function useEditor(): EditorApi {
 export function useImages(project: PWProject) {
   const [images, setImages] = React.useState<ImageMap>(new Map());
   const [nonce, setNonce] = React.useState(0);
-  const key = project.photos.map((p) => p.assetId).join(",");
+  const introAsset = project.intro?.bgAssetId ?? null;
+  const key = project.photos.map((p) => p.assetId).join(",") + "|" + (introAsset ?? "");
 
   React.useEffect(() => {
     let cancelled = false;
     (async () => {
       const map: ImageMap = new Map();
+      const ids = Array.from(new Set([...project.photos.map((p) => p.assetId), ...(introAsset ? [introAsset] : [])]));
       await Promise.all(
-        project.photos.map(async (p) => {
+        ids.map(async (assetId) => {
+          const p = { assetId };
           const url = await assetUrl(p.assetId);
           if (!url) return;
           await new Promise<void>((resolve) => {

@@ -16,9 +16,16 @@ import {
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { assetUrl, hashBlob, putAsset, deleteAsset } from "@/lib/photowall/store";
 import { LAYOUTS, TEMPLATES, TEXT_PRESETS, photosPerPage } from "@/lib/photowall/presets";
-import { ASPECTS, type LayoutKey, type PWPhoto, type PWText } from "@/lib/photowall/types";
+import { ASPECTS, defaultIntro, type LayoutKey, type PWPhoto, type PWText, type TextKind } from "@/lib/photowall/types";
 import { fmtTime } from "@/lib/photowall/render";
 import { exportVideo, downloadBlob, pickMime } from "@/lib/photowall/export";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useServerFn } from "@tanstack/react-start";
+import { extractPosterText } from "@/lib/photowall/poster.functions";
+import {
+  TEXT_KINDS, TEXT_TEMPLATES, OPENING_TEMPLATES, makeText, kindMeta, openingTemplate,
+  buildIntroTexts, insertIntro, removeIntro,
+} from "@/lib/photowall/text";
 import { useEditor } from "./ctx";
 import { AnimationLibraryPanel } from "./AnimationLibrary";
 import type { PanelKey } from "./rail";
@@ -423,40 +430,278 @@ function TemplatesPanel() {
 }
 
 function TextPanel() {
-  const { project, setProject, setSelection, timeline } = useEditor();
-  function add(kind: PWText["kind"]) {
-    const pre = TEXT_PRESETS[0];
-    const t: PWText = {
-      id: crypto.randomUUID(), kind, text: kind === "title" ? "标题文字" : kind === "verse" ? "经文" : "文字",
-      preset: pre.key, font: pre.font, color: pre.color, size: kind === "title" ? 8 : 5,
-      align: "center", shadow: true, animation: "fade", start: 0, duration: Math.min(5, timeline.total),
-    };
+  const { project, setProject, selection, setSelection, timeline, reloadImages } = useEditor();
+  const extract = useServerFn(extractPosterText);
+  const posterInput = React.useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [fields, setFields] = React.useState<{ kind: TextKind; text: string; on: boolean }[]>([]);
+  const [posterAsset, setPosterAsset] = React.useState<string | null>(project.intro?.bgAssetId ?? null);
+  const [tplKey, setTplKey] = React.useState(project.intro?.template ?? "church");
+  const [dur, setDur] = React.useState(project.intro?.duration ?? 7);
+  const [open, setOpen] = React.useState(false);
+  const intro = project.intro;
+
+  function add(kind: TextKind) {
+    const t = makeText(kind, { start: Math.min(project.intro?.enabled ? project.intro.duration : 0, timeline.total), duration: Math.min(5, Math.max(2, timeline.total)) });
     setProject((p) => ({ ...p, texts: [...p.texts, t] }));
     setSelection({ type: "text", id: t.id });
   }
+
+  function applyTemplate(tpl: (typeof TEXT_TEMPLATES)[number]) {
+    const sel = project.texts.find((t) => t.id === selection.id) ?? null;
+    if (!sel) { toast.error("请先在下方选择一个文字图层"); return; }
+    setProject((p) => ({ ...p, texts: p.texts.map((t) => (t.id === sel.id ? { ...t, ...tpl.patch, preset: tpl.key } : t)) }));
+    toast.success(`已应用「${tpl.name}」`);
+  }
+
+  async function onPoster(file: File) {
+    setBusy(true);
+    try {
+      const assetId = await putAsset(file);
+      setPosterAsset(assetId);
+      const dataUrl = await new Promise<string>((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(String(fr.result));
+        fr.onerror = () => rej(new Error("读取图片失败"));
+        fr.readAsDataURL(file);
+      });
+      const r = await extract({ data: { imageUrl: dataUrl, lang: "auto" } });
+      const mapped = (r.fields ?? []).map((f) => ({
+        kind: mapKind(f.kind),
+        text: f.text,
+        on: true,
+      }));
+      if (!mapped.length) toast.error("未识别到文字，可手动添加");
+      else toast.success(`识别到 ${mapped.length} 条文字`);
+      setFields(mapped);
+      setOpen(true);
+      reloadImages();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "海报识别失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function generateIntro() {
+    const picked = fields.filter((f) => f.on && f.text.trim()).map((f) => ({ kind: f.kind, text: f.text }));
+    if (!picked.length) { toast.error("请至少保留一条文字"); return; }
+    const tpl = openingTemplate(tplKey);
+    const texts = buildIntroTexts(picked, tplKey, dur, project.aspect);
+    const nextIntro = {
+      ...defaultIntro(),
+      ...tpl.intro,
+      template: tplKey,
+      duration: dur,
+      enabled: true,
+      bgAssetId: posterAsset ?? project.intro?.bgAssetId ?? null,
+      bg: posterAsset ? (tpl.intro.bg ?? "posterBlur") : (tpl.intro.bg ?? "gradient"),
+    };
+    setProject((p) => insertIntro(p, nextIntro, texts));
+    setOpen(false);
+    toast.success("开场动画已生成");
+  }
+
+  const introTexts = project.texts.filter((t) => t.group === "intro");
+  const bodyTexts = project.texts.filter((t) => t.group !== "intro");
+
   return (
-    <PanelShell title="文字" desc="主标题 / 副标题 / 解说 / 经文 / 结束语">
-      <div className="grid grid-cols-2 gap-2">
-        {([["title", "主标题"], ["subtitle", "副标题"], ["caption", "图片解说"], ["verse", "经文"], ["outro", "结束语"]] as const).map(([k, l]) => (
-          <Button key={k} variant="secondary" size="sm" onClick={() => add(k)}>+ {l}</Button>
-        ))}
+    <PanelShell title="文字" desc="海报识别 · 开场动画 · 文字图层">
+      {/* 海报智能提取 */}
+      <div className="rounded-xl border border-sky-400/20 bg-sky-400/[0.06] p-3">
+        <div className="flex items-center gap-2 text-xs font-semibold text-sky-200">
+          <Wand2 className="h-3.5 w-3.5" /> 海报智能提取
+        </div>
+        <p className="mt-1 text-[11px] text-white/45">上传活动海报，自动识别主标题、副标题、讲员、时间地点等。</p>
+        <input
+          ref={posterInput}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPoster(f); e.target.value = ""; }}
+        />
+        <Button size="sm" className="mt-2 w-full" disabled={busy} onClick={() => posterInput.current?.click()}>
+          {busy ? <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />识别中…</> : <><Upload className="mr-1.5 h-3.5 w-3.5" />上传海报并识别</>}
+        </Button>
+        {fields.length > 0 && (
+          <Button size="sm" variant="secondary" className="mt-1.5 w-full" onClick={() => setOpen(true)}>
+            查看识别结果（{fields.length}）
+          </Button>
+        )}
       </div>
+
+      {/* 开场动画状态 */}
+      <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-white">开场标题动画</span>
+          {intro?.enabled ? (
+            <Button size="sm" variant="ghost" className="h-7 text-[11px] text-rose-300 hover:text-rose-200"
+              onClick={() => { setProject((p) => removeIntro(p)); toast.success("已移除开场"); }}>
+              移除
+            </Button>
+          ) : (
+            <span className="text-[11px] text-white/40">未启用</span>
+          )}
+        </div>
+        {intro?.enabled && (
+          <div className="mt-2 space-y-2">
+            <p className="text-[11px] text-white/45">
+              模板：{openingTemplate(intro.template).emoji} {openingTemplate(intro.template).name} · 时长 {intro.duration.toFixed(1)}s · 文字 {introTexts.length} 条
+            </p>
+            <Field label={`开场时长 ${intro.duration.toFixed(1)}s`}>
+              <Slider value={[intro.duration]} min={4} max={15} step={0.5}
+                onValueChange={([v]) => setProject((p) => (p.intro ? { ...p, intro: { ...p.intro, duration: v } } : p))} />
+            </Field>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="背景虚化">
+                <Slider value={[intro.blur]} min={0} max={60} step={1}
+                  onValueChange={([v]) => setProject((p) => (p.intro ? { ...p, intro: { ...p.intro, blur: v } } : p))} />
+              </Field>
+              <Field label="背景压暗">
+                <Slider value={[intro.dim]} min={0} max={0.9} step={0.05}
+                  onValueChange={([v]) => setProject((p) => (p.intro ? { ...p, intro: { ...p.intro, dim: v } } : p))} />
+              </Field>
+            </div>
+          </div>
+        )}
+        <Button size="sm" variant="secondary" className="mt-2 w-full" onClick={() => { if (!fields.length) setFields(defaultFields()); setOpen(true); }}>
+          {intro?.enabled ? "重新生成开场" : "手动创建开场"}
+        </Button>
+      </div>
+
+      {/* 快速添加 */}
+      <div>
+        <p className="mb-1.5 text-[11px] text-white/55">快速添加文字</p>
+        <div className="grid grid-cols-3 gap-1.5">
+          {TEXT_KINDS.map((k) => (
+            <Button key={k.kind} variant="secondary" size="sm" className="h-8 text-[11px]" onClick={() => add(k.kind)}>
+              + {k.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* 样式模板 */}
+      <div>
+        <p className="mb-1.5 text-[11px] text-white/55">样式模板（应用到选中文字）</p>
+        <div className="grid grid-cols-2 gap-2">
+          {TEXT_TEMPLATES.map((t) => (
+            <button key={t.key} onClick={() => applyTemplate(t)}
+              className="group overflow-hidden rounded-lg border border-white/10 text-left transition hover:border-sky-400/50">
+              <div className="flex h-12 items-center justify-center px-2" style={{ background: t.preview.bg }}>
+                <span className="truncate transition group-hover:scale-105"
+                  style={{ color: t.preview.color, fontFamily: t.preview.font, fontWeight: t.preview.weight, letterSpacing: t.preview.letter, fontSize: 13 }}>
+                  {t.name}
+                </span>
+              </div>
+              <div className="px-2 py-1">
+                <p className="truncate text-[10px] text-white/60">{t.use}</p>
+                <p className="truncate text-[10px] text-white/35">{t.animLabel}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 图层列表 */}
       <div className="space-y-1.5">
-        {project.texts.map((t) => (
+        <p className="text-[11px] text-white/55">文字图层（{project.texts.length}）</p>
+        {[...introTexts, ...bodyTexts].map((t) => (
           <div key={t.id} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
             <button className="min-w-0 flex-1 text-left" onClick={() => setSelection({ type: "text", id: t.id })}>
-              <span className="block truncate text-xs text-white">{t.text || "（空文字）"}</span>
-              <span className="block text-[10px] text-white/40">{fmtTime(t.start)} → {fmtTime(t.start + t.duration)}</span>
+              <span className="block truncate text-xs text-white">
+                {t.group === "intro" && <span className="mr-1 rounded bg-sky-400/20 px-1 text-[9px] text-sky-200">开场</span>}
+                {t.text || "（空文字）"}
+              </span>
+              <span className="block text-[10px] text-white/40">{kindMeta(t.kind).label} · {fmtTime(t.start)} → {fmtTime(t.start + t.duration)}</span>
             </button>
-            <button className="text-white/40 hover:text-rose-400" onClick={() => setProject((p) => ({ ...p, texts: p.texts.filter((x) => x.id !== t.id) }))}>
+            <button className="text-white/40 hover:text-white" title={t.hidden ? "显示" : "隐藏"}
+              onClick={() => setProject((p) => ({ ...p, texts: p.texts.map((x) => (x.id === t.id ? { ...x, hidden: !x.hidden } : x)) }))}>
+              <Eye className={cnx(t.hidden ? "opacity-40" : "")} />
+            </button>
+            <button className="text-white/40 hover:text-rose-400"
+              onClick={() => setProject((p) => ({ ...p, texts: p.texts.filter((x) => x.id !== t.id) }))}>
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         ))}
         {project.texts.length === 0 && <p className="text-[11px] text-white/35">还没有文字图层。</p>}
       </div>
+
+      {/* 识别结果 / 开场生成对话框 */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl border-white/10 bg-[#12151c] text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">开场文字与模板</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[46vh] space-y-2 overflow-y-auto pr-1">
+            {fields.map((f, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Switch checked={f.on} onCheckedChange={(v) => setFields((a) => a.map((x, j) => (j === i ? { ...x, on: v } : x)))} />
+                <Select value={f.kind} onValueChange={(v) => setFields((a) => a.map((x, j) => (j === i ? { ...x, kind: v as TextKind } : x)))}>
+                  <SelectTrigger className={darkInput("h-8 w-28 text-xs")}><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TEXT_KINDS.map((k) => <SelectItem key={k.kind} value={k.kind}>{k.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Input value={f.text} className={darkInput("h-8 flex-1 text-xs")}
+                  onChange={(e) => setFields((a) => a.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} />
+                <button className="text-white/40 hover:text-rose-400" onClick={() => setFields((a) => a.filter((_, j) => j !== i))}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+            <Button size="sm" variant="secondary" onClick={() => setFields((a) => [...a, { kind: "body", text: "", on: true }])}>+ 添加一行</Button>
+          </div>
+
+          <div>
+            <p className="mb-1.5 text-[11px] text-white/55">开场模板</p>
+            <div className="grid grid-cols-4 gap-2">
+              {OPENING_TEMPLATES.map((t) => (
+                <button key={t.key} onClick={() => { setTplKey(t.key); setDur(t.duration); }}
+                  className={`rounded-lg border p-2 text-left transition ${tplKey === t.key ? "border-sky-400 bg-sky-400/10" : "border-white/10 hover:border-white/25"}`}>
+                  <div className="text-base">{t.emoji}</div>
+                  <div className="truncate text-[11px] text-white">{t.name}</div>
+                  <div className="truncate text-[10px] text-white/40">{t.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={`开场时长 ${dur.toFixed(1)}s`}>
+              <Slider value={[dur]} min={4} max={15} step={0.5} onValueChange={([v]) => setDur(v)} />
+            </Field>
+            <Field label="背景">
+              <p className="text-[11px] text-white/45">{posterAsset ? "使用海报模糊背景" : "使用模板渐变背景"}</p>
+            </Field>
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>取消</Button>
+            <Button onClick={generateIntro}>生成开场动画</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PanelShell>
   );
+}
+
+function cnx(extra: string) { return `h-3.5 w-3.5 ${extra}`; }
+
+function defaultFields(): { kind: TextKind; text: string; on: boolean }[] {
+  return TEXT_KINDS.filter((k) => k.introDefault).map((k) => ({ kind: k.kind, text: "", on: true }));
+}
+
+/** AI 返回的 kind → 内部 TextKind */
+function mapKind(k: string): TextKind {
+  const m: Record<string, TextKind> = {
+    title: "title", subtitle: "subtitle", theme: "theme", eventName: "eventName",
+    speaker: "speaker", role: "speaker", date: "date", time: "time",
+    location: "place", address: "place", verse: "verse", verseRef: "verse",
+    organizer: "host", contact: "url", note: "body", tag: "body",
+  };
+  return m[k] ?? "body";
 }
 
 function MusicPanel() {

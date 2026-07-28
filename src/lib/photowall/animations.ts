@@ -629,3 +629,61 @@ export const LIBRARY_STATS = {
   combos: ANIM_COMBOS.length,
   gpuAccelerated: ANIMATION_LIBRARY.filter((a) => a.gpu).length,
 };
+
+/* ============================== 十五、文字动画三段式（入场 / 持续 / 退场） ============================== */
+export interface TextMotionDef { id: string; name: string; desc: string }
+
+/** 入场动画（与 TEXT_ANIMS 共享 id，额外补充方向类） */
+export const TEXT_IN_ANIMS: TextAnimDef[] = [
+  { id: "fade", name: "淡入", en: "Fade In", desc: "柔和淡入", perf: 1, mode: "block" },
+  { id: "rise", name: "上滑", en: "Slide Up", desc: "自下向上滑入", perf: 1, mode: "block" },
+  { id: "slide-down", name: "下滑", en: "Slide Down", desc: "自上向下滑入", perf: 1, mode: "block" },
+  { id: "slide-left", name: "左滑", en: "Slide Left", desc: "自右向左滑入", perf: 1, mode: "block" },
+  { id: "slide-right", name: "右滑", en: "Slide Right", desc: "自左向右滑入", perf: 1, mode: "block" },
+  { id: "zoom-in", name: "缩放进入", en: "Zoom In", desc: "由小放大出现", perf: 1, mode: "block" },
+  { id: "blur-in", name: "模糊变清晰", en: "Blur In", desc: "由虚到实", perf: 3, mode: "block" },
+  { id: "mask-reveal", name: "遮罩揭示", en: "Mask Reveal", desc: "遮罩横向揭示", perf: 2, mode: "mask" },
+  { id: "letter-fade", name: "逐字出现", en: "Letter Fade", desc: "字符依次出现", perf: 1, mode: "letters" },
+  { id: "line-reveal", name: "逐行出现", en: "Line Reveal", desc: "整行上移揭示", perf: 1, mode: "block" },
+  { id: "typewriter", name: "打字机", en: "Typewriter", desc: "逐字打印", perf: 1, mode: "letters" },
+  { id: "title-cinematic", name: "电影标题", en: "Cinematic", desc: "电影级标题推近", perf: 2, mode: "block" },
+  { id: "title-apple", name: "Apple 简约显现", en: "Apple", desc: "克制优雅上浮", perf: 1, mode: "block" },
+  { id: "bible-verse", name: "经文优雅显现", en: "Verse", desc: "经文缓慢浮现", perf: 1, mode: "block" },
+  { id: "gradient-sweep", name: "金色扫光", en: "Gold Sweep", desc: "高光扫过标题", perf: 2, mode: "block" },
+  { id: "glow", name: "发光显现", en: "Glow In", desc: "辉光浮现", perf: 2, mode: "block" },
+  { id: "letter-scale", name: "逐字弹出", en: "Letter Scale", desc: "字符依次弹出", perf: 2, mode: "letters" },
+  { id: "word-slide", name: "词组滑入", en: "Word Slide", desc: "按词滑入", perf: 1, mode: "words" },
+  { id: "neon", name: "霓虹描边", en: "Neon", desc: "霓虹描边发光", perf: 2, mode: "block" },
+  { id: "subtitle", name: "字幕条", en: "Subtitle", desc: "底部字幕背景", perf: 1, mode: "block" },
+  { id: "glass", name: "玻璃质感", en: "Glass", desc: "半透明玻璃文字", perf: 2, mode: "block" },
+  { id: "text-elegant", name: "优雅揭示", en: "Elegant", desc: "优雅上浮", perf: 1, mode: "block" },
+  { id: "none", name: "无入场", en: "None", desc: "直接显示", perf: 1, mode: "block" },
+];
+
+/** 持续动画 */
+export const TEXT_MOTION_ANIMS: TextMotionDef[] = [
+  { id: "none", name: "无", desc: "静止" },
+  { id: "float", name: "轻微漂浮", desc: "上下轻浮" },
+  { id: "breath", name: "呼吸", desc: "透明度轻微呼吸" },
+  { id: "slow-zoom", name: "缓慢放大", desc: "持续缓慢放大" },
+  { id: "glow-breath", name: "发光呼吸", desc: "辉光强弱变化" },
+  { id: "gradient-flow", name: "渐变流动", desc: "渐变色流动" },
+  { id: "sweep", name: "扫光", desc: "高光反复扫过" },
+  { id: "parallax", name: "轻微视差", desc: "缓慢横向位移" },
+];
+
+/** 退场动画 */
+export const TEXT_OUT_ANIMS: TextMotionDef[] = [
+  { id: "fade-out", name: "淡出", desc: "柔和淡出" },
+  { id: "blur-out", name: "模糊消失", desc: "由实到虚" },
+  { id: "slide-out-up", name: "上移消失", desc: "上移淡出" },
+  { id: "slide-out-down", name: "下移消失", desc: "下移淡出" },
+  { id: "slide-out-left", name: "左移消失", desc: "左移淡出" },
+  { id: "zoom-out", name: "缩小消失", desc: "缩小淡出" },
+  { id: "mask-close", name: "遮罩关闭", desc: "遮罩横向收起" },
+  { id: "letter-out", name: "逐字消失", desc: "字符依次消失" },
+  { id: "cinema-out", name: "电影淡出", desc: "缓慢压暗淡出" },
+  { id: "none", name: "无退场", desc: "直接消失" },
+];
+
+export const TEXT_IN_MAP: Record<string, TextAnimDef> = Object.fromEntries(TEXT_IN_ANIMS.map((t) => [t.id, t]));
