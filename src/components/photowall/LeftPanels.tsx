@@ -470,17 +470,35 @@ function LayoutPanel() {
 }
 
 function PlayPanel() {
-  const { project, patchSettings, timeline } = useEditor();
+  const { project, patchSettings, timeline, time, setTime, playing, setPlaying } = useEditor();
   const s = project.settings;
   const perPage = timeline.pageCount ? (timeline.total - (s.openingText ? s.openingDuration : 0) - (s.endingText ? s.endingDuration : 0)) / timeline.pageCount : 0;
   return (
-    <PanelShell title="播放" desc="固定每张时间 或 指定总播放时间">
+    <PanelShell title="播放" desc="编辑器内部预览控制 · 与底部时间轴同步">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-xs font-medium text-white">编辑器预览</span>
+          <span className="tabular-nums text-[11px] text-white/55">{fmtTime(time)} / {fmtTime(timeline.total)}</span>
+        </div>
+        <div className="grid grid-cols-4 gap-1.5">
+          <Button size="sm" onClick={() => setPlaying(true)} disabled={playing}>播放</Button>
+          <Button size="sm" variant="secondary" onClick={() => setPlaying(false)} disabled={!playing}>暂停</Button>
+          <Button size="sm" variant="secondary" onClick={() => { setPlaying(false); setTime(0); }}>停止</Button>
+          <Button size="sm" variant="secondary" onClick={() => { setTime(0); setPlaying(true); }}>从头</Button>
+        </div>
+        <div className="mt-2 flex items-center justify-between rounded-xl bg-white/[0.05] px-3 py-2">
+          <span className="text-xs">循环播放</span>
+          <Switch checked={s.loop} onCheckedChange={(v) => patchSettings({ loop: v })} />
+        </div>
+        <p className="mt-2 text-[11px] text-white/40">仅在当前画布中播放，不会打开新页面；如需真实播放请使用顶部「真实预览」。</p>
+      </div>
+
       <div className="grid grid-cols-2 gap-2">
         <Button variant={s.timingMode === "perPhoto" ? "default" : "secondary"} size="sm" onClick={() => patchSettings({ timingMode: "perPhoto" })}>固定每张时间</Button>
         <Button variant={s.timingMode === "total" ? "default" : "secondary"} size="sm" onClick={() => patchSettings({ timingMode: "total" })}>指定总时长</Button>
       </div>
       {s.timingMode === "perPhoto" ? (
-        <Field label={`每个画面 ${s.perPhoto.toFixed(1)} 秒`}>
+        <Field label={`停留时间：每个画面 ${s.perPhoto.toFixed(1)} 秒`}>
           <Slider value={[s.perPhoto]} min={1} max={20} step={0.5} onValueChange={(v) => patchSettings({ perPhoto: v[0] })} />
         </Field>
       ) : (
@@ -488,6 +506,9 @@ function PlayPanel() {
           <Input type="number" min={1} step={1} className={darkInput()} value={Math.round(s.totalTarget / 60)} onChange={(e) => patchSettings({ totalTarget: Math.max(1, Number(e.target.value)) * 60 })} />
         </Field>
       )}
+      <Field label={`淡入 / 淡出（转场）${s.transition.toFixed(1)} 秒`}>
+        <Slider value={[s.transition]} min={0.1} max={3} step={0.1} onValueChange={(v) => patchSettings({ transition: v[0] })} />
+      </Field>
       <Button variant="secondary" className="w-full gap-2" onClick={() => { patchSettings({ timingMode: "total" }); toast.success("已按目标总时长自动分配每张显示时间"); }}>
         <Wand2 className="h-4 w-4" /> 一键适配总时长
       </Button>
@@ -499,10 +520,6 @@ function PlayPanel() {
         <Field label="结束文字"><Input className={darkInput()} value={s.endingText} onChange={(e) => patchSettings({ endingText: e.target.value })} /></Field>
         <Field label="结束副标题"><Input className={darkInput()} value={s.endingSub} onChange={(e) => patchSettings({ endingSub: e.target.value })} /></Field>
         <Field label="结束秒数"><Input type="number" className={darkInput()} value={s.endingDuration} onChange={(e) => patchSettings({ endingDuration: Number(e.target.value) })} /></Field>
-      </div>
-      <div className="flex items-center justify-between rounded-xl bg-white/[0.05] px-3 py-2">
-        <span className="text-xs">播放结束后自动循环</span>
-        <Switch checked={s.loop} onCheckedChange={(v) => patchSettings({ loop: v })} />
       </div>
 
       <div className="rounded-2xl bg-white/[0.05] p-3 text-[11px] leading-relaxed text-white/70">
@@ -516,71 +533,218 @@ function PlayPanel() {
   );
 }
 
-function ExportPanel() {
-  const { project, images } = useEditor();
-  const [res, setRes] = React.useState("1920x1080");
-  const [progress, setProgress] = React.useState<null | { percent: number; remaining: number; bytes: number }>(null);
-  const [result, setResult] = React.useState<{ blob: Blob; ext: string } | null>(null);
-  const cancelRef = React.useRef({ cancelled: false });
-  const mime = pickMime();
+type ExportStage = "idle" | "prepare" | "render" | "encode" | "done";
 
-  async function run() {
+interface ExportRecord {
+  id: string;
+  name: string;
+  size: number;
+  res: string;
+  fps: number;
+  at: number;
+  blob: Blob;
+}
+
+function ExportPanel({ kick, format }: { kick?: number; format?: "mp4" | "webm" }) {
+  const { project, images, timeline } = useEditor();
+  const [res, setRes] = React.useState("1920x1080");
+  const [fps, setFps] = React.useState("30");
+  const [quality, setQuality] = React.useState("high");
+  const [fmt, setFmt] = React.useState<"mp4" | "webm">(format ?? "mp4");
+  const [source, setSource] = React.useState<"draft" | "published">("draft");
+  const [withMusic, setWithMusic] = React.useState(true);
+  const [withText, setWithText] = React.useState(true);
+  const [loopOut, setLoopOut] = React.useState(false);
+  const [rangeMode, setRangeMode] = React.useState<"all" | "custom">("all");
+  const [from, setFrom] = React.useState(0);
+  const [to, setTo] = React.useState(Math.round(timeline.total));
+  const [stage, setStage] = React.useState<ExportStage>("idle");
+  const [progress, setProgress] = React.useState<{ percent: number; remaining: number; bytes: number } | null>(null);
+  const [records, setRecords] = React.useState<ExportRecord[]>([]);
+  const cancelRef = React.useRef({ cancelled: false });
+  const runningRef = React.useRef(false);
+  const mime = pickMime(fmt);
+
+  React.useEffect(() => { if (format) setFmt(format); }, [format]);
+
+  const run = React.useCallback(async () => {
+    if (runningRef.current) { toast.info("已有导出任务正在进行"); return; }
+    const src = source === "published" ? ((project.publishedSnapshot as typeof project | null) ?? null) : project;
+    if (!src) { toast.error("该项目尚未发布，无法导出已发布版"); return; }
+    runningRef.current = true;
     const [w, h] = res.split("x").map(Number);
+    const f = Number(fps);
     cancelRef.current = { cancelled: false };
-    setResult(null);
+    setStage("prepare");
     setProgress({ percent: 0, remaining: 0, bytes: 0 });
+    const started = Date.now();
     try {
+      setStage("render");
       const out = await exportVideo({
-        project, images, width: w, height: h, fps: 30, signal: cancelRef.current,
+        project: { ...src, settings: { ...src.settings, loop: loopOut } },
+        images, width: w, height: h, fps: f, format: fmt,
+        includeMusic: withMusic, includeText: withText,
+        rangeStart: rangeMode === "custom" ? from : 0,
+        rangeEnd: rangeMode === "custom" ? to : undefined,
+        videoBitrate: Math.round(w * h * f * (quality === "high" ? 0.12 : quality === "medium" ? 0.08 : 0.05)),
+        signal: cancelRef.current,
         onProgress: (p) => setProgress({ percent: p.percent, remaining: p.remaining, bytes: p.bytes }),
       });
-      setResult(out);
-      toast.success("视频渲染完成");
+      setStage("encode");
+      const rec: ExportRecord = {
+        id: crypto.randomUUID(),
+        name: `${project.name}.${out.ext}`,
+        size: out.blob.size,
+        res: `${w}×${h}`,
+        fps: f,
+        at: started,
+        blob: out.blob,
+      };
+      setRecords((r) => [rec, ...r].slice(0, 10));
+      setStage("done");
+      toast.success("导出完成，可在下方下载");
     } catch (e) {
+      setStage("idle");
       toast.error("导出失败：" + (e as Error).message);
     } finally {
+      runningRef.current = false;
       setProgress(null);
     }
-  }
+  }, [project, images, res, fps, fmt, quality, source, withMusic, withText, loopOut, rangeMode, from, to]);
+
+  const lastKick = React.useRef(kick);
+  React.useEffect(() => {
+    if (kick && kick !== lastKick.current) {
+      lastKick.current = kick;
+      void run();
+    }
+  }, [kick, run]);
+
+  const stages: { key: ExportStage; label: string }[] = [
+    { key: "prepare", label: "准备素材" },
+    { key: "render", label: "渲染" },
+    { key: "encode", label: "编码" },
+    { key: "done", label: "完成" },
+  ];
+  const stageIdx = stages.findIndex((s) => s.key === stage);
 
   return (
-    <PanelShell title="导出视频" desc="H.264 / AAC · 30 FPS · yuv420p · faststart">
+    <PanelShell title="导出" desc="导出参数 · 进度 · 历史记录">
+      <Field label="导出格式">
+        <Select value={fmt} onValueChange={(v) => setFmt(v as "mp4" | "webm")}>
+          <SelectTrigger className={darkInput()}><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="mp4">MP4（H.264 / AAC）</SelectItem>
+            <SelectItem value="webm">WebM（VP9 / Opus）</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+      <Field label="导出版本">
+        <Select value={source} onValueChange={(v) => setSource(v as "draft" | "published")}>
+          <SelectTrigger className={darkInput()}><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="draft">当前草稿版（默认）</SelectItem>
+            <SelectItem value="published">已发布版</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
       <Field label="分辨率">
         <Select value={res} onValueChange={setRes}>
           <SelectTrigger className={darkInput()}><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="1920x1080">1920 × 1080（横屏）</SelectItem>
             <SelectItem value="1080x1920">1080 × 1920（竖屏）</SelectItem>
+            <SelectItem value="1440x1080">1440 × 1080（4:3）</SelectItem>
             <SelectItem value="1280x720">1280 × 720</SelectItem>
             <SelectItem value="720x1280">720 × 1280</SelectItem>
           </SelectContent>
         </Select>
       </Field>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="帧率">
+          <Select value={fps} onValueChange={setFps}>
+            <SelectTrigger className={darkInput()}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="24">24 FPS</SelectItem>
+              <SelectItem value="30">30 FPS</SelectItem>
+              <SelectItem value="60">60 FPS</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="视频质量">
+          <Select value={quality} onValueChange={setQuality}>
+            <SelectTrigger className={darkInput()}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="high">高码率</SelectItem>
+              <SelectItem value="medium">标准</SelectItem>
+              <SelectItem value="low">压缩优先</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
       <p className="rounded-xl bg-white/[0.05] p-3 text-[11px] text-white/55">
-        当前浏览器输出格式：<span className="font-medium text-white">{mime.ext.toUpperCase()}</span>
-        {mime.ext !== "mp4" && "（此浏览器不支持 MP4 直录，将输出 WebM，可在 Chrome 中导出 MP4）"}
+        视频编码：{mime.ext === "mp4" ? "H.264 (avc1)" : "VP9"} · 音频编码：{mime.ext === "mp4" ? "AAC" : "Opus"} · 实际输出：
+        <span className="font-medium text-white"> {mime.ext.toUpperCase()}</span>
+        {fmt === "mp4" && mime.ext !== "mp4" && "（此浏览器不支持 MP4 直录，将输出 WebM，建议使用 Chrome）"}
       </p>
 
-      {progress ? (
-        <div className="space-y-2">
-          <Progress value={progress.percent} />
-          <div className="flex justify-between text-[11px] text-white/60">
-            <span>{progress.percent.toFixed(1)}%</span>
-            <span>剩余 {fmtTime(progress.remaining)} · {(progress.bytes / 1048576).toFixed(1)} MB</span>
-          </div>
-          <Button variant="secondary" className="w-full" onClick={() => (cancelRef.current.cancelled = true)}>取消导出</Button>
+      {[["含背景音乐", withMusic, setWithMusic], ["含文字图层", withText, setWithText], ["导出循环标记", loopOut, setLoopOut]].map(([l, v, set]) => (
+        <div key={l as string} className="flex items-center justify-between rounded-xl bg-white/[0.05] px-3 py-2">
+          <span className="text-xs">{l as string}</span>
+          <Switch checked={v as boolean} onCheckedChange={set as (b: boolean) => void} />
         </div>
-      ) : (
-        <Button className="w-full gap-2" onClick={() => void run()} disabled={!project.photos.length}>
-          <Download className="h-4 w-4" /> 开始渲染（实时录制）
-        </Button>
+      ))}
+
+      <Field label="导出范围">
+        <div className="grid grid-cols-2 gap-2">
+          <Button size="sm" variant={rangeMode === "all" ? "default" : "secondary"} onClick={() => setRangeMode("all")}>全部时间轴</Button>
+          <Button size="sm" variant={rangeMode === "custom" ? "default" : "secondary"} onClick={() => setRangeMode("custom")}>自定义范围</Button>
+        </div>
+      </Field>
+      {rangeMode === "custom" && (
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="起始（秒）"><Input type="number" className={darkInput()} value={from} onChange={(e) => setFrom(Math.max(0, Number(e.target.value)))} /></Field>
+          <Field label="结束（秒）"><Input type="number" className={darkInput()} value={to} onChange={(e) => setTo(Number(e.target.value))} /></Field>
+        </div>
       )}
 
-      {result && (
-        <Button variant="secondary" className="w-full gap-2" onClick={() => downloadBlob(result.blob, `${project.name}.${result.ext}`)}>
-          <Download className="h-4 w-4" /> 下载 {result.ext.toUpperCase()}（{(result.blob.size / 1048576).toFixed(1)} MB）
-        </Button>
+      {stage !== "idle" && (
+        <div className="space-y-2 rounded-2xl bg-white/[0.05] p-3">
+          <div className="flex justify-between text-[10px]">
+            {stages.map((s, i) => (
+              <span key={s.key} className={i <= stageIdx ? "text-primary" : "text-white/35"}>{s.label}</span>
+            ))}
+          </div>
+          <Progress value={progress?.percent ?? (stage === "done" ? 100 : 0)} />
+          {progress && (
+            <div className="flex justify-between text-[11px] text-white/60">
+              <span>{progress.percent.toFixed(1)}%</span>
+              <span>剩余 {fmtTime(progress.remaining)} · {(progress.bytes / 1048576).toFixed(1)} MB</span>
+            </div>
+          )}
+          {progress && <Button variant="secondary" className="w-full" onClick={() => (cancelRef.current.cancelled = true)}>取消导出</Button>}
+        </div>
       )}
+
+      <Button className="w-full gap-2" onClick={() => void run()} disabled={!project.photos.length || Boolean(progress)}>
+        <Download className="h-4 w-4" /> {progress ? "正在导出…" : "开始导出"}
+      </Button>
+
+      <div className="space-y-1.5">
+        <p className="text-[11px] text-white/45">导出记录</p>
+        {records.length === 0 && <p className="text-[11px] text-white/25">暂无导出记录。</p>}
+        {records.map((r) => (
+          <div key={r.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+            <div className="truncate text-xs text-white">{r.name}</div>
+            <div className="mt-0.5 text-[10px] text-white/45">
+              {(r.size / 1048576).toFixed(1)} MB · {r.res} · {r.fps} FPS · {new Date(r.at).toLocaleString()}
+            </div>
+            <Button size="sm" variant="secondary" className="mt-2 w-full gap-1" onClick={() => downloadBlob(r.blob, r.name)}>
+              <Download className="h-3.5 w-3.5" /> 下载
+            </Button>
+          </div>
+        ))}
+      </div>
       <p className="text-[11px] text-white/35">渲染期间请保持本页在前台，导出时长约等于视频时长。</p>
     </PanelShell>
   );
@@ -625,7 +789,7 @@ function SettingsPanel() {
   );
 }
 
-export function LeftPanel({ panel }: { panel: PanelKey }) {
+export function LeftPanel({ panel, exportKick, exportFormat }: { panel: PanelKey; exportKick?: number; exportFormat?: "mp4" | "webm" }) {
   switch (panel) {
     case "project": return <ProjectPanel />;
     case "images": return <ImagesPanel />;
@@ -635,7 +799,7 @@ export function LeftPanel({ panel }: { panel: PanelKey }) {
     case "animation": return <AnimationPanel />;
     case "layout": return <LayoutPanel />;
     case "play": return <PlayPanel />;
-    case "export": return <ExportPanel />;
+    case "export": return <ExportPanel kick={exportKick} format={exportFormat} />;
     case "settings": return <SettingsPanel />;
     default: return null;
   }

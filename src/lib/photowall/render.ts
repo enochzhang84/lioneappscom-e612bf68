@@ -54,7 +54,7 @@ export function buildTimeline(p: PWProject): Timeline {
   }
   pages.forEach((photos, i) => {
     const override = photos[0]?.duration;
-    const d = st.timingMode === "perPhoto" && override ? override : base;
+    const d = override && override > 0 ? override : base;
     segments.push({ kind: "page", start: t, end: t + d, photos, index: i });
     t += d;
   });

@@ -53,6 +53,18 @@ export interface PWMusic {
   trimStart: number;
   trimEnd: number; // 0 = 到结尾
   duration: number; // 原始时长
+  startTime?: number; // 在时间轴中的起始位置（秒）
+  muted?: boolean;
+  waveform?: number[] | null; // 预留真实波形数据
+}
+
+/** 时间轴编辑状态（随项目持久化） */
+export interface PWTimelineState {
+  currentTime: number;
+  timelineScale: number; // 每秒像素
+  snap: boolean;
+  height: number;
+  collapsed: boolean;
 }
 
 export interface PWSettings {
@@ -95,6 +107,14 @@ export interface PWProject {
   texts: PWText[];
   music: PWMusic[];
   settings: PWSettings;
+  timeline?: PWTimelineState;
+  /** 发布快照：真实预览与「已发布版」导出读取此版本 */
+  publishedSnapshot?: Omit<PWProject, "publishedSnapshot"> | null;
+  publishedAt?: number | null;
+}
+
+export function defaultTimelineState(): PWTimelineState {
+  return { currentTime: 0, timelineScale: 24, snap: true, height: 240, collapsed: false };
 }
 
 export const ASPECTS: Record<AspectKey, { w: number; h: number; label: string }> = {
@@ -147,5 +167,8 @@ export function newProject(name = "未命名照片墙", aspect: AspectKey = "16:
     texts: [],
     music: [],
     settings: defaultSettings(),
+    timeline: defaultTimelineState(),
+    publishedSnapshot: null,
+    publishedAt: null,
   };
 }

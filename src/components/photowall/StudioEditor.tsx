@@ -2,22 +2,27 @@ import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
-  ChevronLeft, Undo2, Redo2, Eye, Save, Upload as PublishIcon, Download, X, PanelLeftClose, PanelLeftOpen,
-  Ruler, Grid2x2, Loader2, Check, AlertCircle,
+  ChevronLeft, Undo2, Redo2, PlayCircle, Save, Upload as PublishIcon, Download, X, PanelLeftClose, PanelLeftOpen,
+  Ruler, Grid2x2, Loader2, Check, AlertCircle, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ASPECTS, type PWProject, type PWSettings } from "@/lib/photowall/types";
 import { buildTimeline } from "@/lib/photowall/render";
 import { saveProject } from "@/lib/photowall/store";
+import { createAudioController, type AudioController } from "@/lib/photowall/audio";
 import { EditorCtx, useImages, type Selection } from "./ctx";
 import { RAIL, type PanelKey } from "./rail";
 import { LeftPanel } from "./LeftPanels";
 import { PreviewCanvas } from "./PreviewCanvas";
+import { PlaybackBar } from "./PlaybackBar";
 import { Inspector } from "./Inspector";
-import { TimelineBar } from "./TimelineBar";
+import { Timeline } from "./Timeline";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -36,10 +41,12 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
   const [showGrid, setShowGrid] = React.useState(false);
   const [showSafe, setShowSafe] = React.useState(false);
   const [saveState, setSaveState] = React.useState<SaveState>("idle");
-  const [previewMode, setPreviewMode] = React.useState(false);
+  const [exportKick, setExportKick] = React.useState(0);
+  const [exportFormat, setExportFormat] = React.useState<"mp4" | "webm">("mp4");
 
   const { images } = useImages(project);
   const timeline = React.useMemo(() => buildTimeline(project), [project]);
+
 
   const setProject = React.useCallback(
     (updater: (p: PWProject) => PWProject, opts?: { history?: boolean }) => {
@@ -95,6 +102,32 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
     return () => cancelAnimationFrame(raf);
   }, [playing, timeline.total, project.settings.loop]);
 
+  /* 背景音乐：与编辑器时间轴同步 */
+  const audioRef = React.useRef<AudioController | null>(null);
+  const musicKey = project.music.map((m) => `${m.assetId}:${m.volume}:${m.muted}:${m.startTime ?? 0}:${m.loop}`).join("|");
+  React.useEffect(() => {
+    let disposed = false;
+    audioRef.current?.dispose();
+    audioRef.current = null;
+    if (project.music.length) {
+      void createAudioController(project).then((c) => {
+        if (disposed) c.dispose();
+        else audioRef.current = c;
+      });
+    }
+    return () => {
+      disposed = true;
+      audioRef.current?.dispose();
+      audioRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [musicKey]);
+  React.useEffect(() => {
+    audioRef.current?.sync(time, playing);
+  }, [time, playing]);
+
+
+
   /* 快捷键 */
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -109,9 +142,8 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
       } else if (e.code === "Space") {
         e.preventDefault();
         setPlaying((v) => !v);
-      } else if (e.key === "Escape") {
-        setPreviewMode(false);
       }
+
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -158,10 +190,24 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
               {project.status === "published" ? "已发布" : "草稿"}
             </span>
 
-            <div className="mx-auto flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5">
               <IconBtn tip="撤销" onClick={undo} disabled={!past.length}><Undo2 className="h-4 w-4" /></IconBtn>
               <IconBtn tip="重做" onClick={redo} disabled={!future.length}><Redo2 className="h-4 w-4" /></IconBtn>
-              <IconBtn tip="全屏预览" onClick={() => { setPreviewMode(true); setTime(0); setPlaying(true); }}><Eye className="h-4 w-4" /></IconBtn>
+              <Button
+                variant="secondary" size="sm" className="gap-1"
+                onClick={async () => {
+                  setPlaying(false);
+                  setSaveState("saving");
+                  try {
+                    await saveProject(project);
+                    setSaveState("saved");
+                  } catch { setSaveState("error"); }
+                  window.open(`/display/photo-wall-preview/${project.id}`, "_blank", "noopener");
+                }}
+              >
+                <PlayCircle className="h-4 w-4" /> 真实预览
+              </Button>
+
               <div className="mx-1 flex rounded-lg bg-white/[0.06] p-0.5">
                 {(Object.keys(ASPECTS) as (keyof typeof ASPECTS)[]).map((k) => (
                   <button key={k} onClick={() => setProject((p) => ({ ...p, aspect: k }))}
@@ -187,13 +233,35 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
                 <Save className="h-4 w-4" /> 保存
               </Button>
               <Button size="sm" className="gap-1"
-                onClick={() => { setProject((p) => ({ ...p, status: "published" })); toast.success("已发布，可在最近项目中播放"); }}>
+                onClick={() => {
+                  setProject((p) => {
+                    const { publishedSnapshot: _ignored, ...snap } = p;
+                    return { ...p, status: "published", publishedSnapshot: snap };
+                  });
+                  toast.success("已发布，真实预览将播放此版本");
+                }}>
                 <PublishIcon className="h-4 w-4" /> 发布
               </Button>
-              <Button variant="secondary" size="sm" className="gap-1" onClick={() => setPanel("export")}>
-                <Download className="h-4 w-4" /> 导出 MP4
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm" className="gap-1">
+                    <Download className="h-4 w-4" /> 导出 <ChevronDown className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>选择导出格式</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => { setExportFormat("mp4"); setPanel("export"); setExportKick((k) => k + 1); }}>
+                    MP4（H.264 / AAC）
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setExportFormat("webm"); setPanel("export"); setExportKick((k) => k + 1); }}>
+                    WebM（VP9 / Opus）
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setPanel("export")}>打开导出设置…</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <IconBtn tip="关闭" onClick={() => navigate({ to: "/tools/photo-wall" })}><X className="h-4 w-4" /></IconBtn>
+
             </div>
           </header>
 
@@ -220,30 +288,23 @@ export function StudioEditor({ initial }: { initial: PWProject }) {
             {/* 左侧面板 */}
             {!collapsed && (
               <div className="w-[320px] shrink-0 overflow-hidden border-r border-white/10 bg-[#151922]">
-                <LeftPanel panel={panel} />
+                <LeftPanel panel={panel} exportKick={exportKick} exportFormat={exportFormat} />
               </div>
             )}
 
-            {/* 画布 + 时间轴 */}
+            {/* 画布 + 进度条 + 时间轴 */}
             <div className="flex min-w-0 flex-1 flex-col">
               <PreviewCanvas zoom={zoom} setZoom={setZoom} showGrid={showGrid} showSafe={showSafe} />
-              <TimelineBar />
+              <PlaybackBar />
+              <Timeline />
             </div>
 
             {/* 右侧属性面板 */}
             <Inspector />
           </div>
-
-          {previewMode && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black" onClick={() => setPreviewMode(false)}>
-              <div className="w-full max-w-[92vw]">
-                <PreviewCanvas zoom={1.7} setZoom={() => {}} showGrid={false} showSafe={false} />
-              </div>
-              <span className="absolute bottom-6 text-xs text-white/40">点击任意处或按 Esc 退出预览</span>
-            </div>
-          )}
         </div>
       </TooltipProvider>
+
     </EditorCtx.Provider>
   );
 }

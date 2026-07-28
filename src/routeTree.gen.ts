@@ -41,6 +41,7 @@ import { Route as ToolsSolutionBuilderHomeNetworkRouteImport } from './routes/to
 import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/tools.solution-builder.full-solution'
 import { Route as ToolsPhotoWallIdRouteImport } from './routes/tools.photo-wall.$id'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
+import { Route as DisplayPhotoWallPreviewIdRouteImport } from './routes/display.photo-wall-preview.$id'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
 import { Route as AuthenticatedAdminSolutionBuilderRouteImport } from './routes/_authenticated/admin.solution-builder'
@@ -240,6 +241,12 @@ const PDriveC1Route = PDriveC1RouteImport.update({
   path: '/p/drive/c1',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DisplayPhotoWallPreviewIdRoute =
+  DisplayPhotoWallPreviewIdRouteImport.update({
+    id: '/display/photo-wall-preview/$id',
+    path: '/display/photo-wall-preview/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -482,6 +489,7 @@ export interface FileRoutesByFullPath {
   '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/display/photo-wall-preview/$id': typeof DisplayPhotoWallPreviewIdRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
@@ -540,6 +548,7 @@ export interface FileRoutesByTo {
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/display/photo-wall-preview/$id': typeof DisplayPhotoWallPreviewIdRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
@@ -611,6 +620,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/display/photo-wall-preview/$id': typeof DisplayPhotoWallPreviewIdRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
@@ -682,6 +692,7 @@ export interface FileRouteTypes {
     | '/admin/solution-builder'
     | '/admin/tools'
     | '/admin/users'
+    | '/display/photo-wall-preview/$id'
     | '/p/drive/c1'
     | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
@@ -740,6 +751,7 @@ export interface FileRouteTypes {
     | '/admin/seo'
     | '/admin/solution-builder'
     | '/admin/users'
+    | '/display/photo-wall-preview/$id'
     | '/p/drive/c1'
     | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
@@ -810,6 +822,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/solution-builder'
     | '/_authenticated/admin/tools'
     | '/_authenticated/admin/users'
+    | '/display/photo-wall-preview/$id'
     | '/p/drive/c1'
     | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
@@ -861,6 +874,7 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  DisplayPhotoWallPreviewIdRoute: typeof DisplayPhotoWallPreviewIdRoute
   PDriveC1Route: typeof PDriveC1Route
   PSlugIndexRoute: typeof PSlugIndexRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
@@ -1091,6 +1105,13 @@ declare module '@tanstack/react-router' {
       path: '/p/drive/c1'
       fullPath: '/p/drive/c1'
       preLoaderRoute: typeof PDriveC1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/display/photo-wall-preview/$id': {
+      id: '/display/photo-wall-preview/$id'
+      path: '/display/photo-wall-preview/$id'
+      fullPath: '/display/photo-wall-preview/$id'
+      preLoaderRoute: typeof DisplayPhotoWallPreviewIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/users': {
@@ -1602,6 +1623,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ProductsSlugRoute: ProductsSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
+  DisplayPhotoWallPreviewIdRoute: DisplayPhotoWallPreviewIdRoute,
   PDriveC1Route: PDriveC1Route,
   PSlugIndexRoute: PSlugIndexRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
