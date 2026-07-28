@@ -579,17 +579,20 @@ export const ANIM_COMBOS: AnimCombo[] = [
 export type RandomMode =
   | "gentle" | "modern" | "cinematic" | "apple" | "church" | "wedding" | "kids" | "tech" | "all";
 
-export const RANDOM_MODES: { key: RandomMode; label: string; pick: (a: AnimDef) => boolean }[] = [
-  { key: "gentle", label: "温和模式", pick: (a) => a.perf === 1 && !a.fnHeavy },
-  { key: "modern", label: "现代模式", pick: (a) => a.cats.includes("minimal") || a.cats.includes("apple") },
-  { key: "cinematic", label: "电影模式", pick: (a) => a.cats.includes("cinematic") },
-  { key: "apple", label: "Apple 模式", pick: (a) => a.cats.includes("apple") },
-  { key: "church", label: "教会模式", pick: (a) => a.cats.includes("church") || a.cats.includes("wall") },
-  { key: "wedding", label: "婚礼模式", pick: (a) => a.cats.includes("wedding") },
-  { key: "kids", label: "儿童模式", pick: (a) => a.cats.includes("kids") },
-  { key: "tech", label: "科技模式", pick: (a) => a.cats.includes("tech") },
+export interface RandomModeDef { key: RandomMode; label: string; pick: (a: AnimDef) => boolean }
+
+export const RANDOM_MODES: RandomModeDef[] = [
+  { key: "gentle", label: "温和模式", pick: (a: AnimDef) => a.perf === 1 },
+  { key: "modern", label: "现代模式", pick: (a: AnimDef) => a.cats.includes("minimal") || a.cats.includes("apple") },
+  { key: "cinematic", label: "电影模式", pick: (a: AnimDef) => a.cats.includes("cinematic") },
+  { key: "apple", label: "Apple 模式", pick: (a: AnimDef) => a.cats.includes("apple") },
+  { key: "church", label: "教会模式", pick: (a: AnimDef) => a.cats.includes("church") || a.cats.includes("wall") },
+  { key: "wedding", label: "婚礼模式", pick: (a: AnimDef) => a.cats.includes("wedding") },
+  { key: "kids", label: "儿童模式", pick: (a: AnimDef) => a.cats.includes("kids") },
+  { key: "tech", label: "科技模式", pick: (a: AnimDef) => a.cats.includes("tech") },
   { key: "all", label: "全部随机", pick: () => true },
-] as unknown as { key: RandomMode; label: string; pick: (a: AnimDef) => boolean }[];
+];
+
 
 /** 生成不连续重复的随机动画序列 */
 export function randomSequence(mode: RandomMode, count: number): string[] {
