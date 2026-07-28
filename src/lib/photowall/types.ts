@@ -23,7 +23,10 @@ export interface PWPhoto {
   highlight: boolean;
   cover: boolean;
   duration?: number | null; // 秒，单张覆盖
+  /** 单张动画覆盖（动画资源库 ID） */
+  animationId?: string | null;
 }
+
 
 export type TextKind = "title" | "subtitle" | "caption" | "verse" | "outro";
 
@@ -37,7 +40,9 @@ export interface PWText {
   color: string;
   align: "left" | "center" | "right";
   shadow: boolean;
-  animation: "fade" | "rise" | "none";
+  /** 文字动画 ID（动画资源库 · 文字动画），兼容旧值 fade / rise / none */
+  animation: string;
+
   start: number; // 秒
   duration: number; // 秒
 }
@@ -94,7 +99,31 @@ export interface PWSettings {
   loop: boolean;
   bgColor: string;
   accent: string;
+  /* ---------- 动画资源库 Animation Library ---------- */
+  /** 全局图片动画 ID（优先于旧版 animation 字段） */
+  animationId?: string;
+  /** 转场动画 ID */
+  transitionId?: string;
+  /** 缓动方式 */
+  easing?: string;
+  /** 自定义贝塞尔曲线 */
+  customBezier?: [number, number, number, number];
+  /** 动画速度倍率 */
+  animSpeed?: number;
+  /** 动画延迟（占片段比例 0..0.8） */
+  animDelay?: number;
+  /** 片段内循环播放动画 */
+  animLoop?: boolean;
+  /** 动画幅度 0..2 */
+  animIntensity?: number;
+  /** 性能模式 */
+  perfMode?: "smooth" | "balanced" | "quality";
+  /** 每张随机动画（不连续重复） */
+  animRandom?: boolean;
+  /** 当前套用的动画组合 key */
+  animCombo?: string | null;
 }
+
 
 export interface PWProject {
   id: string;
@@ -151,8 +180,19 @@ export function defaultSettings(): PWSettings {
     loop: false,
     bgColor: "#0b0d12",
     accent: "#2563eb",
+    animationId: "kb-classic",
+    transitionId: "cross-dissolve",
+    easing: "cinematic",
+    animSpeed: 1,
+    animDelay: 0,
+    animLoop: false,
+    animIntensity: 1,
+    perfMode: "balanced",
+    animRandom: false,
+    animCombo: null,
   };
 }
+
 
 export function newProject(name = "未命名照片墙", aspect: AspectKey = "16:9"): PWProject {
   const now = Date.now();

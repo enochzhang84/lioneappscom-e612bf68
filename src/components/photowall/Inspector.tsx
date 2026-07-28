@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TEXT_PRESETS } from "@/lib/photowall/presets";
+import { ANIMATION_LIBRARY, TEXT_ANIMS } from "@/lib/photowall/animations";
 import { RotateCcw, RotateCw, Star, Image as ImageIcon, Type, Music2, Sparkles } from "lucide-react";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -168,6 +169,26 @@ export function Inspector() {
                 }
               />
             </Row>
+            <Row label="本张动画（留空跟随全局）">
+              <Select
+                value={photo.animationId ?? "__global"}
+                onValueChange={(v) =>
+                  setProject((p) => ({
+                    ...p,
+                    photos: p.photos.map((x) => (x.id === photo.id ? { ...x, animationId: v === "__global" ? null : v } : x)),
+                  }))
+                }
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="__global">跟随全局设置</SelectItem>
+                  {ANIMATION_LIBRARY.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name} · {a.en}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Row>
+
           </>
         )}
 
@@ -248,10 +269,11 @@ export function Inspector() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fade">淡入淡出</SelectItem>
-                  <SelectItem value="rise">上升出现</SelectItem>
-                  <SelectItem value="none">无</SelectItem>
+                  {TEXT_ANIMS.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name} · {t.en}</SelectItem>
+                  ))}
                 </SelectContent>
+
               </Select>
             </Row>
             <div className="grid grid-cols-2 gap-2">
