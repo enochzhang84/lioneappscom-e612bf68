@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/context-menu";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { assetUrl, hashBlob, putAsset, deleteAsset } from "@/lib/photowall/store";
-import { ANIMATIONS, LAYOUTS, TEMPLATES, TEXT_PRESETS } from "@/lib/photowall/presets";
+import { LAYOUTS, TEMPLATES, TEXT_PRESETS } from "@/lib/photowall/presets";
 import { ASPECTS, type PWPhoto, type PWText } from "@/lib/photowall/types";
 import { fmtTime } from "@/lib/photowall/render";
 import { exportVideo, downloadBlob, pickMime } from "@/lib/photowall/export";
