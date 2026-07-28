@@ -415,32 +415,9 @@ function MusicPanel() {
 }
 
 function AnimationPanel() {
-  const { project, patchSettings } = useEditor();
-  const s = project.settings;
-  return (
-    <PanelShell title="动画" desc="全局照片动效与参数">
-      <div className="grid grid-cols-2 gap-2">
-        {ANIMATIONS.map((a) => (
-          <button key={a.key} onClick={() => patchSettings({ animation: a.key })}
-            className={`rounded-xl border p-3 text-left transition ${s.animation === a.key ? "border-primary bg-primary/15" : "border-white/10 bg-white/[0.04] hover:border-white/25"}`}>
-            <span className="block text-xs font-medium text-white">{a.label}</span>
-            <span className="block text-[10px] text-white/40">{a.desc}</span>
-          </button>
-        ))}
-      </div>
-      <Field label={`放大比例 ${s.zoom.toFixed(2)}×`}><Slider value={[s.zoom]} min={1} max={1.6} step={0.01} onValueChange={(v) => patchSettings({ zoom: v[0] })} /></Field>
-      <Field label={`停留比例 ${Math.round(s.hold * 100)}%`}><Slider value={[s.hold]} min={0} max={1} step={0.05} onValueChange={(v) => patchSettings({ hold: v[0] })} /></Field>
-      <Field label={`转场时间 ${s.transition.toFixed(1)}s`}><Slider value={[s.transition]} min={0.1} max={3} step={0.1} onValueChange={(v) => patchSettings({ transition: v[0] })} /></Field>
-      <Field label={`背景变暗 ${Math.round(s.dimBg * 100)}%`}><Slider value={[s.dimBg]} min={0} max={0.8} step={0.05} onValueChange={(v) => patchSettings({ dimBg: v[0] })} /></Field>
-      {[["blurBg", "背景模糊"], ["random", "随机播放"], ["noRepeat", "禁止连续重复"]].map(([k, l]) => (
-        <div key={k} className="flex items-center justify-between rounded-xl bg-white/[0.05] px-3 py-2">
-          <span className="text-xs">{l}</span>
-          <Switch checked={Boolean(s[k as "blurBg"])} onCheckedChange={(v) => patchSettings({ [k]: v } as never)} />
-        </div>
-      ))}
-    </PanelShell>
-  );
+  return <AnimationLibraryPanel />;
 }
+
 
 function LayoutPanel() {
   const { project, patchSettings } = useEditor();
