@@ -122,6 +122,24 @@ export interface PWSettings {
   animRandom?: boolean;
   /** 当前套用的动画组合 key */
   animCombo?: string | null;
+  /* ---------- 主图放大 Hero ---------- */
+  /** 主图展示方式：网格内放大 / 全屏覆盖 / 全屏浮层 */
+  heroMode?: "grid" | "fullscreen" | "overlay";
+  /** 主图全屏适配：铺满屏幕 / 完整显示 */
+  heroFit?: "cover" | "contain";
+  /** 主图焦点位置 */
+  heroFocus?: "center" | "top" | "bottom" | "left" | "right" | "custom";
+  /** contain 模式下的背景处理 */
+  heroBg?: "black" | "blur" | "color" | "dim";
+  /** 进入全屏时长（秒） */
+  heroIn?: number;
+  /** 全屏停留时长（秒） */
+  heroHold?: number;
+  /** 退出全屏时长（秒） */
+  heroOut?: number;
+  /** 全屏时其他缩略图变暗程度 0..1（1 = 完全隐藏） */
+  heroDim?: number;
+
 }
 
 
