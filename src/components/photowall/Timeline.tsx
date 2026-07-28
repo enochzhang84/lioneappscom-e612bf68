@@ -224,6 +224,36 @@ export function Timeline() {
               })}
             </Row>
 
+            {/* 主图轨：进入全屏 / 全屏停留 / 退出全屏 */}
+            <Row>
+              {pageSegs.map((s, i) => {
+                const plan = heroPlan(project, s, 0);
+                if (plan.index < 0 || plan.mode === "grid") return null;
+                const segs: { label: string; from: number; to: number; cls: string }[] = [
+                  { label: "进入全屏", from: plan.start, to: plan.start + plan.inDur, cls: "bg-amber-500/35 border-amber-400/50" },
+                  { label: "全屏停留", from: plan.start + plan.inDur, to: plan.start + plan.inDur + plan.holdDur, cls: "bg-primary/45 border-primary" },
+                  { label: "退出全屏", from: plan.end - plan.outDur, to: plan.end, cls: "bg-amber-500/35 border-amber-400/50" },
+                ];
+                return segs.map((b, bi) => {
+                  const left = ((s.start + b.from) / total) * width;
+                  const w = ((b.to - b.from) / total) * width;
+                  if (w <= 0.5) return null;
+                  return (
+                    <div
+                      key={`${i}-${bi}`}
+                      className={`absolute top-1 flex items-center justify-center overflow-hidden rounded-md border text-[9px] text-white/90 ${b.cls}`}
+                      style={{ left, width: Math.max(4, w - 2), height: ROW_H - 8 }}
+                      title={`${b.label} ${fmtTime(s.start + b.from)} → ${fmtTime(s.start + b.to)}`}
+                    >
+                      <span className="truncate px-1">{b.label}</span>
+                    </div>
+                  );
+                });
+              })}
+            </Row>
+
+
+
             {/* 文字轨 */}
             <Row>
               {project.texts.map((tx) => {
