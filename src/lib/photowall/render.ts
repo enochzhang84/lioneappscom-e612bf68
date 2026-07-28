@@ -1,6 +1,12 @@
 // Photo Wall Studio — 时间轴与渲染引擎（编辑器预览与 MP4 导出共用）
 import type { AnimationKey, LayoutKey, PWPhoto, PWProject } from "./types";
 import { photosPerPage } from "./presets";
+import {
+  evalAnimation, evalTransition, randomSequence, resolveAnimId, TEXT_ANIM_MAP,
+  type AnimEval, type EasingKey, type PerfMode,
+} from "./animations";
+import { drawFx, applyTransitionClip } from "./fx";
+
 
 export type SegmentKind = "opening" | "page" | "ending";
 
