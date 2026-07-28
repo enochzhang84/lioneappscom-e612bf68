@@ -39,7 +39,8 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 export function buildTimeline(p: PWProject): Timeline {
   const st = p.settings;
   const per = photosPerPage(st.layout);
-  const list = st.random ? seededShuffle(p.photos, p.photos.length * 7 + 13) : p.photos;
+  const inTl = p.photos.filter((x) => x.inTimeline !== false);
+  const list = st.random ? seededShuffle(inTl, inTl.length * 7 + 13) : inTl;
   const pages: PWPhoto[][] = [];
   for (let i = 0; i < list.length; i += per) pages.push(list.slice(i, i + per));
 

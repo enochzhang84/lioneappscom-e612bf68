@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/context-menu";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { assetUrl, hashBlob, putAsset, deleteAsset } from "@/lib/photowall/store";
-import { LAYOUTS, TEMPLATES, TEXT_PRESETS } from "@/lib/photowall/presets";
-import { ASPECTS, type PWPhoto, type PWText } from "@/lib/photowall/types";
+import { LAYOUTS, TEMPLATES, TEXT_PRESETS, photosPerPage } from "@/lib/photowall/presets";
+import { ASPECTS, type LayoutKey, type PWPhoto, type PWText } from "@/lib/photowall/types";
 import { fmtTime } from "@/lib/photowall/render";
 import { exportVideo, downloadBlob, pickMime } from "@/lib/photowall/export";
 import { useEditor } from "./ctx";
@@ -61,13 +61,18 @@ function Thumb({ assetId, className }: { assetId: string; className?: string }) 
 
 /* ------------------------------- 图片面板 ------------------------------- */
 function ImagesPanel() {
-  const { project, setProject, selection, setSelection, selectedIds, setSelectedIds } = useEditor();
+  const { project, setProject, selection, setSelection, selectedIds, setSelectedIds, timeline } = useEditor();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [q, setQ] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [visible, setVisible] = React.useState(120);
   const [confirm, setConfirm] = React.useState<null | { title: string; desc: string; run: () => void }>(null);
   const reuploadRef = React.useRef(false);
+  /** 上传方式：加入时间轴（默认） / 仅上传到素材库 */
+  const [uploadToTimeline, setUploadToTimeline] = React.useState(true);
+
+  const inCount = project.photos.filter((p) => p.inTimeline !== false).length;
+  const outCount = project.photos.length - inCount;
 
   const filtered = React.useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -98,13 +103,42 @@ function ImagesPanel() {
         next.push({
           id: crypto.randomUUID(), assetId, name: f.name, w: dim.w, h: dim.h, size: f.size, hash,
           rotate: 0, radius: 0, border: 0, shadow: true, focusX: 0.5, focusY: 0.5, highlight: false, cover: false, duration: null,
+          inTimeline: uploadToTimeline,
         });
       }
+      // 按上传顺序追加到素材库末尾，画面轨随之在现有片段之后延长
       if (next.length) setProject((p) => ({ ...p, photos: [...p.photos, ...next] }));
-      toast.success(`已添加 ${next.length} 张图片${dupes ? `，跳过 ${dupes} 张重复` : ""}`);
+      toast.success(
+        `已添加 ${next.length} 张图片${uploadToTimeline ? "，并全部加入画面轨" : "（仅素材库）"}${dupes ? ` · 跳过 ${dupes} 张重复` : ""}`,
+      );
     } finally {
       setBusy(false);
     }
+  }
+
+  /** 加入时间轴：按 id 去重，不会重复创建片段 */
+  function addToTimeline(ids: string[]) {
+    const set = new Set(ids);
+    const added = project.photos.filter((p) => set.has(p.id) && p.inTimeline === false).length;
+    if (!added) { toast.info("所选图片已全部在画面轨中，未重复添加"); return; }
+    setProject((p) => ({ ...p, photos: p.photos.map((x) => (set.has(x.id) ? { ...x, inTimeline: true } : x)) }));
+    toast.success(`已将 ${added} 张图片加入画面轨`);
+  }
+
+  function removeFromTimeline(ids: string[]) {
+    const set = new Set(ids);
+    const n = project.photos.filter((p) => set.has(p.id) && p.inTimeline !== false).length;
+    setProject((p) => ({ ...p, photos: p.photos.map((x) => (set.has(x.id) ? { ...x, inTimeline: false } : x)) }));
+    toast.success(`已从画面轨移除 ${n} 张（素材保留在素材库）`);
+  }
+
+  function removePhotos(ids: string[]) {
+    const set = new Set(ids);
+    const gone = project.photos.filter((p) => set.has(p.id));
+    setProject((p) => ({ ...p, photos: p.photos.filter((x) => !set.has(x.id)) }));
+    gone.forEach((g) => void deleteAsset(g.assetId));
+    setSelectedIds((prev) => prev.filter((x) => !set.has(x)));
+    toast.success(`已移除 ${ids.length} 张图片`);
   }
 
   function toggle(id: string, e: React.MouseEvent) {
@@ -122,14 +156,6 @@ function ImagesPanel() {
     setSelection({ type: "photo", id });
   }
 
-  function removePhotos(ids: string[]) {
-    const set = new Set(ids);
-    const gone = project.photos.filter((p) => set.has(p.id));
-    setProject((p) => ({ ...p, photos: p.photos.filter((x) => !set.has(x.id)) }));
-    gone.forEach((g) => void deleteAsset(g.assetId));
-    setSelectedIds((prev) => prev.filter((x) => !set.has(x)));
-    toast.success(`已移除 ${ids.length} 张图片`);
-  }
 
   return (
     <PanelShell title="图片" desc="拖拽或点击上传 · 支持 JPG / PNG / WebP / HEIC">
@@ -149,10 +175,59 @@ function ImagesPanel() {
         <p className="mt-1 text-[11px] text-white/40">自动按 Hash 检测重复图片</p>
       </div>
 
+      {/* 上传方式 */}
+      <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2">
+        <div className="mb-1.5 text-[11px] text-white/55">上传方式</div>
+        <div className="grid grid-cols-2 gap-1">
+          {([[true, "上传并加入时间轴"], [false, "仅上传到素材库"]] as const).map(([v, l]) => (
+            <button key={String(v)} onClick={() => setUploadToTimeline(v)}
+              className={`rounded-lg px-1.5 py-1.5 text-[11px] transition ${uploadToTimeline === v ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/65 hover:bg-white/15"}`}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* 素材 / 时间轴数量统计 */}
+      <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2.5 text-[11px]">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-white/60">
+          <span>素材库：<b className="text-white">{project.photos.length}</b> 张</span>
+          <span>已加入时间轴：<b className="text-white">{inCount}</b> 张</span>
+          <span>未加入：<b className={outCount ? "text-amber-300" : "text-white"}>{outCount}</b> 张</span>
+          <span>画面轨：<b className="text-white">{timeline.pageCount}</b> 屏 · 每屏 {timeline.perPage} 张</span>
+        </div>
+        {timeline.perPage > 1 && inCount > timeline.perPage && (
+          <p className="mt-1.5 text-[10px] leading-relaxed text-white/40">
+            当前布局每屏同时显示 {timeline.perPage} 张，所以 {inCount} 张图片被分成 {timeline.pageCount} 屏（总时长 {fmtTime(timeline.total)}），没有任何图片被丢弃。
+            想让每张单独占一屏（{inCount} 个片段），请在「布局」中选择「单张轮播」。
+          </p>
+        )}
+        {outCount > 0 && (
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-amber-400/15 px-2 py-1.5 text-amber-200">
+            <span>有 {outCount} 张图片尚未加入时间轴</span>
+            <Button size="sm" className="h-6 px-2 text-[11px]" onClick={() => addToTimeline(project.photos.map((p) => p.id))}>全部加入</Button>
+          </div>
+        )}
+      </div>
+
+      {/* 时间轴批量操作 */}
+      <div className="flex flex-wrap gap-1.5 text-[11px]">
+        <Button size="sm" variant="secondary" className="h-7 px-2" onClick={() => addToTimeline(project.photos.map((p) => p.id))}>全部加入时间轴</Button>
+        <Button size="sm" variant="secondary" className="h-7 px-2" disabled={!selectedIds.length} onClick={() => addToTimeline(selectedIds)}>选中加入时间轴</Button>
+        <Button size="sm" variant="secondary" className="h-7 px-2" disabled={!selectedIds.length} onClick={() => removeFromTimeline(selectedIds)}>从时间轴移除</Button>
+        <Button
+          size="sm" variant="secondary" className="h-7 px-2" disabled={!inCount}
+          onClick={() => setConfirm({
+            title: "清空画面轨",
+            desc: "所有图片将退出时间轴，但仍保留在素材库中，可随时重新加入。",
+            run: () => removeFromTimeline(project.photos.map((p) => p.id)),
+          })}
+        >清空画面轨</Button>
+      </div>
+
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索图片…" className={darkInput("pl-8 h-9")} />
       </div>
+
 
       <div className="flex flex-wrap gap-1.5 text-[11px]">
         <Button size="sm" variant="secondary" className="h-7 gap-1 px-2" onClick={() => setSelectedIds(filtered.map((p) => p.id))}>
@@ -233,6 +308,7 @@ function ImagesPanel() {
       <div className="grid grid-cols-3 gap-2">
         {filtered.slice(0, visible).map((ph) => {
           const sel = selectedIds.includes(ph.id);
+          const inTl = ph.inTimeline !== false;
           return (
             <ContextMenu key={ph.id}>
               <ContextMenuTrigger asChild>
@@ -242,34 +318,42 @@ function ImagesPanel() {
                     sel ? "ring-primary" : selection.id === ph.id ? "ring-white/50" : "ring-transparent hover:ring-white/25"
                   }`}
                 >
-                  <Thumb assetId={ph.assetId} className="h-full w-full object-cover" />
+                  <Thumb assetId={ph.assetId} className={`h-full w-full object-cover ${inTl ? "" : "opacity-45 grayscale"}`} />
                   <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-gradient-to-t from-black/80 to-transparent p-1 opacity-0 transition group-hover:opacity-100">
                     <button title="重点" onClick={(e) => { e.stopPropagation(); setProject((p) => ({ ...p, photos: p.photos.map((x) => (x.id === ph.id ? { ...x, highlight: !x.highlight } : x)) })); }}
                       className="rounded p-1 text-white/80 hover:text-amber-300"><Star className="h-3.5 w-3.5" /></button>
                     <button title="编辑" onClick={(e) => { e.stopPropagation(); setSelection({ type: "photo", id: ph.id }); }}
                       className="rounded p-1 text-white/80 hover:text-white"><Pencil className="h-3.5 w-3.5" /></button>
-                    <button title="移除" onClick={(e) => { e.stopPropagation(); removePhotos([ph.id]); }}
+                    <button title={inTl ? "从时间轴移除" : "加入时间轴"} onClick={(e) => { e.stopPropagation(); inTl ? removeFromTimeline([ph.id]) : addToTimeline([ph.id]); }}
+                      className="rounded p-1 text-white/80 hover:text-primary">{inTl ? <Square className="h-3.5 w-3.5" /> : <CheckSquare className="h-3.5 w-3.5" />}</button>
+                    <button title="删除素材" onClick={(e) => { e.stopPropagation(); setConfirm({ title: "删除素材", desc: `将从素材库彻底删除「${ph.name}」，同时从时间轴移除。若只想让它不参与播放，请改用「从时间轴移除」。`, run: () => removePhotos([ph.id]) }); }}
                       className="rounded p-1 text-white/80 hover:text-rose-400"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
-                  <div className="absolute left-1 top-1 flex gap-1">
-                    {ph.highlight && <span className="rounded bg-amber-400/90 px-1 text-[9px] font-semibold text-black">重点</span>}
+                  <div className="absolute left-1 top-1 flex flex-wrap gap-1">
+                    <span className={`rounded px-1 text-[9px] font-semibold ${inTl ? "bg-primary text-primary-foreground" : "bg-white/80 text-black"}`}>
+                      {inTl ? "已在时间轴" : "未加入"}
+                    </span>
+                    {ph.highlight && <span className="rounded bg-amber-400/90 px-1 text-[9px] font-semibold text-black">主图</span>}
                     {ph.cover && <span className="rounded bg-sky-400/90 px-1 text-[9px] font-semibold text-black">封面</span>}
                     {(ph.caption || ph.title) && <span className="rounded bg-emerald-400/90 px-1 text-[9px] font-semibold text-black">解说</span>}
                   </div>
                 </div>
               </ContextMenuTrigger>
-              <ContextMenuContent className="w-48">
+              <ContextMenuContent className="w-52">
                 <ContextMenuItem onSelect={() => setSelection({ type: "photo", id: ph.id })}><Eye className="mr-2 h-3.5 w-3.5" />打开预览 / 编辑</ContextMenuItem>
+                {inTl
+                  ? <ContextMenuItem onSelect={() => removeFromTimeline([ph.id])}>从时间轴移除（保留素材）</ContextMenuItem>
+                  : <ContextMenuItem onSelect={() => addToTimeline([ph.id])}>加入时间轴</ContextMenuItem>}
                 <ContextMenuItem onSelect={() => setProject((p) => ({ ...p, photos: p.photos.map((x) => ({ ...x, cover: x.id === ph.id })) }))}>设为封面</ContextMenuItem>
                 <ContextMenuItem onSelect={() => setProject((p) => ({ ...p, photos: p.photos.map((x) => (x.id === ph.id ? { ...x, highlight: !x.highlight } : x)) }))}>设为重点照片</ContextMenuItem>
                 <ContextMenuSeparator />
                 <ContextMenuItem onSelect={() => setProject((p) => ({ ...p, photos: p.photos.map((x) => (x.id === ph.id ? { ...x, rotate: (x.rotate + 90) % 360 } : x)) }))}>旋转 90°</ContextMenuItem>
-                <ContextMenuItem onSelect={() => setProject((p) => { const i = p.photos.findIndex((x) => x.id === ph.id); const copy = { ...ph, id: crypto.randomUUID() }; const arr = [...p.photos]; arr.splice(i + 1, 0, copy); return { ...p, photos: arr }; })}>复制</ContextMenuItem>
+                <ContextMenuItem onSelect={() => setProject((p) => { const i = p.photos.findIndex((x) => x.id === ph.id); const copy = { ...ph, id: crypto.randomUUID() }; const arr = [...p.photos]; arr.splice(i + 1, 0, copy); return { ...p, photos: arr }; })}>复制片段</ContextMenuItem>
                 <ContextMenuItem onSelect={() => { void assetUrl(ph.assetId).then((u) => { if (u) { const a = document.createElement("a"); a.href = u; a.download = ph.name; a.click(); } }); }}>
                   <Download className="mr-2 h-3.5 w-3.5" />下载原图
                 </ContextMenuItem>
                 <ContextMenuSeparator />
-                <ContextMenuItem className="text-destructive" onSelect={() => removePhotos([ph.id])}>移除</ContextMenuItem>
+                <ContextMenuItem className="text-destructive" onSelect={() => setConfirm({ title: "删除素材", desc: `将从素材库彻底删除「${ph.name}」，同时从时间轴移除。若只想让它不参与播放，请改用「从时间轴移除」。`, run: () => removePhotos([ph.id]) })}>删除素材</ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
           );
@@ -304,15 +388,25 @@ function TemplatesPanel() {
           <button
             key={t.key}
             onClick={() => {
+              const per = photosPerPage((t.patch.layout ?? project.settings.layout) as LayoutKey);
+              const total = project.photos.filter((x) => x.inTimeline !== false).length;
               setProject((p) => ({
                 ...p,
+                // 只改设置，绝不裁剪照片：全部图片继续参与，按每屏张数自动分组
+                photos: p.photos,
                 settings: {
                   ...p.settings, ...t.patch,
                   openingText: t.opening, openingSub: t.openingSub, endingText: t.ending,
                 },
               }));
-              toast.success(`已套用模板：${t.name}`);
+              toast.success(
+                `已套用模板：${t.name}`,
+                total > per
+                  ? { description: `当前 ${total} 张图片将按每屏 ${per} 张自动分为 ${Math.ceil(total / per)} 屏，不会丢弃任何图片。` }
+                  : undefined,
+              );
             }}
+
             className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition hover:border-primary/60 hover:bg-primary/10"
           >
             <span className="text-xl">{t.emoji}</span>
