@@ -162,7 +162,7 @@ export function Timeline() {
         {/* 固定轨道名 */}
         <div className="shrink-0 border-r border-white/10 bg-[#151922]" style={{ width: LABEL_W }}>
           <div className="h-6 border-b border-white/10" />
-          {["画面轨", "文字轨", "音频轨", "转场轨"].map((n) => (
+          {["画面轨", "主图轨", "文字轨", "音频轨", "转场轨"].map((n) => (
             <div key={n} className="flex items-center border-b border-white/5 px-3 text-[11px] text-white/55" style={{ height: ROW_H }}>
               {n}
             </div>
