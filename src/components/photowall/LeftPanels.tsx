@@ -141,6 +141,21 @@ function ImagesPanel() {
     toast.success(`已移除 ${ids.length} 张图片`);
   }
 
+  function toggle(id: string, e: React.MouseEvent) {
+    if (e.shiftKey && selectedIds.length) {
+      const ids = filtered.map((p) => p.id);
+      const a = ids.indexOf(selectedIds[selectedIds.length - 1]);
+      const b = ids.indexOf(id);
+      const [s, t] = a < b ? [a, b] : [b, a];
+      setSelectedIds(Array.from(new Set([...selectedIds, ...ids.slice(s, t + 1)])));
+    } else if (e.ctrlKey || e.metaKey) {
+      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    } else {
+      setSelectedIds([id]);
+    }
+    setSelection({ type: "photo", id });
+  }
+
 
   return (
     <PanelShell title="图片" desc="拖拽或点击上传 · 支持 JPG / PNG / WebP / HEIC">
