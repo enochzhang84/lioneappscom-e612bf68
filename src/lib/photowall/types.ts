@@ -180,8 +180,19 @@ export function defaultSettings(): PWSettings {
     loop: false,
     bgColor: "#0b0d12",
     accent: "#2563eb",
+    animationId: "kb-classic",
+    transitionId: "cross-dissolve",
+    easing: "cinematic",
+    animSpeed: 1,
+    animDelay: 0,
+    animLoop: false,
+    animIntensity: 1,
+    perfMode: "balanced",
+    animRandom: false,
+    animCombo: null,
   };
 }
+
 
 export function newProject(name = "未命名照片墙", aspect: AspectKey = "16:9"): PWProject {
   const now = Date.now();
