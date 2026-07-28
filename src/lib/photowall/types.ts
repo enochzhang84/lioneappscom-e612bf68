@@ -208,6 +208,15 @@ export function defaultSettings(): PWSettings {
     perfMode: "balanced",
     animRandom: false,
     animCombo: null,
+    heroMode: "fullscreen",
+    heroFit: "cover",
+    heroFocus: "center",
+    heroBg: "blur",
+    heroIn: 1,
+    heroHold: 5,
+    heroOut: 1,
+    heroDim: 0.9,
+
   };
 }
 
