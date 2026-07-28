@@ -61,13 +61,18 @@ function Thumb({ assetId, className }: { assetId: string; className?: string }) 
 
 /* ------------------------------- 图片面板 ------------------------------- */
 function ImagesPanel() {
-  const { project, setProject, selection, setSelection, selectedIds, setSelectedIds } = useEditor();
+  const { project, setProject, selection, setSelection, selectedIds, setSelectedIds, timeline } = useEditor();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [q, setQ] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [visible, setVisible] = React.useState(120);
   const [confirm, setConfirm] = React.useState<null | { title: string; desc: string; run: () => void }>(null);
   const reuploadRef = React.useRef(false);
+  /** 上传方式：加入时间轴（默认） / 仅上传到素材库 */
+  const [uploadToTimeline, setUploadToTimeline] = React.useState(true);
+
+  const inCount = project.photos.filter((p) => p.inTimeline !== false).length;
+  const outCount = project.photos.length - inCount;
 
   const filtered = React.useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -98,28 +103,33 @@ function ImagesPanel() {
         next.push({
           id: crypto.randomUUID(), assetId, name: f.name, w: dim.w, h: dim.h, size: f.size, hash,
           rotate: 0, radius: 0, border: 0, shadow: true, focusX: 0.5, focusY: 0.5, highlight: false, cover: false, duration: null,
+          inTimeline: uploadToTimeline,
         });
       }
+      // 按上传顺序追加到素材库末尾，画面轨随之在现有片段之后延长
       if (next.length) setProject((p) => ({ ...p, photos: [...p.photos, ...next] }));
-      toast.success(`已添加 ${next.length} 张图片${dupes ? `，跳过 ${dupes} 张重复` : ""}`);
+      toast.success(
+        `已添加 ${next.length} 张图片${uploadToTimeline ? "，并全部加入画面轨" : "（仅素材库）"}${dupes ? ` · 跳过 ${dupes} 张重复` : ""}`,
+      );
     } finally {
       setBusy(false);
     }
   }
 
-  function toggle(id: string, e: React.MouseEvent) {
-    if (e.shiftKey && selectedIds.length) {
-      const ids = filtered.map((p) => p.id);
-      const a = ids.indexOf(selectedIds[selectedIds.length - 1]);
-      const b = ids.indexOf(id);
-      const [s, t] = a < b ? [a, b] : [b, a];
-      setSelectedIds(Array.from(new Set([...selectedIds, ...ids.slice(s, t + 1)])));
-    } else if (e.ctrlKey || e.metaKey) {
-      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-    } else {
-      setSelectedIds([id]);
-    }
-    setSelection({ type: "photo", id });
+  /** 加入时间轴：按 id 去重，不会重复创建片段 */
+  function addToTimeline(ids: string[]) {
+    const set = new Set(ids);
+    const added = project.photos.filter((p) => set.has(p.id) && p.inTimeline === false).length;
+    if (!added) { toast.info("所选图片已全部在画面轨中，未重复添加"); return; }
+    setProject((p) => ({ ...p, photos: p.photos.map((x) => (set.has(x.id) ? { ...x, inTimeline: true } : x)) }));
+    toast.success(`已将 ${added} 张图片加入画面轨`);
+  }
+
+  function removeFromTimeline(ids: string[]) {
+    const set = new Set(ids);
+    const n = project.photos.filter((p) => set.has(p.id) && p.inTimeline !== false).length;
+    setProject((p) => ({ ...p, photos: p.photos.map((x) => (set.has(x.id) ? { ...x, inTimeline: false } : x)) }));
+    toast.success(`已从画面轨移除 ${n} 张（素材保留在素材库）`);
   }
 
   function removePhotos(ids: string[]) {
@@ -130,6 +140,7 @@ function ImagesPanel() {
     setSelectedIds((prev) => prev.filter((x) => !set.has(x)));
     toast.success(`已移除 ${ids.length} 张图片`);
   }
+
 
   return (
     <PanelShell title="图片" desc="拖拽或点击上传 · 支持 JPG / PNG / WebP / HEIC">
