@@ -352,11 +352,6 @@ function ImagesPanel() {
             </ContextMenu>
           );
         })}
-
-              </ContextMenuContent>
-            </ContextMenu>
-          );
-        })}
       </div>
 
       {filtered.length > visible && (
