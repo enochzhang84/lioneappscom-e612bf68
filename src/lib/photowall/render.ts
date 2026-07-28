@@ -283,6 +283,9 @@ export function drawFrame(
   const tOut = Math.min(1, (seg.end - time) / Math.max(0.05, st.transition));
   const fade = Math.min(tIn, tOut);
 
+  const perf = (st.perfMode as PerfMode) ?? "quality";
+  const trans = evalTransition(st.transitionId ?? "cross-dissolve", tIn, tOut, perf);
+
   if (seg.kind === "opening") {
     drawCard(ctx, W, H, st.openingText, st.openingSub, st.accent, fade);
   } else if (seg.kind === "ending") {
@@ -292,7 +295,7 @@ export function drawFrame(
     const firstImg = first ? images.get(first.assetId) : undefined;
 
     // 背景：模糊铺底
-    if (st.blurBg && firstImg) {
+    if (st.blurBg && firstImg && perf !== "smooth") {
       ctx.save();
       ctx.filter = "blur(48px) saturate(1.2)";
       ctx.globalAlpha = 0.75;
@@ -306,18 +309,27 @@ export function drawFrame(
 
     const rects = layoutRects(st.layout, seg.photos.length, W, H, st.gap * (W / 1920) * 1.6);
 
+    // ---- 转场：整页统一变换 / 遮罩 ----
+    ctx.save();
+    if (trans.clip) applyTransitionClip(ctx, trans.clip, trans.clipP ?? 1, W, H);
+    ctx.translate(W / 2 + trans.dx * W, H / 2 + trans.dy * H);
+    if (trans.rot) ctx.rotate(trans.rot);
+    if (trans.scale !== 1) ctx.scale(trans.scale, trans.scale);
+    ctx.translate(-W / 2, -H / 2);
+    if (trans.blur && perf === "quality") ctx.filter = `blur(${trans.blur}px)`;
+
     seg.photos.forEach((ph, i) => {
       const r = rects[i] ?? rects[rects.length - 1];
       if (!r) return;
       const img = images.get(ph.assetId);
       const seed = i + seg.index * 3 + 1;
-      const a = animState(st.animation, p, seed, st.zoom, st.hold);
+      const a = photoAnimState(project, ph, p, seed, seg.index * tl.perPage + i);
       const isPolaroid = st.layout === "polaroid";
       const frameW = isPolaroid ? Math.round(r.w * 0.045) : 0;
-      const rot = (r.rot ?? 0) + (st.rotateRandom ? ((seed * 37) % 7 - 3) * 0.008 : 0) + (ph.rotate * Math.PI) / 180;
+      const rot = (r.rot ?? 0) + (st.rotateRandom ? ((seed * 37) % 7 - 3) * 0.008 : 0) + (ph.rotate * Math.PI) / 180 + a.rot;
 
       ctx.save();
-      ctx.globalAlpha = fade * a.alpha;
+      ctx.globalAlpha = fade * trans.alpha * a.alpha;
       ctx.translate(r.x + r.w / 2 + a.dx * W, r.y + r.h / 2 + a.dy * H);
       if (rot) ctx.rotate(rot);
       ctx.translate(-r.w / 2, -r.h / 2);
@@ -347,12 +359,17 @@ export function drawFrame(
       ctx.clip();
       if (img && img.complete && img.naturalWidth) {
         if (a.blur > 0) ctx.filter = `blur(${a.blur}px)`;
-        drawCover(ctx, img, img.naturalWidth, img.naturalHeight, 0, 0, r.w, r.h, ph.focusX, ph.focusY, a.scale);
+        const fx = Math.min(1, Math.max(0, ph.focusX + a.focusDX));
+        const fy = Math.min(1, Math.max(0, ph.focusY + a.focusDY));
+        drawCover(ctx, img, img.naturalWidth, img.naturalHeight, 0, 0, r.w, r.h, fx, fy, a.scale);
         ctx.filter = "none";
       } else {
         ctx.fillStyle = "rgba(255,255,255,.06)";
         ctx.fillRect(0, 0, r.w, r.h);
       }
+
+      // 动画特效叠加层
+      if (a.fx) drawFx(ctx, a.fx, a.fxAmt, r.w, r.h, p, seed);
 
       // 图片解说
       const cap = ph.caption || ph.title;
@@ -380,33 +397,187 @@ export function drawFrame(
       }
       ctx.restore();
     });
+    ctx.filter = "none";
+    ctx.restore();
+  }
+
+  // 转场闪光 / 黑白场覆盖
+  if (trans.flash && trans.flash[1] > 0.001) {
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, trans.flash[1]);
+    ctx.fillStyle = trans.flash[0];
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
   }
 
   // 全局文字图层
   for (const tx of project.texts) {
     if (time < tx.start || time > tx.start + tx.duration) continue;
-    const lp = (time - tx.start) / Math.max(0.01, tx.duration);
-    const inA = Math.min(1, (time - tx.start) / 0.6);
-    const outA = Math.min(1, (tx.start + tx.duration - time) / 0.6);
-    const alpha = tx.animation === "none" ? 1 : Math.min(inA, outA);
-    const rise = tx.animation === "rise" ? (1 - Math.min(1, lp * 6)) * H * 0.03 : 0;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.textAlign = tx.align;
-    ctx.fillStyle = tx.color;
-    ctx.font = `${tx.kind === "title" ? 700 : 500} ${Math.round((tx.size / 100) * H)}px ${tx.font}`;
-    if (tx.shadow) {
-      ctx.shadowColor = "rgba(0,0,0,.6)";
-      ctx.shadowBlur = H * 0.018;
-    }
-    const x = tx.align === "left" ? W * 0.07 : tx.align === "right" ? W * 0.93 : W / 2;
-    const yMap: Record<string, number> = { title: 0.44, subtitle: 0.56, verse: 0.5, caption: 0.88, outro: 0.5 };
-    ctx.fillText(fitText(ctx, tx.text, W * 0.86), x, (yMap[tx.kind] ?? 0.5) * H + rise);
-    ctx.restore();
+    drawText(ctx, tx, time, W, H);
   }
 
   ctx.restore();
 }
+
+/* ------------------------------ 文字动画 ------------------------------ */
+function drawText(
+  ctx: CanvasRenderingContext2D,
+  tx: PWProject["texts"][number],
+  time: number,
+  W: number,
+  H: number,
+) {
+  const id = TEXT_ANIM_MAP[tx.animation] ? tx.animation : tx.animation === "rise" ? "rise" : "fade";
+  const def = TEXT_ANIM_MAP[id] ?? TEXT_ANIM_MAP["fade"];
+  const lp = (time - tx.start) / Math.max(0.01, tx.duration);
+  const inA = Math.min(1, (time - tx.start) / 0.6);
+  const outA = Math.min(1, (tx.start + tx.duration - time) / 0.6);
+  const fade = id === "none" ? 1 : Math.min(inA, outA);
+  const enter = Math.min(1, Math.max(0, lp * 3.2)); // 进场进度
+
+  const size = Math.round((tx.size / 100) * H);
+  const weight = tx.kind === "title" ? 700 : 500;
+  const yMap: Record<string, number> = { title: 0.44, subtitle: 0.56, verse: 0.5, caption: 0.88, outro: 0.5 };
+  let baseY = (yMap[tx.kind] ?? 0.5) * H;
+  const x = tx.align === "left" ? W * 0.07 : tx.align === "right" ? W * 0.93 : W / 2;
+
+  ctx.save();
+  ctx.textAlign = tx.align;
+  ctx.font = `${weight} ${size}px ${tx.font}`;
+  ctx.fillStyle = tx.color;
+  ctx.globalAlpha = fade;
+  if (tx.shadow) {
+    ctx.shadowColor = "rgba(0,0,0,.6)";
+    ctx.shadowBlur = H * 0.018;
+  }
+
+  const text = fitText(ctx, tx.text, W * 0.86);
+
+  switch (id) {
+    case "subtitle":
+      baseY = H * 0.88;
+      ctx.save();
+      ctx.globalAlpha = fade * 0.55;
+      ctx.fillStyle = "#000";
+      const tw = ctx.measureText(text).width;
+      ctx.fillRect(x - (tx.align === "center" ? tw / 2 : 0) - size * 0.4, baseY - size, tw + size * 0.8, size * 1.35);
+      ctx.restore();
+      ctx.fillStyle = tx.color;
+      ctx.fillText(text, x, baseY);
+      break;
+    case "bible-verse":
+      ctx.globalAlpha = fade * Math.min(1, enter * 1.2);
+      ctx.fillText(text, x, baseY + (1 - enter) * H * 0.02);
+      break;
+    case "title-cinematic":
+      ctx.save();
+      ctx.translate(x, baseY);
+      ctx.scale(1.06 - 0.06 * enter, 1.06 - 0.06 * enter);
+      ctx.fillText(text, 0, 0);
+      ctx.restore();
+      break;
+    case "title-apple":
+    case "text-elegant":
+      ctx.globalAlpha = fade * enter;
+      ctx.fillText(text, x, baseY + (1 - enter) * H * 0.035);
+      break;
+    case "rise":
+    case "line-reveal":
+      ctx.fillText(text, x, baseY + (1 - Math.min(1, lp * 6)) * H * 0.03);
+      break;
+    case "glow":
+      ctx.shadowColor = tx.color;
+      ctx.shadowBlur = H * 0.03 * (0.6 + 0.4 * Math.sin(lp * Math.PI * 4));
+      ctx.fillText(text, x, baseY);
+      break;
+    case "neon":
+      ctx.shadowColor = "#5ac8ff";
+      ctx.shadowBlur = H * 0.045;
+      ctx.strokeStyle = "#9fe6ff";
+      ctx.lineWidth = Math.max(1, H * 0.002);
+      ctx.strokeText(text, x, baseY);
+      ctx.fillText(text, x, baseY);
+      break;
+    case "glass":
+      ctx.globalAlpha = fade * 0.85;
+      ctx.fillText(text, x, baseY);
+      ctx.globalAlpha = fade * 0.35;
+      ctx.strokeStyle = "rgba(255,255,255,.9)";
+      ctx.lineWidth = Math.max(1, H * 0.0015);
+      ctx.strokeText(text, x, baseY);
+      break;
+    case "gradient-sweep": {
+      const w = ctx.measureText(text).width;
+      const x0 = x - (tx.align === "center" ? w / 2 : tx.align === "right" ? w : 0);
+      const g = ctx.createLinearGradient(x0, 0, x0 + w, 0);
+      const s = (lp * 1.3) % 1;
+      g.addColorStop(Math.max(0, s - 0.25), tx.color);
+      g.addColorStop(Math.min(1, s), "#ffffff");
+      g.addColorStop(Math.min(1, s + 0.25), tx.color);
+      ctx.fillStyle = g;
+      ctx.fillText(text, x, baseY);
+      break;
+    }
+    case "mask-reveal": {
+      const w = ctx.measureText(text).width;
+      const x0 = x - (tx.align === "center" ? w / 2 : tx.align === "right" ? w : 0);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x0, baseY - size, w * enter, size * 1.4);
+      ctx.clip();
+      ctx.fillText(text, x, baseY);
+      ctx.restore();
+      break;
+    }
+    case "typewriter": {
+      const n = Math.max(0, Math.floor(text.length * Math.min(1, lp * 2.2)));
+      ctx.fillText(text.slice(0, n) + (n < text.length && Math.floor(time * 2) % 2 === 0 ? "▍" : ""), x, baseY);
+      break;
+    }
+    case "word-slide": {
+      const words = text.split(/(\s+)/);
+      const total = ctx.measureText(text).width;
+      let cx = x - (tx.align === "center" ? total / 2 : tx.align === "right" ? total : 0);
+      ctx.textAlign = "left";
+      words.forEach((wd, i) => {
+        const d = Math.min(1, Math.max(0, lp * 3 - i * 0.12));
+        ctx.save();
+        ctx.globalAlpha = fade * d;
+        ctx.fillText(wd, cx + (1 - d) * W * 0.03, baseY);
+        ctx.restore();
+        cx += ctx.measureText(wd).width;
+      });
+      break;
+    }
+    case "letter-fade":
+    case "letter-scale":
+    case "letter-rotate": {
+      const chars = [...text];
+      const total = ctx.measureText(text).width;
+      let cx = x - (tx.align === "center" ? total / 2 : tx.align === "right" ? total : 0);
+      ctx.textAlign = "left";
+      chars.forEach((ch, i) => {
+        const d = Math.min(1, Math.max(0, lp * 3 - i * 0.06));
+        const cw = ctx.measureText(ch).width;
+        ctx.save();
+        ctx.globalAlpha = fade * d;
+        ctx.translate(cx + cw / 2, baseY);
+        if (id === "letter-scale") ctx.scale(0.6 + 0.4 * d, 0.6 + 0.4 * d);
+        if (id === "letter-rotate") ctx.rotate((1 - d) * 0.6);
+        ctx.fillText(ch, -cw / 2, 0);
+        ctx.restore();
+        cx += cw;
+      });
+      break;
+    }
+    case "none":
+    case "fade":
+    default:
+      ctx.fillText(text, x, baseY);
+  }
+  ctx.restore();
+}
+
 
 export function fmtTime(s: number) {
   if (!isFinite(s) || s < 0) s = 0;
