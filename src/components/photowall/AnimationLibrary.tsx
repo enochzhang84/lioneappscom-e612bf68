@@ -276,21 +276,70 @@ export function AnimationLibraryPanel() {
           <Sparkles className="h-4 w-4 text-primary" /> 动画资源库
         </h2>
         <p className="mt-0.5 text-[11px] text-white/45">
-          {LIBRARY_STATS.animations} 动画 · {LIBRARY_STATS.transitions} 转场 · {LIBRARY_STATS.textAnimations} 文字 · {LIBRARY_STATS.combos} 组合
+          {SCENE_STATS.scenes} 场景 · {LIBRARY_STATS.animations} 动画 · {LIBRARY_STATS.transitions} 转场 · {LIBRARY_STATS.textAnimations} 文字 · {SCENE_STATS.combos} 组合
         </p>
       </div>
 
-      <div className="flex gap-1 border-b border-white/10 px-3 py-2">
-        {([["anim", "动画", Sparkles], ["transition", "转场", Layers], ["text", "文字", TypeIcon], ["combo", "组合", Wand2]] as const).map(([k, l, Icon]) => (
-          <button key={k} onClick={() => setTab(k)}
-            className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] transition ${tab === k ? "bg-primary text-primary-foreground" : "text-white/60 hover:bg-white/10"}`}>
-            <Icon className="h-3 w-3" /> {l}
-          </button>
-        ))}
+      <div className="flex gap-1 overflow-x-auto border-b border-white/10 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {ANIM_GROUPS.map((g) => {
+          const Icon = GROUP_ICON[g.key];
+          return (
+            <button key={g.key} onClick={() => { setTab(g.key); const c = GROUP_CAT[g.key]; if (c) setCat(c); }}
+              title={g.desc}
+              className={`flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[11px] transition ${tab === g.key ? "bg-primary text-primary-foreground" : "text-white/60 hover:bg-white/10"}`}>
+              <Icon className="h-3 w-3" /> {g.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-3 text-white/85">
-        {tab === "anim" && (
+        {tab === "scene" && (
+          <>
+            <p className="rounded-xl bg-white/[0.05] p-2.5 text-[11px] leading-relaxed text-white/55">
+              点击场景卡片，一键套用整套动画配置：进入 / 停留 / 退出、转场、镜头、背景、文字、特效与推荐时长。
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {SCENE_GROUPS.map((g) => (
+                <button key={g.key} onClick={() => setSceneGroup(g.key)}
+                  className={`rounded-full px-2.5 py-1 text-[11px] transition ${sceneGroup === g.key ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/60 hover:bg-white/15"}`}>
+                  {g.label}
+                </button>
+              ))}
+            </div>
+            <div className="grid gap-2">
+              {SCENE_PRESETS.filter((x) => x.enabled && x.group === sceneGroup).map((sc) => (
+                <button key={sc.key} onClick={() => applyPlan(sc.plan, sc.name, sc.key)}
+                  className={`overflow-hidden rounded-2xl border text-left transition ${activeScene === sc.key ? "border-primary bg-primary/15" : "border-white/10 bg-white/[0.04] hover:border-primary/50 hover:bg-white/[0.07]"}`}>
+                  <div className="h-1.5 w-full" style={{ background: sc.cover }} />
+                  <div className="p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{sc.emoji}</span>
+                      <span className="text-sm font-medium text-white">{sc.name}</span>
+                      <span className="text-[10px] text-white/35">{sc.en}</span>
+                      {activeScene === sc.key && <Check className="ml-auto h-3.5 w-3.5 text-primary" />}
+                    </div>
+                    <p className="mt-1 text-[11px] text-white/45">{sc.desc}</p>
+                    <div className="mt-1.5 flex flex-wrap gap-1 text-[9px] text-white/55">
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">节奏 {sc.rhythm}</span>
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">{sc.plan.perPhoto}s / 张</span>
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">镜头 {ANIM_MAP[sc.plan.camera]?.name ?? sc.plan.camera}</span>
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">转场 {TRANSITIONS.find((t) => t.id === sc.plan.transition)?.name ?? sc.plan.transition}</span>
+                      {sc.plan.bg && <span className="rounded bg-white/[0.07] px-1.5 py-0.5">背景 {ANIM_MAP[sc.plan.bg]?.name}</span>}
+                      {sc.plan.effect && <span className="rounded bg-white/[0.07] px-1.5 py-0.5">特效 {ANIM_MAP[sc.plan.effect]?.name}</span>}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {GRID_TABS.includes(tab) && (
+          <></>
+        )}
+
+        {GRID_TABS.includes(tab) && (
           <>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
