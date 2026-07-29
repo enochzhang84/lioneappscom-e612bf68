@@ -194,6 +194,7 @@ export function AnimationLibraryPanel() {
   }, []);
 
   const currentAnim = resolveAnimId(s.animationId ?? s.animation);
+  const activeScene = s.animCombo ?? null;
   const list = React.useMemo(() => {
     let r = searchAnimations(q, cat, favs);
     if (onlyFav) r = r.filter((a) => favs.includes(a.id));
