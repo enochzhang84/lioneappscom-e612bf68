@@ -364,7 +364,126 @@ const BASIC: AnimDef[] = [
     (p, c) => { const d = ease("bounce", Math.min(1, p * 1.6)); return { dy: -(1 - d) * 0.2 * c.intensity, rot: (1 - d) * 0.15 }; }),
 ];
 
-export const ANIMATION_LIBRARY: AnimDef[] = [...CINEMATIC, ...APPLE, ...CANVA, ...TECH, ...WALL, ...KENBURNS, ...BASIC];
+/* ---------------------------- 基础动画 Basic ---------------------------- */
+const BASIC_CORE: AnimDef[] = [
+  mk("b-fade-in", "淡入", "Fade In", ["basic", "minimal", "photo", "featured"], "从透明淡入", "通用", 3, 1, true,
+    (p) => ({ alpha: Math.min(1, p * 3) })),
+  mk("b-fade-out", "淡出", "Fade Out", ["basic", "minimal", "photo"], "结尾淡出", "结束页", 3, 1, true,
+    (p) => ({ alpha: Math.min(1, (1 - p) * 3) })),
+  mk("b-zoom-in", "缩放进入", "Zoom In", ["basic", "photo"], "由小放大进入", "通用", 3.5, 1, true,
+    (p, c) => ({ scale: 0.88 + 0.12 * smooth(p) * c.intensity + 0.0, alpha: Math.min(1, p * 3) })),
+  mk("b-zoom-out", "缩放退出", "Zoom Out", ["basic", "photo"], "由大缩小退出", "段落收尾", 3.5, 1, true,
+    (p, c) => ({ scale: 1.12 - 0.12 * smooth(p) * c.intensity, alpha: Math.min(1, (1 - p) * 3) })),
+  mk("b-slide-left", "向左滑入", "Slide In Left", ["basic", "photo"], "自右向左滑入", "通用", 3.5, 1, true,
+    (p, c) => ({ scale: 1.05, dx: (1 - ease("cinematic", Math.min(1, p * 2))) * 0.35 * c.intensity })),
+  mk("b-slide-right", "向右滑入", "Slide In Right", ["basic", "photo"], "自左向右滑入", "通用", 3.5, 1, true,
+    (p, c) => ({ scale: 1.05, dx: -(1 - ease("cinematic", Math.min(1, p * 2))) * 0.35 * c.intensity })),
+  mk("b-slide-up", "向上滑入", "Slide In Up", ["basic", "photo"], "自下向上滑入", "通用", 3.5, 1, true,
+    (p, c) => ({ scale: 1.05, dy: (1 - ease("cinematic", Math.min(1, p * 2))) * 0.3 * c.intensity })),
+  mk("b-slide-down", "向下滑入", "Slide In Down", ["basic", "photo"], "自上向下滑入", "通用", 3.5, 1, true,
+    (p, c) => ({ scale: 1.05, dy: -(1 - ease("cinematic", Math.min(1, p * 2))) * 0.3 * c.intensity })),
+  mk("b-opacity", "透明渐变", "Opacity Fade", ["basic", "minimal", "photo"], "低透明度缓慢显现", "背景衬底", 4, 1, true,
+    (p) => ({ alpha: 0.35 + 0.65 * smooth(p) })),
+  mk("b-scale-up", "放大出现", "Scale Up", ["basic", "photo"], "放大浮现", "重点照片", 3.5, 1, true,
+    (p, c) => ({ scale: 1 + 0.14 * ease("spring", p) * c.intensity, alpha: Math.min(1, p * 4) })),
+  mk("b-scale-down", "缩小出现", "Scale Down", ["basic", "photo"], "由大收拢出现", "通用", 3.5, 1, true,
+    (p, c) => ({ scale: 1.18 - 0.18 * ease("cinematic", p) * c.intensity, alpha: Math.min(1, p * 4) })),
+];
+
+/* ---------------------------- 镜头动画补充 Camera ---------------------------- */
+const CAMERA_EXTRA: AnimDef[] = [
+  mk("cam-tilt", "镜头俯仰", "Camera Tilt", ["camera", "cinematic", "photo"], "垂直俯仰运镜", "建筑、全景", 6, 1, true,
+    (p, c) => ({ scale: 1.14, dy: (smooth(p) - 0.5) * 0.05 * c.intensity, rot: (p - 0.5) * 0.01 })),
+  mk("cam-rotate", "镜头旋转", "Camera Rotation", ["camera", "cinematic", "photo"], "缓慢旋转运镜", "创意片段", 6, 2, true,
+    (p, c) => ({ scale: 1.16, rot: (p - 0.5) * 0.06 * c.intensity })),
+  mk("cam-shake", "轻微抖动", "Micro Shake", ["camera", "tech", "photo"], "手持轻微抖动", "纪实、活动", 5, 2, true,
+    (p, c) => ({ scale: 1.08, dx: wave(p, 6, c.seed) * 0.004 * c.intensity, dy: wave(p, 7, c.seed + 2) * 0.004 * c.intensity })),
+  mk("cam-drone", "航拍飞行", "Drone Fly", ["camera", "cinematic", "featured", "photo"], "航拍式推进平移", "户外、退修会", 7, 2, true,
+    (p, c) => ({ scale: 1 + 0.22 * smooth(p) * c.intensity, dx: (smooth(p) - 0.5) * 0.04, dy: -smooth(p) * 0.02 })),
+];
+
+/* ---------------------------- 背景动画 Background ---------------------------- */
+const BACKGROUND: AnimDef[] = [
+  mk("bg-blur", "背景虚化", "Background Blur", ["bg", "photo", "featured"], "四周虚化聚焦中心", "人物、讲员", 5, 2, false,
+    (p, c) => ({ scale: 1.05, fx: "blurbg", fxAmt: 0.9 * c.intensity })),
+  mk("bg-dark", "暗色遮罩", "Dark Overlay", ["bg", "photo"], "压暗画面便于叠字", "标题页", 5, 1, false,
+    (p, c) => ({ scale: 1.03, fx: "dark", fxAmt: 0.8 * c.intensity })),
+  mk("bg-light", "亮色遮罩", "Light Overlay", ["bg", "photo"], "提亮画面柔化", "浅色主题", 5, 1, false,
+    (p, c) => ({ scale: 1.03, fx: "light", fxAmt: 0.7 * c.intensity })),
+  mk("bg-glow", "辉光", "Glow", ["bg", "church", "photo"], "中心温暖辉光", "敬拜、诗歌", 5, 2, false,
+    (p, c) => ({ scale: 1.04, fx: "glowpulse", fxAmt: 0.8 * c.intensity })),
+  mk("bg-particle", "粒子背景", "Particle", ["bg", "tech", "photo"], "浮动粒子背景", "科技、AI 讲座", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "particle", fxAmt: 0.7 * c.intensity })),
+  mk("bg-snow", "飘雪", "Snow", ["bg", "church", "kids", "photo"], "雪花飘落", "圣诞节", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "snow", fxAmt: 0.9 * c.intensity })),
+  mk("bg-rain", "落雨", "Rain", ["bg", "photo"], "细雨落下", "情绪片段", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "rain", fxAmt: 0.8 * c.intensity })),
+  mk("bg-dust", "微尘", "Dust", ["bg", "cinematic", "photo"], "空气微尘漂浮", "怀旧回忆", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "floatdust", fxAmt: 0.8 * c.intensity })),
+  mk("bg-bokeh", "散景光斑", "Bokeh", ["bg", "wedding", "featured", "photo"], "柔焦光斑漂浮", "婚礼、晚会", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "bokeh", fxAmt: 0.85 * c.intensity })),
+  mk("bg-leak", "漏光背景", "Light Leak", ["bg", "cinematic", "photo"], "复古漏光叠加", "旅拍", 5, 2, false,
+    (p, c) => ({ scale: 1.04, fx: "leak", fxAmt: Math.sin(p * Math.PI) * c.intensity })),
+  mk("bg-gradient", "渐变流动", "Gradient Move", ["bg", "tech", "minimal", "photo"], "渐变色流动", "现代、商务", 6, 2, false,
+    (p, c) => ({ scale: 1.03, fx: "gradmove", fxAmt: 0.8 * c.intensity })),
+  mk("bg-aurora", "极光", "Aurora", ["bg", "tech", "photo"], "极光流动光带", "科技、晚会", 7, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "aurora", fxAmt: 0.85 * c.intensity })),
+];
+
+/* ---------------------------- 特效动画 Effects ---------------------------- */
+const EFFECTS: AnimDef[] = [
+  mk("fx-spotlight", "聚光", "Spotlight", ["effect", "church", "photo"], "光束聚焦主体", "讲道、见证", 5, 2, false,
+    (p, c) => ({ scale: 1.04, fx: "spotlight", fxAmt: 0.85 * c.intensity })),
+  mk("fx-highlight", "高亮描边", "Highlight", ["effect", "photo"], "边框高亮强调", "重点照片", 4, 1, false,
+    (p, c) => ({ scale: 1.03, fx: "highlight", fxAmt: Math.sin(p * Math.PI) * c.intensity })),
+  mk("fx-random-highlight", "随机高亮", "Random Highlight", ["effect", "wall", "photo"], "随机时刻闪现高亮", "照片墙", 5, 2, false,
+    (p, c) => ({ scale: 1.03 + rnd(c.seed) * 0.02, fx: "highlight", fxAmt: (rnd(c.seed) > 0.5 ? 1 : 0.4) * Math.sin(p * Math.PI) * c.intensity })),
+  mk("fx-random-zoom", "随机放大", "Random Zoom", ["effect", "wall", "featured", "photo"], "随机方向随机幅度放大", "照片墙", 5, 1, true,
+    (p, c) => ({ scale: 1 + (0.08 + rnd(c.seed) * 0.16) * smooth(p) * c.intensity, dx: (rnd(c.seed + 3) - 0.5) * 0.03, dy: (rnd(c.seed + 7) - 0.5) * 0.03 })),
+  mk("fx-ripple", "波纹", "Ripple", ["effect", "photo"], "水波纹涟漪", "洗礼、水景", 5, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "ripplefx", fxAmt: 0.8 * c.intensity })),
+  mk("fx-ripple-expand", "波纹扩散", "Ripple Expand", ["effect", "church", "photo"], "波纹由中心扩散并放大", "洗礼", 6, 3, false,
+    (p, c) => ({ scale: 1 + 0.1 * smooth(p) * c.intensity, fx: "ripplefx", fxAmt: (1 - p * 0.4) * c.intensity })),
+  mk("fx-reflection", "倒影", "Reflection", ["effect", "minimal", "photo"], "底部倒影反光", "产品、展示", 5, 2, false,
+    (p, c) => ({ scale: 1.03, fx: "reflect", fxAmt: 0.9 * c.intensity })),
+  mk("fx-bloom", "柔光溢出", "Bloom", ["effect", "wedding", "photo"], "高光柔化溢出", "婚礼、逆光", 5, 2, false,
+    (p, c) => ({ scale: 1.04, fx: "bloom", fxAmt: 0.8 * c.intensity })),
+  mk("fx-glow-pulse", "呼吸辉光", "Glow Pulse", ["effect", "church", "photo"], "辉光随呼吸明暗", "敬拜", 6, 2, false,
+    (p, c) => ({ scale: 1.02 + Math.sin(p * Math.PI * 2) * 0.015, fx: "glowpulse", fxAmt: 0.9 * c.intensity })),
+  mk("fx-lens-flare", "镜头光晕", "Lens Flare", ["effect", "cinematic", "photo"], "阳光耀斑掠过", "户外", 5, 2, false,
+    (p, c) => ({ scale: 1.04, fx: "flare", fxAmt: Math.sin(p * Math.PI) * c.intensity })),
+  mk("fx-fire", "火焰", "Fire", ["effect", "photo"], "火星上升", "BBQ、营火", 5, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "fire", fxAmt: 0.85 * c.intensity })),
+  mk("fx-smoke", "烟雾", "Smoke", ["effect", "photo"], "烟雾升腾", "舞台、氛围", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "smoke", fxAmt: 0.8 * c.intensity })),
+  mk("fx-fog", "薄雾", "Fog", ["effect", "cinematic", "photo"], "薄雾弥漫", "清晨、退修会", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "fog", fxAmt: 0.8 * c.intensity })),
+  mk("fx-sparkle", "闪耀", "Sparkle", ["effect", "kids", "wedding", "photo"], "星光闪耀", "婚礼、儿童", 5, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "sparkle", fxAmt: 0.9 * c.intensity })),
+  mk("fx-confetti", "彩带", "Confetti", ["effect", "kids", "featured", "photo"], "彩色纸屑飘落", "生日、毕业典礼", 5, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "confetti", fxAmt: 0.9 * c.intensity })),
+  mk("fx-heart", "爱心", "Heart", ["effect", "kids", "wedding", "photo"], "爱心上升", "婚礼、家庭日", 5, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "heart", fxAmt: 0.85 * c.intensity })),
+  mk("fx-bubble", "泡泡", "Bubble", ["effect", "kids", "photo"], "泡泡上浮", "儿童主日学", 5, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "bubble", fxAmt: 0.85 * c.intensity })),
+  mk("fx-floating-dust", "浮尘", "Floating Dust", ["effect", "cinematic", "photo"], "细小浮尘漂浮", "回忆、纪录片", 6, 3, false,
+    (p, c) => ({ scale: 1.03, fx: "floatdust", fxAmt: 0.75 * c.intensity })),
+  mk("fx-light-beam", "光束", "Light Beam", ["effect", "church", "featured", "photo"], "斜射光束扫过", "敬拜、圣诞", 5, 2, false,
+    (p, c) => ({ scale: 1.04, fx: "beam", fxAmt: 0.9 * c.intensity })),
+  mk("fx-halo", "光环", "Halo", ["effect", "church", "photo"], "圣洁光环", "洗礼、圣餐", 5, 2, false,
+    (p, c) => ({ scale: 1.03, fx: "halo", fxAmt: 0.85 * c.intensity })),
+  mk("fx-soft-light", "柔光", "Soft Light", ["effect", "minimal", "photo"], "顶部柔光渐变", "通用", 5, 1, false,
+    (p, c) => ({ scale: 1.03, fx: "softlight", fxAmt: 0.8 * c.intensity })),
+  mk("fx-vignette", "暗角", "Vignette", ["effect", "cinematic", "photo"], "四周暗角聚焦", "电影感", 5, 1, false,
+    (p, c) => ({ scale: 1.03, fx: "vignette", fxAmt: 0.8 * c.intensity })),
+  mk("fx-dream", "梦幻", "Dream", ["effect", "wedding", "photo"], "梦幻柔彩光晕", "婚礼、成长记录", 6, 3, false,
+    (p, c) => ({ scale: 1.04, fx: "dream", fxAmt: 0.85 * c.intensity })),
+];
+
+export const ANIMATION_LIBRARY: AnimDef[] = [
+  ...CINEMATIC, ...APPLE, ...CANVA, ...TECH, ...WALL, ...KENBURNS, ...BASIC,
+  ...BASIC_CORE, ...CAMERA_EXTRA, ...BACKGROUND, ...EFFECTS,
+];
 
 export const ANIM_MAP: Record<string, AnimDef> = Object.fromEntries(ANIMATION_LIBRARY.map((a) => [a.id, a]));
 
