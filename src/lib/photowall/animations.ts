@@ -733,6 +733,9 @@ export const RANDOM_MODES: RandomModeDef[] = [
   { key: "wedding", label: "婚礼模式", pick: (a: AnimDef) => a.cats.includes("wedding") },
   { key: "kids", label: "儿童模式", pick: (a: AnimDef) => a.cats.includes("kids") },
   { key: "tech", label: "科技模式", pick: (a: AnimDef) => a.cats.includes("tech") },
+  { key: "camera", label: "只随机镜头动画", pick: (a: AnimDef) => a.cats.includes("camera") },
+  { key: "effect", label: "只随机特效动画", pick: (a: AnimDef) => a.cats.includes("effect") || a.cats.includes("bg") },
+  { key: "transition", label: "只随机转场动画", pick: (a: AnimDef) => a.perf === 1 },
   { key: "all", label: "全部随机", pick: () => true },
 ];
 
