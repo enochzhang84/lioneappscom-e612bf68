@@ -491,6 +491,20 @@ export const ANIMATION_LIBRARY: AnimDef[] = [
   ...BASIC_CORE, ...CAMERA_EXTRA, ...BACKGROUND, ...EFFECTS,
 ];
 
+/** 为已有动画补充「镜头 / 基础」分组标签（配置驱动，不改动各自定义） */
+const CAMERA_TAGGED = [
+  "kb-classic", "kb-random", "kb-left", "kb-right", "kb-top", "kb-bottom", "kb-face", "kb-object",
+  "kb-diagonal", "kb-cinematic", "kb-zoom-pan", "kb-zoom-rot",
+  "cine-zoom", "cam-push", "cam-pull", "cam-dolly", "cam-orbit", "focus-pull",
+  "slow-zoom-in", "slow-zoom-out", "pan-left", "pan-right", "pan-up", "pan-down",
+  "floating", "breathing", "depth-push", "depth-pull", "parallax",
+];
+const BASIC_TAGGED = ["none", "soft-fade", "minimal-fade", "smooth-scale", "bounce", "happy-pop", "photo-drop"];
+for (const a of ANIMATION_LIBRARY) {
+  if (CAMERA_TAGGED.includes(a.id) && !a.cats.includes("camera")) a.cats.push("camera");
+  if (BASIC_TAGGED.includes(a.id) && !a.cats.includes("basic")) a.cats.push("basic");
+}
+
 export const ANIM_MAP: Record<string, AnimDef> = Object.fromEntries(ANIMATION_LIBRARY.map((a) => [a.id, a]));
 
 /** 旧版 AnimationKey → 新版动画 ID */
