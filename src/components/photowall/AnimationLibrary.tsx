@@ -15,6 +15,10 @@ import {
   resolveAnimId, searchAnimations,
   type AnimDef, type CatKey, type EasingKey, type PerfMode, type RandomMode,
 } from "@/lib/photowall/animations";
+import {
+  ANIM_GROUPS, RECOMMENDED_COMBOS, SCENE_GROUPS, SCENE_PRESETS, SCENE_STATS,
+  planSequence, planToSettings, type AnimGroupKey, type AnimPlan,
+} from "@/lib/photowall/scenes";
 import { drawFx } from "@/lib/photowall/fx";
 import { useEditor } from "./ctx";
 
@@ -150,13 +154,26 @@ function CurveEditor({
 }
 
 /* ------------------------------ 主面板 ------------------------------ */
-type Tab = "anim" | "transition" | "text" | "combo";
+type Tab = AnimGroupKey;
 type Scope = "current" | "group" | "all" | "random";
+
+/** 各分组默认聚焦的动画分类 */
+const GROUP_CAT: Partial<Record<AnimGroupKey, CatKey>> = {
+  basic: "basic", camera: "camera", bg: "bg", effect: "effect",
+};
+/** 分组图标 */
+const GROUP_ICON: Record<AnimGroupKey, typeof Sparkles> = {
+  combo: Wand2, scene: Sparkles, basic: Layers, transition: Shuffle, camera: Gauge,
+  bg: Zap, text: TypeIcon, effect: Sparkles, fav: Star, recent: History,
+};
+/** 使用动画卡片网格的分组 */
+const GRID_TABS: AnimGroupKey[] = ["basic", "camera", "bg", "effect", "fav", "recent"];
 
 export function AnimationLibraryPanel() {
   const { project, setProject, patchSettings, images, selection, selectedIds } = useEditor();
   const s = project.settings;
-  const [tab, setTab] = React.useState<Tab>("anim");
+  const [tab, setTab] = React.useState<Tab>("scene");
+  const [sceneGroup, setSceneGroup] = React.useState<string>("church");
   const [cat, setCat] = React.useState<CatKey>("featured");
   const [q, setQ] = React.useState("");
   const [scope, setScope] = React.useState<Scope>("all");
@@ -177,11 +194,14 @@ export function AnimationLibraryPanel() {
   }, []);
 
   const currentAnim = resolveAnimId(s.animationId ?? s.animation);
+  const activeScene = s.animCombo ?? null;
   const list = React.useMemo(() => {
+    if (tab === "fav") return favs.map((id) => ANIM_MAP[id]).filter(Boolean);
+    if (tab === "recent") return recent.map((id) => ANIM_MAP[id]).filter(Boolean);
     let r = searchAnimations(q, cat, favs);
     if (onlyFav) r = r.filter((a) => favs.includes(a.id));
     return r;
-  }, [q, cat, favs, onlyFav]);
+  }, [q, cat, favs, onlyFav, tab, recent]);
 
   function toggleFav(id: string) {
     setFavs((prev) => {
@@ -227,6 +247,23 @@ export function AnimationLibraryPanel() {
     toast.success(`已应用到 ${ids.length} 张图片：${name}`);
   }
 
+  /** 套用一整套动画方案（场景类型 / 推荐组合共用） */
+  function applyPlan(plan: AnimPlan, name: string, key: string) {
+    const seq = planSequence(plan, project.photos.length || 1);
+    setProject((p) => ({
+      ...p,
+      photos: p.photos.map((x, i) => ({ ...x, animationId: seq[i % seq.length] })),
+      texts: p.texts.map((t) => ({
+        ...t,
+        animation: plan.text,
+        animMotion: plan.hold ?? t.animMotion,
+      })),
+      settings: { ...p.settings, ...planToSettings(plan), animCombo: key },
+    }));
+    markRecent(plan.enter[0]);
+    toast.success(`已套用：${name} · ${plan.perPhoto}s/张 · ${seq.length} 个片段`);
+  }
+
   function applyCombo(key: string) {
     const c = ANIM_COMBOS.find((x) => x.key === key);
     if (!c) return;
@@ -264,21 +301,69 @@ export function AnimationLibraryPanel() {
           <Sparkles className="h-4 w-4 text-primary" /> 动画资源库
         </h2>
         <p className="mt-0.5 text-[11px] text-white/45">
-          {LIBRARY_STATS.animations} 动画 · {LIBRARY_STATS.transitions} 转场 · {LIBRARY_STATS.textAnimations} 文字 · {LIBRARY_STATS.combos} 组合
+          {SCENE_STATS.scenes} 场景 · {LIBRARY_STATS.animations} 动画 · {LIBRARY_STATS.transitions} 转场 · {LIBRARY_STATS.textAnimations} 文字 · {SCENE_STATS.combos} 组合
         </p>
       </div>
 
-      <div className="flex gap-1 border-b border-white/10 px-3 py-2">
-        {([["anim", "动画", Sparkles], ["transition", "转场", Layers], ["text", "文字", TypeIcon], ["combo", "组合", Wand2]] as const).map(([k, l, Icon]) => (
-          <button key={k} onClick={() => setTab(k)}
-            className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] transition ${tab === k ? "bg-primary text-primary-foreground" : "text-white/60 hover:bg-white/10"}`}>
-            <Icon className="h-3 w-3" /> {l}
-          </button>
-        ))}
+      <div className="flex gap-1 overflow-x-auto border-b border-white/10 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {ANIM_GROUPS.map((g) => {
+          const Icon = GROUP_ICON[g.key];
+          return (
+            <button key={g.key} onClick={() => { setTab(g.key); const c = GROUP_CAT[g.key]; if (c) setCat(c); }}
+              title={g.desc}
+              className={`flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[11px] transition ${tab === g.key ? "bg-primary text-primary-foreground" : "text-white/60 hover:bg-white/10"}`}>
+              <Icon className="h-3 w-3" /> {g.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-3 text-white/85">
-        {tab === "anim" && (
+        {tab === "scene" && (
+          <>
+            <p className="rounded-xl bg-white/[0.05] p-2.5 text-[11px] leading-relaxed text-white/55">
+              点击场景卡片，一键套用整套动画配置：进入 / 停留 / 退出、转场、镜头、背景、文字、特效与推荐时长。
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {SCENE_GROUPS.map((g) => (
+                <button key={g.key} onClick={() => setSceneGroup(g.key)}
+                  className={`rounded-full px-2.5 py-1 text-[11px] transition ${sceneGroup === g.key ? "bg-primary text-primary-foreground" : "bg-white/[0.07] text-white/60 hover:bg-white/15"}`}>
+                  {g.label}
+                </button>
+              ))}
+            </div>
+            <div className="grid gap-2">
+              {SCENE_PRESETS.filter((x) => x.enabled && x.group === sceneGroup).map((sc) => (
+                <button key={sc.key} onClick={() => applyPlan(sc.plan, sc.name, sc.key)}
+                  className={`overflow-hidden rounded-2xl border text-left transition ${activeScene === sc.key ? "border-primary bg-primary/15" : "border-white/10 bg-white/[0.04] hover:border-primary/50 hover:bg-white/[0.07]"}`}>
+                  <div className="h-1.5 w-full" style={{ background: sc.cover }} />
+                  <div className="p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{sc.emoji}</span>
+                      <span className="text-sm font-medium text-white">{sc.name}</span>
+                      <span className="text-[10px] text-white/35">{sc.en}</span>
+                      {activeScene === sc.key && <Check className="ml-auto h-3.5 w-3.5 text-primary" />}
+                    </div>
+                    <p className="mt-1 text-[11px] text-white/45">{sc.desc}</p>
+                    <div className="mt-1.5 flex flex-wrap gap-1 text-[9px] text-white/55">
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">节奏 {sc.rhythm}</span>
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">{sc.plan.perPhoto}s / 张</span>
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">镜头 {ANIM_MAP[sc.plan.camera]?.name ?? sc.plan.camera}</span>
+                      <span className="rounded bg-white/[0.07] px-1.5 py-0.5">转场 {TRANSITIONS.find((t) => t.id === sc.plan.transition)?.name ?? sc.plan.transition}</span>
+                      {sc.plan.bg && <span className="rounded bg-white/[0.07] px-1.5 py-0.5">背景 {ANIM_MAP[sc.plan.bg]?.name}</span>}
+                      {sc.plan.effect && <span className="rounded bg-white/[0.07] px-1.5 py-0.5">特效 {ANIM_MAP[sc.plan.effect]?.name}</span>}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+
+
+
+        {GRID_TABS.includes(tab) && (
           <>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
@@ -408,6 +493,24 @@ export function AnimationLibraryPanel() {
 
         {tab === "combo" && (
           <div className="grid gap-2">
+            {RECOMMENDED_COMBOS.map((c) => (
+              <button key={c.key} onClick={() => applyPlan(c.plan, c.name, c.key)}
+                className={`overflow-hidden rounded-2xl border text-left transition ${activeScene === c.key ? "border-primary bg-primary/15" : "border-white/10 bg-white/[0.04] hover:border-primary/50"}`}>
+                <div className="h-1.5 w-full" style={{ background: c.cover }} />
+                <div className="p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{c.emoji}</span>
+                    <span className="text-sm font-medium text-white">{c.en}</span>
+                    <span className="text-[10px] text-white/35">{c.name}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-white/45">{c.desc}</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {c.plan.enter.map((id) => <span key={id} className="rounded bg-white/[0.07] px-1.5 py-0.5 text-[9px] text-white/55">{ANIM_MAP[id]?.name ?? id}</span>)}
+                  </div>
+                </div>
+              </button>
+            ))}
+            <div className="pt-1 text-[10px] text-white/35">经典组合</div>
             {ANIM_COMBOS.map((c) => (
               <button key={c.key} onClick={() => applyCombo(c.key)}
                 className={`rounded-2xl border p-3 text-left transition ${s.animCombo === c.key ? "border-primary bg-primary/15" : "border-white/10 bg-white/[0.04] hover:border-primary/50"}`}>
@@ -416,13 +519,11 @@ export function AnimationLibraryPanel() {
                   <span className="text-sm font-medium text-white">{c.name}</span>
                 </div>
                 <p className="mt-1 text-[11px] text-white/45">{c.desc}</p>
-                <div className="mt-1.5 flex flex-wrap gap-1">
-                  {c.anims.map((id) => <span key={id} className="rounded bg-white/[0.07] px-1.5 py-0.5 text-[9px] text-white/55">{ANIM_MAP[id]?.name ?? id}</span>)}
-                </div>
               </button>
             ))}
           </div>
         )}
+
 
         {/* ------------------------- 通用参数 ------------------------- */}
         <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
