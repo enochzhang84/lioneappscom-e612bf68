@@ -154,13 +154,21 @@ function CurveEditor({
 }
 
 /* ------------------------------ 主面板 ------------------------------ */
-type Tab = "anim" | "transition" | "text" | "combo";
+type Tab = AnimGroupKey;
 type Scope = "current" | "group" | "all" | "random";
+
+/** 各分组默认聚焦的动画分类 */
+const GROUP_CAT: Partial<Record<AnimGroupKey, CatKey>> = {
+  basic: "basic", camera: "camera", bg: "bg", effect: "effect",
+};
+/** 使用动画卡片网格的分组 */
+const GRID_TABS: AnimGroupKey[] = ["basic", "camera", "bg", "effect", "fav", "recent"];
 
 export function AnimationLibraryPanel() {
   const { project, setProject, patchSettings, images, selection, selectedIds } = useEditor();
   const s = project.settings;
-  const [tab, setTab] = React.useState<Tab>("anim");
+  const [tab, setTab] = React.useState<Tab>("scene");
+  const [sceneGroup, setSceneGroup] = React.useState<string>("church");
   const [cat, setCat] = React.useState<CatKey>("featured");
   const [q, setQ] = React.useState("");
   const [scope, setScope] = React.useState<Scope>("all");
