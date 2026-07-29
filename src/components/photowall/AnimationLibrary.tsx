@@ -15,6 +15,10 @@ import {
   resolveAnimId, searchAnimations,
   type AnimDef, type CatKey, type EasingKey, type PerfMode, type RandomMode,
 } from "@/lib/photowall/animations";
+import {
+  ANIM_GROUPS, RECOMMENDED_COMBOS, SCENE_GROUPS, SCENE_PRESETS, SCENE_STATS,
+  planSequence, planToSettings, type AnimGroupKey, type AnimPlan,
+} from "@/lib/photowall/scenes";
 import { drawFx } from "@/lib/photowall/fx";
 import { useEditor } from "./ctx";
 
