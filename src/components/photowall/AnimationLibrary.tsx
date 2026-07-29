@@ -358,9 +358,8 @@ export function AnimationLibraryPanel() {
           </>
         )}
 
-        {GRID_TABS.includes(tab) && (
-          <></>
-        )}
+
+
 
         {GRID_TABS.includes(tab) && (
           <>
