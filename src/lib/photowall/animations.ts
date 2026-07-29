@@ -719,7 +719,8 @@ export const ANIM_COMBOS: AnimCombo[] = [
 
 /* ============================== 十二、随机动画 ============================== */
 export type RandomMode =
-  | "gentle" | "modern" | "cinematic" | "apple" | "church" | "wedding" | "kids" | "tech" | "all";
+  | "gentle" | "modern" | "cinematic" | "apple" | "church" | "wedding" | "kids" | "tech"
+  | "camera" | "effect" | "transition" | "all";
 
 export interface RandomModeDef { key: RandomMode; label: string; pick: (a: AnimDef) => boolean }
 
