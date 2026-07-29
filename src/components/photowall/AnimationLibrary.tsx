@@ -493,6 +493,24 @@ export function AnimationLibraryPanel() {
 
         {tab === "combo" && (
           <div className="grid gap-2">
+            {RECOMMENDED_COMBOS.map((c) => (
+              <button key={c.key} onClick={() => applyPlan(c.plan, c.name, c.key)}
+                className={`overflow-hidden rounded-2xl border text-left transition ${activeScene === c.key ? "border-primary bg-primary/15" : "border-white/10 bg-white/[0.04] hover:border-primary/50"}`}>
+                <div className="h-1.5 w-full" style={{ background: c.cover }} />
+                <div className="p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{c.emoji}</span>
+                    <span className="text-sm font-medium text-white">{c.en}</span>
+                    <span className="text-[10px] text-white/35">{c.name}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-white/45">{c.desc}</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {c.plan.enter.map((id) => <span key={id} className="rounded bg-white/[0.07] px-1.5 py-0.5 text-[9px] text-white/55">{ANIM_MAP[id]?.name ?? id}</span>)}
+                  </div>
+                </div>
+              </button>
+            ))}
+            <div className="pt-1 text-[10px] text-white/35">经典组合</div>
             {ANIM_COMBOS.map((c) => (
               <button key={c.key} onClick={() => applyCombo(c.key)}
                 className={`rounded-2xl border p-3 text-left transition ${s.animCombo === c.key ? "border-primary bg-primary/15" : "border-white/10 bg-white/[0.04] hover:border-primary/50"}`}>
@@ -501,13 +519,11 @@ export function AnimationLibraryPanel() {
                   <span className="text-sm font-medium text-white">{c.name}</span>
                 </div>
                 <p className="mt-1 text-[11px] text-white/45">{c.desc}</p>
-                <div className="mt-1.5 flex flex-wrap gap-1">
-                  {c.anims.map((id) => <span key={id} className="rounded bg-white/[0.07] px-1.5 py-0.5 text-[9px] text-white/55">{ANIM_MAP[id]?.name ?? id}</span>)}
-                </div>
               </button>
             ))}
           </div>
         )}
+
 
         {/* ------------------------- 通用参数 ------------------------- */}
         <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
