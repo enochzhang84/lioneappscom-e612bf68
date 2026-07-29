@@ -65,11 +65,16 @@ export function ease(key: EasingKey, t: number, custom?: [number, number, number
 /* ============================== 分类 ============================== */
 export type CatKey =
   | "all" | "featured" | "cinematic" | "apple" | "minimal" | "wall" | "church"
-  | "wedding" | "kids" | "tech" | "text" | "photo" | "transition" | "template";
+  | "wedding" | "kids" | "tech" | "text" | "photo" | "transition" | "template"
+  | "basic" | "camera" | "bg" | "effect";
 
 export const CATEGORIES: { key: CatKey; label: string }[] = [
   { key: "all", label: "全部" },
   { key: "featured", label: "推荐" },
+  { key: "basic", label: "基础动画" },
+  { key: "camera", label: "镜头动画" },
+  { key: "bg", label: "背景动画" },
+  { key: "effect", label: "特效动画" },
   { key: "cinematic", label: "电影感" },
   { key: "apple", label: "Apple 风格" },
   { key: "minimal", label: "现代简约" },
@@ -83,6 +88,7 @@ export const CATEGORIES: { key: CatKey; label: string }[] = [
   { key: "transition", label: "转场动画" },
   { key: "template", label: "模板动画" },
 ];
+
 
 /* ============================== 求值结果 ============================== */
 export type FxKind =
