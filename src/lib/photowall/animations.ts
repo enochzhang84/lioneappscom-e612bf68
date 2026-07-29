@@ -88,7 +88,10 @@ export const CATEGORIES: { key: CatKey; label: string }[] = [
 export type FxKind =
   | null | "grain" | "flare" | "leak" | "burn" | "dust" | "frame" | "vignette"
   | "rgb" | "glitch" | "scan" | "grid" | "hud" | "neon" | "hologram" | "matrix"
-  | "particle" | "spotlight" | "sweep" | "glass" | "circuit" | "pulse" | "rainbow";
+  | "particle" | "spotlight" | "sweep" | "glass" | "circuit" | "pulse" | "rainbow"
+  | "snow" | "rain" | "bokeh" | "sparkle" | "confetti" | "heart" | "bubble" | "floatdust"
+  | "fire" | "smoke" | "fog" | "aurora" | "gradmove" | "glowpulse" | "beam" | "halo"
+  | "softlight" | "dark" | "light" | "bloom" | "ripplefx" | "reflect" | "dream" | "highlight" | "blurbg";
 
 export interface AnimEval {
   scale: number;
