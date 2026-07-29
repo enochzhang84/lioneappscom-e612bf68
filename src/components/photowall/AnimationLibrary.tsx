@@ -196,10 +196,12 @@ export function AnimationLibraryPanel() {
   const currentAnim = resolveAnimId(s.animationId ?? s.animation);
   const activeScene = s.animCombo ?? null;
   const list = React.useMemo(() => {
+    if (tab === "fav") return favs.map((id) => ANIM_MAP[id]).filter(Boolean);
+    if (tab === "recent") return recent.map((id) => ANIM_MAP[id]).filter(Boolean);
     let r = searchAnimations(q, cat, favs);
     if (onlyFav) r = r.filter((a) => favs.includes(a.id));
     return r;
-  }, [q, cat, favs, onlyFav]);
+  }, [q, cat, favs, onlyFav, tab, recent]);
 
   function toggleFav(id: string) {
     setFavs((prev) => {
