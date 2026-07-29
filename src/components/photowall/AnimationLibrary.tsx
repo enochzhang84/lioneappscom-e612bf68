@@ -161,6 +161,11 @@ type Scope = "current" | "group" | "all" | "random";
 const GROUP_CAT: Partial<Record<AnimGroupKey, CatKey>> = {
   basic: "basic", camera: "camera", bg: "bg", effect: "effect",
 };
+/** 分组图标 */
+const GROUP_ICON: Record<AnimGroupKey, typeof Sparkles> = {
+  combo: Wand2, scene: Sparkles, basic: Layers, transition: Shuffle, camera: Gauge,
+  bg: Zap, text: TypeIcon, effect: Sparkles, fav: Star, recent: History,
+};
 /** 使用动画卡片网格的分组 */
 const GRID_TABS: AnimGroupKey[] = ["basic", "camera", "bg", "effect", "fav", "recent"];
 
