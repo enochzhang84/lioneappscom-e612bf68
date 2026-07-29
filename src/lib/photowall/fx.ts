@@ -13,7 +13,14 @@ export function drawFx(
 ) {
   if (!kind || amt <= 0.001) return;
   const a = Math.min(1, Math.max(0, amt));
+  if (EXTRA_FX.has(kind)) {
+    ctx.save();
+    drawExtraFx(ctx, kind, a, w, h, p, seed);
+    ctx.restore();
+    return;
+  }
   ctx.save();
+
   switch (kind) {
     case "vignette": {
       const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
