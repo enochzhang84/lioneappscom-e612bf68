@@ -244,6 +244,23 @@ export function AnimationLibraryPanel() {
     toast.success(`已应用到 ${ids.length} 张图片：${name}`);
   }
 
+  /** 套用一整套动画方案（场景类型 / 推荐组合共用） */
+  function applyPlan(plan: AnimPlan, name: string, key: string) {
+    const seq = planSequence(plan, project.photos.length || 1);
+    setProject((p) => ({
+      ...p,
+      photos: p.photos.map((x, i) => ({ ...x, animationId: seq[i % seq.length] })),
+      texts: p.texts.map((t) => ({
+        ...t,
+        animation: plan.text,
+        animMotion: plan.hold ?? t.animMotion,
+      })),
+      settings: { ...p.settings, ...planToSettings(plan), animCombo: key },
+    }));
+    markRecent(plan.enter[0]);
+    toast.success(`已套用：${name} · ${plan.perPhoto}s/张 · ${seq.length} 个片段`);
+  }
+
   function applyCombo(key: string) {
     const c = ANIM_COMBOS.find((x) => x.key === key);
     if (!c) return;
