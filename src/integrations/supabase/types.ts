@@ -1861,6 +1861,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_quiz_answer: {
+        Args: { _answer: string; _id: string }
+        Returns: Json
+      }
+      grade_quiz_questions: { Args: { _ids: string[] }; Returns: Json[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

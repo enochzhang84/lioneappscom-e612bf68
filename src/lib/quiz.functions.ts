@@ -251,20 +251,18 @@ export const checkAnswer = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), answer: answerEnum }).parse(d),
   )
   .handler(async ({ data }): Promise<{ is_correct: boolean; correct_answer?: "A" | "B" | "C" | "D" }> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
-      .from("quiz_questions")
-      .select("correct_answer")
-      .eq("id", data.id)
-      .maybeSingle();
+    // Graded through a SECURITY DEFINER DB function so no service-role key is
+    // needed — answer keys still never leave the database unfiltered.
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: res, error } = await supabasePublic.rpc("check_quiz_answer", {
+      _id: data.id,
+      _answer: data.answer,
+    });
     if (error) throw new Error(error.message);
-    const correct = (row?.correct_answer ?? null) as "A" | "B" | "C" | "D" | null;
-    const is_correct = !!correct && correct === data.answer;
-    // Only reveal the correct letter after a wrong pick — this powers instant
-    // feedback UX. Never leaks the key before the user attempts the question.
-    return is_correct || !correct
-      ? { is_correct }
-      : { is_correct, correct_answer: correct };
+    const payload = (res ?? {}) as { is_correct?: boolean; correct_answer?: "A" | "B" | "C" | "D" };
+    return payload.correct_answer
+      ? { is_correct: !!payload.is_correct, correct_answer: payload.correct_answer }
+      : { is_correct: !!payload.is_correct };
   });
 
 export const gradeQuiz = createServerFn({ method: "POST" })
@@ -275,14 +273,15 @@ export const gradeQuiz = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data }): Promise<GradeResult> => {
-    // Answer keys are only readable server-side. Use the admin client scoped to
-    // just the submitted question IDs so we never expose the full key set.
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
-      .from("quiz_questions")
-      .select("id, question_type, question, image_url, option_a, option_b, option_c, option_d, correct_answer, explanation, question_en, option_a_en, option_b_en, option_c_en, option_d_en, explanation_en, official_source, manual_name, manual_chapter, manual_page, manual_url, google_keywords, category")
-      .in("id", data.ids);
+    // Answer keys stay server-side: a SECURITY DEFINER DB function returns rows
+    // only for the submitted IDs, so no service-role key is required.
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: rpcRows, error } = await supabasePublic.rpc("grade_quiz_questions", {
+      _ids: data.ids,
+    });
     if (error) throw new Error(error.message);
+    const rows = (rpcRows ?? []) as unknown as Array<Record<string, unknown>>;
+
 
     // Preserve original submission order.
     const byId = new Map((rows ?? []).map((r) => [r.id as string, r]));
