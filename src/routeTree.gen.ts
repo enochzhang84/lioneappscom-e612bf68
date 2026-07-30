@@ -41,6 +41,7 @@ import { Route as ToolsSolutionBuilderHomeNetworkRouteImport } from './routes/to
 import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/tools.solution-builder.full-solution'
 import { Route as ToolsPhotoWallIdRouteImport } from './routes/tools.photo-wall.$id'
 import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
+import { Route as DmvC1QuestionBankRouteImport } from './routes/dmv.c1.question-bank'
 import { Route as DisplayPhotoWallPreviewIdRouteImport } from './routes/display.photo-wall-preview.$id'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
@@ -239,6 +240,11 @@ const ToolsPhotoWallIdRoute = ToolsPhotoWallIdRouteImport.update({
 const PDriveC1Route = PDriveC1RouteImport.update({
   id: '/p/drive/c1',
   path: '/p/drive/c1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DmvC1QuestionBankRoute = DmvC1QuestionBankRouteImport.update({
+  id: '/dmv/c1/question-bank',
+  path: '/dmv/c1/question-bank',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DisplayPhotoWallPreviewIdRoute =
@@ -490,6 +496,7 @@ export interface FileRoutesByFullPath {
   '/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/display/photo-wall-preview/$id': typeof DisplayPhotoWallPreviewIdRoute
+  '/dmv/c1/question-bank': typeof DmvC1QuestionBankRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
@@ -549,6 +556,7 @@ export interface FileRoutesByTo {
   '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/display/photo-wall-preview/$id': typeof DisplayPhotoWallPreviewIdRoute
+  '/dmv/c1/question-bank': typeof DmvC1QuestionBankRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
@@ -621,6 +629,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tools': typeof AuthenticatedAdminToolsRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/display/photo-wall-preview/$id': typeof DisplayPhotoWallPreviewIdRoute
+  '/dmv/c1/question-bank': typeof DmvC1QuestionBankRoute
   '/p/drive/c1': typeof PDriveC1Route
   '/tools/photo-wall/$id': typeof ToolsPhotoWallIdRoute
   '/tools/solution-builder/full-solution': typeof ToolsSolutionBuilderFullSolutionRoute
@@ -693,6 +702,7 @@ export interface FileRouteTypes {
     | '/admin/tools'
     | '/admin/users'
     | '/display/photo-wall-preview/$id'
+    | '/dmv/c1/question-bank'
     | '/p/drive/c1'
     | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
@@ -752,6 +762,7 @@ export interface FileRouteTypes {
     | '/admin/solution-builder'
     | '/admin/users'
     | '/display/photo-wall-preview/$id'
+    | '/dmv/c1/question-bank'
     | '/p/drive/c1'
     | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
@@ -823,6 +834,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tools'
     | '/_authenticated/admin/users'
     | '/display/photo-wall-preview/$id'
+    | '/dmv/c1/question-bank'
     | '/p/drive/c1'
     | '/tools/photo-wall/$id'
     | '/tools/solution-builder/full-solution'
@@ -875,6 +887,7 @@ export interface RootRouteChildren {
   ProductsSlugRoute: typeof ProductsSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   DisplayPhotoWallPreviewIdRoute: typeof DisplayPhotoWallPreviewIdRoute
+  DmvC1QuestionBankRoute: typeof DmvC1QuestionBankRoute
   PDriveC1Route: typeof PDriveC1Route
   PSlugIndexRoute: typeof PSlugIndexRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
@@ -1105,6 +1118,13 @@ declare module '@tanstack/react-router' {
       path: '/p/drive/c1'
       fullPath: '/p/drive/c1'
       preLoaderRoute: typeof PDriveC1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dmv/c1/question-bank': {
+      id: '/dmv/c1/question-bank'
+      path: '/dmv/c1/question-bank'
+      fullPath: '/dmv/c1/question-bank'
+      preLoaderRoute: typeof DmvC1QuestionBankRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/display/photo-wall-preview/$id': {
@@ -1624,6 +1644,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsSlugRoute: ProductsSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   DisplayPhotoWallPreviewIdRoute: DisplayPhotoWallPreviewIdRoute,
+  DmvC1QuestionBankRoute: DmvC1QuestionBankRoute,
   PDriveC1Route: PDriveC1Route,
   PSlugIndexRoute: PSlugIndexRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
