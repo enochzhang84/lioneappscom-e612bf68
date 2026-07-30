@@ -100,6 +100,38 @@ export const getRandomQuizQuestions = createServerFn({ method: "GET" })
     return list.slice(0, data.count);
   });
 
+// Full ordered question bank for practice/browsing (NOT for live exams).
+// Includes answer keys + explanations by design: this is a study resource.
+// Backed by a SECURITY DEFINER DB function so no service-role key is needed.
+export type PracticeQuestion = QuizQuestion & {
+  correct_answer: "A" | "B" | "C" | "D";
+  explanation: string | null;
+  explanation_en: string | null;
+  official_source: string | null;
+  manual_name: string | null;
+  manual_chapter: string | null;
+  manual_page: string | null;
+  manual_url: string | null;
+  google_keywords: string | null;
+};
+
+export const listPracticeQuestions = createServerFn({ method: "GET" })
+  .inputValidator((d?: { categories?: string[] }) =>
+    z
+      .object({ categories: z.array(z.string().min(1).max(40)).min(1).max(10).default(["c1", "c1_signs"]) })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data }): Promise<PracticeQuestion[]> => {
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: rows, error } = await supabasePublic.rpc("list_practice_questions", {
+      _categories: data.categories,
+    });
+    if (error) throw new Error(error.message);
+    return ((rows ?? []) as unknown as PracticeQuestion[]);
+  });
+
+
+
 
 // Mixed-pool random draw: fetch N from each specified category, then shuffle.
 // Used by综合模拟考 (e.g. C1 = 36 written + 12 signs = 48).
