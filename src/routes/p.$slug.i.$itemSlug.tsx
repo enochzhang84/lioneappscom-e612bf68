@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Maximize2, Loader2, AlertTriangle } from "lucide-react";
 import { QuizApp } from "./p.drive.c1";
 import { C1MockExamHub } from "@/components/exam/C1MockExamHub";
+import { C1QuestionBank } from "@/components/exam/C1QuestionBank";
 import { BibleCUV } from "@/components/bible/BibleCUV";
 import { BibleCUNP } from "@/components/bible/BibleCUNP";
 import { BibleKJV } from "@/components/bible/BibleKJV";
@@ -66,6 +67,11 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:drive-c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "/p/drive/c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "app:drive-c1-mock": { render: () => <C1MockExamHub /> },
+  "app:drive-c1-bank": {
+    render: () => <C1QuestionBank />,
+    fullPath: "/dmv/c1/question-bank",
+  },
+
   "app:drive-ab-air-brake": { render: () => <QuizApp {...AIR_BRAKE_PROPS} /> },
   "app:drive-ab-combination-vehicle": { render: () => <QuizApp {...COMBINATION_VEHICLE_PROPS} /> },
   "app:drive-ab-commercial-driver": { render: () => <QuizApp {...COMMERCIAL_DRIVER_PROPS} /> },
