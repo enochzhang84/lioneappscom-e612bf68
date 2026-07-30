@@ -66,6 +66,11 @@ const EMBEDDED_APPS: Record<string, { render: () => React.ReactElement; fullPath
   "app:drive-c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "/p/drive/c1": { render: () => <QuizApp embedded />, fullPath: "/p/drive/c1" },
   "app:drive-c1-mock": { render: () => <C1MockExamHub /> },
+  "app:drive-c1-bank": {
+    render: () => <C1QuestionBank />,
+    fullPath: "/dmv/c1/question-bank",
+  },
+
   "app:drive-ab-air-brake": { render: () => <QuizApp {...AIR_BRAKE_PROPS} /> },
   "app:drive-ab-combination-vehicle": { render: () => <QuizApp {...COMBINATION_VEHICLE_PROPS} /> },
   "app:drive-ab-commercial-driver": { render: () => <QuizApp {...COMMERCIAL_DRIVER_PROPS} /> },
