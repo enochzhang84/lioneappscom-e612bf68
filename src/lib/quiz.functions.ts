@@ -251,13 +251,20 @@ export const checkAnswer = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), answer: answerEnum }).parse(d),
   )
   .handler(async ({ data }): Promise<{ is_correct: boolean; correct_answer?: "A" | "B" | "C" | "D" }> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
-      .from("quiz_questions")
-      .select("correct_answer")
-      .eq("id", data.id)
-      .maybeSingle();
+    // Graded through a SECURITY DEFINER DB function so no service-role key is
+    // needed — answer keys still never leave the database unfiltered.
+    const { supabasePublic } = await import("@/integrations/supabase/public-server");
+    const { data: res, error } = await supabasePublic.rpc("check_quiz_answer", {
+      _id: data.id,
+      _answer: data.answer,
+    });
     if (error) throw new Error(error.message);
+    const payload = (res ?? {}) as { is_correct?: boolean; correct_answer?: "A" | "B" | "C" | "D" };
+    return payload.correct_answer
+      ? { is_correct: !!payload.is_correct, correct_answer: payload.correct_answer }
+      : { is_correct: !!payload.is_correct };
+  });
+
     const correct = (row?.correct_answer ?? null) as "A" | "B" | "C" | "D" | null;
     const is_correct = !!correct && correct === data.answer;
     // Only reveal the correct letter after a wrong pick — this powers instant
