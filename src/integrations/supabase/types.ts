@@ -1873,6 +1873,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_practice_questions: {
+        Args: { _categories: string[] }
+        Returns: Json[]
+      }
     }
     Enums: {
       app_role: "admin"
