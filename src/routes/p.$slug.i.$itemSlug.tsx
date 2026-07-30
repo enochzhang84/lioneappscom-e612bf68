@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Maximize2, Loader2, AlertTriangle } from "lucide-react";
 import { QuizApp } from "./p.drive.c1";
 import { C1MockExamHub } from "@/components/exam/C1MockExamHub";
+import { C1QuestionBank } from "@/components/exam/C1QuestionBank";
 import { BibleCUV } from "@/components/bible/BibleCUV";
 import { BibleCUNP } from "@/components/bible/BibleCUNP";
 import { BibleKJV } from "@/components/bible/BibleKJV";
