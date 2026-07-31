@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -104,7 +104,9 @@ export function C1QuestionBank({
     staleTime: 10 * 60 * 1000,
   });
 
-  const [mode, setMode] = useState<Mode>("browse");
+  // Entry point is the sequential practice view; the browsable list stays in
+  // the code (reachable after 结束练习) but is no longer the default screen.
+  const [mode, setMode] = useState<Mode>("practice");
   const [topic, setTopic] = useState("all");
   const [q, setQ] = useState("");
   const [pageSize, setPageSize] = useState(20);
@@ -124,6 +126,18 @@ export function C1QuestionBank({
     setWrongBook(readJSON<Record<string, true>>(K.wrong, {}));
     setRecords(readJSON<PracticeRecord[]>(K.records, []));
   }, []);
+
+  // Once the bank is loaded, offer to resume saved progress (default: 第 1 题).
+  const bootstrapped = useRef(false);
+  useEffect(() => {
+    if (bootstrapped.current) return;
+    if (!bank.data || bank.data.length === 0) return;
+    bootstrapped.current = true;
+    const saved = readJSON<number>(K.progress, 0);
+    setStartedAt(new Date().toISOString());
+    if (saved > 0 && saved < bank.data.length) setResumeAsk(saved);
+    else setCurrent(0);
+  }, [bank.data]);
 
   const all = bank.data ?? [];
 
@@ -272,21 +286,39 @@ export function C1QuestionBank({
       );
     }
     return (
-      <PracticeView
-        item={item}
-        index={current}
-        total={filtered.length}
-        questions={filtered}
-        answers={answers}
-        favorites={favorites}
-        wrongBook={wrongBook}
-        onPick={(pick) => persistAnswer(item.id, pick, pick === item.correct_answer)}
-        onGoTo={goTo}
-        onToggleFavorite={() => toggleFavorite(item.id)}
-        onToggleWrong={() => toggleWrongBook(item.id)}
-        onReset={() => resetAnswer(item.id)}
-        onExit={endPractice}
-      />
+      <>
+        <PracticeView
+          item={item}
+          index={current}
+          total={filtered.length}
+          questions={filtered}
+          answers={answers}
+          favorites={favorites}
+          wrongBook={wrongBook}
+          onPick={(pick) => persistAnswer(item.id, pick, pick === item.correct_answer)}
+          onGoTo={goTo}
+          onToggleFavorite={() => toggleFavorite(item.id)}
+          onToggleWrong={() => toggleWrongBook(item.id)}
+          onReset={() => resetAnswer(item.id)}
+          onExit={endPractice}
+        />
+        {resumeAsk !== null && (
+          <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+              <h3 className="text-lg font-semibold">继续上次练习？</h3>
+              <p className="text-sm text-muted-foreground">
+                上次练习到第 <b>{resumeAsk + 1}</b> 题，你可以继续，也可以从第 1 题重新开始。
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" className="rounded-full" onClick={() => startPractice(0)}>重新开始</Button>
+                <Button className="rounded-full bg-blue-600 hover:bg-blue-700" onClick={() => startPractice(resumeAsk)}>
+                  继续练习
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
@@ -567,10 +599,16 @@ function PracticeView({
     { key: "D" as const, text: item.option_d, textEn: item.option_d_en },
   ]).filter((o) => !!o.text && o.text.trim() !== "");
 
-  // Navigator window keeps large banks usable on phones.
+  // Navigator is paginated (30 per page) and follows the current question.
   const windowSize = 30;
-  const start = Math.max(0, Math.min(index - windowSize / 2, total - windowSize));
-  const navItems = questions.slice(Math.max(0, start), Math.max(0, start) + windowSize);
+  const navPageCount = Math.max(1, Math.ceil(total / windowSize));
+  const [navPage, setNavPage] = useState(Math.floor(index / windowSize));
+  useEffect(() => {
+    setNavPage(Math.floor(index / windowSize));
+  }, [index]);
+  const safeNavPage = Math.min(navPage, navPageCount - 1);
+  const start = safeNavPage * windowSize;
+  const navItems = questions.slice(start, start + windowSize);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -738,12 +776,12 @@ function PracticeView({
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-slate-900">题号导航</h3>
               <span className="text-xs text-slate-500 tabular-nums">
-                显示 {Math.max(0, start) + 1} - {Math.min(total, Math.max(0, start) + windowSize)} / {total}
+                显示 {start + 1} - {Math.min(total, start + windowSize)} / {total}
               </span>
             </div>
-            <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
+            <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-2">
               {navItems.map((nq, i) => {
-                const absolute = Math.max(0, start) + i;
+                const absolute = start + i;
                 const pick = answers[nq.id];
                 const active = absolute === index;
                 return (
@@ -752,7 +790,7 @@ function PracticeView({
                     type="button"
                     onClick={() => onGoTo(absolute)}
                     className={cn(
-                      "h-9 rounded-md text-sm font-medium border transition-colors tabular-nums",
+                      "h-10 rounded-md text-sm font-medium border transition-colors tabular-nums",
                       active
                         ? "bg-blue-600 border-blue-600 text-white shadow ring-2 ring-blue-300"
                         : pick
@@ -767,12 +805,36 @@ function PracticeView({
                 );
               })}
             </div>
-            <div className="flex justify-between gap-2">
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                className="rounded-full min-w-[92px] h-10"
+                disabled={safeNavPage === 0}
+                onClick={() => setNavPage((p) => Math.max(0, p - 1))}
+              >
+                <ArrowLeft size={16} className="mr-1" /> 上一页
+              </Button>
+              <span className="text-sm text-slate-600 tabular-nums">
+                {safeNavPage + 1} / {navPageCount}
+              </span>
+              <Button
+                variant="outline"
+                className="rounded-full min-w-[92px] h-10"
+                disabled={safeNavPage >= navPageCount - 1}
+                onClick={() => setNavPage((p) => Math.min(navPageCount - 1, p + 1))}
+              >
+                下一页 <ArrowRight size={16} className="ml-1" />
+              </Button>
+            </div>
+            <div className="flex flex-wrap justify-between gap-2">
+              <Button variant="outline" size="sm" className="rounded-full" disabled={safeNavPage === 0} onClick={() => setNavPage(0)}>
+                跳到第 1 页
+              </Button>
               <Button variant="outline" size="sm" className="rounded-full" disabled={index === 0} onClick={() => onGoTo(0)}>
                 回到第 1 题
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full" disabled={index >= total - 1} onClick={() => onGoTo(total - 1)}>
-                跳到最后一题
+              <Button variant="outline" size="sm" className="rounded-full" disabled={safeNavPage >= navPageCount - 1} onClick={() => setNavPage(navPageCount - 1)}>
+                跳到最后一页
               </Button>
             </div>
           </CardContent>
