@@ -286,21 +286,39 @@ export function C1QuestionBank({
       );
     }
     return (
-      <PracticeView
-        item={item}
-        index={current}
-        total={filtered.length}
-        questions={filtered}
-        answers={answers}
-        favorites={favorites}
-        wrongBook={wrongBook}
-        onPick={(pick) => persistAnswer(item.id, pick, pick === item.correct_answer)}
-        onGoTo={goTo}
-        onToggleFavorite={() => toggleFavorite(item.id)}
-        onToggleWrong={() => toggleWrongBook(item.id)}
-        onReset={() => resetAnswer(item.id)}
-        onExit={endPractice}
-      />
+      <>
+        <PracticeView
+          item={item}
+          index={current}
+          total={filtered.length}
+          questions={filtered}
+          answers={answers}
+          favorites={favorites}
+          wrongBook={wrongBook}
+          onPick={(pick) => persistAnswer(item.id, pick, pick === item.correct_answer)}
+          onGoTo={goTo}
+          onToggleFavorite={() => toggleFavorite(item.id)}
+          onToggleWrong={() => toggleWrongBook(item.id)}
+          onReset={() => resetAnswer(item.id)}
+          onExit={endPractice}
+        />
+        {resumeAsk !== null && (
+          <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+              <h3 className="text-lg font-semibold">继续上次练习？</h3>
+              <p className="text-sm text-muted-foreground">
+                上次练习到第 <b>{resumeAsk + 1}</b> 题，你可以继续，也可以从第 1 题重新开始。
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" className="rounded-full" onClick={() => startPractice(0)}>重新开始</Button>
+                <Button className="rounded-full bg-blue-600 hover:bg-blue-700" onClick={() => startPractice(resumeAsk)}>
+                  继续练习
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
