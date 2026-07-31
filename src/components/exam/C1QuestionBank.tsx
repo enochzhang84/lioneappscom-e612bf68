@@ -40,6 +40,12 @@ function topicOf(q: PracticeQuestion): string[] {
   return keys.length ? keys : ["other"];
 }
 
+function topicLabelOf(q: PracticeQuestion): string {
+  const first = topicOf(q)[0];
+  return TOPICS.find((t) => t.key === first)?.label ?? "其他";
+}
+
+
 /* ------------------------------------------------------------------ */
 /* Local persistence                                                    */
 /* ------------------------------------------------------------------ */
