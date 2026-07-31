@@ -599,10 +599,16 @@ function PracticeView({
     { key: "D" as const, text: item.option_d, textEn: item.option_d_en },
   ]).filter((o) => !!o.text && o.text.trim() !== "");
 
-  // Navigator window keeps large banks usable on phones.
+  // Navigator is paginated (30 per page) and follows the current question.
   const windowSize = 30;
-  const start = Math.max(0, Math.min(index - windowSize / 2, total - windowSize));
-  const navItems = questions.slice(Math.max(0, start), Math.max(0, start) + windowSize);
+  const navPageCount = Math.max(1, Math.ceil(total / windowSize));
+  const [navPage, setNavPage] = useState(Math.floor(index / windowSize));
+  useEffect(() => {
+    setNavPage(Math.floor(index / windowSize));
+  }, [index]);
+  const safeNavPage = Math.min(navPage, navPageCount - 1);
+  const start = safeNavPage * windowSize;
+  const navItems = questions.slice(start, start + windowSize);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
