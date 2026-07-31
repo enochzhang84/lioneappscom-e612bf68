@@ -127,6 +127,18 @@ export function C1QuestionBank({
     setRecords(readJSON<PracticeRecord[]>(K.records, []));
   }, []);
 
+  // Once the bank is loaded, offer to resume saved progress (default: 第 1 题).
+  const bootstrapped = useRef(false);
+  useEffect(() => {
+    if (bootstrapped.current) return;
+    if (!bank.data || bank.data.length === 0) return;
+    bootstrapped.current = true;
+    const saved = readJSON<number>(K.progress, 0);
+    setStartedAt(new Date().toISOString());
+    if (saved > 0 && saved < bank.data.length) setResumeAsk(saved);
+    else setCurrent(0);
+  }, [bank.data]);
+
   const all = bank.data ?? [];
 
   const filtered = useMemo(() => {
