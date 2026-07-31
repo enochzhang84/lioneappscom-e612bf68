@@ -142,8 +142,14 @@ export function C1QuestionBank({
 
   useEffect(() => { setPage(1); }, [topic, q, pageSize]);
 
+  const globalIndexById = useMemo(
+    () => new Map(all.map((item, i) => [item.id, i] as const)),
+    [all],
+  );
+
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
+
 
   /* ---------- practice ---------- */
 
