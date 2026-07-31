@@ -369,71 +369,93 @@ export function C1QuestionBank({
         <div className="space-y-3">
           {pageRows.map((item, i) => {
             const absolute = (page - 1) * pageSize + i;
+            const globalNo = globalIndexById.get(item.id) ?? absolute;
             const picked = answers[item.id];
             const state = picked ? (picked === item.correct_answer ? "correct" : "wrong") : "none";
             return (
               <Card key={item.id} className="border-slate-200 shadow-sm rounded-2xl">
                 <CardContent className="p-4 md:p-5">
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={cn(
-                        "shrink-0 mt-0.5 h-7 min-w-[2rem] px-1.5 rounded-md grid place-items-center text-xs font-medium tabular-nums border",
-                        state === "correct"
-                          ? "bg-emerald-100 border-emerald-400 text-emerald-800"
-                          : state === "wrong"
-                            ? "bg-red-100 border-red-400 text-red-800"
-                            : "bg-white border-slate-200 text-slate-500",
-                      )}
-                    >
-                      {absolute + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm md:text-base text-slate-900 leading-relaxed whitespace-pre-wrap">
-                        {item.question}
-                      </p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span className="rounded bg-slate-100 px-2 py-0.5">
-                          {item.category === "c1_signs" ? "交通标志" : "笔试题"}
-                        </span>
-                        <span className="rounded bg-emerald-50 text-emerald-700 px-2 py-0.5">
-                          正确答案 {item.correct_answer}
-                        </span>
-                        {favorites[item.id] && (
-                          <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5">已收藏</span>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                    {/* Left: question */}
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                      <span
+                        className={cn(
+                          "shrink-0 mt-0.5 h-7 min-w-[2rem] px-1.5 rounded-md grid place-items-center text-xs font-medium tabular-nums border",
+                          state === "correct"
+                            ? "bg-emerald-100 border-emerald-400 text-emerald-800"
+                            : state === "wrong"
+                              ? "bg-red-100 border-red-400 text-red-800"
+                              : "bg-white border-slate-200 text-slate-500",
                         )}
-                        {wrongBook[item.id] && (
-                          <span className="rounded bg-rose-50 text-rose-700 px-2 py-0.5">错题本</span>
-                        )}
+                      >
+                        {globalNo + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm md:text-base text-slate-900 leading-relaxed whitespace-pre-wrap break-words">
+                          {item.question}
+                        </p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          <span className="rounded bg-slate-100 px-2 py-0.5">
+                            {item.category === "c1_signs" ? "交通标志" : "笔试题"}
+                          </span>
+                          <span className="rounded bg-slate-100 px-2 py-0.5">{topicLabelOf(item)}</span>
+                          <span
+                            className={cn(
+                              "rounded px-2 py-0.5",
+                              state === "correct"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : state === "wrong"
+                                  ? "bg-red-50 text-red-700"
+                                  : "bg-slate-50 text-slate-500",
+                            )}
+                          >
+                            {state === "correct" ? "已答对" : state === "wrong" ? "已答错" : "未练习"}
+                          </span>
+                          {favorites[item.id] && (
+                            <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5">已收藏</span>
+                          )}
+                          {wrongBook[item.id] && (
+                            <span className="rounded bg-rose-50 text-rose-700 px-2 py-0.5">错题本</span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => toggleFavorite(item.id)}
-                        aria-label="收藏"
-                        className={cn(
-                          "h-8 w-8 grid place-items-center rounded-lg border transition-colors",
-                          favorites[item.id]
-                            ? "border-amber-300 bg-amber-50 text-amber-600"
-                            : "border-slate-200 text-slate-400 hover:border-amber-300",
-                        )}
-                      >
-                        <Star size={14} className={favorites[item.id] ? "fill-amber-500" : ""} />
-                      </button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full"
-                        onClick={() => startPractice(absolute)}
-                      >
-                        练习
-                      </Button>
+
+                    {/* Right: global position + actions */}
+                    <div className="flex shrink-0 items-center justify-end gap-2 sm:w-auto sm:flex-col sm:items-end">
+                      <span className="text-xs text-slate-500 tabular-nums whitespace-nowrap">
+                        题库第 {globalNo + 1} / {all.length} 题
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => toggleFavorite(item.id)}
+                          aria-label="收藏"
+                          className={cn(
+                            "h-8 w-8 grid place-items-center rounded-lg border transition-colors",
+                            favorites[item.id]
+                              ? "border-amber-300 bg-amber-50 text-amber-600"
+                              : "border-slate-200 text-slate-400 hover:border-amber-300",
+                          )}
+                        >
+                          <Star size={14} className={favorites[item.id] ? "fill-amber-500" : ""} />
+                        </button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => startPractice(absolute)}
+                        >
+                          {picked ? "继续练习" : "练习"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             );
           })}
+
           {pageRows.length === 0 && (
             <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
               没有匹配的题目
