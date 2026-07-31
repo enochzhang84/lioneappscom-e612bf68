@@ -776,12 +776,12 @@ function PracticeView({
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-slate-900">题号导航</h3>
               <span className="text-xs text-slate-500 tabular-nums">
-                显示 {Math.max(0, start) + 1} - {Math.min(total, Math.max(0, start) + windowSize)} / {total}
+                显示 {start + 1} - {Math.min(total, start + windowSize)} / {total}
               </span>
             </div>
-            <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
+            <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-2">
               {navItems.map((nq, i) => {
-                const absolute = Math.max(0, start) + i;
+                const absolute = start + i;
                 const pick = answers[nq.id];
                 const active = absolute === index;
                 return (
@@ -790,7 +790,7 @@ function PracticeView({
                     type="button"
                     onClick={() => onGoTo(absolute)}
                     className={cn(
-                      "h-9 rounded-md text-sm font-medium border transition-colors tabular-nums",
+                      "h-10 rounded-md text-sm font-medium border transition-colors tabular-nums",
                       active
                         ? "bg-blue-600 border-blue-600 text-white shadow ring-2 ring-blue-300"
                         : pick
@@ -805,12 +805,36 @@ function PracticeView({
                 );
               })}
             </div>
-            <div className="flex justify-between gap-2">
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                className="rounded-full min-w-[92px] h-10"
+                disabled={safeNavPage === 0}
+                onClick={() => setNavPage((p) => Math.max(0, p - 1))}
+              >
+                <ArrowLeft size={16} className="mr-1" /> 上一页
+              </Button>
+              <span className="text-sm text-slate-600 tabular-nums">
+                {safeNavPage + 1} / {navPageCount}
+              </span>
+              <Button
+                variant="outline"
+                className="rounded-full min-w-[92px] h-10"
+                disabled={safeNavPage >= navPageCount - 1}
+                onClick={() => setNavPage((p) => Math.min(navPageCount - 1, p + 1))}
+              >
+                下一页 <ArrowRight size={16} className="ml-1" />
+              </Button>
+            </div>
+            <div className="flex flex-wrap justify-between gap-2">
+              <Button variant="outline" size="sm" className="rounded-full" disabled={safeNavPage === 0} onClick={() => setNavPage(0)}>
+                跳到第 1 页
+              </Button>
               <Button variant="outline" size="sm" className="rounded-full" disabled={index === 0} onClick={() => onGoTo(0)}>
                 回到第 1 题
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full" disabled={index >= total - 1} onClick={() => onGoTo(total - 1)}>
-                跳到最后一题
+              <Button variant="outline" size="sm" className="rounded-full" disabled={safeNavPage >= navPageCount - 1} onClick={() => setNavPage(navPageCount - 1)}>
+                跳到最后一页
               </Button>
             </div>
           </CardContent>
