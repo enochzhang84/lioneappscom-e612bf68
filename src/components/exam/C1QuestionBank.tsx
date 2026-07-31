@@ -104,7 +104,9 @@ export function C1QuestionBank({
     staleTime: 10 * 60 * 1000,
   });
 
-  const [mode, setMode] = useState<Mode>("browse");
+  // Entry point is the sequential practice view; the browsable list stays in
+  // the code (reachable after 结束练习) but is no longer the default screen.
+  const [mode, setMode] = useState<Mode>("practice");
   const [topic, setTopic] = useState("all");
   const [q, setQ] = useState("");
   const [pageSize, setPageSize] = useState(20);
