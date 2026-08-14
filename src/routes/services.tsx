@@ -53,10 +53,8 @@ function ServicesPage() {
         />
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-14 md:pt-24 md:pb-20 grid gap-10 md:grid-cols-[1.15fr_1fr] items-center">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-primary">
-              {lang === "zh" ? "服务与解决方案" : "Services & Solutions"}
-            </div>
-            <h1 className="mt-5 text-4xl md:text-5xl font-bold tracking-tight leading-[1.15]">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.15]">
+
               {lang === "zh"
                 ? "为家庭与小型企业提供实用的数字化解决方案"
                 : "Practical IT Solutions for Home and Small Business"}
