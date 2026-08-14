@@ -114,13 +114,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               </NavigationMenuItem>
 
               {/* 4-8. Untouched routes/paths — only display text is translated. */}
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Link to="/p/$slug" params={{ slug: "tools" }} activeProps={{ className: "text-foreground font-medium" }}>
-                    {t("nav.tools")}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+              {/* 实用工具入口已隐藏（页面 /p/tools 仍可通过 URL 访问） */}
+
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
                   <Link to="/p/$slug" params={{ slug: "ai" }} activeProps={{ className: "text-foreground font-medium" }}>
@@ -203,7 +198,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
                   <Link to="/" onClick={() => setMobileOpen(false)} activeOptions={{ exact: true }} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.home")}</Link>
                   <Link to="/services" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.services")}</Link>
                   <Link to="/cases" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.projects")}</Link>
-                  <Link to="/p/$slug" params={{ slug: "tools" }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.tools")}</Link>
+                  {/* 实用工具入口已隐藏（页面 /p/tools 仍可通过 URL 访问） */}
                   <Link to="/p/$slug" params={{ slug: "ai" }} onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.ai")}</Link>
                   <Link to="/blog" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.blog")}</Link>
                   <Link to="/about" onClick={() => setMobileOpen(false)} activeProps={{ className: "text-foreground font-semibold" }} className="py-2 text-muted-foreground hover:text-foreground">{t("nav.about")}</Link>
