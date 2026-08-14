@@ -188,10 +188,7 @@ function AboutPage() {
         <div className="mx-auto max-w-6xl px-6 pt-16 md:pt-24 pb-16 md:pb-20">
           <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                {isZh ? "关于 Lione Apps" : "About Lione Apps"}
-              </div>
-              <h1 className="mt-4 text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-[1.15]">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-[1.15]">
                 {isZh
                   ? "让科技真正服务于家庭与小型企业"
                   : "Technology That Works for Homes & Small Businesses"}
