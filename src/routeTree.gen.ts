@@ -52,6 +52,7 @@ import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
+import { Route as AuthenticatedAdminNavigationRouteImport } from './routes/_authenticated/admin.navigation'
 import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authenticated/admin.logs'
 import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
 import { Route as AuthenticatedAdminExamsRouteImport } from './routes/_authenticated/admin.exams'
@@ -302,6 +303,12 @@ const AuthenticatedAdminNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminNavigationRoute =
+  AuthenticatedAdminNavigationRouteImport.update({
+    id: '/navigation',
+    path: '/navigation',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminLogsRoute = AuthenticatedAdminLogsRouteImport.update({
   id: '/logs',
   path: '/logs',
@@ -486,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/admin/exams': typeof AuthenticatedAdminExamsRouteWithChildren
   '/admin/files': typeof AuthenticatedAdminFilesRoute
   '/admin/logs': typeof AuthenticatedAdminLogsRoute
+  '/admin/navigation': typeof AuthenticatedAdminNavigationRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
@@ -551,6 +559,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRoute
   '/admin/logs': typeof AuthenticatedAdminLogsRoute
+  '/admin/navigation': typeof AuthenticatedAdminNavigationRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/solution-builder': typeof AuthenticatedAdminSolutionBuilderRoute
@@ -619,6 +628,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/exams': typeof AuthenticatedAdminExamsRouteWithChildren
   '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRoute
   '/_authenticated/admin/logs': typeof AuthenticatedAdminLogsRoute
+  '/_authenticated/admin/navigation': typeof AuthenticatedAdminNavigationRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRouteWithChildren
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRouteWithChildren
@@ -692,6 +702,7 @@ export interface FileRouteTypes {
     | '/admin/exams'
     | '/admin/files'
     | '/admin/logs'
+    | '/admin/navigation'
     | '/admin/notifications'
     | '/admin/pages'
     | '/admin/products'
@@ -757,6 +768,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/files'
     | '/admin/logs'
+    | '/admin/navigation'
     | '/admin/notifications'
     | '/admin/seo'
     | '/admin/solution-builder'
@@ -824,6 +836,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/exams'
     | '/_authenticated/admin/files'
     | '/_authenticated/admin/logs'
+    | '/_authenticated/admin/navigation'
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/pages'
     | '/_authenticated/admin/products'
@@ -1197,6 +1210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/navigation': {
+      id: '/_authenticated/admin/navigation'
+      path: '/navigation'
+      fullPath: '/admin/navigation'
+      preLoaderRoute: typeof AuthenticatedAdminNavigationRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/logs': {
       id: '/_authenticated/admin/logs'
       path: '/logs'
@@ -1504,6 +1524,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminExamsRoute: typeof AuthenticatedAdminExamsRouteWithChildren
   AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRoute
   AuthenticatedAdminLogsRoute: typeof AuthenticatedAdminLogsRoute
+  AuthenticatedAdminNavigationRoute: typeof AuthenticatedAdminNavigationRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRouteWithChildren
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRouteWithChildren
@@ -1529,6 +1550,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminExamsRoute: AuthenticatedAdminExamsRouteWithChildren,
   AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRoute,
   AuthenticatedAdminLogsRoute: AuthenticatedAdminLogsRoute,
+  AuthenticatedAdminNavigationRoute: AuthenticatedAdminNavigationRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRouteWithChildren,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRouteWithChildren,

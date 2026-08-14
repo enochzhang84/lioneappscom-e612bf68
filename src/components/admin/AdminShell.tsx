@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { adminListShortcutPages } from "@/lib/pages-admin.functions";
+import { adminGetHiddenNavItems } from "@/lib/nav-visibility.functions";
 
 type NavItem = {
   to: string;
@@ -81,11 +82,15 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/files", label: "Files", icon: FolderOpen, group: "System" },
   { to: "/admin/notifications", label: "Notifications", icon: Bell, group: "System" },
   { to: "/admin/logs", label: "Logs", icon: ScrollText, group: "System" },
+  { to: "/admin/navigation", label: "Navigation", icon: Settings, group: "System" },
   { to: "/admin/platform/settings", label: "Platform Settings", icon: Settings, group: "System" },
   { to: "/admin/settings", label: "站点内容 (Legacy)", icon: FileText, group: "System" },
 ];
 
-
+/** 导航项的稳定标识（用于持久化“隐藏入口”设置） */
+export function navKeyOf(n: { to: string; label: string }) {
+  return `${n.to}::${n.label}`;
+}
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -97,6 +102,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     queryFn: () => listShortcuts(),
     staleTime: 60_000,
   });
+
+  const getHidden = useServerFn(adminGetHiddenNavItems);
+  const { data: hiddenKeys } = useQuery({
+    queryKey: ["admin", "nav-hidden"],
+    queryFn: () => getHidden(),
+    staleTime: 60_000,
+  });
+  const hidden = new Set(hiddenKeys ?? []);
 
   const dynamicQuickEdit: NavItem[] = (shortcutPages ?? []).map((p) => ({
     to: `/admin/pages/${p.id}`,
@@ -110,7 +123,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     ...STATIC_QUICK_EDIT,
     ...dynamicQuickEdit,
     ...ADMIN_NAV.slice(1),
-  ];
+  ].filter((n) => !hidden.has(navKeyOf(n)));
 
   const groups = Array.from(new Set(nav.map((n) => n.group)));
 
