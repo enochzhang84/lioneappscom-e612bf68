@@ -113,7 +113,7 @@ function UpdatePasswordPage() {
                 {busy ? "提交中…" : "重置密码"}
               </Button>
               <div className="text-center text-sm">
-                <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground">
+                <Link to="/forgot-password" search={{ return: undefined }} className="text-muted-foreground hover:text-foreground">
                   返回找回密码
                 </Link>
               </div>

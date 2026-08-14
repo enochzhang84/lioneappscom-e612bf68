@@ -84,6 +84,7 @@ function AuthPage() {
             {mode === "login" && (
               <Link
                 to="/forgot-password"
+                search={{ return: undefined }}
                 className="block text-center text-sm text-muted-foreground hover:text-foreground"
               >
                 忘记密码？

@@ -2411,11 +2411,11 @@ function AiPaywall({ user }: { user?: User }) {
           </Button>
         ) : (
           <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white">
-            <Link to="/products">查看订阅方案</Link>
+            <Link to="/services">查看订阅方案</Link>
           </Button>
         )}
         <Button asChild variant="outline">
-          <Link to="/products">了解更多会员权益</Link>
+          <Link to="/services">了解更多会员权益</Link>
         </Button>
       </div>
     </div>
