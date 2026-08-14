@@ -339,10 +339,7 @@ function AiHubView({ page, categories, items }: {
     <SiteLayout>
       <section className="border-b border-border bg-gradient-to-b from-primary/[0.03] to-transparent">
         <div className="mx-auto max-w-6xl px-4 md:px-6 py-14 md:py-20 text-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-            <span>✨</span> AI Assistant Hub
-          </div>
-          <h1 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">{page.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{page.title}</h1>
           <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             {subtitle}
           </p>

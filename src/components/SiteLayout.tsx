@@ -297,7 +297,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 }
 
 export function PageHero({
-  eyebrow,
   title,
   desc,
 }: {
@@ -312,12 +311,7 @@ export function PageHero({
         style={{ background: "radial-gradient(60% 50% at 50% 0%, oklch(0.55 0.22 264 / 0.18), transparent 70%)" }}
       />
       <div className="mx-auto max-w-6xl px-6 py-20 md:py-24 text-center">
-        {eyebrow && (
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-primary">
-            {eyebrow}
-          </div>
-        )}
-        <h1 className="mt-5 text-4xl md:text-5xl font-bold tracking-tight">{title}</h1>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{title}</h1>
         {desc && <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">{desc}</p>}
       </div>
     </section>

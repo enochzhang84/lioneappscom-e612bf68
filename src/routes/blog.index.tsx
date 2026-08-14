@@ -147,10 +147,7 @@ function BlogIndex() {
         <div className="max-w-6xl mx-auto px-6 pt-16 md:pt-24 pb-10">
           <div className="grid gap-10 md:grid-cols-[1.1fr_1fr] items-center">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs font-medium text-primary bg-primary/10 rounded-full px-3 py-1">
-                {lang === "zh" ? "Lione Apps 技术博客" : "Lione Apps Insights"}
-              </div>
-              <h1 className="mt-4 text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
                 {heroTitle}
               </h1>
               <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl">
