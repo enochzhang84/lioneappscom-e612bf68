@@ -297,7 +297,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 }
 
 export function PageHero({
-  eyebrow,
   title,
   desc,
 }: {
