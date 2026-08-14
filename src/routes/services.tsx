@@ -183,11 +183,10 @@ function ServicesPage() {
 }
 
 function SectionHeader({
-  eyebrow,
   title,
   desc,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   desc: string;
 }) {
