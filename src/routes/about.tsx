@@ -467,11 +467,10 @@ function SectionShell({ children, tinted = false }: { children: React.ReactNode;
   );
 }
 
-function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
+function SectionHeader({ title }: { eyebrow?: string; title: string }) {
   return (
     <div className="text-center">
-      <div className="text-xs font-medium uppercase tracking-[0.18em] text-primary">{eyebrow}</div>
-      <h2 className="mt-3 text-2xl md:text-4xl font-bold tracking-tight text-slate-900">{title}</h2>
+      <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">{title}</h2>
     </div>
   );
 }
