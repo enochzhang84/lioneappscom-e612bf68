@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { adminListShortcutPages } from "@/lib/pages-admin.functions";
+import { adminGetHiddenNavItems } from "@/lib/nav-visibility.functions";
 
 type NavItem = {
   to: string;
@@ -122,7 +123,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     ...STATIC_QUICK_EDIT,
     ...dynamicQuickEdit,
     ...ADMIN_NAV.slice(1),
-  ];
+  ].filter((n) => !hidden.has(navKeyOf(n)));
 
   const groups = Array.from(new Set(nav.map((n) => n.group)));
 
