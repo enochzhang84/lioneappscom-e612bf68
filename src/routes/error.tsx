@@ -30,7 +30,7 @@ function ErrorPage() {
           <Button asChild className="w-full">
             <Link
               to="/forgot-password"
-              search={returnUrl ? { return: returnUrl } : {}}
+              search={{ return: returnUrl || undefined }}
             >
               重新发送密码重置邮件
             </Link>

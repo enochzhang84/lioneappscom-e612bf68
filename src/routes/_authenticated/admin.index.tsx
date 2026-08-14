@@ -57,8 +57,8 @@ function Dashboard() {
           <Button asChild><Link to="/admin/pages"><Plus size={14} className="mr-1" /> 新建页面</Link></Button>
           <Button asChild variant="outline"><Link to="/admin/tools"><Plus size={14} className="mr-1" /> 新建工具</Link></Button>
           <Button asChild variant="outline"><Link to="/admin/quiz"><Plus size={14} className="mr-1" /> 新增题目</Link></Button>
-          <Button asChild variant="outline"><Link to="/admin/products/new"><Plus size={14} className="mr-1" /> 新增产品</Link></Button>
-          <Button asChild variant="outline"><Link to="/admin/cases/new"><Plus size={14} className="mr-1" /> 新增案例</Link></Button>
+          <Button asChild variant="outline"><Link to="/admin/products"><Plus size={14} className="mr-1" /> 新增产品</Link></Button>
+          <Button asChild variant="outline"><Link to="/admin/cases"><Plus size={14} className="mr-1" /> 新增案例</Link></Button>
           <Button asChild variant="ghost"><Link to="/admin/settings">编辑站点设置 →</Link></Button>
         </div>
       </section>
