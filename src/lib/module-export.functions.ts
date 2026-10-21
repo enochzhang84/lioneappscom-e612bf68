@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
+import { setResponseHeader } from '@tanstack/react-start/server';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { ensureAdmin } from '@/lib/platform';
 import { reviewSelection, authorizeExport } from './module-export-policy';
@@ -10,6 +11,7 @@ export const previewModuleExport = createServerFn({method:'POST'})
   .inputValidator(selection)
   .handler(async ({data,context}) => {
     await ensureAdmin(context);
+    setResponseHeader('Cache-Control','private, no-store');
     const {exportSnapshot} = await import('./module-export-snapshot.server');
     return reviewSelection(exportSnapshot,data.ids);
   });
@@ -19,6 +21,7 @@ export const downloadModuleExport = createServerFn({method:'POST'})
   .inputValidator(selection.extend({digest:z.string().max(3000),confirmed:z.literal(true)}))
   .handler(async ({data,context}) => {
     await ensureAdmin(context);
+    setResponseHeader('Cache-Control','private, no-store');
     const {exportSnapshot} = await import('./module-export-snapshot.server');
     const review = authorizeExport(exportSnapshot,data.ids,data.digest,data.confirmed);
     const {exportPayloads} = await import('./module-export-payloads.server');
