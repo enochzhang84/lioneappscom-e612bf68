@@ -32,7 +32,7 @@ export const Route = createFileRoute("/products/$slug")({
     <SiteLayout><PageHero title="未找到该产品" desc="可能链接已变更或下线。" /></SiteLayout>
   ),
   errorComponent: ({ error }) => (
-    <SiteLayout><PageHero title="加载失败" desc={error.message} /></SiteLayout>
+    <SiteLayout><PageHero title="加载失败" desc={error instanceof Error ? error.message : String(error)} /></SiteLayout>
   ),
   component: ProductPage,
 });
