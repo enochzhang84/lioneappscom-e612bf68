@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, posix } from 'node:path';
 import { sourceReferences, allowedSourcePath } from './module-scan-lib';
 import type { ModuleManifest, ModuleInventory } from '../src/lib/module-manager.types';
@@ -36,7 +36,7 @@ function resolve(file: string, spec: string) {
   const path = spec.startsWith('@/') ? `src/${spec.slice(2)}` : spec.startsWith('.') ? posix.normalize(`${dirname(file)}/${spec}`) : undefined;
   if (!path || !allowedSourcePath(path)) return undefined;
   const clean = path.split('?')[0];
-  return [clean, ...['.ts','.tsx','.js','.jsx','.json','.css','/index.ts','/index.tsx'].map(ext => clean+ext)].find(p => existsSync(p));
+  return [clean, ...['.ts','.tsx','.js','.jsx','.json','.css','/index.ts','/index.tsx'].map(ext => clean+ext)].find(p => existsSync(p) && statSync(p).isFile());
 }
 const graphs = definitions.map(([id,name,category,description,entryList]) => {
   const files = new Set<string>(); const unresolved: ModuleManifest['unresolved'] = [];
