@@ -1,14 +1,14 @@
 // Generated offline. Metadata only.
 import type { ExportSnapshot } from './module-export.types';
 export const exportSnapshot: ExportSnapshot = {
-  "generatedAt": "2026-10-21T18:42:31.991Z",
+  "generatedAt": "2026-10-21T18:50:17.836Z",
   "modules": [
     {
       "id": "calculator",
       "name": "计算器中心",
       "version": "0.0.0-source-snapshot",
-      "digest": "2f448356718eb93694b7e3edd38821d472bbe9c711e909e42a3b7d1518b966ca",
-      "bytes": 30313,
+      "digest": "84ab480e6e4bb42832a57c0db9422f9df891bf1a8a8456f10289acec6149757f",
+      "bytes": 30317,
       "files": [
         {
           "path": "src/components/calculator/Calculator.tsx",
@@ -182,7 +182,7 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "converter",
       "name": "单位换算",
       "version": "0.0.0-source-snapshot",
-      "digest": "ac058f772c8ae1de8e3bd04998ae081222c1a41ed1641ef1b41697afb789a3d3",
+      "digest": "f4c27cf13fa7edfc16de00fdd0ea85f8051bc6339a451b6062141f9ab7531b13",
       "bytes": 29954,
       "files": [
         {
@@ -392,8 +392,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "currency",
       "name": "汇率换算",
       "version": "0.0.0-source-snapshot",
-      "digest": "e654c6d8cfa3740463001032217a6802d2fe34ec9e6c744c0a1a37d530357efb",
-      "bytes": 12929,
+      "digest": "9b3acc5f479ff78dce82202d3c847ebd04f5ca2b07e36ef0c44bc04b0ed92977",
+      "bytes": 12926,
       "files": [
         {
           "path": "src/components/currency/CurrencyConverter.tsx",
@@ -505,8 +505,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "bible",
       "name": "圣经阅读器",
       "version": "0.0.0-source-snapshot",
-      "digest": "969fe587f486afc41146ba9bfacfbe97c3eee70e95807e341501b08c4fd6414c",
-      "bytes": 13372,
+      "digest": "39c63adb1700ac0cfe3db5a8366484cb475dcde1568c488b2aa6a727ef8aac8a",
+      "bytes": 13370,
       "files": [
         {
           "path": "src/components/bible/BibleCUNP.tsx",
@@ -624,8 +624,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "c1-exam",
       "name": "C1 模拟考试",
       "version": "0.0.0-source-snapshot",
-      "digest": "9c50a4ae67946e0493a02e8f97398f7df3be5290fb45b009b268782045c9eb2e",
-      "bytes": 1076900,
+      "digest": "4c9c959d99a6448f9c0a83725b1ebc19c5de7dc562de1b54a306cbcb2bae9a0a",
+      "bytes": 1076899,
       "files": [
         {
           "path": "src/assets/service-business-platforms.jpg",
@@ -1362,8 +1362,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "c1-bank",
       "name": "C1 顺序题库",
       "version": "0.0.0-source-snapshot",
-      "digest": "bc33ae22bc6176bbfaf37f0c9ee007ad7fd60a5f2f4f568677bc3a22745b3768",
-      "bytes": 30573,
+      "digest": "825108853fb39b840d8f04a1654a77aa331adf6ceeae17d0429f376494d0c820",
+      "bytes": 30574,
       "files": [
         {
           "path": "src/components/exam/C1QuestionBank.tsx",
@@ -1628,7 +1628,7 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "automotive",
       "name": "汽车工具中心",
       "version": "0.0.0-source-snapshot",
-      "digest": "c8c702115792afabfe55e396319a8f3b27d30d7512696cb7f9adefddfd5d87b9",
+      "digest": "ec51dafe3d0055b3feb5b25d8d8e921456d57867d87acd3225f20b28e7ea5c73",
       "bytes": 54103,
       "files": [
         {
@@ -1921,8 +1921,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "photo-wall",
       "name": "Photo Wall Studio",
       "version": "0.0.0-source-snapshot",
-      "digest": "54177bde57312196fe8efeed6017dc6a7c29c86453839d75b15843ebe70b6c82",
-      "bytes": 1153257,
+      "digest": "1bc360ca34133be6bf4b6e37eaf55d4339c962e299155cfc56e3c89f00aee4e3",
+      "bytes": 1153259,
       "files": [
         {
           "path": "src/assets/service-business-platforms.jpg",
@@ -2718,8 +2718,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "solution-builder",
       "name": "Solution Builder",
       "version": "0.0.0-source-snapshot",
-      "digest": "6bd55686b7469c46ee558ce137211e9e600ec1fa521cba76498ed2683af6c15a",
-      "bytes": 1065692,
+      "digest": "cb11d512643892c78398a9cbc3e6559dffa902121f61de74d6ad5a05cfec86a5",
+      "bytes": 1065691,
       "files": [
         {
           "path": "src/assets/service-business-platforms.jpg",
@@ -3404,8 +3404,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "ai-tools",
       "name": "AI 助手",
       "version": "0.0.0-source-snapshot",
-      "digest": "afb41cfaa7b856183027539fa81d35b74bf24693fd1176e31ab1dfa8b516c1f7",
-      "bytes": 17155,
+      "digest": "1b27f3fe8b0eeb6efd56839e88a5b74e283ca922e9582dc07a298d08060a1a29",
+      "bytes": 17152,
       "files": [
         {
           "path": "src/components/ai/AiToolByKey.tsx",
@@ -3572,8 +3572,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "dev-tools",
       "name": "开发工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "d11e889a39cd4c51013258ae4895e128d1d04116b16b8030ba134b3ce73ec351",
-      "bytes": 18528,
+      "digest": "58ffe608877028275bae605106ee6e5c5f81aceab78345feabe0b773cc53a877",
+      "bytes": 18530,
       "files": [
         {
           "path": "src/components/tools/DevTool.tsx",
@@ -3721,8 +3721,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "text-tools",
       "name": "文本工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "4c819874f9e4fe3cae22d8d54e633c0723e6306a0dfed54f8643a9df6480d888",
-      "bytes": 15658,
+      "digest": "2d87b062015fa2543c9e0181e074323f683c6347a4f914f8480947889e3f95ca",
+      "bytes": 15662,
       "files": [
         {
           "path": "src/components/tools/TextTool.tsx",
@@ -3869,8 +3869,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "image-tools",
       "name": "图片工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "559e7cc26ec891fb7f2d301d2b6e5b2ed8e8d3afbca54e1d5e474ee183c32ddc",
-      "bytes": 17961,
+      "digest": "f7dafb7264a29ed95a29b4bb6c6b350132b94373aedb4f2b8bb1654d9cc7c0b9",
+      "bytes": 17959,
       "files": [
         {
           "path": "src/components/tools/FileDrop.tsx",
@@ -4027,8 +4027,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "pdf-tools",
       "name": "PDF 工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "70f7b1bbb6ff7313ebc401c37c932ae331d690314cb7d568f91532ef45201ce7",
-      "bytes": 16224,
+      "digest": "62c8a1fcc39fd32be9b8008e49511c0c7af26194012810f879193ade6f905376",
+      "bytes": 16228,
       "files": [
         {
           "path": "src/components/tools/FileDrop.tsx",
@@ -4185,8 +4185,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "file-hash",
       "name": "文件哈希",
       "version": "0.0.0-source-snapshot",
-      "digest": "a6a2a700a31f5e928c3839ff1e9b4694b6f908f41d5ef5a7cdecec0ced8ef745",
-      "bytes": 12152,
+      "digest": "eb9dd1c6a1d636bd28d3fb75907e1cf165a5441b0edbf564588b36cad0fe00f0",
+      "bytes": 12147,
       "files": [
         {
           "path": "src/components/tools/FileHashTool.tsx",
@@ -4312,8 +4312,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "network-tools",
       "name": "网络工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "9b5c67e112d82af84e014a646e69850890287bea638851f6ea7391019b054b0b",
-      "bytes": 19658,
+      "digest": "9a3d779b49479aec57f461f103e443484423133829569b34393273f5f2667993",
+      "bytes": 19659,
       "files": [
         {
           "path": "src/components/tools/LookupTool.tsx",
@@ -4456,8 +4456,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "lookup-tools",
       "name": "查询工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "9633c48015bda5b16383b8f235c7a5eb58cf2e4f68908ac826752940459447f1",
-      "bytes": 11144,
+      "digest": "fe31c1f77ce4f10180fce7dcb05b3bdfc31eb4a86d17dbced866299f397f7a0a",
+      "bytes": 11142,
       "files": [
         {
           "path": "src/components/tools/LookupTool.tsx",
@@ -4570,8 +4570,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "time-tools",
       "name": "时间工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "f30f1f8a469a5aadd02d3de52b9fd10a8b2fb168f43c78637f8156e8af1c330a",
-      "bytes": 14975,
+      "digest": "9d6ecbd921ea97033f9b4e6b8f0b01d7c35c72aae6bcc20d1a66861677a78030",
+      "bytes": 14973,
       "files": [
         {
           "path": "src/components/tools/TimeTool.tsx",
@@ -4690,8 +4690,8 @@ export const exportSnapshot: ExportSnapshot = {
       "id": "simple-tools",
       "name": "通用实用工具",
       "version": "0.0.0-source-snapshot",
-      "digest": "4d33ea053236b671a589470296fb2826041c73e16311c34be8abb52190fc2046",
-      "bytes": 16116,
+      "digest": "f268d482efd610c6b162d4c01c2f50b7b5059bb4a14d5065469369dc521648ac",
+      "bytes": 16119,
       "files": [
         {
           "path": "src/components/tools/SimpleTool.tsx",
