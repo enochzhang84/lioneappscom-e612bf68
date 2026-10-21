@@ -39,10 +39,24 @@ import {
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { EmojiPicker } from "@/components/admin/EmojiPicker";
+import { ModuleManager } from "@/components/admin/ModuleManager";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/admin/tools/")({
-  component: ToolsAdmin,
+  head: () => ({ meta: [
+    { title: "工具与模块管理 — Lione Apps Admin" },
+    { name: "description", content: "Lione Apps 工具管理及模块依赖审查、提取预览。" },
+    { property: "og:title", content: "工具与模块管理 — Lione Apps Admin" },
+    { property: "og:description", content: "Lione Apps 管理员工具及模块审查中心。" },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+  component: ToolsAdminPage,
 });
+
+function ToolsAdminPage() {
+  return <Tabs defaultValue="tools"><div className="px-6 py-3 border-b border-border"><TabsList><TabsTrigger value="tools">工具管理</TabsTrigger><TabsTrigger value="modules">模块管理</TabsTrigger></TabsList></div><TabsContent value="tools" forceMount className="mt-0 data-[state=inactive]:hidden"><ToolsAdmin /></TabsContent><TabsContent value="modules" className="mt-0"><ModuleManager /></TabsContent></Tabs>;
+}
 
 type ToolStatus = "developing" | "live" | "paused" | "hidden";
 
