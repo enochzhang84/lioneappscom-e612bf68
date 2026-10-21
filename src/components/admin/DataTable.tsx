@@ -26,6 +26,7 @@ export type BatchAction<T> = {
   onRun: (rows: T[]) => Promise<void> | void;
   variant?: "default" | "outline" | "destructive";
   confirm?: string;
+  clearSelectionOnRun?: boolean;
 };
 
 type Props<T> = {
@@ -39,6 +40,7 @@ type Props<T> = {
   emptyText?: string;
   loading?: boolean;
   onRowClick?: (row: T) => void;
+  selectionControls?: boolean;
 };
 
 export function DataTable<T>({
@@ -52,6 +54,7 @@ export function DataTable<T>({
   emptyText = "暂无数据",
   loading,
   onRowClick,
+  selectionControls = false,
 }: Props<T>) {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -71,8 +74,8 @@ export function DataTable<T>({
     if (!col?.sortValue) return filtered;
     const copy = [...filtered];
     copy.sort((a, b) => {
-      const va = col.sortValue!(a);
-      const vb = col.sortValue!(b);
+      const va = col.sortValue?.(a);
+      const vb = col.sortValue?.(b);
       if (va == null && vb == null) return 0;
       if (va == null) return 1;
       if (vb == null) return -1;
@@ -87,7 +90,7 @@ export function DataTable<T>({
   const currentPage = Math.min(page, totalPages);
   const paged = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const selectedRows = sorted.filter((r) => selected[rowKey(r)]);
+  const selectedRows = (selectionControls ? rows : sorted).filter((r) => selected[rowKey(r)]);
   const allOnPageSelected = paged.length > 0 && paged.every((r) => selected[rowKey(r)]);
 
   function toggleSort(key: string) {
@@ -132,6 +135,7 @@ export function DataTable<T>({
           </div>
         )}
 
+        {selectionControls && batchActions && <div className="flex flex-wrap gap-2"><Button size="sm" variant="outline" disabled={loading || !rows.length} onClick={() => setSelected(Object.fromEntries(rows.map(r => [rowKey(r),true])))}>全选</Button><Button size="sm" variant="ghost" disabled={!selectedRows.length} onClick={() => setSelected({})}>取消选择</Button></div>}
         {selectedRows.length > 0 && batchActions && batchActions.length > 0 && (
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-xs text-slate-500">已选 {selectedRows.length} 项</span>
@@ -143,7 +147,7 @@ export function DataTable<T>({
                 onClick={async () => {
                   if (a.confirm && !window.confirm(a.confirm)) return;
                   await a.onRun(selectedRows);
-                  setSelected({});
+                  if (a.clearSelectionOnRun !== false) setSelected({});
                 }}
               >
                 {a.label}

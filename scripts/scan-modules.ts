@@ -29,7 +29,7 @@ function list(path: string): string[] {
   return readdirSync(path, { withFileTypes: true }).flatMap(e => e.isDirectory() ? list(`${path}/${e.name}`) : [`${path}/${e.name}`]);
 }
 const all = list('src');
-const sourceFiles = all.filter(p => /\.(tsx?|jsx?|css)$/.test(p));
+const sourceFiles = all.filter(p => /\.(tsx?|jsx?|css)$/.test(p) && !/module-(inventory|export-snapshot|export-payloads)\.server\./.test(p));
 const refs = new Map(sourceFiles.map(p => [p, sourceReferences(readFileSync(p,'utf8'))]));
 const pkg = JSON.parse(readFileSync('package.json','utf8'));
 function resolve(file: string, spec: string) {

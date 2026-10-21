@@ -1,7 +1,7 @@
 // Generated offline by scripts/scan-modules.ts. Metadata only; no source, secrets or database rows.
 import type { ModuleInventory } from './module-manager.types';
 export const moduleInventory: ModuleInventory = {
-  "generatedAt": "2026-10-21T18:42:31.991Z",
+  "generatedAt": "2026-10-21T18:50:17.836Z",
   "method": "离线源文件静态清单 · 字面量 import / from / rpc 分析",
   "stack": [
     {
