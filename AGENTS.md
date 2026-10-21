@@ -3,3 +3,4 @@
 - Generate module metadata offline from source imports with `bun scripts/scan-modules.ts`; serve only the generated metadata through an authenticated admin server function, because the deployed Worker cannot scan a filesystem and source code must never reach the browser.
 - V1 module manifests are review candidates, not portable package guarantees; unknown module versions and runtime/data dependencies must stay explicit.
 - Prebuild source ZIP payloads offline into server-only modules; authenticated admin functions return metadata for review and archive bytes only after digest-bound confirmation, because source must never be publicly served or scanned in the deployed runtime.
+- After changing exportable source, run `bun run modules:prepare` to update both inventory and source snapshots; exclude generated archives from the scanner to avoid recursive inventory growth.

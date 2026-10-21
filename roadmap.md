@@ -5,6 +5,6 @@
 - [x] Verify authenticated preview, multi-selection and dependency previews; report limitations.
 
 # Module Manager V1.1
-- [ ] Build offline real-source ZIPs with sensitive-file exclusions, dependency prechecks and checksums.
-- [ ] Add admin-only preview and confirmed download, selection controls and status handling.
-- [ ] Verify real downloads, archive contents/checksums and unauthorized rejection; preserve Tools.
+- [x] Build offline real-source ZIPs with sensitive-file exclusions, dependency prechecks and checksums.
+- [x] Add admin-only preview and confirmed download, selection controls and status handling.
+- [x] Verify real downloads, archive contents/checksums and unauthorized rejection; preserve Tools.
