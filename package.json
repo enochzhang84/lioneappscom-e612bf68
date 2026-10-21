@@ -4,6 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "modules:prepare": "bun scripts/scan-modules.ts && bun scripts/build-module-exports.ts",
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
