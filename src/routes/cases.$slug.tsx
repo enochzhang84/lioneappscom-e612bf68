@@ -28,7 +28,7 @@ export const Route = createFileRoute("/cases/$slug")({
     };
   },
   notFoundComponent: () => <SiteLayout><PageHero title="未找到该案例" /></SiteLayout>,
-  errorComponent: ({ error }) => <SiteLayout><PageHero title="加载失败" desc={error.message} /></SiteLayout>,
+  errorComponent: ({ error }) => <SiteLayout><PageHero title="加载失败" desc={error instanceof Error ? error.message : String(error)} /></SiteLayout>,
   component: CaseDetail,
 });
 
