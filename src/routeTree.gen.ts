@@ -9,131 +9,85 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UpdatePasswordRouteImport } from './routes/update-password'
-import { Route as ToolsRouteImport } from './routes/tools'
-import { Route as SuccessRouteImport } from './routes/success'
-import { Route as ServicesRouteImport } from './routes/services'
-import { Route as ProcessRouteImport } from './routes/process'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as ErrorRouteImport } from './routes/error'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CasesRouteImport } from './routes/cases'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AiRouteImport } from './routes/ai'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ToolsIndexRouteImport } from './routes/tools.index'
-import { Route as BlogIndexRouteImport } from './routes/blog.index'
-import { Route as ToolsSolutionBuilderRouteImport } from './routes/tools.solution-builder'
-import { Route as ToolsPhotoWallRouteImport } from './routes/tools.photo-wall'
-import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
-import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AiRouteImport } from './routes/ai'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CasesRouteImport } from './routes/cases'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ErrorRouteImport } from './routes/error'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as ProcessRouteImport } from './routes/process'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SuccessRouteImport } from './routes/success'
+import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as ToolsSolutionBuilderIndexRouteImport } from './routes/tools.solution-builder.index'
-import { Route as ToolsPhotoWallIndexRouteImport } from './routes/tools.photo-wall.index'
-import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as CasesSlugRouteImport } from './routes/cases.$slug'
+import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
+import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsPhotoWallRouteImport } from './routes/tools.photo-wall'
+import { Route as ToolsSolutionBuilderRouteImport } from './routes/tools.solution-builder'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as ToolsSolutionBuilderPcRouteImport } from './routes/tools.solution-builder.pc'
-import { Route as ToolsSolutionBuilderNasRouteImport } from './routes/tools.solution-builder.nas'
-import { Route as ToolsSolutionBuilderHomeNetworkRouteImport } from './routes/tools.solution-builder.home-network'
-import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/tools.solution-builder.full-solution'
-import { Route as ToolsPhotoWallIdRouteImport } from './routes/tools.photo-wall.$id'
-import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
-import { Route as DmvC1QuestionBankRouteImport } from './routes/dmv.c1.question-bank'
-import { Route as DisplayPhotoWallPreviewIdRouteImport } from './routes/display.photo-wall-preview.$id'
-import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
-import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
-import { Route as AuthenticatedAdminSolutionBuilderRouteImport } from './routes/_authenticated/admin.solution-builder'
-import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
-import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
-import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authenticated/admin.quiz'
-import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
-import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
-import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
-import { Route as AuthenticatedAdminNavigationRouteImport } from './routes/_authenticated/admin.navigation'
-import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authenticated/admin.logs'
-import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
-import { Route as AuthenticatedAdminExamsRouteImport } from './routes/_authenticated/admin.exams'
-import { Route as AuthenticatedAdminCasesRouteImport } from './routes/_authenticated/admin.cases'
-import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAdminAiRouteImport } from './routes/_authenticated/admin.ai'
-import { Route as AuthenticatedAdminToolsIndexRouteImport } from './routes/_authenticated/admin.tools.index'
-import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin.settings.index'
-import { Route as AuthenticatedAdminQuizIndexRouteImport } from './routes/_authenticated/admin.quiz.index'
-import { Route as AuthenticatedAdminProductsIndexRouteImport } from './routes/_authenticated/admin.products.index'
-import { Route as AuthenticatedAdminPagesIndexRouteImport } from './routes/_authenticated/admin.pages.index'
-import { Route as AuthenticatedAdminExamsIndexRouteImport } from './routes/_authenticated/admin.exams.index'
-import { Route as AuthenticatedAdminCasesIndexRouteImport } from './routes/_authenticated/admin.cases.index'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
+import { Route as AuthenticatedAdminCasesRouteImport } from './routes/_authenticated/admin.cases'
+import { Route as AuthenticatedAdminExamsRouteImport } from './routes/_authenticated/admin.exams'
+import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
+import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authenticated/admin.logs'
+import { Route as AuthenticatedAdminNavigationRouteImport } from './routes/_authenticated/admin.navigation'
+import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
+import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
+import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
+import { Route as AuthenticatedAdminQuizRouteImport } from './routes/_authenticated/admin.quiz'
+import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
+import { Route as AuthenticatedAdminSolutionBuilderRouteImport } from './routes/_authenticated/admin.solution-builder'
+import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as DisplayPhotoWallPreviewIdRouteImport } from './routes/display.photo-wall-preview.$id'
+import { Route as DmvC1QuestionBankRouteImport } from './routes/dmv.c1.question-bank'
+import { Route as PSlugIndexRouteImport } from './routes/p.$slug.index'
+import { Route as PDriveC1RouteImport } from './routes/p.drive.c1'
+import { Route as ToolsPhotoWallIndexRouteImport } from './routes/tools.photo-wall.index'
+import { Route as ToolsPhotoWallIdRouteImport } from './routes/tools.photo-wall.$id'
+import { Route as ToolsSolutionBuilderIndexRouteImport } from './routes/tools.solution-builder.index'
+import { Route as ToolsSolutionBuilderFullSolutionRouteImport } from './routes/tools.solution-builder.full-solution'
+import { Route as ToolsSolutionBuilderHomeNetworkRouteImport } from './routes/tools.solution-builder.home-network'
+import { Route as ToolsSolutionBuilderNasRouteImport } from './routes/tools.solution-builder.nas'
+import { Route as ToolsSolutionBuilderPcRouteImport } from './routes/tools.solution-builder.pc'
 import { Route as AuthenticatedAdminBlogIndexRouteImport } from './routes/_authenticated/admin.blog.index'
-import { Route as ToolsSolutionBuilderSTokenRouteImport } from './routes/tools.solution-builder.s.$token'
-import { Route as PSlugIItemSlugRouteImport } from './routes/p.$slug.i.$itemSlug'
-import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
-import { Route as AuthenticatedAdminQuizIdRouteImport } from './routes/_authenticated/admin.quiz.$id'
-import { Route as AuthenticatedAdminProductsIdRouteImport } from './routes/_authenticated/admin.products.$id'
-import { Route as AuthenticatedAdminPlatformSettingsRouteImport } from './routes/_authenticated/admin.platform.settings'
-import { Route as AuthenticatedAdminPlatformPluginsRouteImport } from './routes/_authenticated/admin.platform.plugins'
-import { Route as AuthenticatedAdminPlatformModulesRouteImport } from './routes/_authenticated/admin.platform.modules'
-import { Route as AuthenticatedAdminPagesIdRouteImport } from './routes/_authenticated/admin.pages.$id'
-import { Route as AuthenticatedAdminExamsIdRouteImport } from './routes/_authenticated/admin.exams.$id'
-import { Route as AuthenticatedAdminCasesIdRouteImport } from './routes/_authenticated/admin.cases.$id'
-import { Route as AuthenticatedAdminBlogCategoriesRouteImport } from './routes/_authenticated/admin.blog.categories'
 import { Route as AuthenticatedAdminBlogIdRouteImport } from './routes/_authenticated/admin.blog.$id'
+import { Route as AuthenticatedAdminBlogCategoriesRouteImport } from './routes/_authenticated/admin.blog.categories'
+import { Route as AuthenticatedAdminCasesIndexRouteImport } from './routes/_authenticated/admin.cases.index'
+import { Route as AuthenticatedAdminCasesIdRouteImport } from './routes/_authenticated/admin.cases.$id'
+import { Route as AuthenticatedAdminExamsIndexRouteImport } from './routes/_authenticated/admin.exams.index'
+import { Route as AuthenticatedAdminExamsIdRouteImport } from './routes/_authenticated/admin.exams.$id'
+import { Route as AuthenticatedAdminPagesIndexRouteImport } from './routes/_authenticated/admin.pages.index'
+import { Route as AuthenticatedAdminPagesIdRouteImport } from './routes/_authenticated/admin.pages.$id'
+import { Route as AuthenticatedAdminPlatformModulesRouteImport } from './routes/_authenticated/admin.platform.modules'
+import { Route as AuthenticatedAdminPlatformPluginsRouteImport } from './routes/_authenticated/admin.platform.plugins'
+import { Route as AuthenticatedAdminPlatformSettingsRouteImport } from './routes/_authenticated/admin.platform.settings'
+import { Route as AuthenticatedAdminProductsIndexRouteImport } from './routes/_authenticated/admin.products.index'
+import { Route as AuthenticatedAdminProductsIdRouteImport } from './routes/_authenticated/admin.products.$id'
+import { Route as AuthenticatedAdminQuizIndexRouteImport } from './routes/_authenticated/admin.quiz.index'
+import { Route as AuthenticatedAdminQuizIdRouteImport } from './routes/_authenticated/admin.quiz.$id'
+import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin.settings.index'
+import { Route as AuthenticatedAdminToolsIndexRouteImport } from './routes/_authenticated/admin.tools.index'
+import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
+import { Route as PSlugIItemSlugRouteImport } from './routes/p.$slug.i.$itemSlug'
+import { Route as ToolsSolutionBuilderSTokenRouteImport } from './routes/tools.solution-builder.s.$token'
 
-const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
-  id: '/update-password',
-  path: '/update-password',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ToolsRoute = ToolsRouteImport.update({
-  id: '/tools',
-  path: '/tools',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SuccessRoute = SuccessRouteImport.update({
-  id: '/success',
-  path: '/success',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ServicesRoute = ServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProcessRoute = ProcessRouteImport.update({
-  id: '/process',
-  path: '/process',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ErrorRoute = ErrorRouteImport.update({
-  id: '/error',
-  path: '/error',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CasesRoute = CasesRouteImport.update({
-  id: '/cases',
-  path: '/cases',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiRoute = AiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -141,48 +95,59 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const AiRoute = AiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ToolsIndexRoute = ToolsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ToolsRoute,
-} as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/blog/',
-  path: '/blog/',
+const CasesRoute = CasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ToolsSolutionBuilderRoute = ToolsSolutionBuilderRouteImport.update({
-  id: '/solution-builder',
-  path: '/solution-builder',
-  getParentRoute: () => ToolsRoute,
-} as any)
-const ToolsPhotoWallRoute = ToolsPhotoWallRouteImport.update({
-  id: '/photo-wall',
-  path: '/photo-wall',
-  getParentRoute: () => ToolsRoute,
-} as any)
-const ProductsSlugRoute = ProductsSlugRouteImport.update({
-  id: '/products/$slug',
-  path: '/products/$slug',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CasesSlugRoute = CasesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CasesRoute,
+const ErrorRoute = ErrorRouteImport.update({
+  id: '/error',
+  path: '/error',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/blog/$slug',
-  path: '/blog/$slug',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessRoute = ProcessRouteImport.update({
+  id: '/process',
+  path: '/process',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuccessRoute = SuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
+  id: '/update-password',
+  path: '/update-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -190,143 +155,49 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const ToolsSolutionBuilderIndexRoute =
-  ToolsSolutionBuilderIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => ToolsSolutionBuilderRoute,
-  } as any)
-const ToolsPhotoWallIndexRoute = ToolsPhotoWallIndexRouteImport.update({
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasesSlugRoute = CasesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CasesRoute,
+} as any)
+const ProductsSlugRoute = ProductsSlugRouteImport.update({
+  id: '/products/$slug',
+  path: '/products/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ToolsPhotoWallRoute,
+  getParentRoute: () => ToolsRoute,
 } as any)
-const PSlugIndexRoute = PSlugIndexRouteImport.update({
-  id: '/p/$slug/',
-  path: '/p/$slug/',
-  getParentRoute: () => rootRouteImport,
+const ToolsPhotoWallRoute = ToolsPhotoWallRouteImport.update({
+  id: '/photo-wall',
+  path: '/photo-wall',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsSolutionBuilderRoute = ToolsSolutionBuilderRouteImport.update({
+  id: '/solution-builder',
+  path: '/solution-builder',
+  getParentRoute: () => ToolsRoute,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
-const ToolsSolutionBuilderPcRoute = ToolsSolutionBuilderPcRouteImport.update({
-  id: '/pc',
-  path: '/pc',
-  getParentRoute: () => ToolsSolutionBuilderRoute,
-} as any)
-const ToolsSolutionBuilderNasRoute = ToolsSolutionBuilderNasRouteImport.update({
-  id: '/nas',
-  path: '/nas',
-  getParentRoute: () => ToolsSolutionBuilderRoute,
-} as any)
-const ToolsSolutionBuilderHomeNetworkRoute =
-  ToolsSolutionBuilderHomeNetworkRouteImport.update({
-    id: '/home-network',
-    path: '/home-network',
-    getParentRoute: () => ToolsSolutionBuilderRoute,
-  } as any)
-const ToolsSolutionBuilderFullSolutionRoute =
-  ToolsSolutionBuilderFullSolutionRouteImport.update({
-    id: '/full-solution',
-    path: '/full-solution',
-    getParentRoute: () => ToolsSolutionBuilderRoute,
-  } as any)
-const ToolsPhotoWallIdRoute = ToolsPhotoWallIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ToolsPhotoWallRoute,
-} as any)
-const PDriveC1Route = PDriveC1RouteImport.update({
-  id: '/p/drive/c1',
-  path: '/p/drive/c1',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DmvC1QuestionBankRoute = DmvC1QuestionBankRouteImport.update({
-  id: '/dmv/c1/question-bank',
-  path: '/dmv/c1/question-bank',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DisplayPhotoWallPreviewIdRoute =
-  DisplayPhotoWallPreviewIdRouteImport.update({
-    id: '/display/photo-wall-preview/$id',
-    path: '/display/photo-wall-preview/$id',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
-  id: '/tools',
-  path: '/tools',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminSolutionBuilderRoute =
-  AuthenticatedAdminSolutionBuilderRouteImport.update({
-    id: '/solution-builder',
-    path: '/solution-builder',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminSettingsRoute =
-  AuthenticatedAdminSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminSeoRoute = AuthenticatedAdminSeoRouteImport.update({
-  id: '/seo',
-  path: '/seo',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminQuizRoute = AuthenticatedAdminQuizRouteImport.update({
-  id: '/quiz',
-  path: '/quiz',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminProductsRoute =
-  AuthenticatedAdminProductsRouteImport.update({
-    id: '/products',
-    path: '/products',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminPagesRoute = AuthenticatedAdminPagesRouteImport.update({
-  id: '/pages',
-  path: '/pages',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminNotificationsRoute =
-  AuthenticatedAdminNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminNavigationRoute =
-  AuthenticatedAdminNavigationRouteImport.update({
-    id: '/navigation',
-    path: '/navigation',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminLogsRoute = AuthenticatedAdminLogsRouteImport.update({
-  id: '/logs',
-  path: '/logs',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminFilesRoute = AuthenticatedAdminFilesRouteImport.update({
-  id: '/files',
-  path: '/files',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminExamsRoute = AuthenticatedAdminExamsRouteImport.update({
-  id: '/exams',
-  path: '/exams',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminCasesRoute = AuthenticatedAdminCasesRouteImport.update({
-  id: '/cases',
-  path: '/cases',
+const AuthenticatedAdminAiRoute = AuthenticatedAdminAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const AuthenticatedAdminAnalyticsRoute =
@@ -335,46 +206,157 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminAiRoute = AuthenticatedAdminAiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
+const AuthenticatedAdminCasesRoute = AuthenticatedAdminCasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
-const AuthenticatedAdminToolsIndexRoute =
-  AuthenticatedAdminToolsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedAdminToolsRoute,
+const AuthenticatedAdminExamsRoute = AuthenticatedAdminExamsRouteImport.update({
+  id: '/exams',
+  path: '/exams',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminFilesRoute = AuthenticatedAdminFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminLogsRoute = AuthenticatedAdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminNavigationRoute =
+  AuthenticatedAdminNavigationRouteImport.update({
+    id: '/navigation',
+    path: '/navigation',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminSettingsIndexRoute =
-  AuthenticatedAdminSettingsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedAdminSettingsRoute,
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminQuizIndexRoute =
-  AuthenticatedAdminQuizIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedAdminQuizRoute,
+const AuthenticatedAdminPagesRoute = AuthenticatedAdminPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminProductsRoute =
+  AuthenticatedAdminProductsRouteImport.update({
+    id: '/products',
+    path: '/products',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminProductsIndexRoute =
-  AuthenticatedAdminProductsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedAdminProductsRoute,
+const AuthenticatedAdminQuizRoute = AuthenticatedAdminQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminSeoRoute = AuthenticatedAdminSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminPagesIndexRoute =
-  AuthenticatedAdminPagesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedAdminPagesRoute,
+const AuthenticatedAdminSolutionBuilderRoute =
+  AuthenticatedAdminSolutionBuilderRouteImport.update({
+    id: '/solution-builder',
+    path: '/solution-builder',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminExamsIndexRoute =
-  AuthenticatedAdminExamsIndexRouteImport.update({
+const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const DisplayPhotoWallPreviewIdRoute =
+  DisplayPhotoWallPreviewIdRouteImport.update({
+    id: '/display/photo-wall-preview/$id',
+    path: '/display/photo-wall-preview/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DmvC1QuestionBankRoute = DmvC1QuestionBankRouteImport.update({
+  id: '/dmv/c1/question-bank',
+  path: '/dmv/c1/question-bank',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PSlugIndexRoute = PSlugIndexRouteImport.update({
+  id: '/p/$slug/',
+  path: '/p/$slug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PDriveC1Route = PDriveC1RouteImport.update({
+  id: '/p/drive/c1',
+  path: '/p/drive/c1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsPhotoWallIndexRoute = ToolsPhotoWallIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsPhotoWallRoute,
+} as any)
+const ToolsPhotoWallIdRoute = ToolsPhotoWallIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ToolsPhotoWallRoute,
+} as any)
+const ToolsSolutionBuilderIndexRoute =
+  ToolsSolutionBuilderIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedAdminExamsRoute,
+    getParentRoute: () => ToolsSolutionBuilderRoute,
+  } as any)
+const ToolsSolutionBuilderFullSolutionRoute =
+  ToolsSolutionBuilderFullSolutionRouteImport.update({
+    id: '/full-solution',
+    path: '/full-solution',
+    getParentRoute: () => ToolsSolutionBuilderRoute,
+  } as any)
+const ToolsSolutionBuilderHomeNetworkRoute =
+  ToolsSolutionBuilderHomeNetworkRouteImport.update({
+    id: '/home-network',
+    path: '/home-network',
+    getParentRoute: () => ToolsSolutionBuilderRoute,
+  } as any)
+const ToolsSolutionBuilderNasRoute = ToolsSolutionBuilderNasRouteImport.update({
+  id: '/nas',
+  path: '/nas',
+  getParentRoute: () => ToolsSolutionBuilderRoute,
+} as any)
+const ToolsSolutionBuilderPcRoute = ToolsSolutionBuilderPcRouteImport.update({
+  id: '/pc',
+  path: '/pc',
+  getParentRoute: () => ToolsSolutionBuilderRoute,
+} as any)
+const AuthenticatedAdminBlogIndexRoute =
+  AuthenticatedAdminBlogIndexRouteImport.update({
+    id: '/blog/',
+    path: '/blog/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBlogIdRoute =
+  AuthenticatedAdminBlogIdRouteImport.update({
+    id: '/blog/$id',
+    path: '/blog/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBlogCategoriesRoute =
+  AuthenticatedAdminBlogCategoriesRouteImport.update({
+    id: '/blog/categories',
+    path: '/blog/categories',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminCasesIndexRoute =
   AuthenticatedAdminCasesIndexRouteImport.update({
@@ -382,44 +364,40 @@ const AuthenticatedAdminCasesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminCasesRoute,
   } as any)
-const AuthenticatedAdminBlogIndexRoute =
-  AuthenticatedAdminBlogIndexRouteImport.update({
-    id: '/blog/',
-    path: '/blog/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const ToolsSolutionBuilderSTokenRoute =
-  ToolsSolutionBuilderSTokenRouteImport.update({
-    id: '/s/$token',
-    path: '/s/$token',
-    getParentRoute: () => ToolsSolutionBuilderRoute,
-  } as any)
-const PSlugIItemSlugRoute = PSlugIItemSlugRouteImport.update({
-  id: '/p/$slug/i/$itemSlug',
-  path: '/p/$slug/i/$itemSlug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
-  id: '/api/public/media/$',
-  path: '/api/public/media/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAdminQuizIdRoute =
-  AuthenticatedAdminQuizIdRouteImport.update({
+const AuthenticatedAdminCasesIdRoute =
+  AuthenticatedAdminCasesIdRouteImport.update({
     id: '/$id',
     path: '/$id',
-    getParentRoute: () => AuthenticatedAdminQuizRoute,
+    getParentRoute: () => AuthenticatedAdminCasesRoute,
   } as any)
-const AuthenticatedAdminProductsIdRoute =
-  AuthenticatedAdminProductsIdRouteImport.update({
+const AuthenticatedAdminExamsIndexRoute =
+  AuthenticatedAdminExamsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminExamsRoute,
+  } as any)
+const AuthenticatedAdminExamsIdRoute =
+  AuthenticatedAdminExamsIdRouteImport.update({
     id: '/$id',
     path: '/$id',
-    getParentRoute: () => AuthenticatedAdminProductsRoute,
+    getParentRoute: () => AuthenticatedAdminExamsRoute,
   } as any)
-const AuthenticatedAdminPlatformSettingsRoute =
-  AuthenticatedAdminPlatformSettingsRouteImport.update({
-    id: '/platform/settings',
-    path: '/platform/settings',
+const AuthenticatedAdminPagesIndexRoute =
+  AuthenticatedAdminPagesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminPagesRoute,
+  } as any)
+const AuthenticatedAdminPagesIdRoute =
+  AuthenticatedAdminPagesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminPagesRoute,
+  } as any)
+const AuthenticatedAdminPlatformModulesRoute =
+  AuthenticatedAdminPlatformModulesRouteImport.update({
+    id: '/platform/modules',
+    path: '/platform/modules',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminPlatformPluginsRoute =
@@ -428,41 +406,63 @@ const AuthenticatedAdminPlatformPluginsRoute =
     path: '/platform/plugins',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminPlatformModulesRoute =
-  AuthenticatedAdminPlatformModulesRouteImport.update({
-    id: '/platform/modules',
-    path: '/platform/modules',
+const AuthenticatedAdminPlatformSettingsRoute =
+  AuthenticatedAdminPlatformSettingsRouteImport.update({
+    id: '/platform/settings',
+    path: '/platform/settings',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminPagesIdRoute =
-  AuthenticatedAdminPagesIdRouteImport.update({
+const AuthenticatedAdminProductsIndexRoute =
+  AuthenticatedAdminProductsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminProductsRoute,
+  } as any)
+const AuthenticatedAdminProductsIdRoute =
+  AuthenticatedAdminProductsIdRouteImport.update({
     id: '/$id',
     path: '/$id',
-    getParentRoute: () => AuthenticatedAdminPagesRoute,
+    getParentRoute: () => AuthenticatedAdminProductsRoute,
   } as any)
-const AuthenticatedAdminExamsIdRoute =
-  AuthenticatedAdminExamsIdRouteImport.update({
+const AuthenticatedAdminQuizIndexRoute =
+  AuthenticatedAdminQuizIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminQuizRoute,
+  } as any)
+const AuthenticatedAdminQuizIdRoute =
+  AuthenticatedAdminQuizIdRouteImport.update({
     id: '/$id',
     path: '/$id',
-    getParentRoute: () => AuthenticatedAdminExamsRoute,
+    getParentRoute: () => AuthenticatedAdminQuizRoute,
   } as any)
-const AuthenticatedAdminCasesIdRoute =
-  AuthenticatedAdminCasesIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedAdminCasesRoute,
+const AuthenticatedAdminSettingsIndexRoute =
+  AuthenticatedAdminSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminSettingsRoute,
   } as any)
-const AuthenticatedAdminBlogCategoriesRoute =
-  AuthenticatedAdminBlogCategoriesRouteImport.update({
-    id: '/blog/categories',
-    path: '/blog/categories',
-    getParentRoute: () => AuthenticatedAdminRoute,
+const AuthenticatedAdminToolsIndexRoute =
+  AuthenticatedAdminToolsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminToolsRoute,
   } as any)
-const AuthenticatedAdminBlogIdRoute =
-  AuthenticatedAdminBlogIdRouteImport.update({
-    id: '/blog/$id',
-    path: '/blog/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
+const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
+  id: '/api/public/media/$',
+  path: '/api/public/media/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PSlugIItemSlugRoute = PSlugIItemSlugRouteImport.update({
+  id: '/p/$slug/i/$itemSlug',
+  path: '/p/$slug/i/$itemSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsSolutionBuilderSTokenRoute =
+  ToolsSolutionBuilderSTokenRouteImport.update({
+    id: '/s/$token',
+    path: '/s/$token',
+    getParentRoute: () => ToolsSolutionBuilderRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -909,88 +909,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/update-password': {
-      id: '/update-password'
-      path: '/update-password'
-      fullPath: '/update-password'
-      preLoaderRoute: typeof UpdatePasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tools': {
-      id: '/tools'
-      path: '/tools'
-      fullPath: '/tools'
-      preLoaderRoute: typeof ToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/success': {
-      id: '/success'
-      path: '/success'
-      fullPath: '/success'
-      preLoaderRoute: typeof SuccessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/services': {
-      id: '/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof ServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/process': {
-      id: '/process'
-      path: '/process'
-      fullPath: '/process'
-      preLoaderRoute: typeof ProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/error': {
-      id: '/error'
-      path: '/error'
-      fullPath: '/error'
-      preLoaderRoute: typeof ErrorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cases': {
-      id: '/cases'
-      path: '/cases'
-      fullPath: '/cases'
-      preLoaderRoute: typeof CasesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai': {
-      id: '/ai'
-      path: '/ai'
-      fullPath: '/ai'
-      preLoaderRoute: typeof AiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1000,60 +923,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tools/': {
-      id: '/tools/'
-      path: '/'
-      fullPath: '/tools/'
-      preLoaderRoute: typeof ToolsIndexRouteImport
-      parentRoute: typeof ToolsRoute
-    }
-    '/blog/': {
-      id: '/blog/'
-      path: '/blog'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexRouteImport
+    '/ai': {
+      id: '/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AiRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tools/solution-builder': {
-      id: '/tools/solution-builder'
-      path: '/solution-builder'
-      fullPath: '/tools/solution-builder'
-      preLoaderRoute: typeof ToolsSolutionBuilderRouteImport
-      parentRoute: typeof ToolsRoute
-    }
-    '/tools/photo-wall': {
-      id: '/tools/photo-wall'
-      path: '/photo-wall'
-      fullPath: '/tools/photo-wall'
-      preLoaderRoute: typeof ToolsPhotoWallRouteImport
-      parentRoute: typeof ToolsRoute
-    }
-    '/products/$slug': {
-      id: '/products/$slug'
-      path: '/products/$slug'
-      fullPath: '/products/$slug'
-      preLoaderRoute: typeof ProductsSlugRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cases/$slug': {
-      id: '/cases/$slug'
-      path: '/$slug'
-      fullPath: '/cases/$slug'
-      preLoaderRoute: typeof CasesSlugRouteImport
-      parentRoute: typeof CasesRoute
+    '/cases': {
+      id: '/cases'
+      path: '/cases'
+      fullPath: '/cases'
+      preLoaderRoute: typeof CasesRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/blog/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/error': {
+      id: '/error'
+      path: '/error'
+      fullPath: '/error'
+      preLoaderRoute: typeof ErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/process': {
+      id: '/process'
+      path: '/process'
+      fullPath: '/process'
+      preLoaderRoute: typeof ProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/success': {
+      id: '/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/update-password': {
+      id: '/update-password'
+      path: '/update-password'
+      fullPath: '/update-password'
+      preLoaderRoute: typeof UpdatePasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -1063,193 +1014,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/tools/solution-builder/': {
-      id: '/tools/solution-builder/'
-      path: '/'
-      fullPath: '/tools/solution-builder/'
-      preLoaderRoute: typeof ToolsSolutionBuilderIndexRouteImport
-      parentRoute: typeof ToolsSolutionBuilderRoute
-    }
-    '/tools/photo-wall/': {
-      id: '/tools/photo-wall/'
-      path: '/'
-      fullPath: '/tools/photo-wall/'
-      preLoaderRoute: typeof ToolsPhotoWallIndexRouteImport
-      parentRoute: typeof ToolsPhotoWallRoute
-    }
-    '/p/$slug/': {
-      id: '/p/$slug/'
-      path: '/p/$slug'
-      fullPath: '/p/$slug/'
-      preLoaderRoute: typeof PSlugIndexRouteImport
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cases/$slug': {
+      id: '/cases/$slug'
+      path: '/$slug'
+      fullPath: '/cases/$slug'
+      preLoaderRoute: typeof CasesSlugRouteImport
+      parentRoute: typeof CasesRoute
+    }
+    '/products/$slug': {
+      id: '/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/products/$slug'
+      preLoaderRoute: typeof ProductsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/': {
+      id: '/tools/'
+      path: '/'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/photo-wall': {
+      id: '/tools/photo-wall'
+      path: '/photo-wall'
+      fullPath: '/tools/photo-wall'
+      preLoaderRoute: typeof ToolsPhotoWallRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/solution-builder': {
+      id: '/tools/solution-builder'
+      path: '/solution-builder'
+      fullPath: '/tools/solution-builder'
+      preLoaderRoute: typeof ToolsSolutionBuilderRouteImport
+      parentRoute: typeof ToolsRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/tools/solution-builder/pc': {
-      id: '/tools/solution-builder/pc'
-      path: '/pc'
-      fullPath: '/tools/solution-builder/pc'
-      preLoaderRoute: typeof ToolsSolutionBuilderPcRouteImport
-      parentRoute: typeof ToolsSolutionBuilderRoute
-    }
-    '/tools/solution-builder/nas': {
-      id: '/tools/solution-builder/nas'
-      path: '/nas'
-      fullPath: '/tools/solution-builder/nas'
-      preLoaderRoute: typeof ToolsSolutionBuilderNasRouteImport
-      parentRoute: typeof ToolsSolutionBuilderRoute
-    }
-    '/tools/solution-builder/home-network': {
-      id: '/tools/solution-builder/home-network'
-      path: '/home-network'
-      fullPath: '/tools/solution-builder/home-network'
-      preLoaderRoute: typeof ToolsSolutionBuilderHomeNetworkRouteImport
-      parentRoute: typeof ToolsSolutionBuilderRoute
-    }
-    '/tools/solution-builder/full-solution': {
-      id: '/tools/solution-builder/full-solution'
-      path: '/full-solution'
-      fullPath: '/tools/solution-builder/full-solution'
-      preLoaderRoute: typeof ToolsSolutionBuilderFullSolutionRouteImport
-      parentRoute: typeof ToolsSolutionBuilderRoute
-    }
-    '/tools/photo-wall/$id': {
-      id: '/tools/photo-wall/$id'
-      path: '/$id'
-      fullPath: '/tools/photo-wall/$id'
-      preLoaderRoute: typeof ToolsPhotoWallIdRouteImport
-      parentRoute: typeof ToolsPhotoWallRoute
-    }
-    '/p/drive/c1': {
-      id: '/p/drive/c1'
-      path: '/p/drive/c1'
-      fullPath: '/p/drive/c1'
-      preLoaderRoute: typeof PDriveC1RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dmv/c1/question-bank': {
-      id: '/dmv/c1/question-bank'
-      path: '/dmv/c1/question-bank'
-      fullPath: '/dmv/c1/question-bank'
-      preLoaderRoute: typeof DmvC1QuestionBankRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/display/photo-wall-preview/$id': {
-      id: '/display/photo-wall-preview/$id'
-      path: '/display/photo-wall-preview/$id'
-      fullPath: '/display/photo-wall-preview/$id'
-      preLoaderRoute: typeof DisplayPhotoWallPreviewIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/admin/users': {
-      id: '/_authenticated/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/tools': {
-      id: '/_authenticated/admin/tools'
-      path: '/tools'
-      fullPath: '/admin/tools'
-      preLoaderRoute: typeof AuthenticatedAdminToolsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/solution-builder': {
-      id: '/_authenticated/admin/solution-builder'
-      path: '/solution-builder'
-      fullPath: '/admin/solution-builder'
-      preLoaderRoute: typeof AuthenticatedAdminSolutionBuilderRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/settings': {
-      id: '/_authenticated/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/seo': {
-      id: '/_authenticated/admin/seo'
-      path: '/seo'
-      fullPath: '/admin/seo'
-      preLoaderRoute: typeof AuthenticatedAdminSeoRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/quiz': {
-      id: '/_authenticated/admin/quiz'
-      path: '/quiz'
-      fullPath: '/admin/quiz'
-      preLoaderRoute: typeof AuthenticatedAdminQuizRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/products': {
-      id: '/_authenticated/admin/products'
-      path: '/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/pages': {
-      id: '/_authenticated/admin/pages'
-      path: '/pages'
-      fullPath: '/admin/pages'
-      preLoaderRoute: typeof AuthenticatedAdminPagesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/notifications': {
-      id: '/_authenticated/admin/notifications'
-      path: '/notifications'
-      fullPath: '/admin/notifications'
-      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/navigation': {
-      id: '/_authenticated/admin/navigation'
-      path: '/navigation'
-      fullPath: '/admin/navigation'
-      preLoaderRoute: typeof AuthenticatedAdminNavigationRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/logs': {
-      id: '/_authenticated/admin/logs'
-      path: '/logs'
-      fullPath: '/admin/logs'
-      preLoaderRoute: typeof AuthenticatedAdminLogsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/files': {
-      id: '/_authenticated/admin/files'
-      path: '/files'
-      fullPath: '/admin/files'
-      preLoaderRoute: typeof AuthenticatedAdminFilesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/exams': {
-      id: '/_authenticated/admin/exams'
-      path: '/exams'
-      fullPath: '/admin/exams'
-      preLoaderRoute: typeof AuthenticatedAdminExamsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/cases': {
-      id: '/_authenticated/admin/cases'
-      path: '/cases'
-      fullPath: '/admin/cases'
-      preLoaderRoute: typeof AuthenticatedAdminCasesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/analytics': {
-      id: '/_authenticated/admin/analytics'
-      path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/ai': {
@@ -1259,54 +1077,187 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/tools/': {
-      id: '/_authenticated/admin/tools/'
-      path: '/'
-      fullPath: '/admin/tools/'
-      preLoaderRoute: typeof AuthenticatedAdminToolsIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminToolsRoute
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/settings/': {
-      id: '/_authenticated/admin/settings/'
-      path: '/'
-      fullPath: '/admin/settings/'
-      preLoaderRoute: typeof AuthenticatedAdminSettingsIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminSettingsRoute
+    '/_authenticated/admin/cases': {
+      id: '/_authenticated/admin/cases'
+      path: '/cases'
+      fullPath: '/admin/cases'
+      preLoaderRoute: typeof AuthenticatedAdminCasesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/quiz/': {
-      id: '/_authenticated/admin/quiz/'
-      path: '/'
-      fullPath: '/admin/quiz/'
-      preLoaderRoute: typeof AuthenticatedAdminQuizIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminQuizRoute
+    '/_authenticated/admin/exams': {
+      id: '/_authenticated/admin/exams'
+      path: '/exams'
+      fullPath: '/admin/exams'
+      preLoaderRoute: typeof AuthenticatedAdminExamsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/products/': {
-      id: '/_authenticated/admin/products/'
-      path: '/'
-      fullPath: '/admin/products/'
-      preLoaderRoute: typeof AuthenticatedAdminProductsIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminProductsRoute
+    '/_authenticated/admin/files': {
+      id: '/_authenticated/admin/files'
+      path: '/files'
+      fullPath: '/admin/files'
+      preLoaderRoute: typeof AuthenticatedAdminFilesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/pages/': {
-      id: '/_authenticated/admin/pages/'
-      path: '/'
-      fullPath: '/admin/pages/'
-      preLoaderRoute: typeof AuthenticatedAdminPagesIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminPagesRoute
+    '/_authenticated/admin/logs': {
+      id: '/_authenticated/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AuthenticatedAdminLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/exams/': {
-      id: '/_authenticated/admin/exams/'
-      path: '/'
-      fullPath: '/admin/exams/'
-      preLoaderRoute: typeof AuthenticatedAdminExamsIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminExamsRoute
+    '/_authenticated/admin/navigation': {
+      id: '/_authenticated/admin/navigation'
+      path: '/navigation'
+      fullPath: '/admin/navigation'
+      preLoaderRoute: typeof AuthenticatedAdminNavigationRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/cases/': {
-      id: '/_authenticated/admin/cases/'
+    '/_authenticated/admin/notifications': {
+      id: '/_authenticated/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/pages': {
+      id: '/_authenticated/admin/pages'
+      path: '/pages'
+      fullPath: '/admin/pages'
+      preLoaderRoute: typeof AuthenticatedAdminPagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/products': {
+      id: '/_authenticated/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/quiz': {
+      id: '/_authenticated/admin/quiz'
+      path: '/quiz'
+      fullPath: '/admin/quiz'
+      preLoaderRoute: typeof AuthenticatedAdminQuizRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/seo': {
+      id: '/_authenticated/admin/seo'
+      path: '/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AuthenticatedAdminSeoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/solution-builder': {
+      id: '/_authenticated/admin/solution-builder'
+      path: '/solution-builder'
+      fullPath: '/admin/solution-builder'
+      preLoaderRoute: typeof AuthenticatedAdminSolutionBuilderRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/tools': {
+      id: '/_authenticated/admin/tools'
+      path: '/tools'
+      fullPath: '/admin/tools'
+      preLoaderRoute: typeof AuthenticatedAdminToolsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/display/photo-wall-preview/$id': {
+      id: '/display/photo-wall-preview/$id'
+      path: '/display/photo-wall-preview/$id'
+      fullPath: '/display/photo-wall-preview/$id'
+      preLoaderRoute: typeof DisplayPhotoWallPreviewIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dmv/c1/question-bank': {
+      id: '/dmv/c1/question-bank'
+      path: '/dmv/c1/question-bank'
+      fullPath: '/dmv/c1/question-bank'
+      preLoaderRoute: typeof DmvC1QuestionBankRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$slug/': {
+      id: '/p/$slug/'
+      path: '/p/$slug'
+      fullPath: '/p/$slug/'
+      preLoaderRoute: typeof PSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/drive/c1': {
+      id: '/p/drive/c1'
+      path: '/p/drive/c1'
+      fullPath: '/p/drive/c1'
+      preLoaderRoute: typeof PDriveC1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/photo-wall/': {
+      id: '/tools/photo-wall/'
       path: '/'
-      fullPath: '/admin/cases/'
-      preLoaderRoute: typeof AuthenticatedAdminCasesIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminCasesRoute
+      fullPath: '/tools/photo-wall/'
+      preLoaderRoute: typeof ToolsPhotoWallIndexRouteImport
+      parentRoute: typeof ToolsPhotoWallRoute
+    }
+    '/tools/photo-wall/$id': {
+      id: '/tools/photo-wall/$id'
+      path: '/$id'
+      fullPath: '/tools/photo-wall/$id'
+      preLoaderRoute: typeof ToolsPhotoWallIdRouteImport
+      parentRoute: typeof ToolsPhotoWallRoute
+    }
+    '/tools/solution-builder/': {
+      id: '/tools/solution-builder/'
+      path: '/'
+      fullPath: '/tools/solution-builder/'
+      preLoaderRoute: typeof ToolsSolutionBuilderIndexRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/solution-builder/full-solution': {
+      id: '/tools/solution-builder/full-solution'
+      path: '/full-solution'
+      fullPath: '/tools/solution-builder/full-solution'
+      preLoaderRoute: typeof ToolsSolutionBuilderFullSolutionRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/solution-builder/home-network': {
+      id: '/tools/solution-builder/home-network'
+      path: '/home-network'
+      fullPath: '/tools/solution-builder/home-network'
+      preLoaderRoute: typeof ToolsSolutionBuilderHomeNetworkRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/solution-builder/nas': {
+      id: '/tools/solution-builder/nas'
+      path: '/nas'
+      fullPath: '/tools/solution-builder/nas'
+      preLoaderRoute: typeof ToolsSolutionBuilderNasRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
+    }
+    '/tools/solution-builder/pc': {
+      id: '/tools/solution-builder/pc'
+      path: '/pc'
+      fullPath: '/tools/solution-builder/pc'
+      preLoaderRoute: typeof ToolsSolutionBuilderPcRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
     }
     '/_authenticated/admin/blog/': {
       id: '/_authenticated/admin/blog/'
@@ -1315,46 +1266,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBlogIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/tools/solution-builder/s/$token': {
-      id: '/tools/solution-builder/s/$token'
-      path: '/s/$token'
-      fullPath: '/tools/solution-builder/s/$token'
-      preLoaderRoute: typeof ToolsSolutionBuilderSTokenRouteImport
-      parentRoute: typeof ToolsSolutionBuilderRoute
+    '/_authenticated/admin/blog/$id': {
+      id: '/_authenticated/admin/blog/$id'
+      path: '/blog/$id'
+      fullPath: '/admin/blog/$id'
+      preLoaderRoute: typeof AuthenticatedAdminBlogIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/p/$slug/i/$itemSlug': {
-      id: '/p/$slug/i/$itemSlug'
-      path: '/p/$slug/i/$itemSlug'
-      fullPath: '/p/$slug/i/$itemSlug'
-      preLoaderRoute: typeof PSlugIItemSlugRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/admin/blog/categories': {
+      id: '/_authenticated/admin/blog/categories'
+      path: '/blog/categories'
+      fullPath: '/admin/blog/categories'
+      preLoaderRoute: typeof AuthenticatedAdminBlogCategoriesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/api/public/media/$': {
-      id: '/api/public/media/$'
-      path: '/api/public/media/$'
-      fullPath: '/api/public/media/$'
-      preLoaderRoute: typeof ApiPublicMediaSplatRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/admin/cases/': {
+      id: '/_authenticated/admin/cases/'
+      path: '/'
+      fullPath: '/admin/cases/'
+      preLoaderRoute: typeof AuthenticatedAdminCasesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminCasesRoute
     }
-    '/_authenticated/admin/quiz/$id': {
-      id: '/_authenticated/admin/quiz/$id'
+    '/_authenticated/admin/cases/$id': {
+      id: '/_authenticated/admin/cases/$id'
       path: '/$id'
-      fullPath: '/admin/quiz/$id'
-      preLoaderRoute: typeof AuthenticatedAdminQuizIdRouteImport
-      parentRoute: typeof AuthenticatedAdminQuizRoute
+      fullPath: '/admin/cases/$id'
+      preLoaderRoute: typeof AuthenticatedAdminCasesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminCasesRoute
     }
-    '/_authenticated/admin/products/$id': {
-      id: '/_authenticated/admin/products/$id'
+    '/_authenticated/admin/exams/': {
+      id: '/_authenticated/admin/exams/'
+      path: '/'
+      fullPath: '/admin/exams/'
+      preLoaderRoute: typeof AuthenticatedAdminExamsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminExamsRoute
+    }
+    '/_authenticated/admin/exams/$id': {
+      id: '/_authenticated/admin/exams/$id'
       path: '/$id'
-      fullPath: '/admin/products/$id'
-      preLoaderRoute: typeof AuthenticatedAdminProductsIdRouteImport
-      parentRoute: typeof AuthenticatedAdminProductsRoute
+      fullPath: '/admin/exams/$id'
+      preLoaderRoute: typeof AuthenticatedAdminExamsIdRouteImport
+      parentRoute: typeof AuthenticatedAdminExamsRoute
     }
-    '/_authenticated/admin/platform/settings': {
-      id: '/_authenticated/admin/platform/settings'
-      path: '/platform/settings'
-      fullPath: '/admin/platform/settings'
-      preLoaderRoute: typeof AuthenticatedAdminPlatformSettingsRouteImport
+    '/_authenticated/admin/pages/': {
+      id: '/_authenticated/admin/pages/'
+      path: '/'
+      fullPath: '/admin/pages/'
+      preLoaderRoute: typeof AuthenticatedAdminPagesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminPagesRoute
+    }
+    '/_authenticated/admin/pages/$id': {
+      id: '/_authenticated/admin/pages/$id'
+      path: '/$id'
+      fullPath: '/admin/pages/$id'
+      preLoaderRoute: typeof AuthenticatedAdminPagesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminPagesRoute
+    }
+    '/_authenticated/admin/platform/modules': {
+      id: '/_authenticated/admin/platform/modules'
+      path: '/platform/modules'
+      fullPath: '/admin/platform/modules'
+      preLoaderRoute: typeof AuthenticatedAdminPlatformModulesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/platform/plugins': {
@@ -1364,47 +1336,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPlatformPluginsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/platform/modules': {
-      id: '/_authenticated/admin/platform/modules'
-      path: '/platform/modules'
-      fullPath: '/admin/platform/modules'
-      preLoaderRoute: typeof AuthenticatedAdminPlatformModulesRouteImport
+    '/_authenticated/admin/platform/settings': {
+      id: '/_authenticated/admin/platform/settings'
+      path: '/platform/settings'
+      fullPath: '/admin/platform/settings'
+      preLoaderRoute: typeof AuthenticatedAdminPlatformSettingsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/pages/$id': {
-      id: '/_authenticated/admin/pages/$id'
+    '/_authenticated/admin/products/': {
+      id: '/_authenticated/admin/products/'
+      path: '/'
+      fullPath: '/admin/products/'
+      preLoaderRoute: typeof AuthenticatedAdminProductsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminProductsRoute
+    }
+    '/_authenticated/admin/products/$id': {
+      id: '/_authenticated/admin/products/$id'
       path: '/$id'
-      fullPath: '/admin/pages/$id'
-      preLoaderRoute: typeof AuthenticatedAdminPagesIdRouteImport
-      parentRoute: typeof AuthenticatedAdminPagesRoute
+      fullPath: '/admin/products/$id'
+      preLoaderRoute: typeof AuthenticatedAdminProductsIdRouteImport
+      parentRoute: typeof AuthenticatedAdminProductsRoute
     }
-    '/_authenticated/admin/exams/$id': {
-      id: '/_authenticated/admin/exams/$id'
+    '/_authenticated/admin/quiz/': {
+      id: '/_authenticated/admin/quiz/'
+      path: '/'
+      fullPath: '/admin/quiz/'
+      preLoaderRoute: typeof AuthenticatedAdminQuizIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminQuizRoute
+    }
+    '/_authenticated/admin/quiz/$id': {
+      id: '/_authenticated/admin/quiz/$id'
       path: '/$id'
-      fullPath: '/admin/exams/$id'
-      preLoaderRoute: typeof AuthenticatedAdminExamsIdRouteImport
-      parentRoute: typeof AuthenticatedAdminExamsRoute
+      fullPath: '/admin/quiz/$id'
+      preLoaderRoute: typeof AuthenticatedAdminQuizIdRouteImport
+      parentRoute: typeof AuthenticatedAdminQuizRoute
     }
-    '/_authenticated/admin/cases/$id': {
-      id: '/_authenticated/admin/cases/$id'
-      path: '/$id'
-      fullPath: '/admin/cases/$id'
-      preLoaderRoute: typeof AuthenticatedAdminCasesIdRouteImport
-      parentRoute: typeof AuthenticatedAdminCasesRoute
+    '/_authenticated/admin/settings/': {
+      id: '/_authenticated/admin/settings/'
+      path: '/'
+      fullPath: '/admin/settings/'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminSettingsRoute
     }
-    '/_authenticated/admin/blog/categories': {
-      id: '/_authenticated/admin/blog/categories'
-      path: '/blog/categories'
-      fullPath: '/admin/blog/categories'
-      preLoaderRoute: typeof AuthenticatedAdminBlogCategoriesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+    '/_authenticated/admin/tools/': {
+      id: '/_authenticated/admin/tools/'
+      path: '/'
+      fullPath: '/admin/tools/'
+      preLoaderRoute: typeof AuthenticatedAdminToolsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminToolsRoute
     }
-    '/_authenticated/admin/blog/$id': {
-      id: '/_authenticated/admin/blog/$id'
-      path: '/blog/$id'
-      fullPath: '/admin/blog/$id'
-      preLoaderRoute: typeof AuthenticatedAdminBlogIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+    '/api/public/media/$': {
+      id: '/api/public/media/$'
+      path: '/api/public/media/$'
+      fullPath: '/api/public/media/$'
+      preLoaderRoute: typeof ApiPublicMediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$slug/i/$itemSlug': {
+      id: '/p/$slug/i/$itemSlug'
+      path: '/p/$slug/i/$itemSlug'
+      fullPath: '/p/$slug/i/$itemSlug'
+      preLoaderRoute: typeof PSlugIItemSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/solution-builder/s/$token': {
+      id: '/tools/solution-builder/s/$token'
+      path: '/s/$token'
+      fullPath: '/tools/solution-builder/s/$token'
+      preLoaderRoute: typeof ToolsSolutionBuilderSTokenRouteImport
+      parentRoute: typeof ToolsSolutionBuilderRoute
     }
   }
 }
